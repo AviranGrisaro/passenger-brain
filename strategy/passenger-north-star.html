@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passenger — Strategy</title>
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --surface: #FFFFFF;
+    --surface-2: #F1F0EA;
+    --fg: #14171A;
+    --muted: #5B6169;
+    --border: rgba(20,23,26,0.11);
+    --border-strong: rgba(20,23,26,0.20);
+    --heat: #E24E1F;
+    --heat-tint: rgba(226,78,31,0.10);
+    --heat-tint-strong: rgba(226,78,31,0.16);
+    --local: #1C7A5E;
+    --local-tint: rgba(28,122,94,0.10);
+    --local-tint-strong: rgba(28,122,94,0.16);
+    --mono: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --shadow: 0 1px 2px rgba(20,23,26,0.04), 0 8px 24px rgba(20,23,26,0.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #121315;
+    --surface: #1A1C1F;
+    --surface-2: #202226;
+    --fg: #ECEDEE;
+    --muted: #9AA0A6;
+    --border: rgba(236,237,238,0.12);
+    --border-strong: rgba(236,237,238,0.22);
+    --heat: #FF7A4D;
+    --heat-tint: rgba(255,122,77,0.14);
+    --heat-tint-strong: rgba(255,122,77,0.22);
+    --local: #3FD9A6;
+    --local-tint: rgba(63,217,166,0.13);
+    --local-tint-strong: rgba(63,217,166,0.20);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121315;
+      --surface: #1A1C1F;
+      --surface-2: #202226;
+      --fg: #ECEDEE;
+      --muted: #9AA0A6;
+      --border: rgba(236,237,238,0.12);
+      --border-strong: rgba(236,237,238,0.22);
+      --heat: #FF7A4D;
+      --heat-tint: rgba(255,122,77,0.14);
+      --heat-tint-strong: rgba(255,122,77,0.22);
+      --local: #3FD9A6;
+      --local-tint: rgba(63,217,166,0.13);
+      --local-tint-strong: rgba(63,217,166,0.20);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--bg); }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  section, header, footer { max-width: 100%; }
+
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+  .prose { max-width: 66ch; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 780px; margin: 0 auto; padding: 12px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand {
+    font-weight: 800; letter-spacing: -0.02em; font-size: 0.95rem;
+    white-space: nowrap;
+  }
+  .brand small {
+    display: block; font-weight: 500; color: var(--muted);
+    font-size: 0.7rem; letter-spacing: 0.02em; margin-top: 1px;
+  }
+  nav.pillnav {
+    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    -ms-overflow-style: none; padding: 2px;
+  }
+  nav.pillnav::-webkit-scrollbar { display: none; }
+  nav.pillnav a {
+    flex: none;
+    display: inline-flex; align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  nav.pillnav a:hover { color: var(--fg); border-color: var(--border-strong); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 56px 0 40px; }
+  .status-row {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    font-size: 0.8rem; color: var(--muted); margin-bottom: 28px;
+  }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    font-weight: 600; color: var(--fg); font-size: 0.75rem;
+  }
+  .status-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--heat); }
+
+  h1.wordmark {
+    font-size: clamp(2.4rem, 5.4vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    margin: 0 0 4px;
+    font-weight: 800;
+  }
+  .kicker {
+    font-size: 1rem; color: var(--muted); margin: 0 0 32px; font-weight: 500;
+  }
+
+  .northstar {
+    font-size: clamp(1.5rem, 3.4vw, 2.15rem);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.28;
+    margin: 0 0 20px;
+  }
+  .northstar .accent { color: var(--heat); }
+  .northstar-sub {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    color: var(--muted);
+    font-weight: 500;
+    margin: 0 0 20px;
+  }
+
+  /* ---------- generic section ---------- */
+  section.block { padding: 48px 0; border-top: 1px solid var(--border); }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
+  }
+  h2 {
+    font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+    letter-spacing: -0.015em;
+    margin: 0 0 18px;
+    font-weight: 800;
+  }
+  h3 {
+    font-size: 1.05rem; margin: 28px 0 10px; font-weight: 700;
+  }
+  p { margin: 0 0 14px; }
+  ul, ol { padding-left: 1.2em; margin: 0 0 14px; }
+  li { margin-bottom: 8px; }
+  .prose p, .prose li { max-width: 66ch; }
+
+  a { color: var(--heat); text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+
+  .assumption {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--heat-tint-strong);
+    color: var(--fg);
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .callout {
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    background: var(--surface-2);
+  }
+
+  /* ---------- vibe strip ---------- */
+  .vibe-strip {
+    display: flex; gap: 6px; margin: 18px 0 10px; overflow-x: auto;
+  }
+  .vibe-chip {
+    flex: 1 1 0; min-width: 92px;
+    padding: 10px 8px 9px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    border: 1px solid var(--border);
+  }
+  .vibe-chip small { display:block; font-weight: 600; color: var(--muted); margin-top:3px; font-size: 0.62rem; }
+  .v0 { background: var(--local-tint); }
+  .v2 { background: var(--surface-2); }
+  .v4 { background: var(--heat-tint-strong); }
+  .vibe-caption { font-size: 0.78rem; color: var(--muted); margin-bottom: 22px; }
+
+  /* ---------- layers diagram ---------- */
+  .layers {
+    display: flex; align-items: center; gap: 14px; margin: 16px 0 24px;
+    flex-wrap: wrap;
+  }
+  .layer-box {
+    flex: 1 1 160px;
+    border-radius: 10px; padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .layer-box.heat { background: var(--heat-tint); }
+  .layer-box.local { background: var(--local-tint); }
+  .layer-box .lbl { font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; }
+  .layer-box .desc { font-size: 0.82rem; color: var(--muted); }
+  .layers .plus { font-weight: 800; font-size: 1.3rem; color: var(--muted); flex: 0 0 auto; }
+  .layers .eq { font-weight: 800; font-size: 1.3rem; color: var(--muted); flex: 0 0 auto; }
+  .layer-box.result { background: var(--surface-2); }
+
+  /* ---------- scope lists ---------- */
+  .scope-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .scope-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px;
+    background: var(--surface);
+  }
+  .scope-card h4 { margin: 0 0 10px; font-size: 0.95rem; font-weight: 800; }
+  .scope-card.out { background: var(--surface-2); }
+  .scope-card.future h4 { color: var(--muted); }
+
+  /* ---------- rollout table ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+  table.rollout {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+    font-size: 0.88rem;
+  }
+  table.rollout th {
+    text-align: left; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--muted);
+    padding: 12px 16px; background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  table.rollout td {
+    padding: 14px 16px; vertical-align: top;
+    border-bottom: 1px solid var(--border);
+  }
+  table.rollout tr:last-child td { border-bottom: none; }
+  table.rollout td.phase { font-weight: 800; white-space: nowrap; }
+  table.rollout td.what { color: var(--fg); }
+  table.rollout td.q { color: var(--muted); font-style: italic; }
+
+  /* ---------- pipeline ---------- */
+  .pipeline-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px 2px 14px; }
+  .pipeline-row { display: flex; align-items: stretch; gap: 0; width: max-content; }
+  .stage {
+    flex: none;
+    min-width: 108px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: var(--surface);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    text-align: center;
+  }
+  .stage .who { display: block; margin-top: 4px; font-size: 0.64rem; color: var(--muted); font-family: var(--sans); }
+  .stage.done { background: var(--local-tint); border-color: var(--local); color: var(--local); font-weight: 800; }
+  .arrow {
+    flex: none; display: flex; align-items: center; justify-content: center;
+    width: 28px; color: var(--muted); font-size: 1rem;
+  }
+  .loops {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px;
+  }
+  .loop-pill {
+    font-family: var(--mono); font-size: 0.72rem;
+    padding: 6px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .loop-pill .ret { color: var(--heat); font-weight: 800; margin: 0 4px; }
+  .stop-callout {
+    border: 1.5px solid var(--heat);
+    border-radius: 10px; padding: 16px 18px; margin: 6px 0 26px;
+    background: var(--heat-tint);
+  }
+  .stop-callout .lbl {
+    font-family: var(--mono); font-weight: 800; font-size: 0.85rem; margin-bottom: 6px;
+  }
+  .stop-callout p { font-size: 0.86rem; margin: 0; color: var(--fg); }
+
+  .roles-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px;
+  }
+  @media (max-width: 560px) { .roles-grid { grid-template-columns: 1fr; } }
+  .role-item { font-size: 0.85rem; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .role-item .rname { font-weight: 800; font-family: var(--mono); font-size: 0.8rem; }
+  .role-item .rdesc { color: var(--muted); }
+
+  /* ---------- positioning ---------- */
+  .positioning-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
+  .pos-card {
+    border-radius: 10px; padding: 18px 20px;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+  .pos-card .not { color: var(--heat); font-weight: 800; }
+  .pos-card p { margin: 6px 0 0; font-size: 0.92rem; }
+
+  /* ---------- architecture ---------- */
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .arch-grid { grid-template-columns: 1fr; } }
+  .arch-card { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .arch-card h4 { margin: 0 0 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .arch-card p { margin: 0; font-size: 0.9rem; }
+
+  /* ---------- risks / open qs ---------- */
+  .risk-list { list-style: none; padding: 0; margin: 0; }
+  .risk-list li {
+    border-left: 3px solid var(--heat);
+    padding: 4px 0 4px 14px; margin-bottom: 16px; font-size: 0.92rem;
+  }
+  .oq-list { list-style: none; padding: 0; margin: 0; }
+  .oq-list li {
+    border-left: 3px solid var(--border-strong);
+    padding: 4px 0 4px 14px; margin-bottom: 16px; font-size: 0.92rem;
+    color: var(--muted);
+  }
+  .oq-list li::marker {}
+
+  footer.doc-footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0 64px;
+    font-size: 0.78rem; color: var(--muted);
+  }
+  footer.doc-footer p { margin: 0 0 8px; }
+  footer.doc-footer .flat-note {
+    margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--border);
+  }
+  .flat-swatches { display: flex; gap: 4px; margin-top: 8px; }
+  .flat-swatches span { width: 16px; height: 16px; border-radius: 3px; display: inline-block; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 40px 0 28px; }
+    section.block { padding: 36px 0; }
+    .brand small { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">PASSENGER<small>Strategy</small></div>
+    <nav class="pillnav">
+      <a href="#northstar">North star</a>
+      <a href="#rightnow">Right now</a>
+      <a href="#v1">Product</a>
+      <a href="#business">Business model</a>
+      <a href="#rollout">Rollout</a>
+      <a href="#agentorg">Agent org</a>
+      <a href="#positioning">Positioning</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#risks">Risks</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero" id="northstar">
+    <div class="status-row">
+      <span>Owner: Aviran Grisaro</span>
+      <span>Last updated: 2026-07-26</span>
+    </div>
+
+    <h1 class="wordmark">Passenger Strategy</h1>
+    <p class="kicker">The strategy every Passenger decision points back to.</p>
+
+    <p class="northstar">Land like a tourist. <span class="accent">Move like a local.</span></p>
+    <p class="northstar-sub">Where to go right now — not what a guidebook says.</p>
+
+    <div class="prose">
+      <p><strong>Right now, finding out what's good means scrolling TikTok, blogs, Instagram — then saving it to Google Maps, showing up, and finding half of it closed.</strong></p>
+      <p>That's not a discovery problem. It's a freshness problem — everything's frozen the second it's posted.</p>
+      <p>Passenger's bet: one live map instead of five stale sources. Heat shows what's packed right now. Tag shows what's actually local. Packed doesn't mean good — packed and touristy is the trap. Packed and local? Exactly where you want to be.</p>
+      <p>Works the same whether you just landed or you're home, tired of the same five places.</p>
+    </div>
+
+    <div class="layers">
+      <div class="layer-box heat">
+        <div class="lbl">Heat</div>
+        <div class="desc">Crowd density, right now</div>
+      </div>
+      <div class="plus">+</div>
+      <div class="layer-box local">
+        <div class="lbl">Tag</div>
+        <div class="desc">Localness, super local → tourist trap</div>
+      </div>
+      <div class="eq">=</div>
+      <div class="layer-box result">
+        <div class="lbl">One map</div>
+        <div class="desc">Two layers. Never one blended score.</div>
+      </div>
+    </div>
+
+    <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Related: <a href="../03-prds/passenger-v1/decisions.md">V1 decision record</a> · <a href="../03-prds/passenger-mvp/PRD.md">MVP PRD</a></p>
+  </header>
+
+  <section class="block" id="rightnow">
+    <p class="eyebrow">Priority</p>
+    <h2>Right now</h2>
+    <div class="prose">
+      <p>Ship Phase 1, fast, to real strangers in Tel Aviv — not friends and family, not internal QA. Nothing else matters until we know if a real person reopens the app within a week, unprompted. That's the one number that validates the bet.</p>
+      <p>Everything downstream — monetization, second city, Events as a bigger vertical — is parked until that signal exists. Not deprioritized forever. Parked.</p>
+    </div>
+  </section>
+
+  <section class="block" id="v1">
+    <p class="eyebrow">The product</p>
+    <h2>V1 is one map</h2>
+    <div class="prose">
+      <p>V1 is a single map, and the whole product lives on it. Nothing routes through a feed, a profile, or a search bar. Profile and search exist only as sheets presented over the map, not separate navigation destinations — you never leave the map screen to reach them, so neither breaks the "nothing routes through" rule.</p>
+    </div>
+
+    <h3>V1 scope</h3>
+    <div class="prose">
+      <ul>
+        <li>One map. Two orthogonal layers — <strong>heat</strong> (crowd density) and <strong>tag</strong> (localness) — never one blended score.</li>
+        <li>Time slider, now → +12 hours. A place's relevance changes by the hour; the map knows that.</li>
+        <li>Three vibe tags, plain language, no scores (see strip below).</li>
+        <li>Two categories: Food &amp; drinks, Things to do.</li>
+        <li>Tap a zone → hand-curated neighborhood blurb + tagged spots. Tap a spot → hands off to native Maps/Waze for directions.</li>
+        <li>No onboarding. Straight to the map + location permission.</li>
+        <li><strong>Localness is decided by algorithm plus local QA, together.</strong> Algorithm proposes; real users verify/correct in-app — crowdsourced, not a hired team. Permanent pipeline, not a stopgap. Trades staffing risk for two others: <strong>cold start</strong> (new city, no users yet to ask) and <strong>incentive</strong> (no reward system in V1 — see Phase 3's points system).</li>
+        <li><strong>Density is a synthetic feed for now</strong>, time-bound to the slider hour, while a live popular-times data source is evaluated separately.</li>
+        <li>Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.</li>
+        <li>Saved places — kept, core. Visited places — a manual "mark as visited" list ships in V1; automatic dwell-based detection (Always-location background permission) stays a Phase 3 feature, not V1.</li>
+        <li>Live Events — a live events overlay on the time slider, on top of the two core layers. Ships in V1, not deferred to Phase 2.</li>
+      </ul>
+    </div>
+
+    <div class="vibe-strip">
+      <div class="vibe-chip v0">Local<small>trust it</small></div>
+      <div class="vibe-chip v2">Mix<small>&nbsp;</small></div>
+      <div class="vibe-chip v4">Tourist<small>&nbsp;</small></div>
+    </div>
+    <p class="vibe-caption">Plain language, no scores.</p>
+
+    <div class="scope-grid">
+      <div class="scope-card out">
+        <h4>Out of scope</h4>
+        <p style="margin:0; font-size:0.9rem;">Itineraries, bookings, Android, social features of any kind — no friends, no posting, no following, no presence — and any business-facing monetization.</p>
+      </div>
+      <div class="scope-card future">
+        <h4>Phase 2 candidate — proximity intelligence</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 2 starts. Discovery gets you interested; proximity makes you competent once you're there.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>Geofence detection — the app notices when you're near a spot you were already heading to.</li>
+          <li>One-screen arrival card: "you're here, order this, say it like this, tickets here." Generated, minimal, nothing to scroll.</li>
+          <li>Location access only turns on while you're en route to a suggestion — never standing, never background.</li>
+          <li>Real cost is on the build side (permissions + geofencing + generated UI), not design — scope it properly before committing.</li>
+        </ul>
+      </div>
+      <div class="scope-card future">
+        <h4>Phase 2 candidate — Scenic View</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 2 starts. In-app routing to a tapped spot, favoring interesting/local streets over the fastest path — not a flat hand-off to native Maps/Waze.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>V1 ships with a flat hand-off to native Maps/Waze instead — this replaces that, if it ships.</li>
+          <li>Real routing-engine build scope, not a UI skin on top of MapKit/Google Maps — cost depends heavily on depth (full in-app turn-by-turn vs. a route preview that still hands off for actual turn-by-turn). Needs an answer before committing.</li>
+        </ul>
+      </div>
+      <div class="scope-card future">
+        <h4>Live Events — in V1, not a Phase 2 candidate</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Corrected 2026-07-26: this was scoped as a Phase 2 candidate, but it's built and shipping unflagged in V1 — a live events overlay on the time slider, on top of the two core layers, additive on top of heat + tag, not a rework of the core map.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>If Events ever grows a business side (ticketing commission, promoter placement), that's B2B-shaped monetization — conflicts with the standing "no business-facing monetization" scope line. Needs an explicit call if/when it comes up, not an assumed exception.</li>
+        </ul>
+      </div>
+      <div class="scope-card future">
+        <h4>Phase 3 candidate — AI local guide</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. A different product bolted onto the same engine: planning, not discovery.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>A named local persona (e.g. "a local from Tokyo") is the guide, not a generic assistant — tell her what you're into, she builds the day.</li>
+          <li>Loose daily itineraries, assembled from the same time/density logic already powering V1's map.</li>
+          <li>Audio-first — listen while walking instead of staring at the phone.</li>
+          <li>Personalization that sharpens with use.</li>
+          <li><strong>Auto-saved places</strong> — stay somewhere 20+ minutes, it auto-saves. No manual save needed. Same mechanic as Bump.</li>
+          <li>Needs identity + preference tracking neither V1 nor Phase 2 requires — the real reason this waits for Phase 3.</li>
+        </ul>
+      </div>
+      <div class="scope-card future">
+        <h4>Phase 3 candidate — Shake to roll</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. Shake your phone, get one nearby thing to do. No scrolling, no choosing, just go.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>Not random — weighted by preference, Saved places, Visited places, and what's hot right now (heat layer). That's why it needs Phase 3's identity + preference tracking, same dependency as the AI local guide.</li>
+        </ul>
+      </div>
+      <div class="scope-card future">
+        <h4>Phase 3 candidate — Points system</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. Rewards for answering local-QA questions, visiting new places, and more.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>This is also the incentive layer V1's crowdsourced local QA is missing — but it ships here, in Phase 3, not V1. Until then, V1 runs on early-user goodwill alone.</li>
+          <li>Needs identity + preference tracking neither V1 nor Phase 2 requires — the real reason this waits for Phase 3.</li>
+        </ul>
+      </div>
+      <div class="scope-card future">
+        <h4>Phase 3 candidate — Hex area discovery (fog-of-war)</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. A reveal-as-you-explore hex grid over the whole map — cells stay fogged until you physically visit that area, Foursquare-style.</p>
+        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>Already built and flagged off (`FeatureFlags.hexAreaDiscovery`) — Phase 3 here means unflagging and polishing, not building from zero.</li>
+          <li>Requires Always-location background authorization, same App Store submission-safety gating as the other Always-location features (Phase 3's auto-detected Visited places, Phase 2's proximity intelligence).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:18px;"><strong>Phase 2 marketing tone</strong> (from the original brief, still standing): fast and uncluttered, conversational not corporate, bold type with real whitespace, colour used on purpose, instant feedback on every tap. References: BeReal (no ceremony), Are.na (typography-forward), TikTok FYP (dense but scannable), Citymapper (legible under heavy data). Avoid gradients, skeuomorphism, corporate polish, anything that reads 2018.</div>
+  </section>
+
+  <section class="block" id="business">
+    <p class="eyebrow">Monetization</p>
+    <h2>Freemium: free core, subscription on top</h2>
+    <div class="prose">
+      <p><strong>Paused.</strong> Not being discussed or built further until Phase 1 proves real retention — pricing model doesn't matter with zero users. The shape below is the working plan for when that signal exists, not something to refine further right now.</p>
+      <p>Core map free forever. Subscription unlocks premium features on top.</p>
+      <ul>
+        <li>Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, Saved/Visited. No paywall on the thing that makes Passenger Passenger.</li>
+        <li>Subscription unlocks premium features as they ship, starting with Phase 2's proximity intelligence. One recurring price, not gated per-feature.</li>
+        <li><strong>AI local guide</strong> (Phase 3) is a further purchase on top of the subscription — its own upsell, not included even for subscribers.</li>
+        <li>Free core reaches every tourist who'd never subscribe for a 3-day trip — it's the growth engine. Subscription is the monetization layer on top of people who already show up, not a gate in front of them.</li>
+        <li>Price point is TBD — test once there's a premium feature worth charging for and real paid traffic to test against.</li>
+      </ul>
+      <p>Subscription launches in Phase 2, alongside proximity intelligence and marketing spend. The free core doesn't change.</p>
+      <p><strong>Why freemium over a hard paywall:</strong> V1 has no retention mechanics yet — no push, no habit loop, nothing pulling someone back daily. Betting Phase 2 revenue on "residents will open this weekly" stakes the whole plan on an unproven assumption. Freemium defers that bet — free core proves reach immediately, subscription only has to work on people who already show up.</p>
+      <p><span class="assumption">ASSUMPTION</span>Whether the premium layer is actually worth paying for is unproven — a thin premium tier risks nobody upgrading and the free tier absorbing everyone.</p>
+    </div>
+  </section>
+
+  <section class="block" id="rollout">
+    <p class="eyebrow">Sequencing</p>
+    <h2>Rollout sequence</h2>
+    <p class="prose" style="font-size:0.9rem; color:var(--muted);"><strong>Phases 2 and 3 don't start until Phase 1 proves retention</strong> — see "Right now" above. This table is the plan for after that signal exists, not a fixed calendar.</p>
+    <div class="table-scroll">
+      <table class="rollout">
+        <thead>
+          <tr><th>Phase</th><th>What ships</th><th>Question it answers</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="phase">1 — Build to launch</td>
+            <td class="what">Full V1: two-layer map (heat + algo/local-QA localness), time slider, synthetic density, hero flow, hand-curated blurbs, native Maps/Waze hand-off, QA validation in Tel Aviv. Ships to real strangers, not friends/family. Ends in the App Store release.</td>
+            <td class="q">Does the core product work end-to-end, and does a real stranger actually come back within a week?</td>
+          </tr>
+          <tr>
+            <td class="phase">2 — Marketing + first features</td>
+            <td class="what">Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence and live popular-times density; Scenic View evaluated as a candidate (Live Events shipped in V1, not a Phase 2 evaluation item); core map stays free</td>
+            <td class="q">Will people upgrade once acquired, and does the product hold up as real features and real users land at the same time?</td>
+          </tr>
+          <tr>
+            <td class="phase">3 — More features</td>
+            <td class="what">Second city (proves the approach isn't Tel Aviv-specific), localness algorithm + local QA scaling to new cities, AI local guide (paid add-on on top of the subscription)</td>
+            <td class="q">Does this generalize past one city, and is there a genuine next tier to the product?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="agentorg">
+    <p class="eyebrow">Execution</p>
+    <h2>The agent org</h2>
+    <p class="prose">Founders don't hand-build everything — a role-based agent team (the "Passenger Agent OS") does the day-to-day execution, dispatched and supervised by a chief-of-staff agent.</p>
+
+    <div class="pipeline-scroll">
+      <div class="pipeline-row">
+        <div class="stage">backlog</div>
+        <div class="arrow">→</div>
+        <div class="stage">spec<span class="who">product</span></div>
+        <div class="arrow">→</div>
+        <div class="stage">design<span class="who">designer</span></div>
+        <div class="arrow">→</div>
+        <div class="stage">build<span class="who">developer / ios-developer</span></div>
+        <div class="arrow">→</div>
+        <div class="stage">code-review<span class="who">code-reviewer / ios-code-reviewer</span></div>
+        <div class="arrow">→</div>
+        <div class="stage">qa<span class="who">qa</span></div>
+        <div class="arrow">→</div>
+        <div class="stage">acceptance<span class="who">product</span></div>
+        <div class="arrow">→</div>
+        <div class="stage done">done</div>
+      </div>
+    </div>
+
+    <div class="loops">
+      <div class="loop-pill">code-review<span class="ret">↩</span>build</div>
+      <div class="loop-pill">qa<span class="ret">↩</span>build</div>
+      <div class="loop-pill">acceptance<span class="ret">↩</span>build / design</div>
+    </div>
+
+    <div class="stop-callout">
+      <div class="lbl">Stops only at: blocked-on-aviran</div>
+      <p>Scope/strategy calls, money, App Store actions, credentials. Everything else the fleet resolves and moves on its own. Run it with "chief of staff, run the company," or <code>/cos</code>.</p>
+    </div>
+
+    <h3>Roles</h3>
+    <div class="roles-grid">
+      <div class="role-item"><span class="rname">product</span><br><span class="rdesc">Reads this strategy, generates its own tasks, writes PRDs, accepts finished work against them.</span></div>
+      <div class="role-item"><span class="rname">architect</span><br><span class="rdesc">Turns approved PRDs into TRDs.</span></div>
+      <div class="role-item"><span class="rname">designer</span><br><span class="rdesc">UX specs + mockups, gated jointly by Serge + Aviran.</span></div>
+      <div class="role-item"><span class="rname">developer</span><br><span class="rdesc">Supabase backend, schema, RLS.</span></div>
+      <div class="role-item"><span class="rname">ios-developer</span><br><span class="rdesc">Swift/SwiftUI client.</span></div>
+      <div class="role-item"><span class="rname">data-engineer</span><br><span class="rdesc">Yeari's domain — the localness/density algorithm and ingestion pipeline.</span></div>
+      <div class="role-item"><span class="rname">code-reviewer / ios-code-reviewer</span><br><span class="rdesc">Gate every diff, security pass mandatory, before QA.</span></div>
+      <div class="role-item"><span class="rname">qa</span><br><span class="rdesc">Tests against the PRD.</span></div>
+      <div class="role-item"><span class="rname">marketing</span><br><span class="rdesc">Per-phase GTM.</span></div>
+      <div class="role-item"><span class="rname">competitor-research</span><br><span class="rdesc">Ongoing competitive tracking.</span></div>
+      <div class="role-item"><span class="rname">project-manager</span><br><span class="rdesc">Nightly hygiene.</span></div>
+      <div class="role-item"><span class="rname">retrospective</span><br><span class="rdesc">Nightly process lessons.</span></div>
+    </div>
+  </section>
+
+  <section class="block" id="positioning">
+    <p class="eyebrow">Market</p>
+    <h2>Positioning</h2>
+    <div class="positioning-grid">
+      <div class="pos-card"><span class="not">Not a guide.</span><p>Guides are static; Passenger is live, hour by hour.</p></div>
+      <div class="pos-card"><span class="not">Not a social feed.</span><p>No friends, no posting, no following, no piecing together five apps' worth of saved posts to figure out what's still open. The map answers "what do I do right now" with no query.</p></div>
+      <div class="pos-card"><span class="not">What nobody else does.</span><p>Real-time heatmaps exist (nightlife-focused, built for residents); static tourist guides exist. Nobody combines both, and nobody treats packed-vs-local as two separate signals on one map. Google Maps' Popular Times is the long-term platform threat — worth watching on a recurring cadence, not a one-time snapshot, since it's the fastest path for a bigger player to close this gap. (See the <a href="../11-competitors/competitive-brief.md">competitive brief</a>.)</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="architecture">
+    <p class="eyebrow">Under the hood</p>
+    <h2>Technical architecture</h2>
+    <div class="arch-grid">
+      <div class="arch-card"><h4>Frontend</h4><p>Native iOS, Swift/SwiftUI. No cross-platform framework, no Android on the roadmap.</p></div>
+      <div class="arch-card"><h4>Backend</h4><p>Supabase (Postgres) — Realtime subscriptions, RLS for per-viewer access control.</p></div>
+      <div class="arch-card"><h4>Mapping</h4><p>MapKit/Google Maps SDK, native heatmap layer. In-app routing for Scenic View is a Phase 2 candidate, not built for V1.</p></div>
+      <div class="arch-card"><h4>Monetization plumbing</h4><p>RevenueCat, wired but dormant — paused along with the rest of Business model, until Phase 1 proves retention.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="risks">
+    <p class="eyebrow">Watch list</p>
+    <h2>Key risks</h2>
+    <ul class="risk-list">
+      <li><strong>Local QA is crowdsourced with no incentive layer in V1.</strong> The points system that's supposed to make users bother answering local-QA questions doesn't ship until Phase 3 — V1 has to get real signal on goodwill alone. If that doesn't produce enough answers, the algorithm has nothing real to check itself against.</li>
+      <li><strong>Cold start, every new city.</strong> Crowdsourced local QA needs users to already be there to ask. Day one of any new city, before there's a user base, there's nobody to answer — chicken-and-egg, worse than a staffed-QA model would have been.</li>
+      <li><strong>Scenic View is real routing-engine scope, if it ships.</strong> In-app routing is new build surface on top of the map/heatmap shell — cost swings a lot depending on depth (full turn-by-turn vs. a route preview that still hands off). Deferred to a Phase 2 candidate, not committed.</li>
+      <li><strong>Density is synthetic at launch.</strong> The "right now" promise is only as real as the popular-times data source landing later — without it, "right now" stays simulated.</li>
+      <li><strong>Subscription pricing is unvalidated</strong> — moot until Phase 1 proves retention; don't spend more time on it before then.</li>
+      <li><strong>Premium-conversion assumption is unproven.</strong> Free core guarantees reach, but subscription only works if people actually upgrade for proximity intelligence (and later, the AI guide) rather than just staying on the free map forever.</li>
+      <li><strong>Liability.</strong> Steering someone toward a spot that turns out unsafe or misleading needs a disclaimer/liability posture before any public paywall.</li>
+      <li><strong>Google is the closest real threat, not a distant one.</strong> They already have real popular-times data at global scale and already index local content — "local vs. touristy" is a metadata layer they could ship if they decided to. The competitive gap here is real but closeable, not structural.</li>
+    </ul>
+  </section>
+
+  <footer class="doc-footer">
+    <p>Passenger — Strategy. Owner: Aviran Grisaro. Last updated: 2026-07-26.</p>
+    <p>Source: <code>04-strategy/locali-strategy.md</code>. This page is a hand-designed reading view of that document, not a generated twin.</p>
+    <div class="flat-note">
+      <p>Flat color only, no gradients anywhere on this page.</p>
+      <div class="flat-swatches">
+        <span style="background:var(--local-tint-strong)"></span>
+        <span style="background:color-mix(in srgb, var(--local-tint-strong) 55%, var(--heat-tint-strong) 45%)"></span>
+        <span style="background:var(--surface-2)"></span>
+        <span style="background:color-mix(in srgb, var(--heat-tint-strong) 55%, var(--local-tint-strong) 45%)"></span>
+        <span style="background:var(--heat-tint-strong)"></span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

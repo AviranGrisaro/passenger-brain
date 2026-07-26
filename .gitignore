@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Rendered viewing artifacts — regenerable, not backed up
+*.html
+!strategy/passenger-north-star.html
+
+# Generated exports
+*.pdf
+
+# Secrets
+.env
+.env.*
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Supabase CLI artifacts
+supabase/.temp/
