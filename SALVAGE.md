@@ -9,12 +9,12 @@ Passenger replaces **Locali**, a 16.5k-line Swift app frozen on 2026-07-26. Noth
 | Repo | `github.com/AviranGrisaro/locali` |
 | iOS app | branch `main`, commit `93cedacaf86ecb32948487e472136c292c1740c7` |
 | Planning workspace | branch `brain`, commit `0a5696c` |
-| Local clone | `../locali-code/` and `../locali-brain/` (kept on disk; safe to delete, GitHub has everything) |
+| Local clone | `../../locali/locali-code/` and `../../locali/locali-brain/` — moved out of the Passenger workspace on 2026-07-27 (kept on disk; safe to delete, GitHub has everything) |
 
 Pull one file without cloning anything new:
 
 ```bash
-git -C ../locali-code show 93cedac:Locali/Services/DirectionsService.swift
+git -C ../../locali/locali-code show 93cedac:Locali/Services/DirectionsService.swift
 ```
 
 ## Rules
