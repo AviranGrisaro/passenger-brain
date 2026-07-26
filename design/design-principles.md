@@ -1,8 +1,8 @@
-# Locali UI/UX Design Principles (shared reference)
+# Passenger UI/UX Design Principles (shared reference)
 
 **Owner:** shared — used by the `designer` agent (when writing specs) and the `ios-code-reviewer` agent (when reviewing built UI).
 **Source:** distilled from the CandleKeep book *"UI/UX Design Principles for AI Agents"* (16 pp, 15 chapters synthesizing Refactoring UI, Don't Make Me Think, Laws of UX, Hooked, Influence, and 5 others). Page citations `(bk pN)` point back to that book.
-**Adaptation note:** the source is web/CSS-centric. The *universal laws* below transfer verbatim to any platform. The *iOS translation* column converts CSS-specific rules (px scales, HSL, selectors, viewport) into SwiftUI/HIG equivalents — cite the law, not the CSS mechanism, when applying to Locali.
+**Adaptation note:** the source is web/CSS-centric. The *universal laws* below transfer verbatim to any platform. The *iOS translation* column converts CSS-specific rules (px scales, HSL, selectors, viewport) into SwiftUI/HIG equivalents — cite the law, not the CSS mechanism, when applying to Passenger.
 
 How to use this doc: it's a **lookup table, not a read-through**. Jump to the section that matches the decision or the diff in front of you. Thresholds are deliberately concrete so they're checkable — a spec or a PR either meets `< 400ms` or it doesn't.
 
@@ -10,9 +10,9 @@ How to use this doc: it's a **lookup table, not a read-through**. Jump to the se
 
 ## 1. The precedence rule (settle every trade-off with this first)
 
-**Maslow's Hierarchy for Interfaces:** Functional > Reliable > Usable > Pleasurable, in that order `(bk p9)`. A delightful screen that crashes is worse than a boring one that works. When two principles below conflict, the higher tier wins. For Locali specifically this means: *the map answers "where is it busy right now" correctly and reliably* before it is beautiful.
+**Maslow's Hierarchy for Interfaces:** Functional > Reliable > Usable > Pleasurable, in that order `(bk p9)`. A delightful screen that crashes is worse than a boring one that works. When two principles below conflict, the higher tier wins. For Passenger specifically this means: *the map answers "where is it busy right now" correctly and reliably* before it is beautiful.
 
-**Tesler's Law:** complexity can't be deleted, only moved. Move it from the user to the system — auto-detect, default, compute `(bk p9)`. (Locali: infer location/time context; don't make the user configure it.)
+**Tesler's Law:** complexity can't be deleted, only moved. Move it from the user to the system — auto-detect, default, compute `(bk p9)`. (Passenger: infer location/time context; don't make the user configure it.)
 
 ---
 
@@ -51,14 +51,14 @@ How to use this doc: it's a **lookup table, not a read-through**. Jump to the se
 
 ## 3. iOS / SwiftUI translation (what the web rules become on our platform)
 
-| Book rule (web) | Locali / SwiftUI equivalent | Cite |
+| Book rule (web) | Passenger / SwiftUI equivalent | Cite |
 |---|---|---|
 | Fixed 12–72px type scale, never `em`, root `100%` | Use **semantic text styles** (`.largeTitle`…`.caption`) + **Dynamic Type**; never hardcode point sizes that don't scale | `bk p4` |
 | Body text never < 16px | Respect Dynamic Type; never ship a fixed body font that can't grow. Test at largest accessibility sizes | `bk p4,13` |
 | Line length 45–75 chars | Same target for readable text blocks; constrain width on iPad / large text | `bk p4` |
 | Author color in HSL, 5–10 shades per role | Define a **semantic color set** in the asset catalog (Primary / Neutral / Accent), each with light+dark variants | `bk p5` |
 | Temper contrast (near-black on near-white, not #000/#fff) | Use system label/background colors; they already temper. Don't hardcode pure black/white | `bk p5` |
-| Never rely on color alone | Heatmap intensity + friend states need icon/shape/label too — **critical for Locali's map** and color-blind users | `bk p5,14` |
+| Never rely on color alone | Heatmap intensity + friend states need icon/shape/label too — **critical for Passenger's map** and color-blind users | `bk p5,14` |
 | 5-level shadow elevation, one light source | Use consistent SwiftUI `.shadow` elevation tiers / materials; don't invent per-view shadows | `bk p6` |
 | Thumb Zone = bottom third | Primary map actions belong in the **bottom third** (80%+ of use is one-handed) | `bk p13` |
 | Never disable pinch-to-zoom | Never suppress the map's native zoom/gestures | `bk p13` |
@@ -70,7 +70,7 @@ How to use this doc: it's a **lookup table, not a read-through**. Jump to the se
 ---
 
 ## 4. State & empty-screen completeness `(bk p6)`
-Never neglect a state. Every screen specs/handles: **loading, empty, error, permission-denied, offline.** Empty states are illustration + one-line description + a CTA — not a blank view. (This is already Locali house rule; the book is the *why*.)
+Never neglect a state. Every screen specs/handles: **loading, empty, error, permission-denied, offline.** Empty states are illustration + one-line description + a CTA — not a blank view. (This is already Passenger house rule; the book is the *why*.)
 
 ---
 

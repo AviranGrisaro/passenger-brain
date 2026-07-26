@@ -136,6 +136,15 @@ git -C ../locali-code show 93cedac:Locali/Services/DirectionsService.swift
 
 `Features/Places/` — mixed: `PlaceDetailCard` (85) and `SavedPlacesSheet` (84) REUSE; `DiscoverSheet` (126), `VisitedPlaceRow` (128), `VisitedSegment` (189) REFERENCE; the confirmation/visit-candidate views REFERENCE pending a fresh local-QA spec.
 
+## Design specs
+
+`05-design/` in the archive holds 22 feature design specs. All are tied to PRDs that no longer exist — treat them as REFERENCE, not input. Two exceptions worth opening before the designer starts from a blank page:
+
+- **`passenger-v1-two-layer-map-visual-system-design-spec.md`** — the heat/tag visual system for the V1 hero screen. Written against the current strategy and still accurate on intent; the layout around it is stale.
+- **`branding-wordmark-app-icon-design.md`** — predates the Passenger name, so the wordmark itself is dead, but the palette and icon reasoning carry.
+
+`design-principles.md` and `reference/ui-ux-design-principles-manual.md` were **carried forward**, not archived — they're process assets, not scope. They live at `design/` now and the designer and iOS reviewer both gate on them.
+
 ## Supabase migrations
 
 Old schema: 26 migrations, `locali-brain/06-database/`, branch `brain`. Passenger starts at `001` from scratch. Verdicts by group:
