@@ -1,0 +1,185 @@
+{
+  "skill_name": "customer-voice",
+  "evals": [
+    {
+      "id": 0,
+      "name": "streaks-gamification",
+      "prompt": "Read .claude/agents/customer-voice.md then review the PRD at content/03-prds/streaks-2/streaks-2.md from a customer's perspective.",
+      "expected_output": "Structured customer review with all 6 personas, weighted verdict, Peloton Parity rule triggered for Guided Explorer, Onboarding Tax applied for Busy Optimizer",
+      "files": [
+        ".claude/agents/customer-voice.md",
+        "content/03-prds/streaks-2/streaks-2.md"
+      ],
+      "assertions": [
+        {
+          "name": "all_6_personas_present",
+          "description": "Output includes reactions for all 6 personas: Power Tracker (Arthur), Busy Optimizer (Teresa), Guided Explorer (Marilyn), Tech-Savvy Engager (Chris), Self-Directed Builder (Supriya), Recovery Seeker (Almond)",
+          "check": "string_contains_all",
+          "values": ["Power Tracker", "Busy Optimizer", "Guided Explorer", "Tech-Savvy Engager", "Self-Directed Builder", "Recovery Seeker"]
+        },
+        {
+          "name": "correct_weight_ordering",
+          "description": "Personas listed in descending weight order: 42%, 20%, 17%, 11%, 6%, 4%",
+          "check": "regex",
+          "pattern": "42%[\\s\\S]*20%[\\s\\S]*17%[\\s\\S]*11%[\\s\\S]*6%[\\s\\S]*4%"
+        },
+        {
+          "name": "weighted_verdict_present",
+          "description": "Contains positive weight %, blocked weight %, and a verdict (Ship/Iterate/Rethink/Kill/Deprioritize)",
+          "check": "string_contains_all",
+          "values": ["Positive weight", "Blocked weight", "Decision"]
+        },
+        {
+          "name": "rule_checks_complete",
+          "description": "All 7 rule checks present: Silent Persona, Peloton Parity, NPS Detractor, Onboarding Tax, Quote or Flag, Cannibalization, Mid-Workout Disruption",
+          "check": "string_contains_all",
+          "values": ["Silent Persona", "Peloton Parity", "NPS Detractor", "Onboarding Tax", "Quote or Flag", "Cannibalization", "Mid-Workout Disruption"]
+        },
+        {
+          "name": "feature_type_classification",
+          "description": "Feature classified as Engagement, Retention, or Growth",
+          "check": "string_contains_any",
+          "values": ["Engagement", "Retention", "Growth"]
+        },
+        {
+          "name": "impact_assessment_header",
+          "description": "Includes Impact Assessment with personas served, weighted coverage %, primary beneficiary",
+          "check": "string_contains_all",
+          "values": ["Impact Assessment", "Personas served", "Weighted coverage", "Primary beneficiary"]
+        },
+        {
+          "name": "interview_data_referenced",
+          "description": "At least 2 persona reactions reference real interview quotes or behavioral data, or flag assumptions with the warning emoji",
+          "check": "manual",
+          "notes": "Check that quotes reference real cluster members (Arthur, Teresa, Marilyn, Chris, Supriya, Almond, etc.) or flag with warning"
+        },
+        {
+          "name": "impact_labels_present",
+          "description": "Each persona reaction has an Impact label: BLOCKER, STRONG POSITIVE, NEUTRAL, or MILD CONCERN",
+          "check": "string_contains_any",
+          "values": ["BLOCKER", "STRONG POSITIVE", "NEUTRAL", "MILD CONCERN"]
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "amp-connect-hardware",
+      "prompt": "Read .claude/agents/customer-voice.md then review the PRD at content/03-prds/amp-connect/PRD-amp-connect.md from a customer's perspective.",
+      "expected_output": "Structured customer review with all 6 personas, weighted verdict, Self-Directed Builder and Recovery Seeker impacts highlighted for hardware feature",
+      "files": [
+        ".claude/agents/customer-voice.md",
+        "content/03-prds/amp-connect/PRD-amp-connect.md"
+      ],
+      "assertions": [
+        {
+          "name": "all_6_personas_present",
+          "description": "Output includes reactions for all 6 personas",
+          "check": "string_contains_all",
+          "values": ["Power Tracker", "Busy Optimizer", "Guided Explorer", "Tech-Savvy Engager", "Self-Directed Builder", "Recovery Seeker"]
+        },
+        {
+          "name": "correct_weight_ordering",
+          "description": "Personas listed in descending weight order",
+          "check": "regex",
+          "pattern": "42%[\\s\\S]*20%[\\s\\S]*17%[\\s\\S]*11%[\\s\\S]*6%[\\s\\S]*4%"
+        },
+        {
+          "name": "weighted_verdict_present",
+          "description": "Contains positive weight %, blocked weight %, and a verdict",
+          "check": "string_contains_all",
+          "values": ["Positive weight", "Blocked weight", "Decision"]
+        },
+        {
+          "name": "rule_checks_complete",
+          "description": "All 7 rule checks present",
+          "check": "string_contains_all",
+          "values": ["Silent Persona", "Peloton Parity", "NPS Detractor", "Onboarding Tax", "Quote or Flag", "Cannibalization", "Mid-Workout Disruption"]
+        },
+        {
+          "name": "feature_type_classification",
+          "description": "Feature classified as Engagement, Retention, or Growth",
+          "check": "string_contains_any",
+          "values": ["Engagement", "Retention", "Growth"]
+        },
+        {
+          "name": "impact_assessment_header",
+          "description": "Includes Impact Assessment section",
+          "check": "string_contains_all",
+          "values": ["Impact Assessment", "Personas served", "Weighted coverage", "Primary beneficiary"]
+        },
+        {
+          "name": "interview_data_referenced",
+          "description": "At least 2 persona reactions reference real interview quotes or flag assumptions",
+          "check": "manual",
+          "notes": "Check that quotes reference real cluster members or flag with warning"
+        },
+        {
+          "name": "impact_labels_present",
+          "description": "Each persona reaction has an Impact label",
+          "check": "string_contains_any",
+          "values": ["BLOCKER", "STRONG POSITIVE", "NEUTRAL", "MILD CONCERN"]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "workout-together-social",
+      "prompt": "Read .claude/agents/customer-voice.md then review the PRD at content/03-prds/workout-together/workout-together.md from a customer's perspective.",
+      "expected_output": "Structured customer review with all 6 personas, social feature impacts, Peloton Parity check for community features",
+      "files": [
+        ".claude/agents/customer-voice.md",
+        "content/03-prds/workout-together/workout-together.md"
+      ],
+      "assertions": [
+        {
+          "name": "all_6_personas_present",
+          "description": "Output includes reactions for all 6 personas",
+          "check": "string_contains_all",
+          "values": ["Power Tracker", "Busy Optimizer", "Guided Explorer", "Tech-Savvy Engager", "Self-Directed Builder", "Recovery Seeker"]
+        },
+        {
+          "name": "correct_weight_ordering",
+          "description": "Personas listed in descending weight order",
+          "check": "regex",
+          "pattern": "42%[\\s\\S]*20%[\\s\\S]*17%[\\s\\S]*11%[\\s\\S]*6%[\\s\\S]*4%"
+        },
+        {
+          "name": "weighted_verdict_present",
+          "description": "Contains positive weight %, blocked weight %, and a verdict",
+          "check": "string_contains_all",
+          "values": ["Positive weight", "Blocked weight", "Decision"]
+        },
+        {
+          "name": "rule_checks_complete",
+          "description": "All 7 rule checks present",
+          "check": "string_contains_all",
+          "values": ["Silent Persona", "Peloton Parity", "NPS Detractor", "Onboarding Tax", "Quote or Flag", "Cannibalization", "Mid-Workout Disruption"]
+        },
+        {
+          "name": "feature_type_classification",
+          "description": "Feature classified as Engagement, Retention, or Growth",
+          "check": "string_contains_any",
+          "values": ["Engagement", "Retention", "Growth"]
+        },
+        {
+          "name": "impact_assessment_header",
+          "description": "Includes Impact Assessment section",
+          "check": "string_contains_all",
+          "values": ["Impact Assessment", "Personas served", "Weighted coverage", "Primary beneficiary"]
+        },
+        {
+          "name": "interview_data_referenced",
+          "description": "At least 2 persona reactions reference real interview quotes or flag assumptions",
+          "check": "manual",
+          "notes": "Check that quotes reference real cluster members or flag with warning"
+        },
+        {
+          "name": "impact_labels_present",
+          "description": "Each persona reaction has an Impact label",
+          "check": "string_contains_any",
+          "values": ["BLOCKER", "STRONG POSITIVE", "NEUTRAL", "MILD CONCERN"]
+        }
+      ]
+    }
+  ]
+}

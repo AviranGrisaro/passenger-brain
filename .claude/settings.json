@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=\"${CLAUDE_PROJECT_DIR:-$PWD}\"; [ -d \"$ROOT/.git\" ] || exit 0; cd \"$ROOT\" || exit 0; if find . -mindepth 2 -type d -name .git -not -path './.git/*' -print -quit 2>/dev/null | grep -q .; then exit 0; fi; ( git add -u && (git diff --cached --quiet || git commit -q -m \"auto-backup $(date +%F)\") && git push -q origin main ) >/dev/null 2>&1 || true; exit 0",
+            "timeout": 60,
+            "statusMessage": "Backing up brain to GitHub..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v gbrain >/dev/null 2>&1 || exit 0; ( gbrain sync --source brain --no-embed >/dev/null 2>&1 & GB=$!; ( n=0; while [ $n -lt 90 ]; do sleep 1; kill -0 $GB 2>/dev/null || exit 0; n=$((n+1)); done; kill -TERM $GB 2>/dev/null; sleep 5; kill -KILL $GB 2>/dev/null ) & WD=$!; wait $GB 2>/dev/null; kill $WD 2>/dev/null; wait $WD 2>/dev/null ) >/dev/null 2>&1; exit 0",
+            "timeout": 120,
+            "statusMessage": "Refreshing gbrain index..."
+          }
+        ]
+      }
+    ]
+  }
+}

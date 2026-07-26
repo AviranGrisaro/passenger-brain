@@ -1,0 +1,15 @@
+{
+  "eval_id": 1,
+  "eval_name": "amp-connect-hardware",
+  "prompt": "Read .claude/agents/customer-voice.md then review the PRD at content/03-prds/amp-connect/PRD-amp-connect.md from a customer's perspective.",
+  "assertions": [
+    {"name": "all_6_personas_present", "description": "All 6 personas included in output"},
+    {"name": "correct_weight_ordering", "description": "Personas in descending weight order (42%, 20%, 17%, 11%, 6%, 4%)"},
+    {"name": "weighted_verdict_present", "description": "Positive weight, blocked weight, and decision present"},
+    {"name": "rule_checks_complete", "description": "All 7 rule checks present"},
+    {"name": "feature_type_classification", "description": "Feature classified as Engagement/Retention/Growth"},
+    {"name": "impact_assessment_header", "description": "Impact Assessment with coverage and beneficiary"},
+    {"name": "interview_data_referenced", "description": "Real interview data or assumption flags present"},
+    {"name": "impact_labels_present", "description": "BLOCKER/STRONG POSITIVE/NEUTRAL/MILD CONCERN labels"}
+  ]
+}

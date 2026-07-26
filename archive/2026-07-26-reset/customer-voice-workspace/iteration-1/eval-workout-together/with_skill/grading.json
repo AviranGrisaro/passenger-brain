@@ -1,0 +1,45 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-workout-together",
+  "variant": "with_skill",
+  "pass_rate": 1.0,
+  "passed": 7,
+  "total": 7,
+  "expectations": [
+    {
+      "text": "All 6 personas present",
+      "passed": true,
+      "evidence": "Found in output"
+    },
+    {
+      "text": "Correct weight ordering (42% before 20% before 17% before 11% before 6% before 4%)",
+      "passed": true,
+      "evidence": "Found in output"
+    },
+    {
+      "text": "Weighted verdict present (Positive weight, Blocked weight, Decision)",
+      "passed": true,
+      "evidence": "Found in output"
+    },
+    {
+      "text": "All 7 rule checks present",
+      "passed": true,
+      "evidence": "Found in output"
+    },
+    {
+      "text": "Feature type classification (Engagement/Retention/Growth)",
+      "passed": true,
+      "evidence": "Found in output"
+    },
+    {
+      "text": "Impact Assessment header present",
+      "passed": true,
+      "evidence": "Found in output"
+    },
+    {
+      "text": "Impact labels present (BLOCKER/STRONG POSITIVE/NEUTRAL/MILD CONCERN)",
+      "passed": true,
+      "evidence": "Found in output"
+    }
+  ]
+}

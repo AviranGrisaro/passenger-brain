@@ -1,0 +1,60 @@
+{
+  "evals": [
+    {
+      "name": "eval-streaks",
+      "with_skill": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "total": 7,
+        "tokens": 133538,
+        "duration_s": 140.1
+      },
+      "without_skill": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "total": 7,
+        "tokens": 120956,
+        "duration_s": 70.7
+      }
+    },
+    {
+      "name": "eval-amp-connect",
+      "with_skill": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "total": 7,
+        "tokens": 157902,
+        "duration_s": 254.7
+      },
+      "without_skill": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "total": 7,
+        "tokens": 140307,
+        "duration_s": 105.5
+      }
+    },
+    {
+      "name": "eval-workout-together",
+      "with_skill": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "total": 7,
+        "tokens": 137090,
+        "duration_s": 165.2
+      },
+      "without_skill": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "total": 7,
+        "tokens": 120379,
+        "duration_s": 65.2
+      }
+    }
+  ],
+  "summary": {
+    "with_skill_avg_pass_rate": 1.0,
+    "without_skill_avg_pass_rate": 0.0,
+    "delta": 1.0
+  }
+}
