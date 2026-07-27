@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passenger — V1 UX Flows</title>
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --surface: #FFFFFF;
+    --surface-2: #F1F0EA;
+    --fg: #14171A;
+    --muted: #5B6169;
+    --border: rgba(20,23,26,0.11);
+    --border-strong: rgba(20,23,26,0.20);
+    --heat: #E24E1F;
+    --heat-tint: rgba(226,78,31,0.10);
+    --heat-tint-strong: rgba(226,78,31,0.16);
+    --local: #1C7A5E;
+    --local-tint: rgba(28,122,94,0.10);
+    --local-tint-strong: rgba(28,122,94,0.16);
+    --mono: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --shadow: 0 1px 2px rgba(20,23,26,0.04), 0 8px 24px rgba(20,23,26,0.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #121315;
+    --surface: #1A1C1F;
+    --surface-2: #202226;
+    --fg: #ECEDEE;
+    --muted: #9AA0A6;
+    --border: rgba(236,237,238,0.12);
+    --border-strong: rgba(236,237,238,0.22);
+    --heat: #FF7A4D;
+    --heat-tint: rgba(255,122,77,0.14);
+    --heat-tint-strong: rgba(255,122,77,0.22);
+    --local: #3FD9A6;
+    --local-tint: rgba(63,217,166,0.13);
+    --local-tint-strong: rgba(63,217,166,0.20);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121315;
+      --surface: #1A1C1F;
+      --surface-2: #202226;
+      --fg: #ECEDEE;
+      --muted: #9AA0A6;
+      --border: rgba(236,237,238,0.12);
+      --border-strong: rgba(236,237,238,0.22);
+      --heat: #FF7A4D;
+      --heat-tint: rgba(255,122,77,0.14);
+      --heat-tint-strong: rgba(255,122,77,0.22);
+      --local: #3FD9A6;
+      --local-tint: rgba(63,217,166,0.13);
+      --local-tint-strong: rgba(63,217,166,0.20);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--bg); }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  section, header, footer { max-width: 100%; }
+  :focus-visible { outline: 2px solid var(--heat); outline-offset: 2px; border-radius: 3px; }
+
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+  .prose { max-width: 66ch; }
+  .prose p, .prose li { max-width: 66ch; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 780px; margin: 0 auto; padding: 12px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 0.95rem; white-space: nowrap; }
+  .brand small {
+    display: block; font-weight: 500; color: var(--muted);
+    font-size: 0.7rem; letter-spacing: 0.02em; margin-top: 1px;
+  }
+  nav.pillnav {
+    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    -ms-overflow-style: none; padding: 2px;
+  }
+  nav.pillnav::-webkit-scrollbar { display: none; }
+  nav.pillnav a {
+    flex: none; display: inline-flex; align-items: center;
+    min-height: 32px; padding: 0 12px; border-radius: 999px;
+    color: var(--muted); text-decoration: none;
+    font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  nav.pillnav a:hover { color: var(--fg); border-color: var(--border-strong); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 56px 0 40px; }
+  .status-row {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    font-size: 0.8rem; color: var(--muted); margin-bottom: 28px;
+  }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    font-weight: 600; color: var(--fg); font-size: 0.75rem;
+  }
+  .status-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--heat); }
+
+  h1.wordmark {
+    font-size: clamp(2.2rem, 5vw, 3.1rem);
+    line-height: 1.04; letter-spacing: -0.03em;
+    margin: 0 0 4px; font-weight: 800; text-wrap: balance;
+  }
+  .kicker { font-size: 1rem; color: var(--muted); margin: 0 0 28px; font-weight: 500; }
+  .lede { font-size: clamp(1.05rem, 2vw, 1.22rem); line-height: 1.5; font-weight: 500; margin: 0; }
+
+  /* ---------- generic section ---------- */
+  section.block { padding: 48px 0; border-top: 1px solid var(--border); }
+  .eyebrow {
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
+  }
+  h2 {
+    font-size: clamp(1.35rem, 2.6vw, 1.7rem); letter-spacing: -0.015em;
+    margin: 0 0 18px; font-weight: 800; text-wrap: balance;
+  }
+  h3 { font-size: 1.05rem; margin: 28px 0 10px; font-weight: 700; }
+  p { margin: 0 0 14px; }
+  ul, ol { padding-left: 1.2em; margin: 0 0 14px; }
+  li { margin-bottom: 8px; }
+  a { color: var(--heat); text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+  a:hover { text-decoration-thickness: 2px; }
+  code {
+    font-family: var(--mono); font-size: 0.85em;
+    background: var(--surface-2); padding: 1px 5px; border-radius: 4px;
+  }
+
+  .flag {
+    display: inline-block; font-size: 0.68rem; font-weight: 800;
+    letter-spacing: 0.03em; padding: 2px 7px; border-radius: 4px;
+    background: var(--heat-tint-strong); color: var(--fg);
+    vertical-align: middle; margin-right: 6px;
+  }
+  .tag-chip {
+    display: inline-block; font-size: 0.72rem; font-weight: 800;
+    padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border-strong);
+    vertical-align: middle;
+  }
+  .tag-local { background: var(--local-tint-strong); }
+  .tag-mix { background: var(--surface-2); }
+  .tag-tourist { background: var(--heat-tint-strong); }
+
+  .table-scroll {
+    overflow-x: auto; border: 1px solid var(--border);
+    border-radius: 10px; -webkit-overflow-scrolling: touch; background: var(--surface);
+  }
+
+  /* ---------- tiers ---------- */
+  .tier {
+    border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 16px; overflow: hidden; background: var(--surface);
+  }
+  .tier-head {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+  }
+  .tier-name {
+    font-family: var(--mono); font-size: 0.78rem; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .tier-desc { font-size: 0.84rem; color: var(--muted); }
+  .tier.t1 { border-left: 4px solid var(--heat); }
+  .tier.t1 .tier-head { background: var(--heat-tint); }
+  .tier.t1 .tier-name { color: var(--heat); }
+  .tier.t2 { border-left: 4px solid var(--border-strong); }
+  .tier.t2 .tier-head { background: var(--surface-2); }
+  .tier.t3 { border-left: 1px solid var(--border); }
+  .tier.t3 .tier-head { background: transparent; }
+  .tier.t3 .tier-name { color: var(--muted); }
+  .tier-note {
+    padding: 12px 18px; font-size: 0.85rem; color: var(--muted);
+    border-bottom: 1px solid var(--border); background: var(--surface-2);
+  }
+
+  .item {
+    display: grid; grid-template-columns: 1fr auto; gap: 4px 16px;
+    padding: 14px 18px; border-bottom: 1px solid var(--border); align-items: start;
+  }
+  .tier .item:last-child { border-bottom: none; }
+  .item-name { font-weight: 700; font-size: 0.92rem; }
+  .item-why { grid-column: 1 / -1; font-size: 0.85rem; color: var(--muted); }
+  .item-why strong { color: var(--fg); }
+  .cost {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+  }
+  @media (max-width: 520px) {
+    .item { grid-template-columns: 1fr; }
+    .cost { justify-self: start; }
+  }
+
+  /* ---------- journeys ---------- */
+  .journey {
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface); margin-bottom: 18px; overflow: hidden;
+  }
+  .journey-head { padding: 15px 20px 13px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .journey-eyebrow {
+    font-family: var(--mono); font-size: 0.68rem; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+    display: block; margin-bottom: 4px;
+  }
+  .journey-title { font-weight: 800; font-size: 1.05rem; margin: 0 0 5px; letter-spacing: -0.01em; }
+  .journey-who { font-size: 0.85rem; color: var(--muted); margin: 0; font-style: italic; }
+
+  ol.jsteps { list-style: none; padding: 18px 20px 6px; margin: 0; counter-reset: js; }
+  ol.jsteps > li {
+    counter-increment: js; position: relative;
+    padding-left: 34px; margin-bottom: 14px; font-size: 0.9rem;
+  }
+  ol.jsteps > li::before {
+    content: counter(js); position: absolute; left: 0; top: 0;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--border-strong);
+    font-family: var(--mono); font-size: 0.7rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; color: var(--muted);
+  }
+  .snag {
+    display: block; margin-top: 8px; padding: 9px 12px;
+    background: var(--heat-tint); border-radius: 6px;
+    border-left: 3px solid var(--heat);
+    font-size: 0.84rem;
+  }
+  .snag .k {
+    font-family: var(--mono); font-size: 0.64rem; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 800; color: var(--heat);
+    display: block; margin-bottom: 3px;
+  }
+  .journey-out {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 14px 20px; background: var(--local-tint); border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .journey-out .k {
+    font-family: var(--mono); font-size: 0.66rem; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 800; color: var(--local); flex: none;
+  }
+  .journey-out .cost {
+    background: transparent; border-color: var(--local); color: var(--local); flex: none;
+  }
+
+  /* ---------- steps (non-journey) ---------- */
+  ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: s; }
+  ol.steps > li {
+    counter-increment: s; position: relative;
+    padding-left: 34px; margin-bottom: 12px; font-size: 0.9rem;
+  }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 1px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--border-strong);
+    font-family: var(--mono); font-size: 0.7rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; color: var(--muted);
+  }
+  ol.steps ul { margin: 6px 0 0; padding-left: 1.1em; font-size: 0.86rem; color: var(--muted); }
+  ol.steps ul strong { color: var(--fg); }
+
+  /* ---------- diagrams ---------- */
+  .diagram { margin: 18px 0 8px; }
+  .dgm-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 4px 2px 12px; }
+  .node {
+    display: inline-flex; flex-direction: column; align-items: flex-start;
+    border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 9px 13px; background: var(--surface);
+    font-family: var(--mono); font-size: 0.74rem; line-height: 1.35;
+  }
+  .node .sub { font-family: var(--sans); font-size: 0.66rem; color: var(--muted); margin-top: 3px; }
+  .node.pri { background: var(--heat-tint); border-color: var(--heat); font-weight: 800; }
+  .node.sec { background: var(--surface-2); }
+  .node.ter { background: transparent; border-style: dashed; color: var(--muted); }
+  .node.term { background: var(--local-tint); border-color: var(--local); color: var(--local); font-weight: 800; }
+  .node.exit { background: transparent; border-style: dotted; border-width: 2px; color: var(--muted); }
+
+  .chain { display: flex; align-items: center; gap: 0; width: max-content; }
+  .chain .arrow { flex: none; width: 26px; text-align: center; color: var(--muted); font-size: 0.95rem; }
+
+  .tree { display: grid; gap: 8px; }
+  .tree-row { display: flex; align-items: center; gap: 10px; }
+  .tree-row .rail {
+    flex: none; font-family: var(--mono); font-size: 0.75rem;
+    color: var(--muted); white-space: pre;
+  }
+  .fan { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px;
+    font-size: 0.76rem; color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch {
+    width: 13px; height: 13px; border-radius: 3px; display: inline-block;
+    border: 1px solid var(--border-strong);
+  }
+
+  /* ---------- nav model ---------- */
+  .surfaces { display: grid; gap: 12px; margin-bottom: 18px; }
+  .surface-card {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 15px 18px; background: var(--surface);
+  }
+  .surface-card h4 {
+    margin: 0 0 6px; font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--muted); font-family: var(--mono);
+  }
+  .surface-card p { margin: 0; font-size: 0.89rem; }
+  .surface-card.exit { border-style: dashed; }
+
+  .depth {
+    border: 1.5px solid var(--border-strong); border-radius: 10px;
+    padding: 16px 18px; background: var(--surface-2);
+  }
+  .depth .lbl { font-family: var(--mono); font-weight: 800; font-size: 0.82rem; margin-bottom: 8px; }
+  .depth p { font-size: 0.88rem; margin: 0 0 10px; }
+  .depth p:last-child { margin-bottom: 0; }
+
+  /* ---------- parked ---------- */
+  .parked { display: grid; gap: 10px; }
+  .parked-item {
+    display: grid; grid-template-columns: auto 1fr; gap: 4px 14px;
+    padding: 14px 0; border-bottom: 1px solid var(--border); align-items: baseline;
+  }
+  .parked-item:last-child { border-bottom: none; }
+  .parked-tier {
+    font-family: var(--mono); font-size: 0.66rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+  }
+  .parked-item.next .parked-tier { background: var(--heat-tint-strong); color: var(--fg); border-color: var(--heat); }
+  .parked-name { font-weight: 700; font-size: 0.9rem; }
+  .parked-body { grid-column: 2; font-size: 0.86rem; color: var(--muted); }
+  .parked-body strong { color: var(--fg); }
+  @media (max-width: 520px) {
+    .parked-item { grid-template-columns: 1fr; }
+    .parked-tier { justify-self: start; }
+    .parked-body { grid-column: 1; }
+  }
+
+  /* ---------- open questions ---------- */
+  ol.oq { list-style: none; padding: 0; margin: 0; counter-reset: q; }
+  ol.oq > li {
+    counter-increment: q; border-left: 3px solid var(--border-strong);
+    padding: 2px 0 2px 16px; margin-bottom: 22px;
+  }
+  ol.oq .qn {
+    font-family: var(--mono); font-size: 0.7rem; font-weight: 800;
+    color: var(--muted); display: block; margin-bottom: 4px;
+  }
+  ol.oq .qt { font-weight: 700; font-size: 0.94rem; display: block; margin-bottom: 6px; }
+  ol.oq p { font-size: 0.87rem; margin: 0 0 8px; color: var(--muted); }
+  ol.oq .rec { font-size: 0.87rem; margin: 0; color: var(--fg); }
+  ol.oq .rec b { color: var(--heat); }
+
+  footer.doc-footer {
+    border-top: 1px solid var(--border); padding: 32px 0 64px;
+    font-size: 0.78rem; color: var(--muted);
+  }
+  footer.doc-footer p { margin: 0 0 8px; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 40px 0 28px; }
+    section.block { padding: 36px 0; }
+    .brand small { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">PASSENGER<small>V1 UX Flows</small></div>
+    <nav class="pillnav">
+      <a href="#frame">Frame</a>
+      <a href="#hierarchy">Hierarchy</a>
+      <a href="#launch">Launch</a>
+      <a href="#journeys">Journeys</a>
+      <a href="#nav">Navigation</a>
+      <a href="#mapstate">Map state</a>
+      <a href="#diagrams">Diagrams</a>
+      <a href="#parked">Phase 2 &amp; 3</a>
+      <a href="#questions">Open questions</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero" id="frame">
+    <div class="status-row">
+      <span class="status-chip"><span class="dot"></span>Draft — awaiting Aviran's read</span>
+      <span>Owner: designer</span>
+      <span>2026-07-27</span>
+    </div>
+
+    <h1 class="wordmark">V1 UX Flows</h1>
+    <p class="kicker">The flow, the hierarchy, and what's primary versus secondary.</p>
+
+    <div class="prose">
+      <p class="lede">Passenger is one map. You open the app and you're looking at Tel Aviv, right now — how packed everywhere is, and whether each place feels local or touristy.</p>
+      <p style="margin-top:18px;">You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places, and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter.</p>
+      <p><strong>There is no feed, no profile, no search bar, nothing to scroll.</strong> Every screen is either the map, or something the map handed you.</p>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Source: <code>strategy/passenger-strategy.md</code> (2026-07-27) + <code>strategy/decisions.md</code> (decisions 18–22). Markdown twin: <code>design/ux-flows.md</code>. Cross-feature flows reference, not a per-feature design spec — no PRDs exist yet to trace against.</p>
+    </div>
+  </header>
+
+  <section class="block" id="hierarchy">
+    <p class="eyebrow">The core of this doc</p>
+    <h2>Feature hierarchy</h2>
+    <div class="prose">
+      <p>Three tiers, ranked by how unavoidable each thing is. Cost is measured in <strong>taps from cold open</strong> — tapping the app icon is 0.</p>
+    </div>
+
+    <div class="tier t1">
+      <div class="tier-head">
+        <span class="tier-name">Primary</span>
+        <span class="tier-desc">Permanently on the map. The user cannot avoid seeing it.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">The map</span><span class="cost">0 taps</span>
+        <span class="item-why">Tel Aviv, MapKit, always the base layer. It's the whole product — strategy: "one map, and the whole product lives on it."</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Heat layer</span><span class="cost">0 taps</span>
+        <span class="item-why">Crowd-density fill in stepped bands, no gradients (decision #17). On by default, the first thing you see.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Tag layer</span><span class="cost">0 taps</span>
+        <span class="item-why">Localness accent per zone and spot, three plain-language values: <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — on by default, orthogonal to heat, never blended. <strong>Heat + tag is the entire V1 map</strong> — two layers, exactly as the north star describes.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">"Tel Aviv, right now" title</span><span class="cost">0 taps</span>
+        <span class="item-why">Fading ambient label on cold open. Decision #8, verbatim.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Time slider</span><span class="cost">0 to see · 1 drag</span>
+        <span class="item-why"><span class="flag">DESIGN CALL</span>Now → +12h, bottom-third thumb zone. Permanently visible, never dismissed, and it reshapes the primary view — that's Primary chrome, not a sheet you invoke. <strong>Overrulable in one line.</strong></span>
+      </div>
+      <div class="item">
+        <span class="item-name">Category chips</span><span class="cost">0 to see · 1 tap</span>
+        <span class="item-why"><span class="flag">DESIGN CALL</span>Food &amp; drinks / Things to do. Same reasoning as the slider — always-visible chrome, not an invoked sheet.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Near-me button</span><span class="cost">0 to see · 1 tap</span>
+        <span class="item-why">Recenter affordance. Persistent icon, part of map chrome.</span>
+      </div>
+    </div>
+
+    <div class="tier t2">
+      <div class="tier-head">
+        <span class="tier-name">Secondary</span>
+        <span class="tier-desc">Invoked from the map.</span>
+      </div>
+      <div class="tier-note">Lighter than it might otherwise be. V1 hands off to native Maps/Waze at the moment of "go" rather than building its own routing screen, so there's no in-app takeover surface to place here.</div>
+      <div class="item">
+        <span class="item-name">Zone sheet</span><span class="cost">1 tap</span>
+        <span class="item-why">Hand-curated neighborhood blurb + tagged spot list. Bottom sheet; the map stays visible behind it.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Spot sheet</span><span class="cost">1–2 taps</span>
+        <span class="item-why">Name, category, vibe tag, save icon, "Go" button. One level under a zone sheet, or reachable directly from a close-zoom pin. <strong>"Go" hands off to native Maps/Waze — an exit from Passenger, not a screen inside it.</strong></span>
+      </div>
+    </div>
+
+    <div class="tier t3">
+      <div class="tier-head">
+        <span class="tier-name">Tertiary</span>
+        <span class="tier-desc">Opt-in, low-frequency. Doesn't block the core loop.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Saved places</span><span class="cost">1 tap</span>
+        <span class="item-why">Bookmarked spots. Deliberately sought out, not part of the glance-and-go loop.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Visited places</span><span class="cost">1 tap</span>
+        <span class="item-why"><strong>Read-only in V1.</strong> Populates automatically from geofence detection (decision #16) — no manual "mark as visited" action. Designed as a list you read, not a flow you drive.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Local-QA answering</span><span class="cost">0 to see · 1 tap</span>
+        <span class="item-why"><span class="flag">DESIGN CALL</span>Contextual micro-prompt asking whether a spot is actually local. It renders <em>inside</em> a Secondary surface, but carries no value to the person answering — pure goodwill, skippable, no incentive layer until Phase 3's points system. Tiered by importance-to-the-user, not by where it sits.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Location permission</span><span class="cost">0 auto · 1 via near-me</span>
+        <span class="item-why">System sheet plus in-app fallback copy if denied. One-time, OS-owned, not app chrome.</span>
+      </div>
+      <div class="item">
+        <span class="item-name">Settings</span><span class="cost">n/a</span>
+        <span class="item-why"><strong>None exist in V1.</strong> No account, no preferences, no toggles beyond what's already Primary chrome.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="launch">
+    <p class="eyebrow">Before any journey starts</p>
+    <h2>Launch behavior</h2>
+
+    <h3>First launch ever</h3>
+    <ol class="steps">
+      <li><strong>Tap the app icon.</strong> No splash screen, no onboarding carousel — the scope gate is explicit: the app opens straight to the map plus the location permission.</li>
+      <li><strong>Map renders immediately.</strong> Tel Aviv, default city-wide center, heat layer for "now", tag accents visible, both categories shown, slider at "now". "Tel Aviv, right now" fades in and out over roughly two seconds.</li>
+      <li><strong>Location permission prompts lazily</strong> — the OS system sheet, never a custom in-app screen (decision #8). It does not block map interaction.
+        <ul>
+          <li><strong>Granted:</strong> map animates to real location, "you are here" marker appears, background Visited detection starts silently.</li>
+          <li><strong>Denied:</strong> map stays at the default city-wide center — walked end to end in Journey 5.</li>
+        </ul>
+      </li>
+      <li><strong>User explores.</strong> Pan, zoom, drag the slider, toggle a category, tap a zone or spot. The steady state almost every session lives in.</li>
+    </ol>
+
+    <h3>Every subsequent launch</h3>
+    <ol class="steps">
+      <li><strong>Tap the app icon.</strong> Map renders against whatever permission state iOS already recorded — no re-prompt.</li>
+      <li><strong>Granted:</strong> opens already centered on current location, no animate-in beat. <strong>Denied:</strong> opens at the same default city-wide center as first run.</li>
+      <li><strong>Slider always resets to "now."</strong> <span class="flag">DESIGN CALL</span>Persisting a stale "+3h" from last session would misrepresent live data the instant the app reopens. "Now" is only ever valid at the moment you look at it.</li>
+    </ol>
+  </section>
+
+  <section class="block" id="journeys">
+    <p class="eyebrow">Five journeys, start to finish</p>
+    <h2>End-to-end journeys</h2>
+    <div class="prose">
+      <p>Chosen to partition V1's surface without duplicating it: two discovery contexts (tourist and resident, who use the same map differently), one return visit, one feedback loop, and one full pass under degraded conditions — because location-denied and offline don't touch one step, they touch nearly every step at once.</p>
+      <p>Every V1 interaction appears in at least one journey. Where something can go wrong, it's attached to the step where it bites.</p>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 1 · Discovery, cold</span>
+        <p class="journey-title">Just landed, knows nothing</p>
+        <p class="journey-who">A tourist, first time opening the app, has just landed in Tel Aviv.</p>
+      </div>
+      <ol class="jsteps">
+        <li>Taps the app icon. Map renders immediately — Tel Aviv, default center, heat + tag on for "now", both categories shown, "Tel Aviv, right now" fading in and out.</li>
+        <li>A few seconds in, the OS location sheet appears without blocking the map underneath. She taps <strong>Allow</strong> — the map animates to her real location, a "you are here" marker appears, and Visited detection starts silently in the background.</li>
+        <li>She taps the <strong>Things to do</strong> chip to cut the clutter. The map filters instantly.</li>
+        <li>She taps a zone near her hotel. A bottom sheet slides up with a hand-curated blurb and a list of tagged spots.
+          <span class="snag"><span class="k">If there's no data here</span>The sheet reads "Nobody's mapped this corner of Tel Aviv yet" instead of an empty list. She keeps browsing; nothing broke.</span>
+        </li>
+        <li>She taps a spot in the list — a rooftop bar tagged <span class="tag-chip tag-local">Local</span>, in a zone where heat is already climbing for this hour. Spot sheet opens: name, category, vibe tag, save icon, "Go".</li>
+        <li>She taps <strong>Go</strong>. Passenger hands her straight to native Maps/Waze with the destination pre-filled — an exit, not a screen inside Passenger. She never sees an in-app route.</li>
+        <li>She walks there using Maps/Waze; Passenger is backgrounded. If the geofence monitor catches her arrival, it silently logs a Visited entry. She doesn't see this happen — it's the setup for Journey 4.</li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>Standing in front of the bar.</span>
+        <span class="cost">4 taps in-app</span>
+      </div>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 2 · Discovery, warm</span>
+        <p class="journey-title">Home and bored, planning tonight</p>
+        <p class="journey-who">A Tel Aviv resident, opening the app on a random Tuesday evening, deciding where to go later.</p>
+      </div>
+      <ol class="jsteps">
+        <li>Taps the app icon — not his first launch, so no permission re-prompt. Map opens centered on his location. Slider resets to "now", as it always does.</li>
+        <li>He drags the slider forward to roughly <strong>+3 hours</strong>. Heat redraws live as he drags; the tag layer doesn't move — a place's localness doesn't change because it's later.
+          <span class="snag"><span class="k">Nothing there at that hour</span>One zone shows almost no heat at +3h. Not an error — real information, and exactly what he needed to see.</span>
+        </li>
+        <li>He leaves both category chips on, since he's not sure what he wants yet.</li>
+        <li>He taps a couple of zones back to back, comparing blurbs and tags, swiping each sheet down to bounce to the next.</li>
+        <li>He finds a bar tagged <span class="tag-chip tag-mix">Mix</span> worth going to later, opens its spot sheet, and taps the save icon. It fills with a quick animation, an inline "Saved" appears, and he stays put.
+          <span class="snag"><span class="k">Connection drops mid-save</span>It still saves locally and syncs once he's back online. A save is too lightweight to gate on connectivity.</span>
+        </li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>A saved place and a plan for later. Journey 3 picks up from here.</span>
+      </div>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 3 · Return visit</span>
+        <p class="journey-title">Coming back to something saved</p>
+        <p class="journey-who">Same resident, a few hours later, ready to actually go.</p>
+      </div>
+      <ol class="jsteps">
+        <li>Opens the app, taps the <strong>Saved</strong> icon.</li>
+        <li>Saved list opens; he taps the bar from Journey 2.</li>
+        <li>The row jumps straight to that spot's sheet, <strong>skipping the zone sheet entirely</strong> — he already chose this place.</li>
+        <li>The spot sheet re-reads current data: heat may have shifted since he saved it (different hour now); the vibe tag hasn't.
+          <span class="snag"><span class="k">Gap in current-hour data</span>The sheet still opens with its static info — name, category, blurb — and the heat readout says "no live data right now" rather than blocking the sheet.</span>
+        </li>
+        <li>He taps <strong>Go</strong> — same hand-off exit as Journey 1, straight to native Maps/Waze.</li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>Standing in front of the bar — shorter than Journey 1 on purpose. Re-finding a place you already chose shouldn't cost as much as discovering one.</span>
+        <span class="cost">3 taps in-app</span>
+      </div>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 4 · Feedback loop</span>
+        <p class="journey-title">Giving something back</p>
+        <p class="journey-who">Either the tourist from Journey 1 or the resident from Journey 3, sometime after actually visiting a place.</p>
+      </div>
+      <ol class="jsteps">
+        <li>Because location was granted and the geofence monitor detected her presence, the spot from Journey 1 has quietly appeared in her Visited list. <strong>No action was required to put it there</strong> — Visited is automatic, not a manual button (decision #16).</li>
+        <li>She opens the Visited icon out of curiosity.
+          <span class="snag"><span class="k">Nothing detected yet</span>Reads "Nothing here yet — this fills in as you walk around Tel Aviv" rather than a blank screen.</span>
+        </li>
+        <li>She taps the entry, which reopens that spot's sheet. Embedded at the bottom is a plain-language micro-prompt: <em>"Does this feel like a local spot, or more of a tourist one?"</em> with three tap targets — <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — the same three words used everywhere else in the app. This is the highest-intent moment to ask: she's already been there, and answering costs nothing beyond a tap she was already making.</li>
+        <li>She taps <strong>Local</strong>. The card collapses into a one-line "Thanks — that's shared with other travelers." No modal, no interruption.
+          <span class="snag"><span class="k">Offline</span>The card doesn't render at all, rather than offering a submit that silently fails. This system runs on goodwill alone in V1, and a failed submission burns that goodwill for nothing.</span>
+          <span class="snag"><span class="k">Already answered</span>The card never appears again for that spot.</span>
+        </li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>One data point fed back into the localness pipeline, at zero extra cost.</span>
+      </div>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 5 · Degraded</span>
+        <p class="journey-title">The degraded run</p>
+        <p class="journey-who">Anyone, location denied and/or offline for the whole session.</p>
+      </div>
+      <ol class="jsteps">
+        <li>Cold open with location denied (or offline entirely). Map renders at the default Tel Aviv city-wide center — no recenter, no "you are here" marker.</li>
+        <li>The near-me button stays visible but greyed. Tapping it doesn't re-trigger the system dialog — iOS won't, once denied — so it shows inline copy pointing to Settings instead.</li>
+        <li>She browses anyway. The map is fully usable without location, just not personalized to where she's standing. She taps a zone.
+          <span class="snag"><span class="k">Network also down</span>The sheet shows the last cached blurb and spot list with a "last updated Xm ago, offline" label rather than failing blank.</span>
+        </li>
+        <li>She taps a spot and saves it — the save still completes locally and syncs once she's back online.</li>
+        <li>She checks the Visited list. <strong>Permanently empty</strong>, with an explainer ("Turn on location to build this automatically") and a Settings deep-link. Visited has no data source without location — ever, not just today.</li>
+        <li>She opens a spot sheet. The local-QA card never renders here; it depends on both a live connection and a real detected visit, neither of which this session can produce.</li>
+        <li>She taps <strong>Go</strong> anyway. The hand-off to Maps/Waze still works offline — it's just handing coordinates to another app, not asking anything of Passenger's servers.</li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>She can still browse, filter, read blurbs and tags, save places, and get routed out. What she loses: personalization, a live Visited list, and any chance to answer a local-QA question. Nothing crashes and nothing lies to her about data being fresher than it is — that's the bar, not full feature parity.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="nav">
+    <p class="eyebrow">Getting around without a nav bar</p>
+    <h2>Navigation model</h2>
+    <div class="prose"><p>No nav bar, no tab bar, no feed. Two surface types, and one exit.</p></div>
+
+    <div class="surfaces">
+      <div class="surface-card">
+        <h4>Map chrome</h4>
+        <p>Always on screen, never dismissed — heat and tag layers, slider, category chips, fading title, near-me button, Saved and Visited icons.</p>
+      </div>
+      <div class="surface-card">
+        <h4>Sheets</h4>
+        <p>Partial height, swipe down or tap outside to dismiss — zone sheet, spot sheet, Saved list, Visited list. The local-QA card is embedded inside the spot sheet, not a sheet of its own.</p>
+      </div>
+      <div class="surface-card exit">
+        <h4>"Go" is not a surface at all</h4>
+        <p>It's a system hand-off to native Maps/Waze, which exits Passenger entirely. Returning afterward drops the user wherever iOS left off — typically the spot sheet or the map. Passenger doesn't reconstruct any state for this, because it never built a screen to leave in the first place.</p>
+      </div>
+    </div>
+
+    <div class="depth">
+      <div class="lbl">Depth rule: 2 levels, no more, while inside the app</div>
+      <p>Map (0) → zone sheet (1) → spot sheet (2) is the deepest path that stays inside Passenger. Saved and Visited reach the same maximum by a shorter route, skipping the zone step because you already chose the place.</p>
+      <p>Nothing in V1 needs a third in-app level. The one feature that would have required it — <strong>Scenic View — is Phase 2</strong>, and keeping it out is exactly what holds this rule at 2 instead of 3.</p>
+      <p>Dismissing any sheet always returns <strong>exactly one level up</strong>.</p>
+    </div>
+  </section>
+
+  <section class="block" id="mapstate">
+    <p class="eyebrow">What the map shows, when</p>
+    <h2>Map state &amp; density</h2>
+
+    <h3>Zoom levels</h3>
+    <div class="prose">
+      <ul>
+        <li><strong>City-wide</strong> — Tel Aviv in full, heat as neighborhood-scale blobs, no individual pins.</li>
+        <li><strong>Neighborhood</strong> — zone boundaries visible, tag accents readable per zone, still no spot-level pins.</li>
+        <li><strong>Close</strong> — individual spot pins appear, each carrying its own vibe-tag badge. Blurb and spot detail become reachable by tap.</li>
+      </ul>
+    </div>
+
+    <h3>Slider hours</h3>
+    <div class="prose">
+      <p>Heat is the only time-variant layer — it redraws per hour selected, because crowd density genuinely changes hour to hour. The tag layer is time-invariant: a place's localness doesn't change by the hour, so it never moves when the slider does.</p>
+    </div>
+
+    <h3>The packed + touristy trap — now more load-bearing, not less</h3>
+    <div class="prose">
+      <p>With three tags, there is <strong>no dedicated vocabulary entry for the worst-case combination anymore</strong>. A busy zone tagged Tourist has to read as something worth avoiding purely from heat and tag shown together — no fourth word is doing that work. That makes the display treatment the whole signal, not a nice-to-have on top of a tag that already said it.</p>
+      <ul>
+        <li>Heat and tag still render on <strong>different visual channels</strong>, never the same one — heat as background fill intensity (stepped bands, no gradients), tag as a badge and label on top, independent of the fill's hue.</li>
+        <li><span class="flag">DESIGN CALL</span>When heat crosses a "busy" threshold on something tagged <span class="tag-chip tag-tourist">Tourist</span>, render a distinct warning-style badge on top of the normal tag badge. Not new text, not a new tag — an icon treatment that appears only when both conditions are true at once. <strong>Computed at display time, never a stored field:</strong> the two layers stay orthogonal in the data model exactly as the strategy requires; only the rendering notices when they coincide.</li>
+        <li><span class="flag">DESIGN CALL</span>The reverse case deserves equal thought. Busy + <span class="tag-chip tag-local">Local</span> should never read as a warning — if anything it's the strongest possible endorsement, busy <em>because</em> it's actually good. No special badge there; the <em>absence</em> of the warning becomes legible precisely because the warning exists for the other case.</li>
+        <li>The "very local but temporarily busy" case still holds. Heat is time-variant, tag isn't — a Local-tagged spot spiking busy at 9pm reads as "busy AND local", two true facts, never as evidence it turned touristy. The warning badge only fires on Tourist-tagged busy spots, which keeps this distinction automatic rather than something the user has to reason through.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" id="diagrams">
+    <p class="eyebrow">At a glance</p>
+    <h2>Diagrams</h2>
+
+    <h3>Launch to steady state</h3>
+    <div class="diagram">
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node">Tap app icon</span>
+          <span class="arrow">→</span>
+          <span class="node pri">Map renders<span class="sub">Tel Aviv, now, heat + tag</span></span>
+          <span class="arrow">→</span>
+          <span class="node">Location permission<span class="sub">lazy, non-blocking</span></span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node ter">granted</span>
+          <span class="arrow">→</span>
+          <span class="node">Recenter on user<span class="sub">Visited detection starts</span></span>
+          <span class="arrow">→</span>
+          <span class="node term">Steady state</span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node ter">denied</span>
+          <span class="arrow">→</span>
+          <span class="node">Stay city-wide<span class="sub">near-me greyed</span></span>
+          <span class="arrow">→</span>
+          <span class="node term">Steady state</span>
+        </div>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, six things are reachable without leaving the map:</p>
+      <div class="fan">
+        <span class="node sec">Tap a zone<span class="sub">→ zone sheet</span></span>
+        <span class="node sec">Tap a spot pin<span class="sub">→ spot sheet</span></span>
+        <span class="node pri">Drag slider<span class="sub">heat redraws</span></span>
+        <span class="node pri">Toggle category<span class="sub">filters in place</span></span>
+        <span class="node ter">Saved<span class="sub">→ spot sheet</span></span>
+        <span class="node ter">Visited<span class="sub">→ spot sheet</span></span>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--muted); margin:18px 0 8px;">And the deepest path, end to end — note where it leaves the app:</p>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node sec">Zone sheet<span class="sub">blurb + spots</span></span>
+          <span class="arrow">→</span>
+          <span class="node sec">Spot sheet<span class="sub">tag · save · Go</span></span>
+          <span class="arrow">→</span>
+          <span class="node exit">Maps/Waze<span class="sub">exits Passenger</span></span>
+        </div>
+      </div>
+    </div>
+
+    <h3>Hierarchy &amp; navigation tree</h3>
+    <div class="diagram">
+      <div class="dgm-scroll">
+        <div class="tree">
+          <div class="tree-row">
+            <span class="node pri">MAP — Primary<span class="sub">heat + tag (2 layers only) · slider · chips · title · near-me &nbsp;|&nbsp; 0 taps</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">└─</span>
+            <span class="node sec">Zone sheet — Secondary<span class="sub">1 tap</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">&nbsp; &nbsp;└─</span>
+            <span class="node sec">Spot sheet — Secondary<span class="sub">1–2 taps · deepest in-app level</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">&nbsp; &nbsp; &nbsp; &nbsp;├─</span>
+            <span class="node exit">Go → native Maps/Waze<span class="sub">exits the app · not a surface</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">&nbsp; &nbsp; &nbsp; &nbsp;└─</span>
+            <span class="node ter">Local-QA prompt — Tertiary<span class="sub">embedded, contextual · no surface of its own</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">├─</span>
+            <span class="node ter">Saved list — Tertiary<span class="sub">1 tap · jumps straight to spot sheet</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">├─</span>
+            <span class="node ter">Visited list — Tertiary<span class="sub">1 tap · read-only, auto-populated</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">└─</span>
+            <span class="node ter">Location permission — Tertiary<span class="sub">system sheet · 0–1 tap</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--heat-tint); border-color:var(--heat);"></span>Primary</span>
+        <span><span class="swatch" style="background:var(--surface-2);"></span>Secondary</span>
+        <span><span class="swatch" style="background:transparent; border-style:dashed;"></span>Tertiary</span>
+        <span><span class="swatch" style="background:transparent; border-style:dotted; border-width:2px;"></span>Exits the app</span>
+        <span><span class="swatch" style="background:var(--local-tint); border-color:var(--local);"></span>Steady state</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="parked">
+    <p class="eyebrow">Placement only, not design</p>
+    <h2>Where Phase 2 and 3 features slot in</h2>
+    <div class="prose">
+      <p>Scenic View and Live Events both moved to Phase 2 as of this revision, subscription-gated alongside proximity intelligence.</p>
+    </div>
+
+    <div class="parked">
+      <div class="parked-item next">
+        <span class="parked-tier">Phase 2 · changes the rules</span>
+        <span class="parked-name">Scenic View</span>
+        <span class="parked-body">Replaces V1's "Go" hand-off with a full-screen in-app routing surface. <strong>Not just an addition — it changes what leaving the spot sheet means.</strong> In V1, Go ends the in-app journey, with nothing to reconstruct on return. With Scenic View, the journey continues inside Passenger during transit, which reopens two things V1 sidesteps entirely: what re-entering the spot context looks like after arrival (V1 has no "you've arrived" moment, since the app was never watching), and <strong>the depth rule, which goes back to 3 levels</strong> the moment this ships. Worth scoping alongside proximity intelligence — both concern the in-transit experience and would likely share build surface. The open depth question (full turn-by-turn vs. route-preview-then-handoff) travels with it.</span>
+      </div>
+      <div class="parked-item">
+        <span class="parked-tier">Phase 2 · Primary</span>
+        <span class="parked-name">Live Events</span>
+        <span class="parked-body">Enters as a third overlay toggle alongside the category chips — additive chrome, since it extends the base map's visualization rather than opening a new surface. <strong>Displaces nothing.</strong> The two-layer hero view doesn't need to change shape to gain a third toggle later, which is exactly why cutting Events from V1 costs nothing structurally now.</span>
+      </div>
+      <div class="parked-item">
+        <span class="parked-tier">Phase 2 · Secondary</span>
+        <span class="parked-name">Proximity intelligence + arrival card</span>
+        <span class="parked-body">A new Secondary surface, but geofence-triggered rather than tap-invoked — a time-triggered variant of the spot sheet, appearing when the user is already en route. Extends the spot sheet; displaces nothing.</span>
+      </div>
+      <div class="parked-item">
+        <span class="parked-tier">Phase 3 · structural</span>
+        <span class="parked-name">AI local guide</span>
+        <span class="parked-body">A different product mode on the same engine, not a sheet off the map. Needs its own Primary-adjacent entry point. <strong>The one candidate that breaks V1's single-primary-surface simplicity rather than extending it.</strong> Flag it loudly whenever Phase 3 gets scoped.</span>
+      </div>
+      <div class="parked-item">
+        <span class="parked-tier">Phase 3 · Secondary</span>
+        <span class="parked-name">Shake to roll</span>
+        <span class="parked-body">A gesture-triggered action roughly parallel to the spot sheet — a random-suggestion overlay fired by a device gesture instead of a tap. Purely additive.</span>
+      </div>
+      <div class="parked-item">
+        <span class="parked-tier">Phase 3 · Tertiary</span>
+        <span class="parked-name">Auto-saved places</span>
+        <span class="parked-body">Extends the save step in Journey 2 with an automatic trigger (dwell ≥ 20 min). No new surface — Saved gains an automatic path alongside the manual one.</span>
+      </div>
+      <div class="parked-item">
+        <span class="parked-tier">Phase 3 · Tertiary</span>
+        <span class="parked-name">Points system</span>
+        <span class="parked-body">Adds a rewards surface and changes the character of Journey 4. Local-QA is goodwill-only today and correctly tiered low. Once points exist, answering has real incentive behind it and <strong>deserves re-tiering upward</strong> — at that point, not before.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="questions">
+    <p class="eyebrow">Decisions this doc couldn't make</p>
+    <h2>Open UX questions</h2>
+
+    <ol class="oq">
+      <li>
+        <span class="qn">Q1</span>
+        <span class="qt">Local-QA prompt cadence</span>
+        <p>The strategy says the QA system exists, but not how often or on what trigger it asks.</p>
+        <p class="rec"><b>Recommendation:</b> trigger primarily right after a spot lands in Visited — the highest-intent, already-there moment — plus occasionally on spot-sheet view for low-confidence tags only, capped at roughly once per session. Protect the goodwill this runs on rather than maximizing answer volume.</p>
+      </li>
+      <li>
+        <span class="qn">Q2</span>
+        <span class="qt">Lazy location permission — exact trigger</span>
+        <p>Decision #8 says "lazy," but not whether that's an automatic system prompt shortly after the map renders, or only on the first tap of near-me.</p>
+        <p class="rec"><b>Recommendation:</b> auto-prompt once, softly, a couple of seconds after the map first renders. Starts Visited tracking as early as possible without blocking the first look at the map.</p>
+      </li>
+      <li>
+        <span class="qn">Q3</span>
+        <span class="qt">Does the slider ever look backward?</span>
+        <p>Taken here as strictly forward-only, now → +12 hours. Worth confirming there's no case for "it was busier here 30 minutes ago" before this locks into the build.</p>
+      </li>
+      <li>
+        <span class="qn">Q4</span>
+        <span class="qt">Visited detection during the hand-off</span>
+        <p>V1's Visited list depends entirely on the geofence monitor catching a visit while Passenger is backgrounded — the user is inside Maps/Waze, not Passenger, at the exact moment they arrive. Does iOS reliably keep background location running through that hand-off and the walk that follows, or does exiting the app risk losing the one signal Visited depends on?</p>
+        <p class="rec"><b>Recommendation:</b> confirm background-location behavior with the architect before treating Visited's automatic-only design as settled. If it's shaky, a lightweight manual backstop may be needed even though the current decision rules one out.</p>
+      </li>
+      <li>
+        <span class="qn">Q5</span>
+        <span class="qt">Does the busy + Tourist warning badge need its own VoiceOver label?</span>
+        <p>It's a display-time computation, not a stored tag, so it won't inherit whatever label the tag badge already carries.</p>
+        <p class="rec"><b>Recommendation:</b> give it an explicit label — "busy and touristy, worth a second look" — rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred.</p>
+      </li>
+    </ol>
+  </section>
+
+  <footer class="doc-footer">
+    <p>Passenger — V1 UX Flows. Drafted by the designer agent for Aviran Grisaro, 2026-07-27.</p>
+    <p>Reading view of <code>design/ux-flows.md</code>. Built on the token system from <code>strategy/passenger-north-star.html</code> — flat color, no gradients.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

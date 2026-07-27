@@ -3,7 +3,7 @@
 **Owner:** designer (drafted for Aviran)
 **Date:** 2026-07-27
 **Status:** Draft — awaiting Aviran's read
-**Source:** `strategy/passenger-strategy.md` (2026-07-23) + `strategy/decisions.md` (locked 2026-07-22, amended 2026-07-26)
+**Source:** `strategy/passenger-strategy.md` (2026-07-27) + `strategy/decisions.md` (decisions 18–22, 2026-07-27)
 **Document type:** cross-feature UX flows reference. This is not a per-feature design spec — it doesn't carry a PRD-traceability table or a high-fidelity mockup link, because no PRD exists yet to trace against (`prds/INDEX.md` is empty). Once `product` writes the six V1 PRDs this doc predicts, each gets its own spec under `design/<phase-slug>/` that does carry those.
 
 ---
