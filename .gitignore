@@ -4,6 +4,7 @@
 # Rendered viewing artifacts — regenerable, not backed up
 *.html
 !strategy/passenger-north-star.html
+!design/ux-flows.html
 
 # Generated exports
 *.pdf
