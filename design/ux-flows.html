@@ -428,9 +428,9 @@
 
     <div class="prose">
       <p class="lede">Passenger is one map. You open the app and you're looking at Tel Aviv, right now — how packed everywhere is, and whether each place feels local or touristy.</p>
-      <p style="margin-top:18px;">You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places, and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter.</p>
+      <p style="margin-top:18px;">You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places — sometimes on purpose, sometimes because you lingered somewhere long enough that it saved itself — and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter.</p>
       <p><strong>There is no feed, no profile, nothing to scroll.</strong> If you already know what you're after, search is one tap away — a sheet you open, not a box that's always staring back at you: a product whose whole pitch is "you don't need to ask" shouldn't put a question mark in front of you by default. Every screen is either the map, or something the map handed you.</p>
-      <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Source: <code>strategy/passenger-strategy.md</code> (2026-07-27) + <code>strategy/decisions.md</code> (decisions 18–25). Markdown twin: <code>design/ux-flows.md</code>. Cross-feature flows reference, not a per-feature design spec — no PRDs exist yet to trace against.</p>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Source: <code>strategy/passenger-strategy.md</code> (2026-07-27) + <code>strategy/decisions.md</code> (decisions 18–26). Markdown twin: <code>design/ux-flows.md</code>. Cross-feature flows reference, not a per-feature design spec — no PRDs exist yet to trace against.</p>
     </div>
   </header>
 
@@ -457,7 +457,7 @@
       </div>
       <div class="item">
         <span class="item-name">Tag layer</span><span class="cost">0 taps</span>
-        <span class="item-why">Localness accent, three plain-language values: <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — on by default, orthogonal to heat, never blended. <strong>Heat + tag is the entire V1 map</strong> — two layers, exactly as the north star describes. <strong>Renders at whatever granularity is legible per zoom, not everywhere at once</strong> — see Map state, revised after Aviran's pushback on badge density.</span>
+        <span class="item-why">Localness accent, three plain-language values: <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — on by default, orthogonal to heat, never blended. <strong>Heat + tag is the entire V1 map</strong> — two layers, exactly as the north star describes. <strong>This row contradicted Map state for one revision, fixed now:</strong> tag renders as the zone's outline stroke, not a badge, genuinely visible at every zoom including city-wide — the same 0-tap claim heat gets, honestly true this time.</span>
       </div>
       <div class="item">
         <span class="item-name">"Tel Aviv, right now" title</span><span class="cost">0 taps</span>
@@ -504,12 +504,8 @@
         <span class="tier-desc">Opt-in, low-frequency. Doesn't block the core loop.</span>
       </div>
       <div class="item">
-        <span class="item-name">Saved places</span><span class="cost">1 tap</span>
-        <span class="item-why">Bookmarked spots. Deliberately sought out, not part of the glance-and-go loop.</span>
-      </div>
-      <div class="item">
-        <span class="item-name">Visited places</span><span class="cost">1 tap</span>
-        <span class="item-why"><strong>Read-only in V1.</strong> Populates automatically from geofence detection (decision #16) — no manual "mark as visited" action. Designed as a list you read, not a flow you drive.</span>
+        <span class="item-name">Places<span class="sub" style="display:block; font-weight:500; color:var(--muted); font-size:0.78rem;">merges Saved + Visited — decision #26, supersedes #16</span></span><span class="cost">1 tap (floating icon)</span>
+        <span class="item-why">One list, fed three ways: <strong>manual save</strong> (the save icon), <strong>auto-save</strong> (dwell 20+ minutes at a spot — the Bump mechanic, pulled forward from Phase 3), and <strong>geofence detection</strong> (present, however briefly). <strong>Guard, load-bearing, not an optimization:</strong> auto-save only ever fires on places already in Passenger's own places table — a home or a friend's apartment is never a tagged spot, so it never saves itself, no matter how long anyone stays. Each row shows which of the three put it there — a short word (<strong>Saved</strong> / <strong>Auto-saved</strong> / <strong>Visited</strong>), not a separate list per mechanism. <strong>Naming and provenance display are recorded open on decision #26 — "Places" and the three-word labels are my proposal, not yet confirmed;</strong> see Open questions. Also renders on the map now, not only as a list — see Map state.</span>
       </div>
       <div class="item">
         <span class="item-name">Local-QA answering</span><span class="cost">no cold-open cost — push-triggered</span>
@@ -536,7 +532,7 @@
       <li><strong>Map renders immediately.</strong> Tel Aviv, default city-wide center, heat layer for "now", tag accents visible, both categories always shown together since there's no category filter outside the search sheet (decision #25), slider at "now". "Tel Aviv, right now" fades in and out over roughly two seconds.</li>
       <li><strong>Location permission prompts lazily</strong> — the OS system sheet, never a custom in-app screen (decision #8). It does not block map interaction.
         <ul>
-          <li><strong>Granted:</strong> map animates to real location, "you are here" marker appears, background Visited detection starts silently.</li>
+          <li><strong>Granted:</strong> map animates to real location, "you are here" marker appears, and Places-detection can begin — in a limited, foreground-favoring way at this permission level. Reliable background tracking needs the Always upgrade below, not yet asked for at this point.</li>
           <li><strong>Denied:</strong> map stays at the default city-wide center — walked end to end in Journey 6.</li>
         </ul>
       </li>
@@ -549,6 +545,18 @@
       <li><strong>Granted:</strong> opens already centered on current location, no animate-in beat. <strong>Denied:</strong> opens at the same default city-wide center as first run.</li>
       <li><strong>Slider always resets to "now."</strong> <span class="flag">DESIGN CALL</span>Persisting a stale "+3h" from last session would misrepresent live data the instant the app reopens. "Now" is only ever valid at the moment you look at it.</li>
     </ol>
+
+    <h3>Permission sequence — three asks across a session, not one gate at launch</h3>
+    <div class="prose">
+      <p>Decision #8 keeps cold open permission-gate-free — still true, still just the one lazy When-In-Use location prompt above. But V1 now has three distinct system permissions to eventually ask for, not one: <strong>Location — When In Use</strong> (cold open, unchanged), <strong>Location — Always</strong> (needed for dwell-based auto-save and for background geofence detection to actually fire — Places population likely needed this all along; decision #26 is what finally makes it explicit rather than hand-waved as generic "location permission"), and <strong>Notifications</strong> (decision #24, the post-visit toast). Asking for all three near launch would be a permissions gauntlet the strategy never signed up for.</p>
+      <p><span class="flag">DESIGN CALL, FLAGGED</span><strong>Proposed sequence:</strong></p>
+      <ol class="steps">
+        <li><strong>Cold open:</strong> Location — When In Use only, exactly as specified above. Nothing else.</li>
+        <li><strong>First real visit</strong> — the first time the app can tell she's dwelling somewhere or has just arrived: a single <strong>in-app priming line</strong> first — plain language, something like <em>"Let Passenger notice your visits, even when it's closed?"</em> — not a system dialog yet. If she continues, two system prompts fire back to back, both explained by that one line: Location — Always, then Notifications.</li>
+        <li><strong>If she declines the priming line, or denies either system prompt:</strong> no repeated asking, ever. Manual saves keep working regardless. Auto-save, geofence-detected Places entries, and the local-QA notification simply don't happen for her — degraded, not broken, not re-prompted.</li>
+      </ol>
+      <p>This turns three scattered asks into two moments — one at launch, one contextual pair later. This is a proposal, not a confirmed sequence; see Open questions.</p>
+    </div>
   </section>
 
   <section class="block" id="journeys">
@@ -568,7 +576,7 @@
       </div>
       <ol class="jsteps">
         <li>Taps the app icon. Map renders immediately — Tel Aviv, default center, heat + tag on for "now", both categories always shown together (decision #25 — no category filter on the map itself anymore), "Tel Aviv, right now" fading in and out.</li>
-        <li>A few seconds in, the OS location sheet appears without blocking the map underneath. She taps <strong>Allow</strong> — the map animates to her real location, a "you are here" marker appears, and Visited detection starts silently in the background.</li>
+        <li>A few seconds in, the OS location sheet appears without blocking the map underneath. She taps <strong>Allow</strong> — the map animates to her real location, a "you are here" marker appears, and Places-detection can begin in its limited, When-In-Use form (the reliable background version waits on the Always upgrade).</li>
         <li>She taps a zone near her hotel, both categories mixed together in the list that opens. A bottom sheet slides up with a hand-curated blurb and a scrollable list of tagged spots — short enough (decision #12's bounded curation) that she doesn't need to narrow it by category to scan it.
           <span class="snag"><span class="k">If there's no data here</span>The sheet reads "Nobody's mapped this corner of Tel Aviv yet" instead of an empty list. She keeps browsing; nothing broke.</span>
           <span class="snag"><span class="k">Decision #25's real cost</span>If she'd wanted to narrow to just "Things to do" first, that's no longer a single tap — she'd have to open search and select the category there (Journey 5's territory), which costs more than the old always-visible chip did. This journey shows the cheaper, unfiltered default instead.</span>
@@ -614,8 +622,8 @@
         <p class="journey-who">Same resident, a few hours later, ready to actually go.</p>
       </div>
       <ol class="jsteps">
-        <li>Opens the app, taps the <strong>Saved</strong> icon.</li>
-        <li>Saved list opens; he taps the bar from Journey 2.</li>
+        <li>Opens the app, taps the <strong>Places</strong> icon — one icon now, not two (decision #26 merges Saved and Visited).</li>
+        <li>The Places list opens. The bar he saved in Journey 2 sits in it, labeled <strong>Saved</strong> — but it's not the only thing there: whatever else the app has quietly logged (a lunch spot that dwelled its way in, somewhere he merely passed near) shows up in the same list, each row carrying its own short provenance word so a deliberate choice doesn't read as identical to something that saved itself. He taps the bar.</li>
         <li>The row jumps straight to that spot's sheet, <strong>skipping the zone sheet entirely</strong> — he already chose this place.</li>
         <li>The spot sheet re-reads current data: heat may have shifted since he saved it (different hour now); the vibe tag hasn't.
           <span class="snag"><span class="k">Gap in current-hour data</span>The sheet still opens with its static info — name, category, blurb — and the heat readout says "no live data right now" rather than blocking the sheet.</span>
@@ -624,7 +632,7 @@
       </ol>
       <div class="journey-out">
         <span class="k">Outcome</span>
-        <span>Standing in front of the bar — shorter than Journey 1 on purpose. Re-finding a place you already chose shouldn't cost as much as discovering one.</span>
+        <span>Standing in front of the bar — unchanged by the merge for this path; shorter than Journey 1 on purpose, since re-finding a place you already chose shouldn't cost as much as discovering one.</span>
         <span class="cost">3 taps in-app</span>
       </div>
     </div>
@@ -635,11 +643,15 @@
         <p class="journey-title">Giving something back</p>
         <p class="journey-who">Either the tourist from Journey 1 or the resident from Journey 3, sometime after actually visiting a place.</p>
       </div>
-      <div class="snag" style="margin: 0 20px 14px;"><span class="k">Rewritten for decision #24</span>The app now comes to her, not the other way around. The old version had her opening the Visited list and finding the ask embedded in a sheet — that's gone, in any form. One ask mechanism, not two, per Aviran's explicit call. No quiet spot-sheet fallback for a missed notification; the coverage that trades away is real and named in Open questions rather than solved by bolting a second mechanism back on.</div>
+      <div class="snag" style="margin: 0 20px 14px;"><span class="k">Rewritten twice now</span>Decision #24 changed how the ask arrives, decision #26 changed what else happens at the same moment. The old version had her opening the Visited list and finding the ask embedded in a sheet — that's gone, in any form. One ask mechanism, not two, per Aviran's explicit call. No quiet spot-sheet fallback for a missed notification; the coverage that trades away is real and named in Open questions rather than solved by bolting a second mechanism back on.</div>
       <ol class="jsteps">
-        <li>The geofence monitor detects her presence at the bar from Journey 1 — unchanged, still what populates the Visited list automatically (decision #16).</li>
-        <li>Passenger fires an iOS <strong>local</strong> notification while backgrounded. If this is the first visit it's ever detected for her, firing it is preceded by a one-time system prompt for notification permission — asked right here, in context, not at cold open alongside location (decision #8 stays permission-gate-free at launch; this is V1's second permission ask, and it happens later, self-explanatory: "Passenger wants to notify you after you visit somewhere").
-          <span class="snag"><span class="k">Notification permission denied</span>No notification ever fires for her again, for any visit. The Visited list keeps populating regardless — that's location-driven, not notification-driven — but she never gets asked. A real coverage gap, named directly in Open questions rather than patched with a second ask surface.</span>
+        <li>She's at the bar from Journey 1 for a while — say, 25 minutes, a drink and something to eat. Two things happen on the strength of that alone, both automatic: the geofence confirms she's actually there, and because 25 minutes clears the dwell threshold, the bar <strong>auto-saves itself into her Places list</strong> — distinct from a plain "visited" entry, which is what a shorter stop would have logged instead.
+          <span class="snag"><span class="k">The guard, restated because it's load-bearing</span>This only happens because the bar is already a tagged spot in Passenger's own places table. Twenty-five minutes at her Airbnb or a friend's apartment triggers none of this — auto-save never touches an arbitrary coordinate.</span>
+          <span class="snag"><span class="k">If she'd left after ten minutes instead</span>The same geofence signal would have logged a plain <strong>Visited</strong> entry — present in the list, but without the more deliberate-feeling label auto-save or a manual save carries.</span>
+        </li>
+        <li><strong>Permission sequence, first time only</strong> (see Launch behavior): an in-app priming line, then two system prompts back to back — Location Always, then Notifications.
+          <span class="snag"><span class="k">Always denied</span>Background detection degrades — Places may stop reliably picking up dwell/geofence signals while the app isn't open, though everything still works in the foreground. Separate from the question below: denying Always doesn't itself stop her from being asked, it stops the app from reliably noticing in the first place.</span>
+          <span class="snag"><span class="k">Notifications denied</span>No notification ever fires for her again, for any visit. Places keeps populating regardless — that's location-driven, not notification-driven — but she never gets asked. A real coverage gap, named directly in Open questions rather than patched with a second ask surface.</span>
           <span class="snag"><span class="k">App already foregrounded</span><span class="flag">DESIGN CALL</span>If Passenger is already open when the geofence fires, the toast drops directly — no reason to route through a system notification she'd have to tap when she's already looking at the screen it would open.</span>
         </li>
         <li>She taps the notification. Passenger foregrounds to whatever it was last showing — no deep link into the spot's own sheet, since the toast carries everything needed to answer. A toast drops from the <strong>top</strong> of the screen: <em>"Does this feel like a local spot, or more of a tourist one?"</em> — <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span>. <strong>Non-blocking, not modal:</strong> sits on top of whatever's underneath, dismissible by ignoring it, auto-dismisses after a few seconds untouched — same "no modal, no interruption" rule as everywhere else in this doc, and how an iOS banner already behaves.</li>
@@ -651,7 +663,7 @@
       </ol>
       <div class="journey-out">
         <span class="k">Outcome</span>
-        <span>One data point fed back into the localness pipeline, at zero extra cost beyond a tap on a notification that arrived on its own.</span>
+        <span>One data point fed back into the localness pipeline, and the bar sits in her Places list labeled <strong>Auto-saved</strong> — at zero extra cost beyond a tap on a notification that arrived on its own.</span>
       </div>
     </div>
 
@@ -694,15 +706,15 @@
         <li>She browses anyway. The map is fully usable without location, just not personalized to where she's standing. She taps a zone.
           <span class="snag"><span class="k">Network also down</span>The sheet shows the last cached blurb and spot list with a "last updated Xm ago, offline" label rather than failing blank.</span>
         </li>
-        <li>She taps a spot and saves it — the save still completes locally and syncs once she's back online.</li>
-        <li>She checks the Visited list. <strong>Permanently empty</strong>, with an explainer ("Turn on location to build this automatically") and a Settings deep-link. Visited has no data source without location — ever, not just today. With no location, nothing gets detected, so there's nothing for Journey 4's notification to ever fire on either — the same gap explains both empty surfaces at once.</li>
-        <li><strong>If location was granted for part of this session but she's offline</strong> (the "and/or" half of this journey), a visit can still be detected and a notification can still fire — geofencing and local notifications are both on-device, not server calls. The toast still drops when she opens it; answering queues locally and syncs once she's back online, same as the save flow above.</li>
+        <li>She taps a spot and <strong>saves it manually</strong> — completes locally, syncs once she's back online. Unaffected by location being denied: a manual save was never a location feature to begin with.</li>
+        <li>She checks the <strong>Places</strong> list. The place she just manually saved is right there, labeled <strong>Saved</strong> — but that's all that's in it, and all that ever will be without location: auto-save and geofence-detected visits both depend on the exact signal Visited always needed, so with location denied, two of the list's three feed paths stay permanently empty (explainer: "Turn on location to build this automatically," Settings deep-link). The same gap explains why Journey 4's notification never fires either — nothing to detect, nothing to auto-save, nothing to ask about.</li>
+        <li><strong>If location was granted for part of this session but she's offline</strong> (the "and/or" half of this journey), a visit can still be detected, a spot can still auto-save, and a notification can still fire — geofencing, dwell detection, and local notifications are all on-device, not server calls. The toast still drops when she opens it; answering queues locally and syncs once she's back online, same as the save flow above.</li>
         <li>She taps the search icon anyway — location denial doesn't touch it (search was never location-scoped to begin with), but offline shrinks it to whatever's cached, same as Journey 5's offline path.</li>
         <li>She taps <strong>Go</strong> anyway. The hand-off to Maps/Waze still works offline — it's just handing coordinates to another app, not asking anything of Passenger's servers.</li>
       </ol>
       <div class="journey-out">
         <span class="k">Outcome</span>
-        <span>She can still browse, search, read blurbs and tags, save places, and get routed out. If location was denied outright, she also loses any chance to answer a local-QA question, since nothing was ever detected to ask about — but pure offline with location granted doesn't cost her that; the ask still arrives, it just syncs late. Nothing crashes and nothing lies to her about data being fresher than it is — that's the bar, not full feature parity.</span>
+        <span>She can still browse, search, read blurbs and tags, manually save places, and get routed out — manual save is the one Places feed path that never depends on location at all. If location was denied outright, she loses the other two feed paths and any chance to answer a local-QA question — but pure offline with location granted doesn't cost her any of that; everything still happens, it just syncs late. Nothing crashes and nothing lies to her about data being fresher than it is — that's the bar, not full feature parity.</span>
       </div>
     </div>
   </section>
@@ -715,11 +727,11 @@
     <div class="surfaces">
       <div class="surface-card">
         <h4>Map chrome</h4>
-        <p>Always on screen, never dismissed — heat and tag layers, slider, fading title, near-me button, Search/Saved/Visited icons. Category chips no longer belong here (decision #25 — they live inside the search sheet now). The neighborhood button lives here too, with one difference: it's conditionally present, only rendering at neighborhood zoom, rather than visible from any state the way the rest of this list is.</p>
+        <p>Always on screen, never dismissed — heat and tag layers, slider, fading title, near-me button, Search icon, <strong>Places icon (one icon now, not two — decision #26 merges Saved and Visited)</strong>. Category chips no longer belong here (decision #25 — they live inside the search sheet now). The neighborhood button lives here too, with one difference: it's conditionally present, only rendering at neighborhood zoom, rather than visible from any state the way the rest of this list is.</p>
       </div>
       <div class="surface-card">
         <h4>Sheets</h4>
-        <p>Partial height, swipe down or tap outside to dismiss — zone sheet, spot sheet, search sheet (now including the category chips), Saved list, Visited list.</p>
+        <p>Partial height, swipe down or tap outside to dismiss — zone sheet, spot sheet, search sheet (now including the category chips), <strong>Places list (merged, decision #26)</strong>.</p>
       </div>
       <div class="surface-card">
         <h4>The local-QA toast</h4>
@@ -735,8 +747,8 @@
 
     <div class="depth">
       <div class="lbl">Depth rule: 2 levels, no more, while inside the app</div>
-      <p>Map (0) → zone sheet (1) → spot sheet (2) is the deepest path that stays inside Passenger. Saved and Visited reach the same maximum by a shorter route, skipping the zone step because you already chose the place.</p>
-      <p><strong>Search holds at the same ceiling, but gets there two different ways</strong> depending on the result type — worth confirming rather than assuming, since it isn't the same shortcut in both directions. Search (1) → spot sheet (2), for a place-name or keyword result, matches the Saved/Visited pattern exactly — it skips the zone-tap step because the user already named what they want. Search (1) → zone sheet (2), for a neighborhood result, isn't a shortcut at all — it reaches the <em>same</em> zone sheet a direct map tap would reach at level 1, just one level deeper, because the query itself occupies level 1 first. Either way, 2 stays the ceiling.</p>
+      <p>Map (0) → zone sheet (1) → spot sheet (2) is the deepest path that stays inside Passenger. Places reaches the same maximum by a shorter route, skipping the zone step because you already chose the place.</p>
+      <p><strong>Search holds at the same ceiling, but gets there two different ways</strong> depending on the result type — worth confirming rather than assuming, since it isn't the same shortcut in both directions. Search (1) → spot sheet (2), for a place-name or keyword result, matches the Places pattern exactly — it skips the zone-tap step because the user already named what they want. Search (1) → zone sheet (2), for a neighborhood result, isn't a shortcut at all — it reaches the <em>same</em> zone sheet a direct map tap would reach at level 1, just one level deeper, because the query itself occupies level 1 first. Either way, 2 stays the ceiling.</p>
       <p>Nothing in V1 needs a third in-app level. The one feature that would have required it — <strong>Scenic View — is Phase 2</strong>, and keeping it out is exactly what holds this rule at 2 instead of 3.</p>
       <p>Dismissing any sheet always returns <strong>exactly one level up</strong>.</p>
       <p style="font-size:0.85rem; color:var(--muted);">The local-QA toast (decision #24) sits outside this rule entirely — not an exception to track, but because it was never a navigational level to begin with. It isn't reached by descending from anywhere, and dismissing it doesn't return "up" to a prior screen, since it never displaced one.</p>
@@ -748,37 +760,43 @@
     <h2>Map state &amp; density</h2>
 
     <div class="snag" style="margin-bottom:18px;">
-      <span class="k">Revised this round</span>Aviran's pushback, verbatim: <em>"how do you show tag layer on every location on the map? its gonna be too much information on one layer."</em> He was right — the previous version badged every close-zoom pin, then stacked a warning badge on top of that. Worst case (Florentin at 8pm, dozens of pins) was heat fill plus a tag badge plus sometimes a warning badge, once per pin, all at once. Rewritten below around one governing fix: <strong>tag gets the same progressive disclosure heat already has</strong>, instead of trying to render at every zoom simultaneously.
+      <span class="k">Revised this round — the fix over-corrected</span>Aviran's pushback, verbatim: <em>"how do you show tag layer on every location on the map? its gonna be too much information on one layer."</em> The last pass moved tag to neighborhood-zoom-only badges and solved the density problem — but that left tag with <strong>zero</strong> rendering at city-wide zoom, the zoom cold open actually shows, while Feature hierarchy still claimed tag was "on by default, the first thing you see," 0 taps. Aviran caught the contradiction: heat-only at cold open is the half of this product anyone already gets from Google Maps. The fix is a channel change, not a placement change — heat keeps the fill, tag moves to the zone's <strong>outline stroke</strong>, a channel nothing else was using, so it can be visible at every zoom without reopening the density problem.
     </div>
 
     <h3>Zoom levels, and where each layer actually lives</h3>
     <div class="prose">
       <ul>
-        <li><strong>City-wide</strong> — heat as neighborhood-scale blobs. <strong>No tag signal at all yet, and no pins.</strong> Badging every neighborhood in Tel Aviv at once would be the identical clutter problem one level up.</li>
-        <li><strong>Neighborhood</strong> — zone boundaries visible, heat as zone-level stepped-band fill. <strong>This is the tag layer's home.</strong> Each zone carries at most one small tag badge anchored at its centroid — Local, Tourist, or nothing (see the Mix rule below). Decision #12 bounds this at dozens of neighborhoods citywide and only a handful visible per viewport at this zoom — a legible badge count, which dozens of spot pins never were. Still no spot pins.</li>
-        <li><strong>Close</strong> — individual spot pins appear. <strong>Pins carry no tag signal at all.</strong> Heat continues exactly as it rendered at neighborhood zoom; pins exist only to mark a location and its category. Tapping a pin opens the spot sheet, where the vibe tag renders as what it always was underneath the map: a word in a sheet, not a decoration competing with dozens of others.</li>
+        <li><strong>City-wide</strong> — heat as neighborhood-scale blobs. <strong>Tag renders here now too</strong> — a zone outline stroke, but only on <strong>Local</strong> zones; Mix and Tourist stay unstroked. No word labels yet (too fine to read at this scale), no pins.</li>
+        <li><strong>Neighborhood</strong> — zone boundaries visible, heat as zone-level stepped-band fill. Outline stroke on <strong>Local or Tourist</strong> zones (Mix still unstroked), <strong>plus a word label</strong> at the centroid — the only zoom where the word appears. Still no spot pins.</li>
+        <li><strong>Close</strong> — individual spot pins appear. The zone's outline stroke persists at whatever boundary is in view (no label at this zoom). <strong>Pins themselves still carry no tag signal at all</strong> — heat continues exactly as it rendered at neighborhood zoom; pins exist only to mark a location and category, plus a ring accent for anything already in the viewer's Places list (decision #26, below). Tapping a pin opens the spot sheet, where the vibe tag renders as what it always was underneath the map: a word in a sheet, not a decoration competing with dozens of others.</li>
       </ul>
       <p><span class="flag">DESIGN CALL</span>Whether spot pins should carry tag at all was left open for me to decide. I'm calling it <strong>no, never</strong> — not "no badge, but a tag-colored pin shape instead." Even a pin whose own shape and fill encode tag still asks the eye to individually parse every pin in a crowded block one at a time; the only fix that survives Florentin at 8pm is moving spot-level tag off the map surface entirely, onto the zone sheet's list, where it's a word read one row at a time. Decision #12 still keeps spot-level localness <em>data</em> — this only changes where it <em>renders</em>. Pin anatomy, clustering, and exact labels are in the companion spec linked below.</p>
+      <p><span class="flag">DESIGN CALL</span>Why city-wide only strokes Local, not Tourist too: extends the existing Mix-is-silent discipline one level further rather than carving out an exception. A handful of green pockets across the city is a glance; a fully outlined city in two colors is a map you have to parse. It also lines up with what "busy" even means at that scale — heat itself is only coarse blobs at city-wide, not the zone-level precision the busy+Tourist warning needs, so that warning has no coherent city-wide granularity to begin with. City-wide becomes a map of where to trust, matching the north star's actual question, not a map of every liability too.</p>
     </div>
 
     <h3>Slider hours</h3>
     <div class="prose">
-      <p>Unchanged by any of this — heat is the only time-variant layer, tag isn't, so a zone's tag badge never moves when the slider does, regardless of which granularity it's currently rendering at.</p>
+      <p>Unchanged by any of this — heat is the only time-variant layer, tag isn't, so a zone's tag stroke never moves when the slider does, regardless of which granularity it's currently rendering at.</p>
     </div>
 
-    <h3>Mix renders no badge, ever, at any granularity</h3>
+    <h3>Mix renders nothing — no stroke, no label — at any granularity</h3>
     <div class="prose">
-      <p>With three tags, Mix is the unmarked middle and almost certainly the most common single value — badging it would be pure clutter carrying zero information. A zone badge only ever appears for <span class="tag-chip tag-local">Local</span> or <span class="tag-chip tag-tourist">Tourist</span>; a blank zone reads as Mix. <span class="flag">DESIGN CALL</span>A zone with no curated data yet also renders blank, identically — the map surface doesn't try to distinguish "confidently Mix" from "not yet rated," and that's an accepted trade-off: tapping in always resolves which one it is, the same way every other empty state in this doc resolves "no data here" on contact rather than pre-announcing it on the map.</p>
+      <p>With three tags, Mix is the unmarked middle and almost certainly the most common single value — marking it would be pure clutter carrying zero information. A zone gets a stroke only for <span class="tag-chip tag-local">Local</span> or <span class="tag-chip tag-tourist">Tourist</span>; a blank zone reads as Mix. <span class="flag">DESIGN CALL</span>A zone with no curated data yet also renders blank, identically — the map surface doesn't try to distinguish "confidently Mix" from "not yet rated," and that's an accepted trade-off: tapping in always resolves which one it is, the same way every other empty state in this doc resolves "no data here" on contact rather than pre-announcing it on the map.</p>
     </div>
 
     <h3>The packed + touristy trap — replace, don't stack</h3>
     <div class="prose">
-      <p>A zone that's simultaneously busy and Tourist-tagged doesn't get two decorations — it gets <strong>one badge, in a distinct warning form, replacing the plain Tourist badge outright.</strong> Never two elements competing for the same handful of square millimeters (Von Restorff: only one "special" element per view). Busy + <span class="tag-chip tag-local">Local</span> still never gets a warning treatment of any kind — the absence stays legible precisely because the warning exists for the other case, and that logic survives the move to zone granularity unchanged. The "very local but temporarily busy" case holds too: heat is time-variant, tag isn't, so a Local-tagged zone spiking busy at 9pm reads as "busy AND local," never as evidence it turned touristy.</p>
+      <p>A zone that's simultaneously busy and Tourist-tagged doesn't get two decorations — it gets <strong>one stroke treatment, in a distinct warning form, replacing the plain Tourist stroke outright</strong> (and the label reflects it, at neighborhood zoom). Never two elements competing for the same handful of square millimeters (Von Restorff: only one "special" element per view). Busy + <span class="tag-chip tag-local">Local</span> still never gets a warning treatment of any kind — the absence stays legible precisely because the warning exists for the other case, and that logic survives the move to zone granularity unchanged. The "very local but temporarily busy" case holds too: heat is time-variant, tag isn't, so a Local-tagged zone spiking busy at 9pm reads as "busy AND local," never as evidence it turned touristy.</p>
+    </div>
+
+    <h3>Personal places on the map (decision #26)</h3>
+    <div class="prose">
+      <p>A place already in the viewer's Places list gets a ring accent on its pin at close zoom — binary (yours or not), not a three-way encoding of manual/auto/visited the way the list itself shows; that nuance stays list-only, on purpose, so the map doesn't reopen the exact density mistake tag-per-pin was. Safe at a scale tag-per-pin never was, because it's bounded by one person's own history, not by the city's spot count. Full reasoning and the exact rendering rule are in <code>design/map-rendering-spec.md</code>.</p>
     </div>
 
     <div class="surface-card" style="margin-bottom:18px;">
       <h4>Pin anatomy, clustering &amp; accessibility labels</h4>
-      <p>Specified in the companion doc, not here — that level of rendering detail would bloat a flows document: <code>design/map-rendering-spec.md</code> <span style="color:var(--muted); font-size:0.82rem;">(markdown only, no reading-view twin)</span>. What belongs here is the structural fact that governs it: the busy+Tourist warning and the Mix-is-silent rule both now live at zone badges, not spot pins.</p>
+      <p>Specified in the companion doc, not here — that level of rendering detail would bloat a flows document: <code>design/map-rendering-spec.md</code> <span style="color:var(--muted); font-size:0.82rem;">(markdown only, no reading-view twin)</span>. What belongs here is the structural fact that governs it: the busy+Tourist warning and the Mix-is-silent rule both live at the zone's stroke, not spot pins.</p>
     </div>
 
     <h3>Search results and the map — a real design call, unaffected by the tag-density fix above</h3>
@@ -804,7 +822,7 @@
         <div class="chain">
           <span class="node">Tap app icon</span>
           <span class="arrow">→</span>
-          <span class="node pri">Map renders<span class="sub">Tel Aviv, now, heat + tag</span></span>
+          <span class="node pri">Map renders<span class="sub">Tel Aviv, now, heat fill + tag stroke, city-wide</span></span>
           <span class="arrow">→</span>
           <span class="node">Location permission<span class="sub">lazy, non-blocking</span></span>
         </div>
@@ -813,7 +831,7 @@
         <div class="chain">
           <span class="node ter">granted</span>
           <span class="arrow">→</span>
-          <span class="node">Recenter on user<span class="sub">Visited detection starts</span></span>
+          <span class="node">Recenter on user<span class="sub">Places detection starts</span></span>
           <span class="arrow">→</span>
           <span class="node term">Steady state</span>
         </div>
@@ -828,14 +846,13 @@
         </div>
       </div>
 
-      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, seven things are reachable without leaving the map — category chips no longer among them, since decision #25 moved them inside search:</p>
+      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, six things are reachable without leaving the map — category chips no longer among them (decision #25), Saved and Visited merged into one (decision #26):</p>
       <div class="fan">
         <span class="node sec">Tap a zone shape<span class="sub">→ zone sheet</span></span>
         <span class="node pri">Neighborhood button<span class="sub">→ zone sheet · neighborhood zoom only</span></span>
         <span class="node sec">Tap a spot pin<span class="sub">→ spot sheet</span></span>
         <span class="node pri">Drag slider<span class="sub">heat redraws</span></span>
-        <span class="node ter">Saved<span class="sub">→ spot sheet</span></span>
-        <span class="node ter">Visited<span class="sub">→ spot sheet</span></span>
+        <span class="node ter">Places<span class="sub">→ spot sheet · manual/auto/visited merged</span></span>
         <span class="node sec">Search<span class="sub">→ spot or zone sheet, or category browse</span></span>
       </div>
       <p style="font-size:0.8rem; color:var(--muted); margin-top:6px;">Zone shape, neighborhood button, and a search neighborhood result are three doors into the same zone sheet — none of them a different destination.</p>
@@ -868,13 +885,29 @@
       </div>
     </div>
 
-    <h3>Post-visit local-QA <span style="font-weight:500; color:var(--muted); font-size:0.85rem;">(async — not part of the flow above)</span></h3>
+    <h3>Post-visit local-QA and auto-save <span style="font-weight:500; color:var(--muted); font-size:0.85rem;">(async — not part of the flow above)</span></h3>
     <div class="diagram">
       <div class="dgm-scroll">
         <div class="chain">
-          <span class="node">Geofence detects a visit</span>
+          <span class="node">Geofence + dwell timer running</span>
           <span class="arrow">→</span>
-          <span class="node ter">First time?<span class="sub">ask notification permission in context</span></span>
+          <span class="node ter">Dwell ≥ 20 min<span class="sub">at a tagged spot?</span></span>
+          <span class="arrow">→</span>
+          <span class="node pri">Auto-saves into Places<span class="sub">guard: tagged spots only</span></span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node ter">Dwell &lt; 20 min<span class="sub">but present</span></span>
+          <span class="arrow">→</span>
+          <span class="node">Logs as Visited in Places</span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node">Either path</span>
+          <span class="arrow">→</span>
+          <span class="node ter">First time?<span class="sub">priming card, then ask notification permission</span></span>
           <span class="arrow">→</span>
           <span class="node">Local notification fires<span class="sub">if granted — else never, for any visit</span></span>
         </div>
@@ -890,12 +923,43 @@
       </div>
     </div>
 
+    <h3>Permission sequence <span style="font-weight:500; color:var(--muted); font-size:0.85rem;">— two moments, not three scattered asks</span></h3>
+    <div class="diagram">
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node">Cold open</span>
+          <span class="arrow">→</span>
+          <span class="node pri">Location — When In Use<span class="sub">lazy, decision #8</span></span>
+          <span class="arrow">→</span>
+          <span class="node">Normal use, any length</span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node ter">First real visit<span class="sub">Passenger can notice</span></span>
+          <span class="arrow">→</span>
+          <span class="node">In-app priming line<span class="sub">"Let Passenger notice your visits?"</span></span>
+          <span class="arrow">→</span>
+          <span class="node pri">Location — Always</span>
+          <span class="arrow">→</span>
+          <span class="node pri">Notifications</span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node exit">Decline / deny either</span>
+          <span class="arrow">→</span>
+          <span class="node term">Manual save still works.<span class="sub">No auto-save, no Visited, no QA toast.</span></span>
+        </div>
+      </div>
+    </div>
+
     <h3>Hierarchy &amp; navigation tree</h3>
     <div class="diagram">
       <div class="dgm-scroll">
         <div class="tree">
           <div class="tree-row">
-            <span class="node pri">MAP — Primary<span class="sub">heat (all zooms) + tag (zone badges only) · slider · title · near-me — no chips (decision #25) &nbsp;|&nbsp; 0 taps</span></span>
+            <span class="node pri">MAP — Primary<span class="sub">heat fill (all zooms) + tag stroke (all zooms) · slider · title · near-me — no chips (decision #25) &nbsp;|&nbsp; 0 taps</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">├─</span>
@@ -903,7 +967,7 @@
           </div>
           <div class="tree-row">
             <span class="rail">&nbsp; &nbsp;└─</span>
-            <span class="node sec">Spot sheet — Secondary<span class="sub">1–2 taps · deepest in-app level</span></span>
+            <span class="node sec">Spot sheet — Secondary<span class="sub">1–2 taps · deepest in-app level · ring accent on pin if already in Places</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">&nbsp; &nbsp; &nbsp; &nbsp;└─</span>
@@ -919,23 +983,19 @@
           </div>
           <div class="tree-row">
             <span class="rail">├─</span>
-            <span class="node ter">Saved list — Tertiary<span class="sub">1 tap · jumps straight to spot sheet</span></span>
-          </div>
-          <div class="tree-row">
-            <span class="rail">├─</span>
-            <span class="node ter">Visited list — Tertiary<span class="sub">1 tap · read-only, auto-populated</span></span>
+            <span class="node ter">Places — Tertiary<span class="sub">1 tap · merged Saved+Visited (decision #26) · manual/auto-save/geofence</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">&nbsp; &nbsp;└╌╌</span>
-            <span class="node ter">Local-QA toast — Tertiary<span class="sub">push-triggered, not navigated to · decision #24</span></span>
+            <span class="node ter">Local-QA toast — Tertiary<span class="sub">push-triggered off geofence+dwell, not navigated to · decision #24</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">├─</span>
-            <span class="node ter">Location permission — Tertiary<span class="sub">system sheet · 0–1 tap</span></span>
+            <span class="node ter">Location permission — Tertiary<span class="sub">When In Use at launch, Always upgrade at first real visit</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">└─</span>
-            <span class="node ter">Notification permission — Tertiary<span class="sub">system sheet · asked in-context on first detected visit</span></span>
+            <span class="node ter">Notification permission — Tertiary<span class="sub">system sheet, bundled with the Always upgrade</span></span>
           </div>
         </div>
       </div>
@@ -983,9 +1043,9 @@
         <span class="parked-body">A gesture-triggered action roughly parallel to the spot sheet — a random-suggestion overlay fired by a device gesture instead of a tap. Purely additive.</span>
       </div>
       <div class="parked-item">
-        <span class="parked-tier">Phase 3 · Tertiary</span>
-        <span class="parked-name">Auto-saved places</span>
-        <span class="parked-body">Extends the save step in Journey 2 with an automatic trigger (dwell ≥ 20 min). No new surface — Saved gains an automatic path alongside the manual one.</span>
+        <span class="parked-tier">Pulled into V1</span>
+        <span class="parked-name"><del>Auto-saved places</del></span>
+        <span class="parked-body"><strong>No longer parked — decision #26 pulls this into V1.</strong> It's one of the three feed paths into the merged Places list now (Feature hierarchy, Journey 4). Left here only as a marker that this row used to exist.</span>
       </div>
       <div class="parked-item">
         <span class="parked-tier">Phase 3 · Tertiary</span>
@@ -1003,14 +1063,14 @@
       <li>
         <span class="qn">Q1</span>
         <span class="qt">Local-QA notification cadence — revisited for a push mechanic, where tolerance is much lower</span>
-        <p>My old recommendation ("roughly once per session") doesn't translate — a notification isn't session-bound, and firing one on every detected visit will burn goodwill fast.</p>
-        <p class="rec"><b>Recommendation:</b> cap at one local-QA notification per day, full stop, regardless of how many visits are detected that day, and only trigger it for visits that clear a minimum dwell-time threshold (someone who passed by isn't someone who visited). Exact threshold is a data/build question, not a UX one — see Q9.</p>
+        <p>My old recommendation ("roughly once per session") doesn't translate — a notification isn't session-bound, and firing one on every detected visit will burn goodwill fast. Decision #26 now gives auto-save an explicit number — 20 minutes — for a related-but-not-identical purpose (worth saving vs. worth asking about).</p>
+        <p class="rec"><b>Recommendation:</b> cap at one local-QA notification per day, full stop, regardless of how many visits are detected that day, and default to reusing the same 20-minute dwell threshold rather than maintaining two separate numbers with no obvious reason to differ — see Q9 if asking should have a stricter bar than saving.</p>
       </li>
       <li>
         <span class="qn">Q2</span>
         <span class="qt">Lazy location permission — exact trigger</span>
         <p>Decision #8 says "lazy," but not whether that's an automatic system prompt shortly after the map renders, or only on the first tap of near-me.</p>
-        <p class="rec"><b>Recommendation:</b> auto-prompt once, softly, a couple of seconds after the map first renders. Starts Visited tracking as early as possible without blocking the first look at the map.</p>
+        <p class="rec"><b>Recommendation:</b> auto-prompt once, softly, a couple of seconds after the map first renders. Starts Places-tracking (in its limited When-In-Use form) as early as possible without blocking the first look at the map.</p>
       </li>
       <li>
         <span class="qn">Q3</span>
@@ -1019,15 +1079,15 @@
       </li>
       <li>
         <span class="qn">Q4</span>
-        <span class="qt">Visited detection during the hand-off — now also gates whether the local-QA notification can fire at all</span>
-        <p>V1's Visited list, and now the notification in decision #24, both depend entirely on the geofence monitor catching a visit while Passenger is backgrounded — the user is inside Maps/Waze, not Passenger, at the exact moment they arrive. Does iOS reliably keep background location running through that hand-off, or does exiting the app risk losing the one signal both features depend on?</p>
-        <p class="rec"><b>Recommendation:</b> confirm background-location behavior with the architect before treating either Visited's automatic-only design or the notification trigger as settled — if it's shaky, both need a fallback conversation, not just Visited.</p>
+        <span class="qt">Background-location reliability — now load-bearing for three things, not one, and it needs "Always," not "When In Use"</span>
+        <p>Places population, the dwell-based auto-save trigger, and the local-QA notification all depend on the geofence/dwell monitor running while Passenger is backgrounded. Does iOS reliably keep Always-level background location running through a Maps/Waze hand-off and the walk that follows, or does backgrounding risk losing the signal all three features depend on?</p>
+        <p class="rec"><b>Recommendation:</b> confirm this with the architect before treating any of Places' automatic paths (decision #26), the notification trigger (decision #24), or the old Visited-only design (decision #16, now superseded) as settled — if Always-level tracking is shaky, all three need a fallback conversation, not just one of them.</p>
       </li>
       <li>
         <span class="qn">Q5</span>
-        <span class="qt">Does the busy + Tourist warning badge (now zone-level) need its own VoiceOver label?</span>
-        <p>It's a display-time computation, not a stored tag, so it won't inherit whatever label the plain Tourist badge already carries.</p>
-        <p class="rec"><b>Recommendation:</b> give it an explicit label — "busy and touristy, worth a second look" — rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred. This now has a sharper edge: the Mix-is-silent rule means a sighted user reads "no badge" as Mix, but VoiceOver can't read an absence — resolved in full in <code>design/map-rendering-spec.md</code>'s accessibility section, kept coherent with this question rather than answered twice.</p>
+        <span class="qt">Does the busy + Tourist warning stroke (zone-level) need its own VoiceOver label?</span>
+        <p>It's a display-time computation, not a stored tag, so it won't inherit whatever label the plain Tourist stroke already carries.</p>
+        <p class="rec"><b>Recommendation:</b> give it an explicit label — "busy and touristy, worth a second look" — rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred. This now has a sharper edge: the Mix-is-silent rule means a sighted user reads "no stroke" as Mix, but VoiceOver can't read an absence — resolved in full in <code>design/map-rendering-spec.md</code>'s accessibility section, kept coherent with this question rather than answered twice.</p>
       </li>
       <li>
         <span class="qn">Q6</span>
@@ -1049,8 +1109,20 @@
       </li>
       <li>
         <span class="qn">Q9</span>
-        <span class="qt">Exact dwell-time threshold for triggering the local-QA notification</span>
-        <p>Referenced in Q1 but not a UX call — needs data-engineer/architect input on what dwell time reliably distinguishes "visited" from "walked past," and whether that threshold is the same one Visited-list population itself uses or a separate, possibly stricter one — a notification is a much bigger interruption than quietly adding a row to a list.</p>
+        <span class="qt">Should the local-QA notification reuse decision #26's 20-minute auto-save threshold, or need its own?</span>
+        <p>Q1's refined recommendation defaults to reusing it. The case for a separate, stricter number: a push notification is a bigger interruption than quietly adding a row to a list, so "worth asking about" could reasonably demand more than "worth saving." Needs data-engineer/architect input either way, not a pure UX call.</p>
+      </li>
+      <li>
+        <span class="qn">Q10</span>
+        <span class="qt">Permission sequence — flagged hard, per the instruction that came with decision #26</span>
+        <p>V1 now needs three system permissions (Location When-In-Use, Location Always, Notifications) for a product whose decision #8 explicitly rules out a permission gate at launch. Launch behavior proposes a concrete ordering — one prompt at cold open, then a single in-app priming line before Always and Notifications fire back to back at the first real visit — but it's a proposal, not a confirmed sequence.</p>
+        <p class="rec"><b>Recommendation:</b> confirm the proposed ordering, or replace it, before this becomes a build spec — don't let three unordered permission asks reach <code>ios-developer</code> by default.</p>
+      </li>
+      <li>
+        <span class="qn">Q11</span>
+        <span class="qt">The merged Places list's name and provenance display — recorded open on decision #26, and I'm proposing rather than leaving blank</span>
+        <p>Name: <strong>"Places."</strong> Provenance: a short word per row — <strong>Saved / Auto-saved / Visited</strong> — with manual save always winning the displayed label if it ever applies to a place, auto-save next, plain Visited last, so a place never shows two conflicting explanations for why it's in the list.</p>
+        <p class="rec"><b>Recommendation:</b> confirm both, or overrule either — everything in Feature hierarchy, Journeys 3–4, and <code>design/map-rendering-spec.md</code> is written against this proposal, so a change here is a find-and-replace, not a redesign.</p>
       </li>
     </ol>
   </section>
