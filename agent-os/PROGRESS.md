@@ -13,6 +13,14 @@ Entry format:
 
 ---
 
+### 2026-07-27 — designer — UX flows doc revised: conflict resolved, restructured around journeys
+
+- **Did:** Rewrote `design/ux-flows.md` per Aviran's resolution of the prior entry's flagged conflict, relayed by the coordinator. Settled as fact: three vibe tags (Local · Mix · Tourist, no dedicated "tourist trap" tag), Scenic View moved to Phase 2 (V1's "Go" hands off to native Maps/Waze and exits the app), Live Events moved to Phase 2 (V1 map is heat + tag only). Deleted the conflict-banner section and all "committed vs. briefed" hedging entirely — the doc now reads as settled. Restructured §4 from 8 disconnected micro-flows into 5 end-to-end journeys (just landed → hand-off; resident planning with the slider; returning to a saved place; giving back a local-QA answer; the full degraded run under denied-location/offline) with unhappy paths embedded at the step where they bite. Updated: Secondary tier (Scenic View removed, now just zone sheet + spot sheet), depth rule (2 levels inside the app, not 3 — "Go" is an exit, not a level), §6's packed+touristy legibility treatment (now load-bearing since no tag names the worst case — added a display-time-only warning badge for busy+Tourist as a `[design call]`), both mermaid diagrams, and §8 (Scenic View and Events now written up as Phase 2 parked candidates, with what each would displace). Dropped the conflict question from §9; added two new ones (Visited-detection reliability during a Maps/Waze hand-off; VoiceOver labeling for the new computed warning badge).
+- **Evidence:** File at `design/ux-flows.md`, fully rewritten. Grepped for residual "conflict"/"committed strategy"/"tourist trap"/"five vibe" references post-edit — none found outside one intentional "very local but temporarily busy" scenario description.
+- **Left behind:** Section 8 notes the Scenic View depth question (full turn-by-turn vs. route-preview-then-handoff) is still open but is now a Phase 2 scoping question, not a V1 blocker — flagged there instead of in §9. Five open questions remain in §9 for Aviran, two of them new to this revision.
+
+---
+
 ### 2026-07-27 — designer — UX flows doc for Passenger V1
 
 - **Did:** Wrote `design/ux-flows.md` at Aviran's direct request — flow, feature hierarchy (primary/secondary/tertiary with reasoning + tap-cost from cold open), primary flow (first launch vs. subsequent), 8 numbered secondary flows with unhappy paths, navigation model + depth rule, map state/density behavior (including the packed+touristy legibility problem), 2 mermaid diagrams, Phase 2/3 placement, and 5 open questions for Aviran. Not a per-feature spec — no PRD-traceability table or mockup link, since `prds/INDEX.md` is still empty.
