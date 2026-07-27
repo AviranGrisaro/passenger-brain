@@ -2,6 +2,8 @@
 
 **Date:** 2026-07-27 · **Author:** competitive-brief pass (Claude) · **Status:** first pass, no prior analysis existed in `competitors/`
 
+**Companion:** [Apple Maps and Snap Map deep dive](2026-07-27-apple-snap-deep-dive.md) — the two threats this brief underweighted. It confirms with sources that Apple Maps ads launch summer 2026 (US/Canada, including inside Suggested Places), which makes the "incumbents are commercially blocked from a tourist-trap label" argument sourced rather than inferred, and it finds that Snap already holds the inputs to compute locals-vs-visitors per venue.
+
 **Scope assumptions** — no scoping conversation happened, so this brief runs broad by default:
 - **Competitors:** the full set, not one named rival. Direct real-time-density apps, the map platforms, the localness/anti-tourist-trap category, and the actual status quo (TikTok + Google Maps saved lists).
 - **Focus:** product and positioning. Pricing is thin because Phase 1 ships free and most of the field is free or creator-monetized.
