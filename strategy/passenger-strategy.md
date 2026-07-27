@@ -32,10 +32,10 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - One map. Two orthogonal layers: **heat** (crowd density) and **tag** (localness) — never one blended score.
 - Time slider, now → +12 hours. A place's relevance changes by the hour; the map knows that.
 - Three vibe tags, plain language, no scores: **Local** (trust it) · **Mix** · **Tourist**. There's no separate "tourist trap" tag — packed-and-touristy is what to avoid, and it reads off the two layers together rather than needing a label of its own.
-- Two categories: Food & drinks, Things to do.
+- Two categories: Food & drinks, Things to do — selected inside the search sheet, not from permanent chrome on the map (decision #25).
 - Tap a zone → hand-curated neighborhood blurb + tagged spots. Tap a spot → hands off to native Maps/Waze for directions. No in-app routing in V1; Scenic View is a Phase 2 candidate.
 - No onboarding. Straight to the map + location permission.
-- **Localness is decided by algorithm plus local QA, together.** The algorithm proposes; real users, asked in-app whether a spot is actually local, verify and correct it — crowdsourced from the user base, not a hired/managed team. That combination is the permanent pipeline — not hand-curation alone, waiting for an algorithm to someday replace it solo. Two open risks this trades in for the staffing risk it removes: **cold start** (a new city has no users yet to ask, on day one) and **incentive** (no reward system exists in V1 to make anyone bother answering — see Phase 3's points system, and the risk that creates).
+- **Localness is decided by algorithm plus local QA, together.** The algorithm proposes; real users, asked in-app whether a spot is actually local, verify and correct it — crowdsourced from the user base, not a hired/managed team. That combination is the permanent pipeline — not hand-curation alone, waiting for an algorithm to someday replace it solo. **The ask is triggered by a detected visit** — when the geofence logs that someone was actually somewhere, a local notification fires and a toast drops from the top of the screen asking whether the place felt local or touristy (decision #24). Asked while the visit is fresh, from someone who was genuinely there. Two open risks this trades in for the staffing risk it removes: **cold start** (a new city has no users yet to ask, on day one) and **incentive** (no reward system exists in V1 to make anyone bother answering — see Phase 3's points system, and the risk that creates).
 - **Density is a synthetic feed for now**, time-bound to the slider hour, while a live popular-times data source is evaluated separately.
 - Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.
 - Saved places and Visited places — kept, core. No Events overlay in V1; that's a Phase 2 candidate. The V1 map is heat + tag, and nothing else.
@@ -93,7 +93,7 @@ Freemium: core map free forever, subscription unlocks premium features on top.
 
 Subscription launches in Phase 2, alongside proximity intelligence and marketing spend. The free core doesn't change.
 
-**Why freemium over a hard paywall:** V1 has no retention mechanics yet — no push, no habit loop, nothing pulling someone back daily. Betting Phase 2 revenue on "residents will open this weekly" stakes the whole plan on an unproven assumption. Freemium defers that bet — free core proves reach immediately, subscription only has to work on people who already show up.
+**Why freemium over a hard paywall:** V1 still has no habit loop — nothing pulling someone back daily. The one notification it sends (decision #24) fires after a visit the user already made, asking a question that helps the map; it isn't a re-engagement mechanic and shouldn't be counted as one. Betting Phase 2 revenue on "residents will open this weekly" stakes the whole plan on an unproven assumption. Freemium defers that bet — free core proves reach immediately, subscription only has to work on people who already show up.
 
 **[ASSUMPTION]** Whether the premium layer is actually worth paying for is unproven — a thin premium tier risks nobody upgrading and the free tier absorbing everyone.
 
