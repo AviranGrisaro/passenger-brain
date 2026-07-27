@@ -3,7 +3,7 @@
 **Owner:** designer (drafted for Aviran)
 **Date:** 2026-07-27
 **Status:** Draft — awaiting Aviran's read
-**Source:** `strategy/passenger-strategy.md` (2026-07-27) + `strategy/decisions.md` (decisions 18–23, 2026-07-27)
+**Source:** `strategy/passenger-strategy.md` (2026-07-27) + `strategy/decisions.md` (decisions 18–25, 2026-07-27)
 **Document type:** cross-feature UX flows reference. This is not a per-feature design spec — it doesn't carry a PRD-traceability table or a high-fidelity mockup link, because no PRD exists yet to trace against (`prds/INDEX.md` is empty). Once `product` writes the six V1 PRDs this doc predicts, each gets its own spec under `design/<phase-slug>/` that does carry those.
 
 ---
@@ -20,6 +20,8 @@ Passenger is one map. You open the app and you're looking at Tel Aviv, right now
 
 ### Primary — permanently on the map, unavoidable
 
+**This list is short, and got shorter again this round.** Category chips (decision #25, overriding my own earlier flagged call — see Secondary below) are the second thing to leave permanent map chrome after spot-level tag badges left it last round. What's actually left, permanently, on the map: the map itself, heat, tag (at zone granularity only), the fading title, the slider, and the near-me button — plus the neighborhood button, conditionally. Six things, one of them conditional. That's it.
+
 | Item | What it is | Why Primary | Cost |
 |---|---|---|---|
 | The map | Tel Aviv, MapKit, always the base layer | It's the whole product — strategy: "one map, and the whole product lives on it" | 0 |
@@ -27,9 +29,10 @@ Passenger is one map. You open the app and you're looking at Tel Aviv, right now
 | Tag layer | Localness accent, three plain-language values: **Local · Mix · Tourist** | On by default, orthogonal to heat, never blended. Heat + tag is the entire V1 map — two layers, exactly as the north star describes. **Renders at whatever granularity is legible per zoom, not everywhere at once — see §6, revised after Aviran's pushback on badge density.** | 0 |
 | "Tel Aviv, right now" title | Fading ambient label on cold open | Decision #8, verbatim | 0 |
 | Time slider | Now → +12h control, bottom-third (thumb zone) | **My call, flagged.** Permanently visible, never dismissed, reshapes the primary view — Primary-chrome behavior, not a sheet you invoke. | 0 to see, 1 drag to change |
-| Category chips (Food & drinks / Things to do) | Persistent filter toggle | **Same call as above, same flag.** Always-visible chrome, not an invoked sheet. | 0 to see, 1 tap to change |
 | Location/"near me" button | Recenter affordance | Persistent icon, part of map chrome | 0 to see, 1 tap to use |
-| Neighborhood button ("See all of [Neighborhood]") | Explicit, Bump-inspired affordance naming the dominant zone in view; a second, more reliable door into the same zone sheet a polygon tap already opens | **My call, flagged.** Map-surface chrome, not a sheet, so it belongs with Primary by construction — but it's the first *conditional* Primary item in this doc: visible only at neighborhood zoom, when one zone dominates the viewport, not from anywhere the way the slider or chips are. It exists because a loosely-bounded polygon is an unreliable, hard-to-discover tap target (Fitts's Law: a big, unambiguous target beats an edge you have to find) — tapping the zone shape still works, this is a second door to the same place. | 0 to see at neighborhood zoom, 1 tap to use |
+| Neighborhood button ("See all of [Neighborhood]") | Explicit, Bump-inspired affordance naming the dominant zone in view; a second, more reliable door into the same zone sheet a polygon tap already opens | **My call, flagged.** Map-surface chrome, not a sheet, so it belongs with Primary by construction — but it's the first *conditional* Primary item in this doc: visible only at neighborhood zoom, when one zone dominates the viewport, not from anywhere the way the slider or near-me button are. It exists because a loosely-bounded polygon is an unreliable, hard-to-discover tap target (Fitts's Law: a big, unambiguous target beats an edge you have to find) — tapping the zone shape still works, this is a second door to the same place. | 0 to see at neighborhood zoom, 1 tap to use |
+
+~~Category chips (Food & drinks / Things to do)~~ — **moved to Secondary, inside the search sheet (decision #25).** This directly overrides my own earlier call, flagged twice, that chips belonged in Primary chrome. Aviran's override, not re-argued here — see the Secondary table below for where they live now and what changes.
 
 ### Secondary — invoked from the map
 
@@ -39,7 +42,7 @@ Lighter than it might otherwise be: V1 hands off to native Maps/Waze at the mome
 |---|---|---|---|
 | Zone sheet | Neighborhood blurb + tagged spot list | Requires a tap on a zone shape *or* the neighborhood button when one's showing — two doors, same destination; bottom sheet, map stays visible behind it | 1 tap |
 | Spot sheet | Name, category, vibe tag, save icon, "Go" button | One level under a zone sheet, or reachable directly from a close-zoom map pin. **"Go" hands off to native Maps/Waze — an exit from Passenger, not a screen inside it.** | 1–2 taps |
-| Search sheet | Query field matching place names, keywords, and neighborhoods; opened from an icon in map chrome | **Secondary, not Primary — Aviran's explicit call, and the reasoning matters:** a permanent search bar sitting in front of a product whose whole pitch is "you don't need to ask" undercuts that pitch. One tap away, gone when you're done, keeps the map itself as the thing you look at rather than a results page waiting for a query. | 1 tap |
+| Search sheet | Query field matching place names, keywords, and neighborhoods, **plus the two category chips (Food & drinks / Things to do) — the only place either now lives (decision #25)**; opened from an icon in map chrome | **Secondary, not Primary — Aviran's explicit call, and the reasoning matters:** a permanent search bar sitting in front of a product whose whole pitch is "you don't need to ask" undercuts that pitch. One tap away, gone when you're done, keeps the map itself as the thing you look at rather than a results page waiting for a query. Folding the category chips in here is the same reasoning applied a second time: one fewer permanent control competing for space on the map. | 1 tap |
 
 ### Tertiary — opt-in, low-frequency, doesn't block the core loop
 
@@ -47,7 +50,7 @@ Lighter than it might otherwise be: V1 hands off to native Maps/Waze at the mome
 |---|---|---|---|
 | Saved places | List of places you bookmarked | Deliberately sought out, not part of the glance-and-go loop | 1 tap (floating icon) |
 | Visited places | List of places the app detected you near | Same reasoning; also read-only in V1 — see Journey 4 | 1 tap (floating icon) |
-| Local-QA answering | Contextual micro-prompt asking if a spot is actually local | **My call, flagged.** Surfaces *inside* a Secondary surface (the spot sheet), but carries no primary value to the person answering — pure goodwill, skippable, no incentive layer until Phase 3's points system. Tiered by importance-to-the-user, not by where it physically renders. | 0 extra taps to see (embedded), 1 tap to answer |
+| Local-QA answering | **Rewritten for decision #24, not patched.** A post-visit toast, not an embedded card: the geofence detects a visit, a local notification fires while Passenger is backgrounded, opening it drops a non-blocking toast from the top of the screen — same three words, Local / Mix / Tourist | **Still Tertiary, but the reasoning changed underneath it.** It used to be Tertiary because it rendered inside a Secondary surface with no primary value to the answerer. It no longer renders inside anything — it's an unprompted interruption that arrives on its own. It stays Tertiary anyway, now purely on importance-to-the-user grounds: still pure goodwill, still skippable by ignoring the notification entirely, still no incentive layer until Phase 3's points system. Tiering by consequence-to-the-user rather than by delivery mechanism is the more durable rule anyway — see Journey 4 for the full flow, and §9 for the two real costs (a second permission prompt, and V1's first notification) this trades in. | Doesn't have a cold-open tap cost the way everything else in this table does — it's the first push-triggered surface in this doc, arriving independent of anything the user navigates to. Once it fires: 1 tap to open the notification, 1 tap (or ignore) to answer. |
 | Location permission | System permission sheet + in-app fallback copy if denied | One-time, OS-owned, not app chrome | 0 (auto-triggered) or 1 (via "near me") |
 | Settings-ish surfaces | — | **None exist in V1.** No account, no preferences, no toggles beyond what's already Primary chrome. | n/a |
 
@@ -58,11 +61,11 @@ Lighter than it might otherwise be: V1 hands off to native Maps/Waze at the mome
 ### First launch ever
 
 1. **Tap the app icon.** No splash screen, no onboarding carousel (`BOARD.md` scope gate: "No onboarding — the app opens straight to the map plus location permission").
-2. **Map renders immediately** — Tel Aviv, default city-wide center **[design call: exact default coordinate is a build detail, not a UX one]**, heat layer for "now," tag accents visible, both categories shown combined, slider at "now" (leftmost), "Tel Aviv, right now" title fades in and out over ~2 seconds.
+2. **Map renders immediately** — Tel Aviv, default city-wide center **[design call: exact default coordinate is a build detail, not a UX one]**, heat layer for "now," tag accents visible, both categories always shown together since there's no category filter outside the search sheet (decision #25), slider at "now" (leftmost), "Tel Aviv, right now" title fades in and out over ~2 seconds.
 3. **Location permission prompts lazily** — the OS system sheet, not a custom in-app screen (decision #8: "no permission gate; lazy location"). It does not block map interaction.
    - **Granted:** map animates to the user's real location, a "you are here" marker appears, background Visited-detection starts silently (decision #16).
    - **Denied:** map stays at the default city-wide center — full treatment in Journey 6.
-4. **User is free to explore** — pan, zoom (pinch-to-zoom never suppressed), drag the slider, toggle a category, tap a zone or a spot. This is the steady state almost every session lives in.
+4. **User is free to explore** — pan, zoom (pinch-to-zoom never suppressed), drag the slider, tap a zone or a spot, open search if she wants to narrow by category or find something specific. This is the steady state almost every session lives in.
 
 ### Every subsequent launch
 
@@ -81,15 +84,15 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 
 *A tourist, first time opening the app, has just landed in Tel Aviv.*
 
-1. Taps the app icon. Map renders immediately: Tel Aviv, default center, heat + tag on for "now," both categories shown, "Tel Aviv, right now" title fading in and out.
+1. Taps the app icon. Map renders immediately: Tel Aviv, default center, heat + tag on for "now," both categories always shown together (decision #25 — there's no category filter on the map itself anymore), "Tel Aviv, right now" title fading in and out.
 2. A few seconds in, the OS location-permission sheet appears without blocking the map underneath. She taps **Allow** — map animates to her real location, a "you are here" marker appears, Visited-detection starts silently in the background. *(The denied branch gets its full walk-through in Journey 6, not repeated here.)*
-3. She taps the "Things to do" category chip to cut the clutter — the map instantly filters to that category only.
-4. She taps a zone near her hotel. A bottom sheet slides up with a hand-curated blurb and a list of tagged spots.
+3. She taps a zone near her hotel, both categories mixed together in the list that opens. A bottom sheet slides up with a hand-curated blurb and a scrollable list of tagged spots — short enough (decision #12's bounded curation) that she doesn't need to narrow it by category to scan it.
    - **Unhappy path:** if this zone has no curated data yet, the sheet reads "Nobody's mapped this corner of Tel Aviv yet" instead of an empty list — she keeps browsing, nothing broke.
-5. She taps a spot in the list — a rooftop bar tagged **Local**, in a zone where heat is already climbing for this hour. Spot sheet opens: name, category, vibe tag, save icon, "Go" button.
-6. She taps **Go**. Passenger hands her straight to native Maps/Waze with the destination pre-filled — an exit, not a screen inside Passenger. She never sees an in-app route.
-7. She walks there using Maps/Waze; Passenger is backgrounded. If the geofence monitor catches her arrival, it silently logs a Visited entry — she doesn't see this happen; it's the setup for Journey 4.
-8. **Outcome:** standing in front of the bar. In-app cost: category chip + zone + spot + Go = 4 taps, plus whatever happens inside Maps/Waze.
+   - **Note on decision #25's real cost:** if she *did* want to narrow to just "Things to do" before browsing, that's no longer a single tap — she'd have to open search first and select the category there (Journey 5's territory), which costs more than the old always-visible chip did. This journey shows the cheaper, unfiltered default path instead, since that's now genuinely the lower-cost way to browse casually.
+4. She taps a spot in the list — a rooftop bar tagged **Local**, in a zone where heat is already climbing for this hour. Spot sheet opens: name, category, vibe tag, save icon, "Go" button.
+5. She taps **Go**. Passenger hands her straight to native Maps/Waze with the destination pre-filled — an exit, not a screen inside Passenger. She never sees an in-app route.
+6. She walks there using Maps/Waze; Passenger is backgrounded. If the geofence monitor catches her arrival, Passenger fires a local notification — the local-QA ask from Journey 4 picks up from here, not repeated in this journey.
+7. **Outcome:** standing in front of the bar. In-app cost: zone + spot + Go = 3 taps, plus whatever happens inside Maps/Waze — cheaper than before decision #25, precisely because there's no chip to tap on the way.
 
 ### Journey 2 — Home and bored, planning tonight
 
@@ -98,7 +101,7 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 1. Taps the app icon — not his first launch, so no permission re-prompt. Map opens centered on his current location. Slider resets to "now," as it always does.
 2. He drags the slider forward to roughly +3 hours. The heat layer redraws live as he drags; the tag layer doesn't move — a place's localness doesn't change because it's later.
    - **Unhappy path:** at +3h, one zone shows almost no heat at all — not an error, just real information (nothing relevant there at that hour), which is exactly what he needed to see.
-3. He leaves both category chips on since he's not sure what he wants yet.
+3. He's not sure what he wants yet, so he doesn't bother with search or its category chips — both categories just show together by default, which is exactly what he wants right now.
 4. He taps a couple of zones back to back, comparing blurbs and tags, swiping each sheet down to bounce to the next.
 5. He finds a bar tagged **Mix** worth going to later, opens its spot sheet, and taps the save icon — it fills with a quick animation, an inline "Saved" confirmation appears, and he stays put.
    - **Unhappy path:** his connection drops right as he taps save — it still saves locally and syncs once he's back online; a save is too lightweight to gate on connectivity.
@@ -120,22 +123,25 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 
 *Either the tourist from Journey 1 or the resident from Journey 3, sometime after actually visiting a place.*
 
-1. Because location was granted and the geofence monitor detected her presence, the spot from Journey 1 has quietly appeared in her Visited list — no action was required to put it there (decision #16: Visited is automatic, not a manual "mark visited" button).
-2. She opens the Visited icon out of curiosity.
-   - **Unhappy path (nothing detected yet):** if she opens this before anything's been logged, it reads "Nothing here yet — this fills in as you walk around Tel Aviv" rather than a blank screen.
-3. She taps the entry, which reopens that spot's sheet. Embedded at the bottom is a plain-language micro-prompt: "Does this feel like a local spot, or more of a tourist one?" with three tap targets — **Local / Mix / Tourist** — the same three words used everywhere else in the app.
-   - This is the highest-intent moment to ask: she's already been there, and answering costs her nothing beyond a tap she was already making by opening the sheet.
-4. She taps **Local**. The card collapses into a one-line "Thanks — that's shared with other travelers." No modal, no interruption.
-   - **Unhappy path (offline):** the card doesn't render at all rather than offering a submit that silently fails — this system runs on goodwill alone in V1, and a failed submission burns that goodwill for nothing.
-   - **Unhappy path (already answered):** if she'd already answered for this spot, the card never appears again.
-5. **Outcome:** one data point fed back into the localness pipeline, at zero extra cost beyond a tap she was already making.
+**Rewritten for decision #24 — the app now comes to her, not the other way around.** The old version had her opening the Visited list out of curiosity and finding the ask embedded in a sheet. That's gone. There is no spot-sheet version of this ask anymore, in any form — one ask mechanism, not two, per Aviran's explicit call. I'm not quietly keeping a fallback for the case where the notification gets missed; the coverage this trades away is real and named explicitly in §9 rather than solved by bolting a second mechanism back on.
+
+1. The geofence monitor detects her presence at the bar from Journey 1 — this part is unchanged, and still what populates the Visited list automatically (decision #16).
+2. Passenger fires an iOS **local** notification while backgrounded. **If this is the first visit Passenger has ever detected for her,** firing it is preceded by a one-time system prompt asking for notification permission — requested right here, in context, not at cold open alongside location (decision #8 stays permission-gate-free at launch; this is V1's second permission ask, and it happens later, on its own, when it's self-explanatory: "Passenger wants to notify you after you visit somewhere").
+   - **Unhappy path (notification permission denied):** no notification ever fires for her, for any future visit either. The Visited list keeps populating regardless — that's location-driven, not notification-driven — but she never gets asked about any of it. This is a real coverage gap, not a small one; it's named directly in §9 rather than patched over with a second ask surface.
+   - **[design call]** If Passenger happens to already be in the foreground at the exact moment the geofence fires (she's looking at the app when she arrives), the toast drops directly — there's no reason to route through a system notification she'd have to tap when she's already looking at the screen it would open.
+3. She taps the notification. Passenger foregrounds (if it wasn't already) to whatever it was last showing — no deep link into the spot's own sheet, since the toast itself carries everything needed to answer. A toast drops from the **top** of the screen: "Does this feel like a local spot, or more of a tourist one?" — three tap targets, **Local / Mix / Tourist**, the same three words used everywhere else in the app. **Non-blocking, not modal:** it sits on top of whatever's underneath, dismissible by simply ignoring it, and auto-dismisses on its own after a few seconds if she doesn't touch it — consistent with every other "no modal, no interruption" moment in this doc, and with how an iOS banner already behaves.
+4. She taps **Local**. The toast collapses into a one-line "Thanks — that's shared with other travelers" and disappears.
+   - **Unhappy path (offline):** unlike the old embedded version, the toast still appears — it's three fixed words and a place name already known on-device, nothing about showing it needs a live connection. Her answer queues locally and syncs once she's back online, the same pattern already established for saving a place offline (Journey 2) rather than the old "don't render it at all" rule, which only made sense when the ask needed live spot data alongside it.
+   - **Unhappy path (ignored):** she swipes the notification away, or lets the toast auto-dismiss. Nothing else happens — no re-prompt, no reminder, no second chance for this visit.
+   - **Unhappy path (already answered):** if she's already answered for this spot, no notification fires for it a second time.
+5. **Outcome:** one data point fed back into the localness pipeline, at zero extra cost beyond a tap she was already going to make on a notification that arrived on its own.
 
 ### Journey 5 — I already know what I'm looking for
 
 *A resident whose friend just texted "go to Port Said" — or anyone chasing a specific craving, not interested in browsing.*
 
-1. Taps the search icon in map chrome. A sheet opens over the map with a single text field — no default suggestions needed to start.
-2. Types "Port Said." Matches appear as she types. The same field matches three kinds of things: place names (this one), keywords ("hummus," "rooftop bar"), and neighborhoods ("Florentin").
+1. Taps the search icon in map chrome. A sheet opens over the map with a single text field, plus the two category chips (Food & drinks / Things to do) — the only place either now lives (decision #25). No default suggestions needed to start.
+2. Types "Port Said." Matches appear as she types. The same field matches three kinds of things: place names (this one), keywords ("hummus," "rooftop bar"), and neighborhoods ("Florentin"). Tapping a category chip instead of typing does the same thing a text query does — produces a result set that dims the map down to matching pins/zones, just scoped by category instead of by text.
    - **Unhappy path (no results):** "Nothing matching 'Port Said' right now" and the field stays open and editable — same empty-state convention used everywhere else (a line, not a dead end).
 3. She taps the place-name result. The search sheet transitions directly into that spot's sheet — name, category, vibe tag, save icon, "Go" button. The tag and heat shown reflect the current slider hour, exactly as if she'd tapped the pin on the map; search filters into the same live data, it doesn't invent a separate result-only view.
    - **Unhappy path (result exists, no data at this hour):** heat reads "no live data right now" — the same treatment as a saved place with a data gap (Journey 3). Search doesn't get its own rule for this.
@@ -153,20 +159,21 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 2. The near-me button stays visible but greyed. Tapping it doesn't re-trigger the system permission dialog (iOS won't, once denied) — it shows inline copy pointing to Settings instead.
 3. She browses anyway — the map is fully usable without location, just not personalized to where she's standing. She taps a zone; if the network is also down, the sheet shows the last cached blurb/spot list with a "last updated Xm ago, offline" label rather than failing blank.
 4. She taps a spot and saves it — the save still completes locally and syncs once she's back online.
-5. She checks the Visited list. It's permanently empty, with an explainer state ("Turn on location to build this automatically") and a Settings deep-link — Visited has no data source without location, ever, not just today.
-6. She opens a spot sheet — the local-QA card never renders here, offline or not; it depends on both a live connection and a real, detected visit, neither of which this session can produce.
+5. She checks the Visited list. It's permanently empty, with an explainer state ("Turn on location to build this automatically") and a Settings deep-link — Visited has no data source without location, ever, not just today. With no location, nothing gets detected, so there's nothing for the Journey 4 notification to ever fire on either — the same location gap explains both empty surfaces at once.
+6. **If location was granted for part of this session but she's offline** (the "and/or" half of this journey), a visit can still be detected and a notification can still fire — geofencing and local notifications are both on-device, not server calls. The toast still drops when she opens it; answering queues locally and syncs once she's back online, same as the save flow in step 4.
 7. She taps the search icon anyway — location denial doesn't touch it (search was never location-scoped to begin with), but offline shrinks it to whatever's cached, same as Journey 5's offline path.
 8. She taps **Go** anyway. The hand-off to native Maps/Waze still works even offline — it's just handing coordinates to another app, not requesting anything from Passenger's own servers.
-9. **Outcome:** she can still browse, filter, search, read blurbs and tags, save places, and get routed out to a destination. What she loses entirely: personalization to her real location, a live Visited list, and any chance to answer a local-QA question. Nothing crashes and nothing lies to her about data being fresher than it is — that's the actual bar here, not full feature parity.
+9. **Outcome:** she can still browse, search, read blurbs and tags, save places, and get routed out to a destination. If location was denied outright, she also loses any chance to answer a local-QA question, since nothing was ever detected to ask about — but pure offline with location granted doesn't cost her that; the ask still arrives, it just syncs late. Nothing crashes and nothing lies to her about data being fresher than it is — that's the actual bar here, not full feature parity.
 
 ---
 
 ## 5. Navigation model
 
-No nav bar, no tab bar, no feed. Two surface types:
+No nav bar, no tab bar, no feed. Three surface types:
 
-- **Map chrome** — always on screen, never dismissed: heat/tag layers, slider, category chips, fading title, near-me button, Search/Saved/Visited icons. The neighborhood button lives here too, with one difference from everything else in this list — it's conditionally present, only rendering at neighborhood zoom (§6), rather than visible from any state the way the rest of this list is.
-- **Sheets** — partial-height, swipe-down or tap-outside to dismiss: zone sheet, spot sheet, search sheet, Saved list, Visited list, the local-QA card (embedded inside the spot sheet, not its own sheet).
+- **Map chrome** — always on screen, never dismissed: heat/tag layers, slider, fading title, near-me button, Search/Saved/Visited icons. Category chips no longer belong to this list (decision #25 — they live inside the search sheet now). The neighborhood button lives here too, with one difference from everything else in this list — it's conditionally present, only rendering at neighborhood zoom (§6), rather than visible from any state the way the rest of this list is.
+- **Sheets** — partial-height, swipe-down or tap-outside to dismiss: zone sheet, spot sheet, search sheet (now including the category chips), Saved list, Visited list.
+- **The local-QA toast** — a new category, not a sheet. Top-anchored, non-blocking, and — unlike everything else in this list — never invoked by the user; it arrives on its own, dropped in response to a system notification tap (decision #24), and dismisses on its own too, either on answer or after a few seconds of being ignored. It doesn't sit "on top of the map" the way a sheet does — it can appear over whatever the app is currently showing, since it doesn't require any particular screen underneath it. See Journey 4.
 
 **The zone sheet now has three doors, one destination.** Tapping a zone shape, tapping the neighborhood button, and selecting a neighborhood result from search all open the exact same zone sheet. None of them is a different surface or changes what depth costs — they're three ways of naming the same 1-tap trip, which is the point: the polygon tap was always there but easy to miss or mis-hit, so the button and search give it two more reliable front doors without inventing a second destination.
 
@@ -177,6 +184,8 @@ No nav bar, no tab bar, no feed. Two surface types:
 - **Search (1) → zone sheet (2)**, for a neighborhood result, isn't a shortcut at all — it reaches the *same* zone sheet a direct map tap would reach at level 1, just one level deeper, because the query itself occupies level 1 first. Either way, 2 stays the ceiling.
 
 Nothing in V1 needs a third in-app level — the one feature that would have required it, Scenic View, is Phase 2 (§8), and keeping it out of V1 is exactly what holds this rule at 2 instead of 3. Dismissing any sheet always returns exactly one level up.
+
+The local-QA toast (decision #24) sits outside this rule entirely, not as an exception to track but because it was never a navigational level to begin with — it isn't reached by descending from anywhere, and dismissing it doesn't return "up" to a prior screen, since it never displaced one.
 
 ---
 
@@ -200,7 +209,9 @@ Nothing in V1 needs a third in-app level — the one feature that would have req
 
 **Pin clustering, pin anatomy, and the exact accessibility labels for all of this** are specified in the companion doc, not here — that level of rendering detail would bloat a flows document: [`design/map-rendering-spec.md`](./map-rendering-spec.md). What belongs in *this* doc is the structural fact that governs it: the busy+Tourist warning and the Mix-is-silent rule both now live at zone badges, not spot pins, which is what makes the rendering spec's job (clustering dozens of untagged pins) simpler than the version of this problem the previous draft left behind.
 
-**Search results and the map — a real design call, unaffected by the above.** Decision #23 settles that results carry heat/tag and honor the slider hour, but not what the map itself does visually while the search sheet is open. **[design call]** While results are showing, the map underneath dims everything except the matching pins or zones — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath. Search doesn't become a second, persistent filter sitting alongside the category chips — that would blur the one thing category chips are for and undercut the same "you don't need to ask" reasoning that keeps search out of Primary chrome in the first place.
+**Search results and the map — a real design call, unaffected by the tag-density fix above.** Decision #23 settles that results carry heat/tag and honor the slider hour, but not what the map itself does visually while the search sheet is open. **[design call]** While results are showing (from a typed query or a tapped category chip — decision #25 makes these the same mechanic, see §2), the map underneath dims everything except the matching pins or zones — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath.
+
+**What a category selection does once the search sheet closes — resolving the old open question about category filtering, now that chips live only in search.** **[design call]** A category selection is scoped to that search session only. Dismissing the search sheet — whether or not a result was tapped — always drops the filter and returns the map to its full, unfiltered heat/tag view, both categories mixed. It never persists as a standing map-level filter. Reasoning: with chips no longer on the map, there's nowhere left to *show* that a filter is silently still active — a persisted-but-invisible filter is exactly the kind of hidden state a map whose whole premise is "legible at a glance" can't afford (design-principles.md's Sovereign/Transient framing: the map is Sovereign and must stay fully legible on its own; the search sheet is Transient, and its effects should die with it). Every fresh search-sheet open starts with both categories active by default, consistent with the doc's broader no-persistence pattern (the slider resets to "now" every launch; search itself defaults to no saved history, §9).
 
 ---
 
@@ -214,43 +225,59 @@ flowchart TD
     B --> C{Location permission}
     C -->|Granted| D[Recenter on user, Visited detection starts]
     C -->|Denied| E[Stay on default city-wide view, near-me greyed]
-    D --> F[Steady state: map + slider + chips]
+    D --> F[Steady state: map + slider, no chips here anymore]
     E --> F
     F --> G[Tap a zone shape] --> ZS[Zone sheet: blurb + spot list]
     F --> T["Neighborhood button<br/>(shows at neighborhood zoom)"] --> ZS
     F --> H[Tap a spot pin] --> M[Spot sheet: tag, save, Go]
     ZS --> M
     F --> I[Drag time slider]
-    F --> J[Toggle category chip]
     F --> K[Tap Saved icon] --> P[Saved list] --> M
     F --> L[Tap Visited icon] --> Q[Visited list, automatic] --> M
-    F --> S[Tap Search icon] --> SS[Search sheet: name / keyword / neighborhood]
+    F --> S["Tap Search icon"] --> SS["Search sheet: name / keyword /<br/>neighborhood / category chips"]
     SS -->|place or keyword result| M
     SS -->|neighborhood result| ZS
+    SS -->|category chip| SS
     M -->|Go| N[Hands off to native Maps/Waze — exits Passenger]
     M -->|save icon| O[Saved]
-    M -. embedded, sometimes .-> R["Local-QA prompt: Local / Mix / Tourist"]
+```
+
+### Post-visit local-QA (async — not part of the flow above)
+
+```mermaid
+flowchart TD
+    V[Geofence detects a visit] --> W{Notification permission<br/>already decided?}
+    W -->|first time: ask in context| X{Granted?}
+    W -->|already granted| Y[Local notification fires]
+    X -->|Yes| Y
+    X -->|No| Z[No notification ever fires<br/>for this or future visits]
+    Y --> AA{App already foregrounded?}
+    AA -->|No| BB[User taps the notification] --> CC[Toast drops from top:<br/>Local / Mix / Tourist]
+    AA -->|Yes| CC
+    CC -->|answered| DD[Toast collapses: Thanks]
+    CC -->|ignored| EE[Auto-dismisses, no reminder]
 ```
 
 ### Hierarchy / navigation tree
 
 ```mermaid
 flowchart TD
-    Map["MAP — Primary (0 taps)\nheat (all zooms) + tag (zone badges only, §6) + slider + chips + title"]
+    Map["MAP — Primary (0 taps)\nheat (all zooms) + tag (zone badges only, §6)<br/>+ slider + title + near-me — no chips (decision #25)"]
     Map --> Zone["Zone sheet — Secondary (1 tap)"]
     Map --> Neigh["Neighborhood button — Primary\n(conditional: neighborhood zoom only)"]
     Neigh --> Zone
     Zone --> Spot["Spot sheet — Secondary (1-2 taps)"]
     Spot -.Go, exits app.-> Handoff["Native Maps/Waze\n(outside Passenger)"]
-    Map --> Search["Search sheet — Secondary (1 tap)"]
-    Search -->|place/keyword result| Spot
+    Map --> Search["Search sheet — Secondary (1 tap)\nnow also holds the category chips"]
+    Search -->|place/keyword/category result| Spot
     Search -->|neighborhood result| Zone
     Map --> Saved["Saved list — Tertiary (1 tap)"]
     Map --> Visited["Visited list — Tertiary (1 tap, automatic/read-only)"]
     Saved --> Spot
     Visited --> Spot
-    Spot -. embedded, contextual .-> QA["Local-QA prompt — Tertiary\nLocal / Mix / Tourist"]
+    Visited -.geofence detects a visit, async.-> QA["Local-QA toast — Tertiary\nLocal / Mix / Tourist — push-triggered,<br/>not navigated to (decision #24)"]
     Map --> Perm["Location permission — Tertiary\n(system sheet, 0-1 tap)"]
+    QA -.-> NotifPerm["Notification permission — Tertiary\n(system sheet, asked in-context\non first detected visit)"]
 ```
 
 ---
@@ -261,22 +288,23 @@ Two things are parked as of this revision — Scenic View and Live Events both m
 
 - **Scenic View (Phase 2)** replaces V1's "Go" hand-off with a full-screen in-app routing surface that favors interesting streets over the fastest path. This isn't just an addition — it changes what leaving the spot sheet *means*. In V1, tapping Go ends the in-app journey (an exit, nothing to reconstruct on return). With Scenic View, the user's journey continues inside Passenger during transit, which reopens two things V1 currently sidesteps entirely: what re-entering the spot/zone context looks like after arrival (V1 has no "you've arrived" moment, since the app was never watching), and the depth rule, which goes back to 3 levels (map → zone → spot → Scenic View) the moment this ships. Worth scoping alongside Phase 2's proximity intelligence (arrival card) — both concern the in-transit experience and would likely share build surface.
   - The earlier open question about Scenic View's depth (full in-app turn-by-turn vs. a route-preview-then-handoff) still applies whenever Phase 2 gets scoped — but it's no longer a V1 blocker, so it's dropped from §9's list below and flagged here instead, for whoever picks up Phase 2.
-- **Live Events (Phase 2)** enters as a third overlay toggle on the map, alongside the category chips — Primary tier, additive chrome, since it extends the base map's visualization rather than opening a new surface. It displaces nothing in V1's structure: the two-layer hero view (heat + tag) doesn't need to change shape to gain a third toggle later, which is exactly why cutting Events from V1 costs nothing structurally now.
+- **Live Events (Phase 2)** enters as a third overlay toggle on the map — Primary tier, additive chrome, since it extends the base map's visualization rather than opening a new surface. It displaces nothing in V1's structure: the two-layer hero view (heat + tag) doesn't need to change shape to gain a third toggle later, which is exactly why cutting Events from V1 costs nothing structurally now. (Category chips are no longer a map-chrome neighbor it would sit beside — decision #25 moved them into the search sheet — but that doesn't change where Events itself would land.)
 - **Proximity intelligence + arrival card (Phase 2):** a new **Secondary** surface, automatically triggered (geofence) rather than tap-invoked — a time-triggered variant of the spot sheet appearing when the user is already en route. Extends the spot sheet; doesn't displace it.
 - **AI local guide persona, audio-first, personalization (Phase 3):** a different product mode on the same engine, not a sheet off the map. Would need its own **Primary-adjacent entry point** — a real structural change, not an addition. Flag clearly if Phase 3 ever gets scoped: it's the one candidate that breaks V1's "single primary surface" simplicity rather than extending it.
 - **Shake-to-decide (Phase 3):** a gesture-triggered **Secondary** action, roughly parallel to the spot sheet — a random-suggestion overlay triggered by a device gesture instead of a tap. Purely additive.
 - **Auto-saved places (Phase 3):** extends the "save a place" step (Journey 2) with a new automatic trigger (dwell time ≥20 min). No new surface — Saved (**Tertiary**) gains an automatic path alongside the manual one.
-- **Points system (Phase 3):** adds a new **Tertiary** surface (points/rewards) and changes the character of the local-QA prompt (Journey 4). Today it's goodwill-only and correctly tiered low/contextual; once points exist, answering has real incentive behind it and probably deserves more visual prominence than a quiet embedded card — worth re-tiering upward at that point, not before.
+- **Points system (Phase 3):** adds a new **Tertiary** surface (points/rewards) and changes the character of the local-QA prompt (Journey 4, now a post-visit notification + toast per decision #24). Today it's goodwill-only and correctly tiered low; once points exist, answering has real incentive behind it and the ask itself probably deserves more visual weight than a quiet, ignorable toast — worth re-tiering upward and reconsidering the delivery mechanism at that point, not before.
 
 ---
 
 ## 9. Open UX questions for Aviran
 
-1. **Local-QA prompt cadence** — the strategy says the QA system exists but doesn't say how often or on what trigger it should ask. **Recommendation:** trigger primarily right after a spot lands in Visited (the highest-intent, already-there moment), plus occasionally on spot-sheet view for low-confidence tags only, capped at roughly once per session — protect the goodwill this system runs on rather than maximizing answer volume.
+1. **Local-QA notification cadence — revisited for a push mechanic, where the tolerance is much lower than it was for an embedded card.** My old recommendation ("roughly once per session") doesn't translate — a notification isn't session-bound, and firing one on every single detected visit will burn goodwill fast. **Recommendation:** cap at one local-QA notification per day, full stop, regardless of how many visits are detected that day, and only trigger it for visits that clear a minimum dwell-time threshold (someone who passed by isn't someone who visited) — exact threshold is a data/build question, not a UX one, so it's Q9 below rather than answered here.
 2. **Lazy location permission — exact trigger mechanism.** Decision #8 says "lazy," but not whether that means an automatic system prompt shortly after the map first renders, or only on the user's first tap of "near me." **Recommendation:** auto-prompt once, softly, a couple of seconds after the map first renders — gets Visited-tracking started as early as possible without blocking the first look at the map.
 3. **Does the time slider ever look backward?** Taken here as strictly forward-only, "now → +12 hours." Worth confirming there's no case for showing "an hour ago" for context before this is locked into the build.
-4. **Visited detection during a hand-off.** V1's Visited list depends entirely on the geofence monitor catching a visit while Passenger is backgrounded — the user is inside Maps/Waze, not Passenger, at the exact moment they arrive. Does iOS reliably keep background location running through that hand-off and the walk that follows, or does exiting the app risk losing the one signal Visited depends on? **Recommendation:** confirm background-location behavior with the architect before treating Visited's automatic-only design (decision #16) as settled — if it's shaky, a lightweight manual backstop may be needed even though the current decision rules one out.
+4. **Visited detection during a hand-off — now also gates whether the local-QA notification can fire at all.** V1's Visited list, and now the notification in decision #24, both depend entirely on the geofence monitor catching a visit while Passenger is backgrounded — the user is inside Maps/Waze, not Passenger, at the exact moment they arrive. Does iOS reliably keep background location running through that hand-off and the walk that follows, or does exiting the app risk losing the one signal both features depend on? **Recommendation:** confirm background-location behavior with the architect before treating either Visited's automatic-only design (decision #16) or the notification trigger (decision #24) as settled — if it's shaky, both need a fallback conversation, not just Visited.
 5. **Does the computed busy + Tourist warning badge (§6, now zone-level) need its own VoiceOver label?** It's a display-time computation, not a stored tag, so it won't inherit whatever label the plain Tourist badge already carries. **Recommendation:** give it an explicit label ("busy and touristy — worth a second look") rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred. This now has a second, sharper edge to it: §6's Mix-is-silent rule means a sighted user reads "no badge" as Mix, but VoiceOver can't read an absence — full detail and resolution in `design/map-rendering-spec.md`'s accessibility section, kept coherent with this question rather than answered twice.
-6. **Does the search sheet keep recent searches?** There's no account and no persistence story anywhere else in V1 — the time slider itself resets to "now" every launch on purpose. **Recommendation:** default to no persisted history across launches, matching that pattern; a session-only recent list (cleared on relaunch) is a reasonable middle ground if a completely blank field on every open feels too cold, but that's worth Aviran's read since locals searching the same handful of things repeatedly is a real, recurring use case this would help.
-7. **Does search respect the active category filter?** If a user has narrowed the map to "Food & drinks" and then searches a keyword that's ambiguous across categories (e.g., "market"), does search scope to the active chip or search everything regardless? **Recommendation:** search everything regardless of the active category filter — a typed query is a more specific signal of intent than a standing chip, and scoping it down risks silently hiding the exact result the user typed for.
-8. **What does the neighborhood button do when the viewport straddles two zones roughly evenly** — at the boundary between Florentin and Neve Tzedek, say, with no single dominant neighborhood in view? **Recommendation:** don't guess at a winner. Hide the button entirely below some clear-dominance threshold (e.g., one zone needs to cover meaningfully more than half the visible viewport) rather than risk sending someone into the wrong neighborhood's sheet with false confidence — tapping either zone shape directly still works regardless, so nothing is lost by having the button stay quiet in the ambiguous case.
+6. **Does the search sheet keep recent searches?** There's no account and no persistence story anywhere else in V1 — the time slider itself resets to "now" every launch on purpose, and category selections now die with the sheet too (§6). **Recommendation:** default to no persisted history across launches, matching that pattern; a session-only recent list (cleared on relaunch) is a reasonable middle ground if a completely blank field on every open feels too cold, but that's worth Aviran's read since locals searching the same handful of things repeatedly is a real, recurring use case this would help.
+7. **What does the neighborhood button do when the viewport straddles two zones roughly evenly** — at the boundary between Florentin and Neve Tzedek, say, with no single dominant neighborhood in view? **Recommendation:** don't guess at a winner. Hide the button entirely below some clear-dominance threshold (e.g., one zone needs to cover meaningfully more than half the visible viewport) rather than risk sending someone into the wrong neighborhood's sheet with false confidence — tapping either zone shape directly still works regardless, so nothing is lost by having the button stay quiet in the ambiguous case.
+8. **Notification-permission-denied is a real, named coverage gap, not a small one.** With no spot-sheet fallback (decision #24 replaces, doesn't supplement), a user who denies notification permission — or who consistently ignores/dismisses the notification — never gets asked about any visit, ever, in V1. This directly compounds the strategy's own named risk ("V1 has to get real signal on goodwill alone... if that doesn't produce enough answers, the algorithm has nothing to check itself against"). **Recommendation:** accept this trade for now — a second ask mechanism to plug the gap reintroduces exactly the complexity decision #24 just removed — but track the notification opt-in rate as a real launch metric, not an afterthought; if it's low, that's a signal to revisit this doc, not just a data point to note.
+9. **Exact dwell-time threshold for triggering the local-QA notification.** Referenced in Q1 above but not a UX call — needs data-engineer/architect input on what dwell time reliably distinguishes "visited" from "walked past," and whether that threshold is the same one Visited-list population itself uses or a separate, possibly stricter one (a notification is a much bigger interruption than quietly adding a row to a list, so it may deserve a higher bar).

@@ -3,7 +3,7 @@
 **Owner:** designer (drafted for Aviran)
 **Date:** 2026-07-27
 **Status:** Draft — awaiting Aviran's read
-**Source:** `strategy/decisions.md` #12 (neighborhood + spot granularity), #17 (no gradients), #18 (three vibe tags) + `design/design-principles.md` §2/§3/§5 + Aviran's direct pushback on tag-layer density, relayed 2026-07-27.
+**Source:** `strategy/decisions.md` #12 (neighborhood + spot granularity), #17 (no gradients), #18 (three vibe tags), #25 (category chips move into the search sheet) + `design/design-principles.md` §2/§3/§5 + Aviran's direct pushback on tag-layer density, relayed 2026-07-27.
 **Relationship to `design/ux-flows.md`:** §6 of that doc states the structural rules this spec implements — tag renders progressively by zoom, Mix is silent, the busy+Tourist warning replaces rather than stacks. This doc is the rendering detail underneath those rules: what's actually drawn, how pins cluster, and the exact accessibility labels. Read §6 first for the *why*; this doc is the *how*. No PRD exists yet to trace against, and this doc doesn't need its own high-fidelity mockup — it's a rendering-rules reference for whoever builds the map layer, not a flow a reviewer clicks through.
 
 ---
@@ -45,6 +45,7 @@ Heat and tag never share a visual channel, at any zoom: heat is always the area/
 
 - **No tag encoding of any kind** — not a badge, not a colored fill, not a shaped outline that varies by tag. This was an open call in `ux-flows.md` §6 and it's resolved here as **no, never**: even a tag-colored pin shape still asks the eye to individually parse every pin in a dense block, which is the exact failure mode Aviran flagged. Tag lives in the spot sheet as a word, full stop.
 - **What a pin does carry:** a shape/icon that encodes **category** (Food & drinks vs. Things to do) — e.g., a fork-and-knife glyph vs. a generic landmark glyph — so that with both categories showing at once (the default), a user can tell them apart without relying on color alone (design-principles.md §3, §5).
+- **This got more load-bearing, not less, after decision #25.** With category chips off the map and into the search sheet, both categories are mixed together on the base map at all times outside of a deliberate search session — there's no lightweight way to pre-filter to just one category while casually browsing anymore. The pin's category glyph is now the *only* way to visually tell categories apart during ordinary browsing, not a nice-to-have alongside a chip-filtered view. Get this shape/icon distinction wrong and there's no fallback for the common case.
 - **Touch target:** ≥44pt regardless of how small the glyph renders visually (design-principles.md §2, Fitts's Law) — the tappable area is never just the drawn glyph's bounding box if that's smaller than 44pt.
 - **Tap behavior:** unchanged from `ux-flows.md` — opens the spot sheet directly. A pin is never a two-step disclosure (no "tap once to preview, tap again to open").
 
@@ -58,6 +59,7 @@ Unspecified anywhere until now, and load-bearing for exactly this problem — cl
 - **Cluster marker appearance:** a plain circular badge with a count (e.g., "12"). **Neutral styling — never heat- or tag-colored.** A cluster is a rendering convenience representing an ambiguous mix of underlying spots, not a data signal; coloring it would imply a meaning (a dominant tag, an average heat) this spec deliberately avoids computing or claiming.
 - **Tap behavior:** tapping a cluster **zooms and recenters the map on it** — it never opens a sheet directly, since a cluster doesn't represent one place. As the user zooms further, clusters break apart automatically, converging on individual pins once spacing exceeds the threshold.
 - **The neighborhood button (`ux-flows.md` §2) is the other way to beat density** — a user doesn't have to wait for pins to fully declutter to see everything in an area; the button's zone sheet lists every tagged spot regardless of how tightly its pins are clustered on the map at that moment. Clustering and the button solve the same underlying problem (too much at once) from two different angles — one keeps the map itself legible, the other gives a full-list escape hatch.
+- **Category-chip results cluster identically to text-query results.** Since decision #25 makes tapping a category chip inside the search sheet produce the same kind of result set a typed query does (`ux-flows.md` §6), a "Things to do" result set that's still dense at the current zoom clusters exactly the same way an unfiltered view would — clustering doesn't get a separate ruleset for a search-driven subset of pins.
 
 ---
 
