@@ -10,7 +10,8 @@ Passenger exists because the previous board ran 27 PRDs through this exact lifec
 
 - No social features of any kind — friends, following, posting, presence, profiles, avatars.
 - No onboarding — the app opens straight to the map plus location permission.
-- Phase 2 (proximity) and Phase 3 (AI guide, shake-to-decide, points) are parked. Don't build toward them or leave hooks.
+- Phase 2 (proximity intelligence, **Scenic View**, **Live Events**) and Phase 3 (AI guide, shake-to-decide, points) are parked. Don't build toward them or leave hooks.
+- **Scenic View and Live Events moved out of V1 on 2026-07-27** (decisions #19, #20). V1 tap-a-spot hands off to native Maps/Waze; the V1 map is heat + tag only. Both existed in the Locali client, so watch for them returning through `SALVAGE.md` rather than through a PRD.
 
 ## Task lifecycle (state → owner)
 
