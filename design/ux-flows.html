@@ -429,8 +429,8 @@
     <div class="prose">
       <p class="lede">Passenger is one map. You open the app and you're looking at Tel Aviv, right now — how packed everywhere is, and whether each place feels local or touristy.</p>
       <p style="margin-top:18px;">You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places, and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter.</p>
-      <p><strong>There is no feed, no profile, no search bar, nothing to scroll.</strong> Every screen is either the map, or something the map handed you.</p>
-      <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Source: <code>strategy/passenger-strategy.md</code> (2026-07-27) + <code>strategy/decisions.md</code> (decisions 18–22). Markdown twin: <code>design/ux-flows.md</code>. Cross-feature flows reference, not a per-feature design spec — no PRDs exist yet to trace against.</p>
+      <p><strong>There is no feed, no profile, nothing to scroll.</strong> If you already know what you're after, search is one tap away — a sheet you open, not a box that's always staring back at you: a product whose whole pitch is "you don't need to ask" shouldn't put a question mark in front of you by default. Every screen is either the map, or something the map handed you.</p>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Source: <code>strategy/passenger-strategy.md</code> (2026-07-27) + <code>strategy/decisions.md</code> (decisions 18–23). Markdown twin: <code>design/ux-flows.md</code>. Cross-feature flows reference, not a per-feature design spec — no PRDs exist yet to trace against.</p>
     </div>
   </header>
 
@@ -481,7 +481,7 @@
         <span class="tier-name">Secondary</span>
         <span class="tier-desc">Invoked from the map.</span>
       </div>
-      <div class="tier-note">Lighter than it might otherwise be. V1 hands off to native Maps/Waze at the moment of "go" rather than building its own routing screen, so there's no in-app takeover surface to place here.</div>
+      <div class="tier-note">Lighter than it might otherwise be. V1 hands off to native Maps/Waze at the moment of "go" rather than building its own routing screen, so there's no in-app takeover surface to place here. Three items now, not two — search (decision #23) joins zone sheet and spot sheet.</div>
       <div class="item">
         <span class="item-name">Zone sheet</span><span class="cost">1 tap</span>
         <span class="item-why">Hand-curated neighborhood blurb + tagged spot list. Bottom sheet; the map stays visible behind it.</span>
@@ -489,6 +489,10 @@
       <div class="item">
         <span class="item-name">Spot sheet</span><span class="cost">1–2 taps</span>
         <span class="item-why">Name, category, vibe tag, save icon, "Go" button. One level under a zone sheet, or reachable directly from a close-zoom pin. <strong>"Go" hands off to native Maps/Waze — an exit from Passenger, not a screen inside it.</strong></span>
+      </div>
+      <div class="item">
+        <span class="item-name">Search sheet</span><span class="cost">1 tap</span>
+        <span class="item-why"><strong>Secondary, not Primary — Aviran's explicit call, and the reasoning matters:</strong> a permanent search bar sitting in front of a product whose whole pitch is "you don't need to ask" undercuts that pitch. One tap away, gone when you're done, keeps the map itself as the thing you look at rather than a results page waiting for a query. Matches place names, keywords, and neighborhoods.</span>
       </div>
     </div>
 
@@ -531,7 +535,7 @@
       <li><strong>Location permission prompts lazily</strong> — the OS system sheet, never a custom in-app screen (decision #8). It does not block map interaction.
         <ul>
           <li><strong>Granted:</strong> map animates to real location, "you are here" marker appears, background Visited detection starts silently.</li>
-          <li><strong>Denied:</strong> map stays at the default city-wide center — walked end to end in Journey 5.</li>
+          <li><strong>Denied:</strong> map stays at the default city-wide center — walked end to end in Journey 6.</li>
         </ul>
       </li>
       <li><strong>User explores.</strong> Pan, zoom, drag the slider, toggle a category, tap a zone or spot. The steady state almost every session lives in.</li>
@@ -546,10 +550,11 @@
   </section>
 
   <section class="block" id="journeys">
-    <p class="eyebrow">Five journeys, start to finish</p>
+    <p class="eyebrow">Six journeys, start to finish</p>
     <h2>End-to-end journeys</h2>
     <div class="prose">
-      <p>Chosen to partition V1's surface without duplicating it: two discovery contexts (tourist and resident, who use the same map differently), one return visit, one feedback loop, and one full pass under degraded conditions — because location-denied and offline don't touch one step, they touch nearly every step at once.</p>
+      <p>Chosen to partition V1's surface without duplicating it: two discovery contexts (tourist and resident, who use the same map differently), one return visit, one feedback loop, one search-first context, and one full pass under degraded conditions — because location-denied and offline don't touch one step, they touch nearly every step at once.</p>
+      <p><strong>Search earns its own journey</strong> rather than folding into an existing one: every other journey starts with <em>reading</em> the map — a zone, a slider drag, a saved list — while search is the one path that starts with already knowing what you want and skips the reading entirely. It sits right before the degraded run: a normal alternate entry point, followed by the stress-test pass that touches everything that came before it, search included.</p>
       <p>Every V1 interaction appears in at least one journey. Where something can go wrong, it's attached to the step where it bites.</p>
     </div>
 
@@ -647,7 +652,34 @@
 
     <div class="journey">
       <div class="journey-head">
-        <span class="journey-eyebrow">Journey 5 · Degraded</span>
+        <span class="journey-eyebrow">Journey 5 · Search-first</span>
+        <p class="journey-title">I already know what I'm looking for</p>
+        <p class="journey-who">A resident whose friend just texted "go to Port Said" — or anyone chasing a specific craving, not interested in browsing.</p>
+      </div>
+      <ol class="jsteps">
+        <li>Taps the search icon in map chrome. A sheet opens over the map with a single text field — no default suggestions needed to start.</li>
+        <li>Types "Port Said." Matches appear as she types. The same field matches three kinds of things: place names (this one), keywords ("hummus," "rooftop bar"), and neighborhoods ("Florentin").
+          <span class="snag"><span class="k">No results</span>"Nothing matching 'Port Said' right now" — the field stays open and editable. Same empty-state convention used everywhere else: a line, not a dead end.</span>
+        </li>
+        <li>She taps the place-name result. The search sheet transitions directly into that spot's sheet — name, category, vibe tag, save icon, "Go". The tag and heat reflect the current slider hour, exactly as if she'd tapped the pin on the map; <strong>search filters into the same live data, it doesn't invent a separate result-only view.</strong>
+          <span class="snag"><span class="k">Result exists, no data at this hour</span>Heat reads "no live data right now" — same treatment as a saved place with a data gap (Journey 3). Search doesn't get its own rule for this.</span>
+        </li>
+        <li>She taps <strong>Go</strong> — hands off to native Maps/Waze exactly like every other spot sheet. Search doesn't create a second kind of exit.</li>
+        <li><strong>Alternate ending — a neighborhood result:</strong> if she'd typed "Florentin" instead, selecting it pans the map there and opens that zone's sheet — the same blurb-plus-spot-list surface as tapping the zone directly, just reached from a query instead of a glance.
+          <span class="snag"><span class="k">Neighborhood has no curated blurb yet</span>Same empty state as tapping an under-curated zone from the map — search surfaces the zone, it doesn't invent content for it.</span>
+        </li>
+        <li><span class="snag" style="margin-top:0;"><span class="k">Offline</span>Search runs against whatever's already cached locally — matches are limited to that, and anything opened from a result carries the same "last updated Xm ago, offline" label used everywhere else.</span></li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>At the spot sheet (or zone sheet) — cheaper than either discovery journey, because there was no browsing to do.</span>
+        <span class="cost">2 taps in-app</span>
+      </div>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 6 · Degraded</span>
         <p class="journey-title">The degraded run</p>
         <p class="journey-who">Anyone, location denied and/or offline for the whole session.</p>
       </div>
@@ -660,11 +692,12 @@
         <li>She taps a spot and saves it — the save still completes locally and syncs once she's back online.</li>
         <li>She checks the Visited list. <strong>Permanently empty</strong>, with an explainer ("Turn on location to build this automatically") and a Settings deep-link. Visited has no data source without location — ever, not just today.</li>
         <li>She opens a spot sheet. The local-QA card never renders here; it depends on both a live connection and a real detected visit, neither of which this session can produce.</li>
+        <li>She taps the search icon anyway — location denial doesn't touch it (search was never location-scoped to begin with), but offline shrinks it to whatever's cached, same as Journey 5's offline path.</li>
         <li>She taps <strong>Go</strong> anyway. The hand-off to Maps/Waze still works offline — it's just handing coordinates to another app, not asking anything of Passenger's servers.</li>
       </ol>
       <div class="journey-out">
         <span class="k">Outcome</span>
-        <span>She can still browse, filter, read blurbs and tags, save places, and get routed out. What she loses: personalization, a live Visited list, and any chance to answer a local-QA question. Nothing crashes and nothing lies to her about data being fresher than it is — that's the bar, not full feature parity.</span>
+        <span>She can still browse, filter, search, read blurbs and tags, save places, and get routed out. What she loses: personalization, a live Visited list, and any chance to answer a local-QA question. Nothing crashes and nothing lies to her about data being fresher than it is — that's the bar, not full feature parity.</span>
       </div>
     </div>
   </section>
@@ -681,7 +714,7 @@
       </div>
       <div class="surface-card">
         <h4>Sheets</h4>
-        <p>Partial height, swipe down or tap outside to dismiss — zone sheet, spot sheet, Saved list, Visited list. The local-QA card is embedded inside the spot sheet, not a sheet of its own.</p>
+        <p>Partial height, swipe down or tap outside to dismiss — zone sheet, spot sheet, search sheet, Saved list, Visited list. The local-QA card is embedded inside the spot sheet, not a sheet of its own.</p>
       </div>
       <div class="surface-card exit">
         <h4>"Go" is not a surface at all</h4>
@@ -692,6 +725,7 @@
     <div class="depth">
       <div class="lbl">Depth rule: 2 levels, no more, while inside the app</div>
       <p>Map (0) → zone sheet (1) → spot sheet (2) is the deepest path that stays inside Passenger. Saved and Visited reach the same maximum by a shorter route, skipping the zone step because you already chose the place.</p>
+      <p><strong>Search holds at the same ceiling, but gets there two different ways</strong> depending on the result type — worth confirming rather than assuming, since it isn't the same shortcut in both directions. Search (1) → spot sheet (2), for a place-name or keyword result, matches the Saved/Visited pattern exactly — it skips the zone-tap step because the user already named what they want. Search (1) → zone sheet (2), for a neighborhood result, isn't a shortcut at all — it reaches the <em>same</em> zone sheet a direct map tap would reach at level 1, just one level deeper, because the query itself occupies level 1 first. Either way, 2 stays the ceiling.</p>
       <p>Nothing in V1 needs a third in-app level. The one feature that would have required it — <strong>Scenic View — is Phase 2</strong>, and keeping it out is exactly what holds this rule at 2 instead of 3.</p>
       <p>Dismissing any sheet always returns <strong>exactly one level up</strong>.</p>
     </div>
@@ -724,6 +758,12 @@
         <li><span class="flag">DESIGN CALL</span>The reverse case deserves equal thought. Busy + <span class="tag-chip tag-local">Local</span> should never read as a warning — if anything it's the strongest possible endorsement, busy <em>because</em> it's actually good. No special badge there; the <em>absence</em> of the warning becomes legible precisely because the warning exists for the other case.</li>
         <li>The "very local but temporarily busy" case still holds. Heat is time-variant, tag isn't — a Local-tagged spot spiking busy at 9pm reads as "busy AND local", two true facts, never as evidence it turned touristy. The warning badge only fires on Tourist-tagged busy spots, which keeps this distinction automatic rather than something the user has to reason through.</li>
       </ul>
+    </div>
+
+    <h3>Search results and the map — a real design call</h3>
+    <div class="prose">
+      <p>Decision #23 settles that results carry heat and tag and honor the slider hour, but not what the map itself does visually while the search sheet is open.</p>
+      <p><span class="flag">DESIGN CALL</span>While results are showing, the map underneath dims everything except the matching pins — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath. Search doesn't become a second, persistent filter sitting alongside the category chips — that would blur the one thing category chips are for and undercut the same "you don't need to ask" reasoning that keeps search out of Primary chrome in the first place.</p>
     </div>
   </section>
 
@@ -761,7 +801,7 @@
         </div>
       </div>
 
-      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, six things are reachable without leaving the map:</p>
+      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, seven things are reachable without leaving the map:</p>
       <div class="fan">
         <span class="node sec">Tap a zone<span class="sub">→ zone sheet</span></span>
         <span class="node sec">Tap a spot pin<span class="sub">→ spot sheet</span></span>
@@ -769,6 +809,23 @@
         <span class="node pri">Toggle category<span class="sub">filters in place</span></span>
         <span class="node ter">Saved<span class="sub">→ spot sheet</span></span>
         <span class="node ter">Visited<span class="sub">→ spot sheet</span></span>
+        <span class="node sec">Search<span class="sub">→ spot or zone sheet</span></span>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--muted); margin:18px 0 8px;">Search branches on result type — the one entry point that can land on either sheet:</p>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node sec">Search sheet<span class="sub">name · keyword · neighborhood</span></span>
+          <span class="arrow">→</span>
+          <span class="node sec">Spot sheet<span class="sub">place / keyword result</span></span>
+        </div>
+      </div>
+      <div class="dgm-scroll">
+        <div class="chain">
+          <span class="node sec">Search sheet<span class="sub">name · keyword · neighborhood</span></span>
+          <span class="arrow">→</span>
+          <span class="node sec">Zone sheet<span class="sub">neighborhood result</span></span>
+        </div>
       </div>
 
       <p style="font-size:0.82rem; color:var(--muted); margin:18px 0 8px;">And the deepest path, end to end — note where it leaves the app:</p>
@@ -805,6 +862,10 @@
           <div class="tree-row">
             <span class="rail">&nbsp; &nbsp; &nbsp; &nbsp;└─</span>
             <span class="node ter">Local-QA prompt — Tertiary<span class="sub">embedded, contextual · no surface of its own</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">├─</span>
+            <span class="node sec">Search sheet — Secondary<span class="sub">1 tap · place/keyword → spot sheet · neighborhood → zone sheet</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">├─</span>
@@ -909,6 +970,18 @@
         <span class="qt">Does the busy + Tourist warning badge need its own VoiceOver label?</span>
         <p>It's a display-time computation, not a stored tag, so it won't inherit whatever label the tag badge already carries.</p>
         <p class="rec"><b>Recommendation:</b> give it an explicit label — "busy and touristy, worth a second look" — rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred.</p>
+      </li>
+      <li>
+        <span class="qn">Q6</span>
+        <span class="qt">Does the search sheet keep recent searches?</span>
+        <p>There's no account and no persistence story anywhere else in V1 — the time slider itself resets to "now" every launch on purpose.</p>
+        <p class="rec"><b>Recommendation:</b> default to no persisted history across launches, matching that pattern. A session-only recent list, cleared on relaunch, is a reasonable middle ground if a completely blank field on every open feels too cold — but that's worth Aviran's read, since locals searching the same handful of things repeatedly is a real, recurring use case this would help.</p>
+      </li>
+      <li>
+        <span class="qn">Q7</span>
+        <span class="qt">Does search respect the active category filter?</span>
+        <p>If a user has narrowed the map to "Food & drinks" and then searches a keyword that's ambiguous across categories (e.g., "market"), does search scope to the active chip or search everything regardless?</p>
+        <p class="rec"><b>Recommendation:</b> search everything regardless of the active category filter — a typed query is a more specific signal of intent than a standing chip, and scoping it down risks silently hiding the exact result the user typed for.</p>
       </li>
     </ol>
   </section>
