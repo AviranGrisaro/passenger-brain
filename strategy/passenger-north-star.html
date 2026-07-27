@@ -445,7 +445,7 @@
     <p class="eyebrow">The product</p>
     <h2>V1 is one map</h2>
     <div class="prose">
-      <p>V1 is a single map, and the whole product lives on it. Nothing routes through a feed, a profile, or a search bar. Profile and search exist only as sheets presented over the map, not separate navigation destinations — you never leave the map screen to reach them, so neither breaks the "nothing routes through" rule.</p>
+      <p>V1 is a single map, and the whole product lives on it. Nothing routes through a feed or a profile. <strong>There is no profile in V1</strong> — no account, no avatar, no preferences; the standing no-social prohibition covers it. Search does ship (decision #23), but as a sheet presented over the map rather than a separate navigation destination — you never leave the map screen to reach it.</p>
     </div>
 
     <h3>V1 scope</h3>
@@ -462,6 +462,7 @@
         <li>Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.</li>
         <li>Saved places — kept, core. Visited places — populates <strong>automatically</strong> from geofence detection after the lazy location grant (decision #16, reconfirmed 2026-07-27). No manual "mark as visited" action in V1.</li>
         <li>No Live Events overlay in V1 — moved to Phase 2 (2026-07-27). The V1 map is heat + tag, and nothing else.</li>
+        <li><strong>Search</strong> — an icon in the map chrome opening a sheet. Place names, keywords ("hummus", "rooftop bar"), and neighborhoods. A name or keyword jumps to the spot; a neighborhood pans the map and opens its zone sheet. Results carry the same heat and tag signals and honor the slider hour — search filters the map, it doesn't bypass it.</li>
       </ul>
     </div>
 
@@ -651,7 +652,7 @@
     <h2>Positioning</h2>
     <div class="positioning-grid">
       <div class="pos-card"><span class="not">Not a guide.</span><p>Guides are static; Passenger is live, hour by hour.</p></div>
-      <div class="pos-card"><span class="not">Not a social feed.</span><p>No friends, no posting, no following, no piecing together five apps' worth of saved posts to figure out what's still open. The map answers "what do I do right now" with no query.</p></div>
+      <div class="pos-card"><span class="not">Not a social feed.</span><p>No friends, no posting, no following, no piecing together five apps' worth of saved posts to figure out what's still open. The map answers "what do I do right now" without you having to ask it anything — search is there for when you already have somewhere specific in mind, not for getting an answer out of the product in the first place. If people reach for search before they read the map, the map isn't doing its job.</p></div>
       <div class="pos-card"><span class="not">What nobody else does.</span><p>Real-time heatmaps exist (nightlife-focused, built for residents); static tourist guides exist. Nobody combines both, and nobody treats packed-vs-local as two separate signals on one map. Google Maps' Popular Times is the long-term platform threat — worth watching on a recurring cadence, not a one-time snapshot, since it's the fastest path for a bigger player to close this gap. (See the <a href="../11-competitors/competitive-brief.md">competitive brief</a>.)</p></div>
     </div>
   </section>

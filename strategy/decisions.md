@@ -43,6 +43,7 @@ Locali's own strategy was already tourist-first ("where should I walk right now 
 | 20 | **Events overlay moves to Phase 2** | 2026-07-27, direct from Aviran. **Supersedes #14.** V1 map is heat + tag only — two layers, matching the north star exactly. |
 | 21 | **Phase 2 additions are subscription-gated** — proximity intelligence, Scenic View, Live Events | 2026-07-27, direct from Aviran. Free core is permanently the V1 scope: heat + tag, both categories, slider, zone/spot detail, Saved/Visited, native hand-off. Consistent with #9 (Phase 1 fully free). |
 | 22 | **Localness = algorithm + crowdsourced local QA**, together, as the permanent pipeline | 2026-07-27, confirmed by Aviran. **Supersedes #5** — the curator is not the definition of "local" for V1. Real users are asked in-app whether a spot is actually local; the algorithm proposes, they verify and correct. Trades staffing risk for cold-start and incentive risk (no reward layer until Phase 3's points system). |
+| 23 | **Search ships in V1** — place names, keywords, and neighborhoods | 2026-07-27, direct from Aviran. Reached from an icon in the map chrome, opens as a sheet over the map — Secondary tier, not persistent chrome, so the map stays the default answer. Results carry heat + tag and honor the slider hour. Softens, but does not void, the "no query" positioning line: search is for when you already have somewhere in mind. **Watch-item** — if users reach for search before reading the map, that's a signal the map isn't working. |
 
 ## Knowing deviations from the brief
 

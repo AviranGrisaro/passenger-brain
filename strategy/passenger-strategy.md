@@ -26,7 +26,7 @@ Everything downstream — monetization, second city, Events as a bigger vertical
 
 ## The product
 
-V1 is a single map, and the whole product lives on it. Nothing routes through a feed, a profile, or a search bar.
+V1 is a single map, and the whole product lives on it. Nothing routes through a feed or a profile. Search exists, but as a sheet over the map rather than a destination — you never leave the map screen to reach it.
 
 **V1 scope:**
 - One map. Two orthogonal layers: **heat** (crowd density) and **tag** (localness) — never one blended score.
@@ -39,6 +39,7 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - **Density is a synthetic feed for now**, time-bound to the slider hour, while a live popular-times data source is evaluated separately.
 - Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.
 - Saved places and Visited places — kept, core. No Events overlay in V1; that's a Phase 2 candidate. The V1 map is heat + tag, and nothing else.
+- **Search**, reached from an icon in the map chrome, opening as a sheet. Covers place names, keywords ("hummus", "rooftop bar"), and neighborhoods — a name or keyword jumps to the spot, a neighborhood pans the map and opens its zone sheet. Results carry the same heat and tag signals as the map and honor the slider hour; search filters the map, it doesn't bypass it. Added 2026-07-27 (decision #23).
 
 **Out of scope:** itineraries, bookings, Android, social features of any kind (no friends, no posting, no following, no presence), any business-facing monetization.
 
@@ -75,7 +76,7 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 ## Positioning
 
 - **Not a guide.** Guides are static; Passenger is live, hour by hour.
-- **Not a social feed.** No friends, no posting, no following, no piecing together five apps' worth of saved posts to figure out what's still open. The map answers "what do I do right now" with no query.
+- **Not a social feed.** No friends, no posting, no following, no piecing together five apps' worth of saved posts to figure out what's still open. The map answers "what do I do right now" without you having to ask it anything — search is there for when you already have somewhere specific in mind, not for getting an answer out of the product in the first place. If people reach for search before they read the map, the map isn't doing its job.
 - **What nobody else does:** real-time heatmaps exist (nightlife-focused, built for residents); static tourist guides exist. Nobody combines both, and nobody treats packed-vs-local as two separate signals on one map. Google Maps' Popular Times is the long-term platform threat — worth watching on a recurring cadence, not a one-time snapshot, since it's the fastest path for a bigger player to close this gap.
 
 ## Business model
