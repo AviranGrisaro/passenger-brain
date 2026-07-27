@@ -396,7 +396,7 @@
   <header class="hero" id="northstar">
     <div class="status-row">
       <span>Owner: Aviran Grisaro</span>
-      <span>Last updated: 2026-07-26</span>
+      <span>Last updated: 2026-07-27</span>
     </div>
 
     <h1 class="wordmark">Passenger Strategy</h1>
@@ -461,7 +461,7 @@
         <li><strong>Density is a synthetic feed for now</strong>, time-bound to the slider hour, while a live popular-times data source is evaluated separately.</li>
         <li>Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.</li>
         <li>Saved places — kept, core. Visited places — a manual "mark as visited" list ships in V1; automatic dwell-based detection (Always-location background permission) stays a Phase 3 feature, not V1.</li>
-        <li>Live Events — a live events overlay on the time slider, on top of the two core layers. Ships in V1, not deferred to Phase 2.</li>
+        <li>No Live Events overlay in V1 — moved to Phase 2 (2026-07-27). The V1 map is heat + tag, and nothing else.</li>
       </ul>
     </div>
 
@@ -496,9 +496,11 @@
         </ul>
       </div>
       <div class="scope-card future">
-        <h4>Live Events — in V1, not a Phase 2 candidate</h4>
-        <p style="margin:0 0 8px; font-size:0.9rem;">Corrected 2026-07-26: this was scoped as a Phase 2 candidate, but it's built and shipping unflagged in V1 — a live events overlay on the time slider, on top of the two core layers, additive on top of heat + tag, not a rework of the core map.</p>
+        <h4>Phase 2 — Live Events</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Moved out of V1 on 2026-07-27 (decision #20). A live events overlay on the time slider, additive on top of heat + tag, not a rework of the core map.</p>
         <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
+          <li>Subscription-gated when it ships, alongside proximity intelligence and Scenic View.</li>
+          <li>Salvage warning: the Locali client had an events overlay shipping unflagged. When the client is rebuilt, it must not come back in from salvage — this is Phase 2 scope now.</li>
           <li>If Events ever grows a business side (ticketing commission, promoter placement), that's B2B-shaped monetization — conflicts with the standing "no business-facing monetization" scope line. Needs an explicit call if/when it comes up, not an assumed exception.</li>
         </ul>
       </div>
@@ -550,7 +552,7 @@
       <p>Core map free forever. Subscription unlocks premium features on top.</p>
       <ul>
         <li>Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, Saved/Visited. No paywall on the thing that makes Passenger Passenger.</li>
-        <li>Subscription unlocks premium features as they ship, starting with Phase 2's proximity intelligence. One recurring price, not gated per-feature.</li>
+        <li>Subscription unlocks premium features as they ship: <strong>proximity intelligence, Scenic View, and Live Events</strong>, all arriving in Phase 2. One recurring price, not gated per-feature.</li>
         <li><strong>AI local guide</strong> (Phase 3) is a further purchase on top of the subscription — its own upsell, not included even for subscribers.</li>
         <li>Free core reaches every tourist who'd never subscribe for a 3-day trip — it's the growth engine. Subscription is the monetization layer on top of people who already show up, not a gate in front of them.</li>
         <li>Price point is TBD — test once there's a premium feature worth charging for and real paid traffic to test against.</li>
@@ -578,7 +580,7 @@
           </tr>
           <tr>
             <td class="phase">2 — Marketing + first features</td>
-            <td class="what">Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence and live popular-times density; Scenic View evaluated as a candidate (Live Events shipped in V1, not a Phase 2 evaluation item); core map stays free</td>
+            <td class="what">Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence, Scenic View, Live Events, and live popular-times density; core map stays free</td>
             <td class="q">Will people upgrade once acquired, and does the product hold up as real features and real users land at the same time?</td>
           </tr>
           <tr>
@@ -681,7 +683,7 @@
   </section>
 
   <footer class="doc-footer">
-    <p>Passenger — Strategy. Owner: Aviran Grisaro. Last updated: 2026-07-26.</p>
+    <p>Passenger — Strategy. Owner: Aviran Grisaro. Last updated: 2026-07-27.</p>
     <p>Source: <code>04-strategy/locali-strategy.md</code>. This page is a hand-designed reading view of that document, not a generated twin.</p>
     <div class="flat-note">
       <p>Flat color only, no gradients anywhere on this page.</p>
