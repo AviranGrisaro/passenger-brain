@@ -456,7 +456,7 @@
       </div>
       <div class="item">
         <span class="item-name">Tag layer</span><span class="cost">0 taps</span>
-        <span class="item-why">Localness accent per zone and spot, three plain-language values: <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — on by default, orthogonal to heat, never blended. <strong>Heat + tag is the entire V1 map</strong> — two layers, exactly as the north star describes.</span>
+        <span class="item-why">Localness accent, three plain-language values: <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — on by default, orthogonal to heat, never blended. <strong>Heat + tag is the entire V1 map</strong> — two layers, exactly as the north star describes. <strong>Renders at whatever granularity is legible per zoom, not everywhere at once</strong> — see Map state, revised after Aviran's pushback on badge density.</span>
       </div>
       <div class="item">
         <span class="item-name">"Tel Aviv, right now" title</span><span class="cost">0 taps</span>
@@ -474,6 +474,10 @@
         <span class="item-name">Near-me button</span><span class="cost">0 to see · 1 tap</span>
         <span class="item-why">Recenter affordance. Persistent icon, part of map chrome.</span>
       </div>
+      <div class="item">
+        <span class="item-name">Neighborhood button<span class="sub" style="display:block; font-weight:500; color:var(--muted); font-size:0.78rem;">"See all of [Neighborhood]"</span></span><span class="cost">0 to see at neighborhood zoom · 1 tap</span>
+        <span class="item-why"><span class="flag">DESIGN CALL</span>Explicit, Bump-inspired affordance naming the dominant zone in view — a second, more reliable door into the same zone sheet a polygon tap already opens. Map-surface chrome, not a sheet, so it belongs with Primary by construction — but it's the first <em>conditional</em> Primary item here: visible only at neighborhood zoom, not from anywhere the way the slider or chips are. Exists because a loosely-bounded polygon is a hard-to-discover tap target (Fitts's Law) — tapping the zone shape still works.</span>
+      </div>
     </div>
 
     <div class="tier t2">
@@ -484,7 +488,7 @@
       <div class="tier-note">Lighter than it might otherwise be. V1 hands off to native Maps/Waze at the moment of "go" rather than building its own routing screen, so there's no in-app takeover surface to place here. Three items now, not two — search (decision #23) joins zone sheet and spot sheet.</div>
       <div class="item">
         <span class="item-name">Zone sheet</span><span class="cost">1 tap</span>
-        <span class="item-why">Hand-curated neighborhood blurb + tagged spot list. Bottom sheet; the map stays visible behind it.</span>
+        <span class="item-why">Hand-curated neighborhood blurb + tagged spot list. Reached by tapping a zone shape <em>or</em> the neighborhood button when one's showing — two doors, same destination. Bottom sheet; the map stays visible behind it.</span>
       </div>
       <div class="item">
         <span class="item-name">Spot sheet</span><span class="cost">1–2 taps</span>
@@ -710,7 +714,7 @@
     <div class="surfaces">
       <div class="surface-card">
         <h4>Map chrome</h4>
-        <p>Always on screen, never dismissed — heat and tag layers, slider, category chips, fading title, near-me button, Saved and Visited icons.</p>
+        <p>Always on screen, never dismissed — heat and tag layers, slider, category chips, fading title, near-me button, Saved and Visited icons. The neighborhood button lives here too, with one difference: it's conditionally present, only rendering at neighborhood zoom, rather than visible from any state the way the rest of this list is.</p>
       </div>
       <div class="surface-card">
         <h4>Sheets</h4>
@@ -721,6 +725,8 @@
         <p>It's a system hand-off to native Maps/Waze, which exits Passenger entirely. Returning afterward drops the user wherever iOS left off — typically the spot sheet or the map. Passenger doesn't reconstruct any state for this, because it never built a screen to leave in the first place.</p>
       </div>
     </div>
+
+    <div class="prose"><p style="font-size:0.89rem;"><strong>The zone sheet now has three doors, one destination.</strong> Tapping a zone shape, tapping the neighborhood button, and selecting a neighborhood result from search all open the exact same zone sheet — none of them a different surface, none changing what depth costs. The button and search just give an always-there polygon tap two more reliable front doors.</p></div>
 
     <div class="depth">
       <div class="lbl">Depth rule: 2 levels, no more, while inside the app</div>
@@ -735,35 +741,44 @@
     <p class="eyebrow">What the map shows, when</p>
     <h2>Map state &amp; density</h2>
 
-    <h3>Zoom levels</h3>
+    <div class="snag" style="margin-bottom:18px;">
+      <span class="k">Revised this round</span>Aviran's pushback, verbatim: <em>"how do you show tag layer on every location on the map? its gonna be too much information on one layer."</em> He was right — the previous version badged every close-zoom pin, then stacked a warning badge on top of that. Worst case (Florentin at 8pm, dozens of pins) was heat fill plus a tag badge plus sometimes a warning badge, once per pin, all at once. Rewritten below around one governing fix: <strong>tag gets the same progressive disclosure heat already has</strong>, instead of trying to render at every zoom simultaneously.
+    </div>
+
+    <h3>Zoom levels, and where each layer actually lives</h3>
     <div class="prose">
       <ul>
-        <li><strong>City-wide</strong> — Tel Aviv in full, heat as neighborhood-scale blobs, no individual pins.</li>
-        <li><strong>Neighborhood</strong> — zone boundaries visible, tag accents readable per zone, still no spot-level pins.</li>
-        <li><strong>Close</strong> — individual spot pins appear, each carrying its own vibe-tag badge. Blurb and spot detail become reachable by tap.</li>
+        <li><strong>City-wide</strong> — heat as neighborhood-scale blobs. <strong>No tag signal at all yet, and no pins.</strong> Badging every neighborhood in Tel Aviv at once would be the identical clutter problem one level up.</li>
+        <li><strong>Neighborhood</strong> — zone boundaries visible, heat as zone-level stepped-band fill. <strong>This is the tag layer's home.</strong> Each zone carries at most one small tag badge anchored at its centroid — Local, Tourist, or nothing (see the Mix rule below). Decision #12 bounds this at dozens of neighborhoods citywide and only a handful visible per viewport at this zoom — a legible badge count, which dozens of spot pins never were. Still no spot pins.</li>
+        <li><strong>Close</strong> — individual spot pins appear. <strong>Pins carry no tag signal at all.</strong> Heat continues exactly as it rendered at neighborhood zoom; pins exist only to mark a location and its category. Tapping a pin opens the spot sheet, where the vibe tag renders as what it always was underneath the map: a word in a sheet, not a decoration competing with dozens of others.</li>
       </ul>
+      <p><span class="flag">DESIGN CALL</span>Whether spot pins should carry tag at all was left open for me to decide. I'm calling it <strong>no, never</strong> — not "no badge, but a tag-colored pin shape instead." Even a pin whose own shape and fill encode tag still asks the eye to individually parse every pin in a crowded block one at a time; the only fix that survives Florentin at 8pm is moving spot-level tag off the map surface entirely, onto the zone sheet's list, where it's a word read one row at a time. Decision #12 still keeps spot-level localness <em>data</em> — this only changes where it <em>renders</em>. Pin anatomy, clustering, and exact labels are in the companion spec linked below.</p>
     </div>
 
     <h3>Slider hours</h3>
     <div class="prose">
-      <p>Heat is the only time-variant layer — it redraws per hour selected, because crowd density genuinely changes hour to hour. The tag layer is time-invariant: a place's localness doesn't change by the hour, so it never moves when the slider does.</p>
+      <p>Unchanged by any of this — heat is the only time-variant layer, tag isn't, so a zone's tag badge never moves when the slider does, regardless of which granularity it's currently rendering at.</p>
     </div>
 
-    <h3>The packed + touristy trap — now more load-bearing, not less</h3>
+    <h3>Mix renders no badge, ever, at any granularity</h3>
     <div class="prose">
-      <p>With three tags, there is <strong>no dedicated vocabulary entry for the worst-case combination anymore</strong>. A busy zone tagged Tourist has to read as something worth avoiding purely from heat and tag shown together — no fourth word is doing that work. That makes the display treatment the whole signal, not a nice-to-have on top of a tag that already said it.</p>
-      <ul>
-        <li>Heat and tag still render on <strong>different visual channels</strong>, never the same one — heat as background fill intensity (stepped bands, no gradients), tag as a badge and label on top, independent of the fill's hue.</li>
-        <li><span class="flag">DESIGN CALL</span>When heat crosses a "busy" threshold on something tagged <span class="tag-chip tag-tourist">Tourist</span>, render a distinct warning-style badge on top of the normal tag badge. Not new text, not a new tag — an icon treatment that appears only when both conditions are true at once. <strong>Computed at display time, never a stored field:</strong> the two layers stay orthogonal in the data model exactly as the strategy requires; only the rendering notices when they coincide.</li>
-        <li><span class="flag">DESIGN CALL</span>The reverse case deserves equal thought. Busy + <span class="tag-chip tag-local">Local</span> should never read as a warning — if anything it's the strongest possible endorsement, busy <em>because</em> it's actually good. No special badge there; the <em>absence</em> of the warning becomes legible precisely because the warning exists for the other case.</li>
-        <li>The "very local but temporarily busy" case still holds. Heat is time-variant, tag isn't — a Local-tagged spot spiking busy at 9pm reads as "busy AND local", two true facts, never as evidence it turned touristy. The warning badge only fires on Tourist-tagged busy spots, which keeps this distinction automatic rather than something the user has to reason through.</li>
-      </ul>
+      <p>With three tags, Mix is the unmarked middle and almost certainly the most common single value — badging it would be pure clutter carrying zero information. A zone badge only ever appears for <span class="tag-chip tag-local">Local</span> or <span class="tag-chip tag-tourist">Tourist</span>; a blank zone reads as Mix. <span class="flag">DESIGN CALL</span>A zone with no curated data yet also renders blank, identically — the map surface doesn't try to distinguish "confidently Mix" from "not yet rated," and that's an accepted trade-off: tapping in always resolves which one it is, the same way every other empty state in this doc resolves "no data here" on contact rather than pre-announcing it on the map.</p>
     </div>
 
-    <h3>Search results and the map — a real design call</h3>
+    <h3>The packed + touristy trap — replace, don't stack</h3>
+    <div class="prose">
+      <p>A zone that's simultaneously busy and Tourist-tagged doesn't get two decorations — it gets <strong>one badge, in a distinct warning form, replacing the plain Tourist badge outright.</strong> Never two elements competing for the same handful of square millimeters (Von Restorff: only one "special" element per view). Busy + <span class="tag-chip tag-local">Local</span> still never gets a warning treatment of any kind — the absence stays legible precisely because the warning exists for the other case, and that logic survives the move to zone granularity unchanged. The "very local but temporarily busy" case holds too: heat is time-variant, tag isn't, so a Local-tagged zone spiking busy at 9pm reads as "busy AND local," never as evidence it turned touristy.</p>
+    </div>
+
+    <div class="surface-card" style="margin-bottom:18px;">
+      <h4>Pin anatomy, clustering &amp; accessibility labels</h4>
+      <p>Specified in the companion doc, not here — that level of rendering detail would bloat a flows document: <code>design/map-rendering-spec.md</code> <span style="color:var(--muted); font-size:0.82rem;">(markdown only, no reading-view twin)</span>. What belongs here is the structural fact that governs it: the busy+Tourist warning and the Mix-is-silent rule both now live at zone badges, not spot pins.</p>
+    </div>
+
+    <h3>Search results and the map — a real design call, unaffected by the above</h3>
     <div class="prose">
       <p>Decision #23 settles that results carry heat and tag and honor the slider hour, but not what the map itself does visually while the search sheet is open.</p>
-      <p><span class="flag">DESIGN CALL</span>While results are showing, the map underneath dims everything except the matching pins — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath. Search doesn't become a second, persistent filter sitting alongside the category chips — that would blur the one thing category chips are for and undercut the same "you don't need to ask" reasoning that keeps search out of Primary chrome in the first place.</p>
+      <p><span class="flag">DESIGN CALL</span>While results are showing, the map underneath dims everything except the matching pins or zones — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath. Search doesn't become a second, persistent filter sitting alongside the category chips — that would blur the one thing category chips are for and undercut the same "you don't need to ask" reasoning that keeps search out of Primary chrome in the first place.</p>
     </div>
   </section>
 
@@ -801,9 +816,10 @@
         </div>
       </div>
 
-      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, seven things are reachable without leaving the map:</p>
+      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, eight things are reachable without leaving the map:</p>
       <div class="fan">
-        <span class="node sec">Tap a zone<span class="sub">→ zone sheet</span></span>
+        <span class="node sec">Tap a zone shape<span class="sub">→ zone sheet</span></span>
+        <span class="node pri">Neighborhood button<span class="sub">→ zone sheet · neighborhood zoom only</span></span>
         <span class="node sec">Tap a spot pin<span class="sub">→ spot sheet</span></span>
         <span class="node pri">Drag slider<span class="sub">heat redraws</span></span>
         <span class="node pri">Toggle category<span class="sub">filters in place</span></span>
@@ -811,6 +827,7 @@
         <span class="node ter">Visited<span class="sub">→ spot sheet</span></span>
         <span class="node sec">Search<span class="sub">→ spot or zone sheet</span></span>
       </div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:6px;">Zone shape, neighborhood button, and a search neighborhood result are three doors into the same zone sheet — none of them a different destination.</p>
 
       <p style="font-size:0.82rem; color:var(--muted); margin:18px 0 8px;">Search branches on result type — the one entry point that can land on either sheet:</p>
       <div class="dgm-scroll">
@@ -845,11 +862,11 @@
       <div class="dgm-scroll">
         <div class="tree">
           <div class="tree-row">
-            <span class="node pri">MAP — Primary<span class="sub">heat + tag (2 layers only) · slider · chips · title · near-me &nbsp;|&nbsp; 0 taps</span></span>
+            <span class="node pri">MAP — Primary<span class="sub">heat (all zooms) + tag (zone badges only) · slider · chips · title · near-me &nbsp;|&nbsp; 0 taps</span></span>
           </div>
           <div class="tree-row">
-            <span class="rail">└─</span>
-            <span class="node sec">Zone sheet — Secondary<span class="sub">1 tap</span></span>
+            <span class="rail">├─</span>
+            <span class="node sec">Zone sheet — Secondary<span class="sub">1 tap · 2 doors: zone shape + neighborhood button</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">&nbsp; &nbsp;└─</span>
@@ -862,6 +879,10 @@
           <div class="tree-row">
             <span class="rail">&nbsp; &nbsp; &nbsp; &nbsp;└─</span>
             <span class="node ter">Local-QA prompt — Tertiary<span class="sub">embedded, contextual · no surface of its own</span></span>
+          </div>
+          <div class="tree-row">
+            <span class="rail">├─</span>
+            <span class="node pri">Neighborhood button — Primary<span class="sub">conditional · neighborhood zoom only · → zone sheet above</span></span>
           </div>
           <div class="tree-row">
             <span class="rail">├─</span>
@@ -967,9 +988,9 @@
       </li>
       <li>
         <span class="qn">Q5</span>
-        <span class="qt">Does the busy + Tourist warning badge need its own VoiceOver label?</span>
-        <p>It's a display-time computation, not a stored tag, so it won't inherit whatever label the tag badge already carries.</p>
-        <p class="rec"><b>Recommendation:</b> give it an explicit label — "busy and touristy, worth a second look" — rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred.</p>
+        <span class="qt">Does the busy + Tourist warning badge (now zone-level) need its own VoiceOver label?</span>
+        <p>It's a display-time computation, not a stored tag, so it won't inherit whatever label the plain Tourist badge already carries.</p>
+        <p class="rec"><b>Recommendation:</b> give it an explicit label — "busy and touristy, worth a second look" — rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred. This now has a sharper edge: the Mix-is-silent rule means a sighted user reads "no badge" as Mix, but VoiceOver can't read an absence — resolved in full in <code>design/map-rendering-spec.md</code>'s accessibility section, kept coherent with this question rather than answered twice.</p>
       </li>
       <li>
         <span class="qn">Q6</span>
@@ -982,6 +1003,12 @@
         <span class="qt">Does search respect the active category filter?</span>
         <p>If a user has narrowed the map to "Food & drinks" and then searches a keyword that's ambiguous across categories (e.g., "market"), does search scope to the active chip or search everything regardless?</p>
         <p class="rec"><b>Recommendation:</b> search everything regardless of the active category filter — a typed query is a more specific signal of intent than a standing chip, and scoping it down risks silently hiding the exact result the user typed for.</p>
+      </li>
+      <li>
+        <span class="qn">Q8</span>
+        <span class="qt">What does the neighborhood button do when the viewport straddles two zones roughly evenly?</span>
+        <p>At the boundary between Florentin and Neve Tzedek, say, with no single dominant neighborhood in view.</p>
+        <p class="rec"><b>Recommendation:</b> don't guess at a winner. Hide the button entirely below some clear-dominance threshold (e.g., one zone needs to cover meaningfully more than half the viewport) rather than risk sending someone into the wrong neighborhood's sheet with false confidence — tapping either zone shape directly still works regardless.</p>
       </li>
     </ol>
   </section>

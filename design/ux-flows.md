@@ -24,11 +24,12 @@ Passenger is one map. You open the app and you're looking at Tel Aviv, right now
 |---|---|---|---|
 | The map | Tel Aviv, MapKit, always the base layer | It's the whole product — strategy: "one map, and the whole product lives on it" | 0 |
 | Heat layer | Crowd-density fill, stepped bands (no gradients — decision #17) | On by default, the first thing you see | 0 |
-| Tag layer | Localness accent per zone/spot, three plain-language values: **Local · Mix · Tourist** | On by default, orthogonal to heat, never blended. Heat + tag is the entire V1 map — two layers, exactly as the north star describes | 0 |
+| Tag layer | Localness accent, three plain-language values: **Local · Mix · Tourist** | On by default, orthogonal to heat, never blended. Heat + tag is the entire V1 map — two layers, exactly as the north star describes. **Renders at whatever granularity is legible per zoom, not everywhere at once — see §6, revised after Aviran's pushback on badge density.** | 0 |
 | "Tel Aviv, right now" title | Fading ambient label on cold open | Decision #8, verbatim | 0 |
 | Time slider | Now → +12h control, bottom-third (thumb zone) | **My call, flagged.** Permanently visible, never dismissed, reshapes the primary view — Primary-chrome behavior, not a sheet you invoke. | 0 to see, 1 drag to change |
 | Category chips (Food & drinks / Things to do) | Persistent filter toggle | **Same call as above, same flag.** Always-visible chrome, not an invoked sheet. | 0 to see, 1 tap to change |
 | Location/"near me" button | Recenter affordance | Persistent icon, part of map chrome | 0 to see, 1 tap to use |
+| Neighborhood button ("See all of [Neighborhood]") | Explicit, Bump-inspired affordance naming the dominant zone in view; a second, more reliable door into the same zone sheet a polygon tap already opens | **My call, flagged.** Map-surface chrome, not a sheet, so it belongs with Primary by construction — but it's the first *conditional* Primary item in this doc: visible only at neighborhood zoom, when one zone dominates the viewport, not from anywhere the way the slider or chips are. It exists because a loosely-bounded polygon is an unreliable, hard-to-discover tap target (Fitts's Law: a big, unambiguous target beats an edge you have to find) — tapping the zone shape still works, this is a second door to the same place. | 0 to see at neighborhood zoom, 1 tap to use |
 
 ### Secondary — invoked from the map
 
@@ -36,7 +37,7 @@ Lighter than it might otherwise be: V1 hands off to native Maps/Waze at the mome
 
 | Item | What it is | Why Secondary | Cost |
 |---|---|---|---|
-| Zone sheet | Neighborhood blurb + tagged spot list | Requires a tap on a zone; bottom sheet, map stays visible behind it | 1 tap |
+| Zone sheet | Neighborhood blurb + tagged spot list | Requires a tap on a zone shape *or* the neighborhood button when one's showing — two doors, same destination; bottom sheet, map stays visible behind it | 1 tap |
 | Spot sheet | Name, category, vibe tag, save icon, "Go" button | One level under a zone sheet, or reachable directly from a close-zoom map pin. **"Go" hands off to native Maps/Waze — an exit from Passenger, not a screen inside it.** | 1–2 taps |
 | Search sheet | Query field matching place names, keywords, and neighborhoods; opened from an icon in map chrome | **Secondary, not Primary — Aviran's explicit call, and the reasoning matters:** a permanent search bar sitting in front of a product whose whole pitch is "you don't need to ask" undercuts that pitch. One tap away, gone when you're done, keeps the map itself as the thing you look at rather than a results page waiting for a query. | 1 tap |
 
@@ -164,8 +165,10 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 
 No nav bar, no tab bar, no feed. Two surface types:
 
-- **Map chrome** — always on screen, never dismissed: heat/tag layers, slider, category chips, fading title, near-me button, Search/Saved/Visited icons.
+- **Map chrome** — always on screen, never dismissed: heat/tag layers, slider, category chips, fading title, near-me button, Search/Saved/Visited icons. The neighborhood button lives here too, with one difference from everything else in this list — it's conditionally present, only rendering at neighborhood zoom (§6), rather than visible from any state the way the rest of this list is.
 - **Sheets** — partial-height, swipe-down or tap-outside to dismiss: zone sheet, spot sheet, search sheet, Saved list, Visited list, the local-QA card (embedded inside the spot sheet, not its own sheet).
+
+**The zone sheet now has three doors, one destination.** Tapping a zone shape, tapping the neighborhood button, and selecting a neighborhood result from search all open the exact same zone sheet. None of them is a different surface or changes what depth costs — they're three ways of naming the same 1-tap trip, which is the point: the polygon tap was always there but easy to miss or mis-hit, so the button and search give it two more reliable front doors without inventing a second destination.
 
 **"Go" is not a surface at all.** It's a system hand-off to native Maps/Waze, which exits Passenger entirely. Returning to Passenger afterward (backgrounding/foregrounding) drops the user back wherever iOS left off — typically the spot sheet or the map — Passenger doesn't reconstruct any state for this, because it never built a screen to leave in the first place.
 
@@ -179,21 +182,25 @@ Nothing in V1 needs a third in-app level — the one feature that would have req
 
 ## 6. State & density of the map
 
-**Zoom levels:**
-- **City-wide** — Tel Aviv in full, heat as neighborhood-scale blobs, no individual pins.
-- **Neighborhood** — zone boundaries visible, tag accents readable per zone, still no spot-level pins.
-- **Close** — individual spot pins appear, each carrying its own vibe-tag badge; blurb/spot-list detail becomes reachable by tap.
+**Revised this round.** Aviran's pushback, verbatim: *"how do you show tag layer on every location on the map? its gonna be too much information on one layer."* He was right — the previous version of this section badged every close-zoom pin, then stacked a warning badge on top of that. Worst case (Florentin at 8pm, dozens of pins) was heat fill plus a tag badge plus sometimes a warning badge, once per pin, all at once. That doesn't survive contact with a real dense neighborhood. Rewritten below around one governing fix: **tag gets the same progressive disclosure heat already has, instead of trying to render at every zoom simultaneously.**
 
-**Slider hours:** heat is the only layer that's time-variant — it redraws per the hour selected, because crowd density genuinely changes hour to hour. The tag layer is time-invariant: a place's localness doesn't change by the hour, so it never moves when the slider does.
+**Zoom levels, and where each layer actually lives:**
 
-**The packed + touristy trap — now more load-bearing, not less.** With three tags — Local, Mix, Tourist — there is no dedicated vocabulary entry for the worst-case combination anymore. A busy zone tagged Tourist has to read as something worth avoiding purely from heat and tag shown together — there is no fourth word doing that work for us. That makes the display treatment the whole signal, not a nice-to-have on top of a tag that already said it:
+- **City-wide** — heat as neighborhood-scale blobs. **No tag signal at all yet, and no pins.** Badging every neighborhood in Tel Aviv at once would be the identical clutter problem one level up — dozens of zones instead of dozens of pins, same failure.
+- **Neighborhood** — zone boundaries visible, heat as zone-level stepped-band fill. **This is the tag layer's home.** Each zone carries at most one small tag badge anchored at its centroid — Local, Tourist, or nothing (see the Mix rule below). Decision #12 bounds this at dozens of neighborhoods citywide and only a handful visible in any one viewport at this zoom — a legible number of badges, which dozens of individual spot pins never were. Still no spot pins.
+- **Close** — individual spot pins appear. **Pins carry no tag signal at all.** Heat continues exactly as it rendered at neighborhood zoom (area-level fill, unchanged) — pins exist only to mark a location and its category, nothing more. Tapping a pin opens the spot sheet, where the vibe tag renders as what it always was underneath the map: a word in a sheet, not a decoration competing with dozens of others for the same screen.
 
-- Heat and tag still render on different visual channels, never the same one — heat as background fill intensity (stepped bands, no gradients), tag as a badge/icon + text label on top, independent of the fill's hue.
-- **[design call]** When heat crosses a "busy" threshold on a zone or spot tagged **Tourist**, render a distinct warning-style badge on top of the normal tag badge — not new text, not a new tag, just an icon treatment that only appears when both conditions are true at once. This is computed at display time, not a stored field: the two layers stay orthogonal in the data model exactly as the strategy requires; only the rendering notices when they coincide.
-- **[design call]** The reverse case deserves equal thought: busy + **Local** should never read as a warning — if anything it's the strongest possible endorsement ("busy because it's actually good"). No special badge needed there; the *absence* of the warning badge becomes legible precisely because the warning badge exists for the other case.
-- The "very local but temporarily busy" case still holds (heat is time-variant, tag isn't): a Local-tagged spot spiking busy at 9pm should read as "busy AND local," two true facts, never as evidence it's turned touristy. The warning badge above only fires on Tourist-tagged busy spots, which keeps this distinction automatic rather than something the user has to reason through.
+**[design call, mine]** Whether spot pins should carry tag at all, at any zoom, was left open for me to decide. I'm calling it **no, never** — not "no badge, but yes to a tag-colored pin shape instead." Aviran's complaint was about density of *signal*, not just density of *objects*: even a pin whose own shape and fill encode tag (no separate badge riding beside it) still asks the eye to individually parse every pin in a crowded block one at a time. The only fix that actually survives Florentin at 8pm is moving spot-level tag off the map surface entirely, onto the zone sheet's list, where it's a word read one row at a time instead of a field scanned all at once spatially. Decision #12 still keeps spot-level localness *data* — this only changes where it *renders*. If a future pass wants tag-per-pin back (e.g., a "show only Local spots" close-zoom mode as a deliberate feature), that's a new decision to make then, not a default to fall back into.
 
-**Search results and the map — a real design call.** Decision #23 settles that results carry heat/tag and honor the slider hour, but not what the map itself does visually while the search sheet is open. **[design call]** While results are showing, the map underneath dims everything except the matching pins — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath. Search doesn't become a second, persistent filter sitting alongside the category chips — that would blur the one thing category chips are for and undercut the same "you don't need to ask" reasoning that keeps search out of Primary chrome in the first place.
+**Slider hours:** unchanged by any of this — heat is the only time-variant layer, tag isn't, so a zone's tag badge never moves when the slider does, regardless of which granularity it's currently rendering at.
+
+**Mix renders no badge, ever, at any granularity.** With three tags, Mix is the unmarked middle and almost certainly the most common single value — badging it would be pure clutter carrying zero information. A zone badge only ever appears for Local or Tourist; a blank zone reads as Mix. **[design call]** A zone with no curated data yet also renders blank, identically — the map surface doesn't try to distinguish "confidently Mix" from "not yet rated," and that's an accepted trade-off, not an oversight: tapping in always resolves which one it is, the same way every other empty state in this doc already resolves "no data here" on contact rather than pre-announcing it on the map.
+
+**The packed + touristy trap — replace, don't stack.** A zone that's simultaneously busy and Tourist-tagged doesn't get two decorations — it gets **one badge, in a distinct warning form, replacing the plain Tourist badge outright.** Never two elements competing for the same handful of square millimeters (design-principles.md §2, Von Restorff: only one "special" element per view). Busy + **Local** still never gets a warning treatment of any kind — the absence of a warning stays legible precisely because the warning exists for the other case, and that logic survives the move to zone granularity unchanged. The "very local but temporarily busy" case holds too: heat is time-variant, tag isn't, so a Local-tagged zone spiking busy at 9pm reads as "busy AND local," never as evidence it turned touristy.
+
+**Pin clustering, pin anatomy, and the exact accessibility labels for all of this** are specified in the companion doc, not here — that level of rendering detail would bloat a flows document: [`design/map-rendering-spec.md`](./map-rendering-spec.md). What belongs in *this* doc is the structural fact that governs it: the busy+Tourist warning and the Mix-is-silent rule both now live at zone badges, not spot pins, which is what makes the rendering spec's job (clustering dozens of untagged pins) simpler than the version of this problem the previous draft left behind.
+
+**Search results and the map — a real design call, unaffected by the above.** Decision #23 settles that results carry heat/tag and honor the slider hour, but not what the map itself does visually while the search sheet is open. **[design call]** While results are showing, the map underneath dims everything except the matching pins or zones — search filters what's visually prominent, not just what's technically attached to each result row, so "search filters the map, it doesn't bypass it" is true on screen, not only in the data. This is temporary: the moment a result is selected and the destination sheet opens, the dimming clears and the full unfiltered heat/tag view returns underneath. Search doesn't become a second, persistent filter sitting alongside the category chips — that would blur the one thing category chips are for and undercut the same "you don't need to ask" reasoning that keeps search out of Primary chrome in the first place.
 
 ---
 
@@ -209,7 +216,8 @@ flowchart TD
     C -->|Denied| E[Stay on default city-wide view, near-me greyed]
     D --> F[Steady state: map + slider + chips]
     E --> F
-    F --> G[Tap a zone] --> ZS[Zone sheet: blurb + spot list]
+    F --> G[Tap a zone shape] --> ZS[Zone sheet: blurb + spot list]
+    F --> T["Neighborhood button<br/>(shows at neighborhood zoom)"] --> ZS
     F --> H[Tap a spot pin] --> M[Spot sheet: tag, save, Go]
     ZS --> M
     F --> I[Drag time slider]
@@ -228,8 +236,10 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Map["MAP — Primary (0 taps)\nheat + tag, 2 layers only + slider + chips + title"]
+    Map["MAP — Primary (0 taps)\nheat (all zooms) + tag (zone badges only, §6) + slider + chips + title"]
     Map --> Zone["Zone sheet — Secondary (1 tap)"]
+    Map --> Neigh["Neighborhood button — Primary\n(conditional: neighborhood zoom only)"]
+    Neigh --> Zone
     Zone --> Spot["Spot sheet — Secondary (1-2 taps)"]
     Spot -.Go, exits app.-> Handoff["Native Maps/Waze\n(outside Passenger)"]
     Map --> Search["Search sheet — Secondary (1 tap)"]
@@ -266,6 +276,7 @@ Two things are parked as of this revision — Scenic View and Live Events both m
 2. **Lazy location permission — exact trigger mechanism.** Decision #8 says "lazy," but not whether that means an automatic system prompt shortly after the map first renders, or only on the user's first tap of "near me." **Recommendation:** auto-prompt once, softly, a couple of seconds after the map first renders — gets Visited-tracking started as early as possible without blocking the first look at the map.
 3. **Does the time slider ever look backward?** Taken here as strictly forward-only, "now → +12 hours." Worth confirming there's no case for showing "an hour ago" for context before this is locked into the build.
 4. **Visited detection during a hand-off.** V1's Visited list depends entirely on the geofence monitor catching a visit while Passenger is backgrounded — the user is inside Maps/Waze, not Passenger, at the exact moment they arrive. Does iOS reliably keep background location running through that hand-off and the walk that follows, or does exiting the app risk losing the one signal Visited depends on? **Recommendation:** confirm background-location behavior with the architect before treating Visited's automatic-only design (decision #16) as settled — if it's shaky, a lightweight manual backstop may be needed even though the current decision rules one out.
-5. **Does the computed busy + Tourist warning badge (§6) need its own VoiceOver label?** It's a display-time computation, not a stored tag, so it won't inherit whatever label the tag badge already carries. **Recommendation:** give it an explicit label ("busy and touristy — worth a second look") rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred.
+5. **Does the computed busy + Tourist warning badge (§6, now zone-level) need its own VoiceOver label?** It's a display-time computation, not a stored tag, so it won't inherit whatever label the plain Tourist badge already carries. **Recommendation:** give it an explicit label ("busy and touristy — worth a second look") rather than relying on VoiceOver to read heat and tag separately and expecting the combination to be inferred. This now has a second, sharper edge to it: §6's Mix-is-silent rule means a sighted user reads "no badge" as Mix, but VoiceOver can't read an absence — full detail and resolution in `design/map-rendering-spec.md`'s accessibility section, kept coherent with this question rather than answered twice.
 6. **Does the search sheet keep recent searches?** There's no account and no persistence story anywhere else in V1 — the time slider itself resets to "now" every launch on purpose. **Recommendation:** default to no persisted history across launches, matching that pattern; a session-only recent list (cleared on relaunch) is a reasonable middle ground if a completely blank field on every open feels too cold, but that's worth Aviran's read since locals searching the same handful of things repeatedly is a real, recurring use case this would help.
 7. **Does search respect the active category filter?** If a user has narrowed the map to "Food & drinks" and then searches a keyword that's ambiguous across categories (e.g., "market"), does search scope to the active chip or search everything regardless? **Recommendation:** search everything regardless of the active category filter — a typed query is a more specific signal of intent than a standing chip, and scoping it down risks silently hiding the exact result the user typed for.
+8. **What does the neighborhood button do when the viewport straddles two zones roughly evenly** — at the boundary between Florentin and Neve Tzedek, say, with no single dominant neighborhood in view? **Recommendation:** don't guess at a winner. Hide the button entirely below some clear-dominance threshold (e.g., one zone needs to cover meaningfully more than half the visible viewport) rather than risk sending someone into the wrong neighborhood's sheet with false confidence — tapping either zone shape directly still works regardless, so nothing is lost by having the button stay quiet in the ambiguous case.
