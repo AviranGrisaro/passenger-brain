@@ -460,7 +460,7 @@
         <li><strong>Localness is decided by algorithm plus local QA, together.</strong> Algorithm proposes; real users verify/correct in-app — crowdsourced, not a hired team. Permanent pipeline, not a stopgap. Trades staffing risk for two others: <strong>cold start</strong> (new city, no users yet to ask) and <strong>incentive</strong> (no reward system in V1 — see Phase 3's points system).</li>
         <li><strong>Density is a synthetic feed for now</strong>, time-bound to the slider hour, while a live popular-times data source is evaluated separately.</li>
         <li>Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.</li>
-        <li>Saved places — kept, core. Visited places — populates <strong>automatically</strong> from geofence detection after the lazy location grant (decision #16, reconfirmed 2026-07-27). No manual "mark as visited" action in V1.</li>
+        <li><strong>One list of places, fed three ways</strong> (decision #26, supersedes #16): a manual save, an auto-save after dwelling somewhere 20+ minutes, or geofence detection that you were there. Saved and Visited are no longer separate lists, and the list renders on the map as well. Auto-save fires only on places already in Passenger's places table, so a home or office is never saved.</li>
         <li>No Live Events overlay in V1 — moved to Phase 2 (2026-07-27). The V1 map is heat + tag, and nothing else.</li>
         <li><strong>Search</strong> — an icon in the map chrome opening a sheet. Place names, keywords ("hummus", "rooftop bar"), and neighborhoods. A name or keyword jumps to the spot; a neighborhood pans the map and opens its zone sheet. Results carry the same heat and tag signals and honor the slider hour — search filters the map, it doesn't bypass it.</li>
       </ul>
@@ -513,7 +513,7 @@
           <li>Loose daily itineraries, assembled from the same time/density logic already powering V1's map.</li>
           <li>Audio-first — listen while walking instead of staring at the phone.</li>
           <li>Personalization that sharpens with use.</li>
-          <li><strong>Auto-saved places</strong> — stay somewhere 20+ minutes, it auto-saves. No manual save needed. Same mechanic as Bump.</li>
+          <li><em>Auto-saved places moved to V1 on 2026-07-27 (decision #26) — no longer a Phase 3 item.</em></li>
           <li>Needs identity + preference tracking neither V1 nor Phase 2 requires — the real reason this waits for Phase 3.</li>
         </ul>
       </div>
@@ -521,7 +521,7 @@
         <h4>Phase 3 candidate — Shake to roll</h4>
         <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. Shake your phone, get one nearby thing to do. No scrolling, no choosing, just go.</p>
         <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
-          <li>Not random — weighted by preference, Saved places, Visited places, and what's hot right now (heat layer). That's why it needs Phase 3's identity + preference tracking, same dependency as the AI local guide.</li>
+          <li>Not random — weighted by preference, your places list, and what's hot right now (heat layer). That's why it needs Phase 3's identity + preference tracking, same dependency as the AI local guide.</li>
         </ul>
       </div>
       <div class="scope-card future">
@@ -536,8 +536,8 @@
         <h4>Phase 3 candidate — Hex area discovery (fog-of-war)</h4>
         <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. A reveal-as-you-explore hex grid over the whole map — cells stay fogged until you physically visit that area, Foursquare-style.</p>
         <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
-          <li>Already built and flagged off (`FeatureFlags.hexAreaDiscovery`) — Phase 3 here means unflagging and polishing, not building from zero.</li>
-          <li>Requires Always-location background authorization, same App Store submission-safety gating as the other Always-location features (Phase 3's auto-detected Visited places, Phase 2's proximity intelligence).</li>
+          <li><strong>Stale claim, corrected 2026-07-27:</strong> this said the feature was already built and flagged off via <code>FeatureFlags.hexAreaDiscovery</code>. That was true of Locali. After the 2026-07-26 reset it is not — <code>FeatureFlags.swift</code> does not exist in <code>passenger-code</code>, and every fog-of-war file is marked BURN in <code>SALVAGE.md</code>. Shipping this means building it again, and re-opening a deliberate deletion.</li>
+          <li>Requires Always-location background authorization, same App Store submission-safety gating as the other Always-location features (V1's auto-save and visit detection as of decision #26, Phase 2's proximity intelligence).</li>
         </ul>
       </div>
     </div>
@@ -552,7 +552,7 @@
       <p><strong>Paused.</strong> Not being discussed or built further until Phase 1 proves real retention — pricing model doesn't matter with zero users. The shape below is the working plan for when that signal exists, not something to refine further right now.</p>
       <p>Core map free forever. Subscription unlocks premium features on top.</p>
       <ul>
-        <li>Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, Saved/Visited. No paywall on the thing that makes Passenger Passenger.</li>
+        <li>Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, search, the places list. No paywall on the thing that makes Passenger Passenger.</li>
         <li>Subscription unlocks premium features as they ship: <strong>proximity intelligence, Scenic View, and Live Events</strong>, all arriving in Phase 2. One recurring price, not gated per-feature.</li>
         <li><strong>AI local guide</strong> (Phase 3) is a further purchase on top of the subscription — its own upsell, not included even for subscribers.</li>
         <li>Free core reaches every tourist who'd never subscribe for a 3-day trip — it's the growth engine. Subscription is the monetization layer on top of people who already show up, not a gate in front of them.</li>

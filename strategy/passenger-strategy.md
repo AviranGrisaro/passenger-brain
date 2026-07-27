@@ -38,7 +38,8 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - **Localness is decided by algorithm plus local QA, together.** The algorithm proposes; real users, asked in-app whether a spot is actually local, verify and correct it — crowdsourced from the user base, not a hired/managed team. That combination is the permanent pipeline — not hand-curation alone, waiting for an algorithm to someday replace it solo. **The ask is triggered by a detected visit** — when the geofence logs that someone was actually somewhere, a local notification fires and a toast drops from the top of the screen asking whether the place felt local or touristy (decision #24). Asked while the visit is fresh, from someone who was genuinely there. Two open risks this trades in for the staffing risk it removes: **cold start** (a new city has no users yet to ask, on day one) and **incentive** (no reward system exists in V1 to make anyone bother answering — see Phase 3's points system, and the risk that creates).
 - **Density is a synthetic feed for now**, time-bound to the slider hour, while a live popular-times data source is evaluated separately.
 - Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.
-- Saved places and Visited places — kept, core. No Events overlay in V1; that's a Phase 2 candidate. The V1 map is heat + tag, and nothing else.
+- **One list of places, fed three ways** (decision #26): you save somewhere manually, you dwell somewhere 20+ minutes and it saves itself, or the geofence detects you were there. Saved and Visited are no longer separate lists. The list also renders on the map, so your own places are visible in place rather than only in a list. Auto-save only ever fires on places already in Passenger's own places table — your flat and your office are not tagged spots, so they never get saved.
+- No Events overlay in V1; that's a Phase 2 candidate. The V1 map is heat + tag, and nothing else.
 - **Search**, reached from an icon in the map chrome, opening as a sheet. Covers place names, keywords ("hummus", "rooftop bar"), and neighborhoods — a name or keyword jumps to the spot, a neighborhood pans the map and opens its zone sheet. Results carry the same heat and tag signals as the map and honor the slider hour; search filters the map, it doesn't bypass it. Added 2026-07-27 (decision #23).
 
 **Out of scope:** itineraries, bookings, Android, social features of any kind (no friends, no posting, no following, no presence), any business-facing monetization.
@@ -67,7 +68,6 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - Audio-first — listen while walking instead of staring at the phone.
 - Personalization that sharpens with use.
 - **Shake to decide** — shake your phone, get one random nearby thing to do. No scrolling, no choosing, just go.
-- **Auto-saved places** — stay somewhere 20+ minutes, it auto-saves. No manual save needed. Same mechanic as Bump.
 - **Points system** — rewards for answering local-QA questions, visiting new places, and more. This is also the incentive layer V1's crowdsourced local QA is missing — but it ships here, in Phase 3, not V1. Until then, V1 runs on early-user goodwill alone.
 - Needs identity and preference tracking neither V1 nor Phase 2 requires — that's the real reason this waits for Phase 3, not just sequencing.
 
@@ -85,7 +85,7 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 
 Freemium: core map free forever, subscription unlocks premium features on top.
 
-- Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, Saved/Visited, hand-off to native maps. That's the full V1 scope, and it never goes behind a paywall.
+- Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, the places list, hand-off to native maps. That's the full V1 scope, and it never goes behind a paywall.
 - Subscription unlocks premium features as they ship: **proximity intelligence, Scenic View, and Live Events**, all arriving in Phase 2. One recurring price, not gated per-feature.
 - **AI local guide** (Phase 3) is a further purchase on top of the subscription — its own upsell, not included even for subscribers.
 - Free core reaches every tourist who'd never subscribe for a 3-day trip — it's the growth engine. Subscription is the monetization layer on top of people who already show up, not a gate in front of them.
@@ -138,7 +138,7 @@ Everything resolves on its own except scope/strategy calls, money, App Store act
 - **Density is synthetic at launch.** The "right now" promise is only as real as the popular-times data source landing later — without it, "right now" stays simulated.
 - **Subscription pricing is unvalidated** — moot until Phase 1 proves retention; don't spend more time on it before then.
 - **Premium-conversion assumption is unproven.** Free core guarantees reach, but subscription only works if people actually upgrade rather than staying on the free map forever. Moving Scenic View and Events behind the subscription makes the paid tier meaningfully thicker than proximity intelligence alone — which cuts both ways: a better offer to convert against, and three features' worth of build cost landing in the same phase as paid acquisition.
-- **V1 is now a thinner bet.** Pulling Scenic View and Events out leaves the launch build as heat + tag + slider + zone/spot detail + Saved/Visited. That's the leanest possible test of the core premise, which is the point — but it also means the week-one-return question gets answered by the two layers alone, with nothing else to carry it if they're not enough on their own.
+- **V1 is now a thinner bet.** Pulling Scenic View and Events out leaves the launch build as heat + tag + slider + zone/spot detail + search + the places list. That's the leanest possible test of the core premise, which is the point — but it also means the week-one-return question gets answered by the two layers alone, with nothing else to carry it if they're not enough on their own.
 - **Liability.** Steering someone toward a spot that turns out unsafe or misleading needs a disclaimer/liability posture before any public paywall.
 - **Google is the closest real threat, not a distant one.** They already have real popular-times data at global scale and already index local content — "local vs. touristy" is a metadata layer they could ship if they decided to. The competitive gap here is real but closeable, not structural.
 
@@ -147,6 +147,6 @@ Everything resolves on its own except scope/strategy calls, money, App Store act
 - What exactly counts as "a real person came back within a week, unprompted" — install-to-reopen, or does it need to be unprompted by a push/email too (V1 has neither, so probably moot for now, but worth defining before Phase 1 ships)?
 - What's the right algorithm/local-QA balance as cities scale — does QA involvement shrink over time, or stay constant per city forever?
 - Does the points system need to pull forward into V1 since local QA depends on it, or is early-user goodwill actually enough for a small first cohort in one city?
-- Is the free/premium line now permanent at "V1 scope stays free forever," or could something currently in it (Saved/Visited) move behind the subscription later? The Phase 2 additions are settled as paid; what's already free is the part still worth pinning down.
+- Is the free/premium line now permanent at "V1 scope stays free forever," or could something currently in it (the places list, search) move behind the subscription later? The Phase 2 additions are settled as paid; what's already free is the part still worth pinning down.
 - **Scenic View depth**, when Phase 2 scopes it: full in-app turn-by-turn navigation, or a route preview that still hands off to native maps for the actual walking? Real build-cost difference. No longer a launch blocker, but it's the first thing Phase 2 has to answer.
 - Does removing Events from V1 change what the time slider is for? It was carrying two kinds of information — how packed a place will be, and what's happening there. Now it carries one.
