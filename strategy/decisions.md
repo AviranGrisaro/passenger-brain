@@ -38,13 +38,18 @@ Locali's own strategy was already tourist-first ("where should I walk right now 
 | 15 | **Rebrand Locali → Passenger** | Wordmark, app name, icon, App Store identity. |
 | 16 | **Keep Saved + Visited places**; strip only V1.5 target-proximity geofencing | Deviation from brief ("saved lists out of scope"). Visited populates only after lazy location grant. CityGeofenceMonitor stays. |
 | 17 | **No gradients anywhere** — heat = stepped bands / flat cells | Supersedes T-024 gradient-heatmap request. |
+| 18 | Vibe tags (3): **Local · Mix · Tourist** | 2026-07-27, direct from Aviran. **Supersedes #6.** No dedicated "tourist trap" tag — packed-and-touristy reads off heat + tag together instead of getting its own label. |
+| 19 | **Scenic View moves to Phase 2.** V1 tap-a-spot hands off to native Maps/Waze | 2026-07-27, direct from Aviran. No in-app routing in the launch build. Removes routing-engine scope from V1; the cost moves to Phase 2, it doesn't disappear. |
+| 20 | **Events overlay moves to Phase 2** | 2026-07-27, direct from Aviran. **Supersedes #14.** V1 map is heat + tag only — two layers, matching the north star exactly. |
+| 21 | **Phase 2 additions are subscription-gated** — proximity intelligence, Scenic View, Live Events | 2026-07-27, direct from Aviran. Free core is permanently the V1 scope: heat + tag, both categories, slider, zone/spot detail, Saved/Visited, native hand-off. Consistent with #9 (Phase 1 fully free). |
+| 22 | **Localness = algorithm + crowdsourced local QA**, together, as the permanent pipeline | 2026-07-27, confirmed by Aviran. **Supersedes #5** — the curator is not the definition of "local" for V1. Real users are asked in-app whether a spot is actually local; the algorithm proposes, they verify and correct. Trades staffing risk for cold-start and incentive risk (no reward layer until Phase 3's points system). |
 
 ## Knowing deviations from the brief
 
-- **Events kept** (brief: two categories only, that's the whole taxonomy).
+- ~~**Events kept**~~ — reversed by #20. Events is Phase 2; V1 is back to the brief's two-layer map.
 - **Saved + Visited kept** (brief: saved lists out of scope for V1).
-- **"Tourist trap"** tag added (brief names 4 + "etc.").
-- **V1 does not live-scrape** — the "from TikTok / local-language" north star is delivered via hand-curation in V1; the real pipeline is the C4 spike.
+- ~~**"Tourist trap"** tag added~~ — reversed by #18. Down to three tags, fewer than the brief's four.
+- **V1 does not live-scrape** — the "from TikTok / local-language" north star is delivered in V1 by the algorithm-plus-crowdsourced-QA pipeline (#22), not by live scraping; the scraping pipeline is the C4 spike.
 
 ## Critical path
 
