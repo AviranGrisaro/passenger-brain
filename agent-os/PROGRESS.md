@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-28 — chief-of-staff — STANDING RULE: local-only, no git push until Aviran says so
+
+- **Provenance:** founder-direct, live chat, via `/cos`. Verbatim: "until further messages, work locally only. nothing to push. once i have a git i will tell you push it to git."
+- **Rule:** no `git push` of any kind, on any repo (`passenger-brain`, `passenger-code`, or any other), until Aviran explicitly says "push it" in a future message. Commits, edits, Linear updates, and agent dispatch continue as normal — only the push step is held.
+- **Current state at time of this instruction:** neither `passenger-brain` nor `passenger-code` has a `git remote` configured right now, so there is nothing to push regardless — this rule is pre-emptive, for when a remote gets added.
+- **Binding on:** this chief-of-staff session and every agent it dispatches for the duration of this rule — per the standing memory rule, any agent reads this Current Snapshot/recent worklog before working, so this entry is how the rule reaches them without a separate broadcast.
+- **Left behind:** when Aviran says "push it," resume normal push behavior per each agent's own file (commit + push same turn) — no further confirmation needed once he's said it.
+
+---
+
 ### 2026-07-28 — marketing — Phase 1 marketing & acquisition plan
 
 - **Did:** Wrote `marketing/phase-1/marketing-acquisition-plan.md` (+ local-only `.html` twin, gitignored) using the `/marketing-plan` skill structure. Read `agent-os/BOARD.md` and this file's worklog, `strategy/passenger-strategy.md` in full, and confirmed via `passenger-code` git log (`chore: empty the app so the first feature starts from scratch`) plus a codebase grep that no analytics/tracking tooling exists anywhere yet — the app is pre-build. Plan covers: Tel Aviv-specific audience (backpacker/hostel circuit + local-QA-relevant residents, explicitly excluding friends/family), zero-spend channels (hostel front-desk seeding, free walking-tour mentions, disclosed founder posts in local Facebook/Reddit communities, café/bar table-tents at genuinely local spots, ASO copy drafting), an acquisition funnel ending in the one metric that matters, and a measurable pass/fail bar.
