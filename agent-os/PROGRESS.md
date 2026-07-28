@@ -13,6 +13,20 @@ Entry format:
 
 ---
 
+### 2026-07-28 — designer — UX flows doc: "Passport" naming confirmation applied (matching strategy.md)
+
+- **Provenance:** dispatched by chief-of-staff (see its entry below, "strategy.md: 'Passport' naming confirmed by Aviran") — Aviran confirmed "Passport" naming for the stamp-collection stats screen live, direct, resolving the [ASSUMPTION] the previous designer pass had flagged. Chief-of-staff already reworded `strategy/passenger-strategy.md` to reflect this; this pass makes the matching update in `design/ux-flows.md` and its HTML twin. The other two open items from the prior pass — Phase 2/3 placement, and stamp-collection vs. Phase 3's points system — are untouched, no word from Aviran on those yet.
+- **Did:** Targeted reword only, no rewrite, in two places per file:
+  1. **§8 parked-features bullet** (`design/ux-flows.md` line 381; `design/ux-flows.html` line 1027): replaced "Naming is **[ASSUMPTION]**, needs Aviran's explicit sign-off (§9, strategy.md Open questions)" with "**Naming confirmed by Aviran, 2026-07-28** (strategy.md) — no longer an open assumption." (HTML: removed the `<span class="flag">ASSUMPTION</span>` markup, same reword.)
+  2. **§9 Q13** (`design/ux-flows.md` line 404; `design/ux-flows.html` lines 1134–1135): reworded the header from "three questions parked... not re-litigated here" to "two questions still parked," dropped the naming clause from the still-open list, and added a parenthetical noting the "Passport" name is now confirmed by Aviran (2026-07-28), pointing to strategy.md.
+  - Checked **Journey 7** (§4, lines 255–272 in the md) per the brief's instruction — it uses "Passport" as settled terminology throughout but never itself carried an [ASSUMPTION]/sign-off flag on the naming, so nothing there needed changing.
+  - Left the reasoning for why "Passport" not "profile" fully in place in both spots (scope-gate tripwire, no-profile frame) — only the conditional/sign-off framing changed to confirmed.
+- **Evidence:** Grepped both files for "Passport" and "[ASSUMPTION]"/"sign-off" post-edit — zero remaining "[ASSUMPTION]" or "needs...sign-off" hits anywhere in either file; all "Passport" mentions are either descriptive (screen name, mermaid diagram, Journey 7 walkthrough) or the two confirmation notes just added. Ran `git diff --stat` — 2 files changed, 4 lines in the md, 6 in the html, confirming no incidental edits elsewhere. Confirmed the two still-open items (per-city flavor names, points-system relationship) read exactly as before in both §8 and Q13 — untouched.
+- **Left behind:** Same two open items as before, unchanged: Phase 2/3 placement for the stamp-collection feature, and whether it's the same mechanic as Phase 3's points system or two coexisting systems. No PRD should be written until those resolve (naming is no longer the blocker, but these two still are).
+- **Git:** Committed to `passenger-brain` (local repo, branch `main`), staged only the two touched design files plus this PROGRESS.md entry. **Could not push** — this local clone has no `origin` remote configured, same situation as the last two entries below. Commit exists locally only.
+
+---
+
 ### 2026-07-28 — designer — UX flows doc: stamp collection / "Passport" screen added as Phase 2/3 preview
 
 - **Provenance:** founder-direct via chief-of-staff (see its two stub entries below — "founder-direct request stub: stamp collection system" and "strategy.md: stamp collection system added as Phase 2/3 candidate"). Docs-only pass, per the brief — no build, no PRD yet. Source of truth for the mechanics is the new Phase 2 block chief-of-staff already landed in `strategy/passenger-strategy.md` (between Live Events and the AI-local-guide bullets) plus its three new Open Questions rows; this entry only covers the UX/flow-level treatment in `design/ux-flows.md` and its HTML twin.
