@@ -17,6 +17,7 @@ The iOS app lives in the sibling `passenger-code` repo. Nothing here is code.
 | "what's been done" | [`agent-os/PROGRESS.md`](agent-os/PROGRESS.md) |
 | "what did we learn" | [`agent-os/LESSONS.md`](agent-os/LESSONS.md) |
 | "the PRD for X" | `prds/<feature-slug>/<feature-slug>.md` |
+| "the marketing plan for phase X" | `marketing/<phase-slug>/marketing-acquisition-plan.md` (Phase 1: [`marketing/phase-1/marketing-acquisition-plan.md`](marketing/phase-1/marketing-acquisition-plan.md)) |
 | "how the team works" | [`agent-os/README.md`](agent-os/README.md), [`agent-os/ONBOARDING.md`](agent-os/ONBOARDING.md) |
 | "can we reuse the old code for X" | [`SALVAGE.md`](SALVAGE.md) |
 

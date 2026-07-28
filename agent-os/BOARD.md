@@ -38,6 +38,7 @@ Task rows: `| id | task | state | owner | updated | notes / findings / output |`
 | id | task | state | owner | updated | notes / output |
 |---|---|---|---|---|---|
 | — | _empty — awaiting first `product` pass over the strategy doc_ | — | — | 2026-07-26 | Fresh start. See PROGRESS.md entry for 2026-07-26. |
+| M1 | Phase 1 marketing & acquisition plan (grassroots, zero-spend, Tel Aviv) | acceptance | marketing | 2026-07-28 | `marketing/phase-1/marketing-acquisition-plan.md`. Defines the 7-day unprompted-reopen metric ([ASSUMPTION] ≥20% of ≥30 tracked real-stranger installs), flags no tracking infra exists yet (build dependency), flags Phase 4-vs-Phase 2 discrepancy in this agent's own brief, and escalates all spend/public-presence items to Aviran. Awaiting `product` acceptance per marketing lifecycle (`backlog → in-progress(owner) → acceptance(product) → done`). |
 
 ## Linear
 
