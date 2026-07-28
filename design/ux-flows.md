@@ -1,7 +1,7 @@
 # Passenger V1 — UX Flows
 
 **Owner:** designer (drafted for Aviran)
-**Date:** 2026-07-27
+**Date:** 2026-07-28 (revised per Aviran's 5 numbered notes, live chat)
 **Status:** Draft — awaiting Aviran's read
 **Source:** `strategy/passenger-strategy.md` (2026-07-27) + `strategy/decisions.md` (decisions 18–26, 2026-07-27)
 **Document type:** cross-feature UX flows reference. This is not a per-feature design spec — it doesn't carry a PRD-traceability table or a high-fidelity mockup link, because no PRD exists yet to trace against (`prds/INDEX.md` is empty). Once `product` writes the six V1 PRDs this doc predicts, each gets its own spec under `design/<phase-slug>/` that does carry those.
@@ -16,42 +16,44 @@ Passenger is one map. You open the app and you're looking at Tel Aviv, right now
 
 ## 2. The hierarchy
 
-**Cost is measured in taps from cold open** (app icon tap = 0).
+Four fields per component, per Aviran's ask — kept to a phrase each, not a paragraph: **what it is**, **Principle** (cite `design-principles.md` §, not re-derived taste), **UX intent** (the user goal), **Flow** (tier + tap cost from cold open, app icon = 0; folds in what used to be a separate Cost column).
 
 ### Primary — permanently on the map, unavoidable
 
-**This list is short, and got shorter again this round.** Category chips (decision #25, overriding my own earlier flagged call — see Secondary below) are the second thing to leave permanent map chrome after spot-level tag badges left it last round. What's actually left, permanently, on the map: the map itself, heat, tag (at zone granularity only), the fading title, the slider, and the near-me button — plus the neighborhood button, conditionally. Six things, one of them conditional. That's it.
+Six things, one conditional: the map, heat, tag (zone granularity), the fading title, the slider, near-me — plus the neighborhood button, conditional. Category chips left this list last round (decision #25, moved to Secondary/search) — checked the rest of the doc, no stray mentions remain.
 
-| Item | What it is | Why Primary | Cost |
-|---|---|---|---|
-| The map | Tel Aviv, MapKit, always the base layer | It's the whole product — strategy: "one map, and the whole product lives on it" | 0 |
-| Heat layer | Crowd-density fill, stepped bands (no gradients — decision #17) | On by default, the first thing you see | 0 |
-| Tag layer | Localness accent, three plain-language values: **Local · Mix · Tourist** | On by default, orthogonal to heat, never blended. Heat + tag is the entire V1 map — two layers, exactly as the north star describes. **This row contradicted §6 for one revision and is fixed now:** tag renders as the zone's outline stroke, not a badge, which means it's genuinely visible at every zoom including city-wide — the same 0-tap claim heat gets, honestly true this time. See §6. | 0 |
-| "Tel Aviv, right now" title | Fading ambient label on cold open | Decision #8, verbatim | 0 |
-| Time slider | Now → +12h control, bottom-third (thumb zone) | **My call, flagged.** Permanently visible, never dismissed, reshapes the primary view — Primary-chrome behavior, not a sheet you invoke. | 0 to see, 1 drag to change |
-| Location/"near me" button | Recenter affordance | Persistent icon, part of map chrome | 0 to see, 1 tap to use |
-| Neighborhood button ("See all of [Neighborhood]") | Explicit, Bump-inspired affordance naming the dominant zone in view; a second, more reliable door into the same zone sheet a polygon tap already opens | **My call, flagged.** Map-surface chrome, not a sheet, so it belongs with Primary by construction — but it's the first *conditional* Primary item in this doc: visible only at neighborhood zoom, when one zone dominates the viewport, not from anywhere the way the slider or near-me button are. It exists because a loosely-bounded polygon is an unreliable, hard-to-discover tap target (Fitts's Law: a big, unambiguous target beats an edge you have to find) — tapping the zone shape still works, this is a second door to the same place. | 0 to see at neighborhood zoom, 1 tap to use |
+| Item | What it is | Principle | UX intent | Flow |
+|---|---|---|---|---|
+| The map | Tel Aviv, MapKit base layer | §1 Maslow precedence; §3 Sovereign posture | Answer "busy right now" in one glance | Primary · 0 taps |
+| Heat layer | Crowd-density fill, stepped bands (decision #17) | §3 never color alone | Is it busy, before any tap | Primary · 0 taps |
+| Tag layer | Tells the user if a place feels tourist or not — **Local · Mix · Tourist**, not a score | §3 never color alone; Tesler's Law | "Local or touristy" without asking | Primary · 0 taps. Rendering (§6) is a separate solution layer — Open Q12 |
+| "Tel Aviv, right now" title | Fading ambient label, ~2s | §2 omit needless chrome; decision #8 | Orient, then get out of the way | Primary · 0 taps, cold-open only |
+| Time slider | Now → +12h, bottom-third | §3 Thumb Zone; §2 Poka-Yoke | Preview later hours without leaving the map | Primary · 0 taps / 1 drag |
+| Near-me button | Recenter, persistent icon | §2 Fitts's Law | One tap back to "where am I" | Primary · 0 taps / 1 tap |
+| Neighborhood button | Names the dominant zone; second door to the zone sheet | §2 Fitts's Law | Reliable target beats a loose polygon edge | Primary, **conditional** · 0 taps at neighborhood zoom only / 1 tap |
 
-~~Category chips (Food & drinks / Things to do)~~ — **moved to Secondary, inside the search sheet (decision #25).** This directly overrides my own earlier call, flagged twice, that chips belonged in Primary chrome. Aviran's override, not re-argued here — see the Secondary table below for where they live now and what changes.
+~~Category chips~~ — **moved to Secondary, inside search (decision #25)**, overriding my own earlier flagged call. Not re-argued here.
 
 ### Secondary — invoked from the map
 
-Lighter than it might otherwise be: V1 hands off to native Maps/Waze at the moment of "go," rather than building its own routing screen, so there is no in-app takeover surface to place here. Three items now, not two — search (decision #23) joins zone sheet and spot sheet.
+No in-app routing screen — V1 hands off to Maps/Waze — so nothing sits above these three.
 
-| Item | What it is | Why Secondary | Cost |
-|---|---|---|---|
-| Zone sheet | Neighborhood blurb + tagged spot list | Requires a tap on a zone shape *or* the neighborhood button when one's showing — two doors, same destination; bottom sheet, map stays visible behind it | 1 tap |
-| Spot sheet | Name, category, vibe tag, save icon, "Go" button | One level under a zone sheet, or reachable directly from a close-zoom map pin. **"Go" hands off to native Maps/Waze — an exit from Passenger, not a screen inside it.** | 1–2 taps |
-| Search sheet | Query field matching place names, keywords, and neighborhoods, **plus the two category chips (Food & drinks / Things to do) — the only place either now lives (decision #25)**; opened from an icon in map chrome | **Secondary, not Primary — Aviran's explicit call, and the reasoning matters:** a permanent search bar sitting in front of a product whose whole pitch is "you don't need to ask" undercuts that pitch. One tap away, gone when you're done, keeps the map itself as the thing you look at rather than a results page waiting for a query. Folding the category chips in here is the same reasoning applied a second time: one fewer permanent control competing for space on the map. | 1 tap |
+| Item | What it is | Principle | UX intent | Flow |
+|---|---|---|---|---|
+| Zone sheet | Blurb + tagged spot list | Miller's Law (decision #12 bounds it); §3 Sovereign/Transient | Read a place without losing the map | Secondary · 1 tap, 3 doors → 1 destination |
+| Spot sheet | Name, category, tag, save, "Go" | Hick's Law; Von Restorff (Go is the one filled action) | One decision: go or not | Secondary · 1–2 taps; **Go exits Passenger** |
+| Search sheet | Query field + the two category chips (decision #25) | Hick's Law (2 chips); Fogg B=MAT | Serve "I know what I want" without a standing question mark | Secondary · 1 tap; dies with the sheet (§6) |
 
 ### Tertiary — opt-in, low-frequency, doesn't block the core loop
 
-| Item | What it is | Why Tertiary | Cost |
-|---|---|---|---|
-| **Places** — merges Saved and Visited (decision #26, supersedes #16) | One list, fed three ways: **manual save** (the save icon), **auto-save** (dwell 20+ minutes at a spot — the Bump mechanic, pulled forward from Phase 3), and **geofence detection** (present, however briefly). **Guard, load-bearing, not an optimization:** auto-save only ever fires on places already in Passenger's own places table — a home or a friend's apartment is never a tagged spot, so it never saves itself, no matter how long anyone stays. Each row shows which of the three put it there — a short word (**Saved** / **Auto-saved** / **Visited**), not a separate list per mechanism, and not identical treatment either: a place chosen on purpose and a place that saved itself over lunch shouldn't read as the same kind of entry. **Naming and provenance display are both recorded open on decision #26 — "Places" and the three-word labels are my proposal, not yet Aviran-confirmed; see §9.** Also renders on the map now, not only as a list — see §6. | One icon now instead of two — deliberately sought out either way, not part of the glance-and-go loop, still fully skippable | 1 tap (floating icon) |
-| Local-QA answering | **Rewritten for decision #24, not patched.** A post-visit toast, not an embedded card: the geofence detects a visit, a local notification fires while Passenger is backgrounded, opening it drops a non-blocking toast from the top of the screen — same three words, Local / Mix / Tourist | **Still Tertiary, but the reasoning changed underneath it.** It used to be Tertiary because it rendered inside a Secondary surface with no primary value to the answerer. It no longer renders inside anything — it's an unprompted interruption that arrives on its own. It stays Tertiary anyway, now purely on importance-to-the-user grounds: still pure goodwill, still skippable by ignoring the notification entirely, still no incentive layer until Phase 3's points system. Tiering by consequence-to-the-user rather than by delivery mechanism is the more durable rule anyway — see Journey 4 for the full flow, and §9 for the two real costs (a second permission prompt, and V1's first notification) this trades in. | Doesn't have a cold-open tap cost the way everything else in this table does — it's the first push-triggered surface in this doc, arriving independent of anything the user navigates to. Once it fires: 1 tap to open the notification, 1 tap (or ignore) to answer. |
-| Location permission | System permission sheet + in-app fallback copy if denied | One-time, OS-owned, not app chrome | 0 (auto-triggered) or 1 (via "near me") |
-| Settings-ish surfaces | — | **None exist in V1.** No account, no preferences, no toggles beyond what's already Primary chrome. | n/a |
+| Item | What it is | Principle | UX intent | Flow |
+|---|---|---|---|---|
+| **Places** (merges Saved/Visited, decision #26) | Manual save, auto-save (20+ min dwell, tagged spots only — guard), or geofence detection; each row shows provenance (**Saved / Auto-saved / Visited**). Naming/provenance my proposal, not confirmed — §9 | Miller's Law; Poka-Yoke (guard) | Easy return to a place cared about, without conflating deliberate and incidental | Tertiary · 1 tap (floating icon) |
+| Local-QA answering | Post-visit toast (decision #24): notification → non-blocking toast, Local/Mix/Tourist | Von Restorff; Fogg B=MAT; §2 ask-once ethics | Real signal at the freshest moment, no obligation | Tertiary, push-triggered · 1 tap to open, 1 (or ignore) to answer |
+| Location permission | System sheet + in-app fallback copy | §2 ask-once ethics; decision #8 | Access without gating the map | Tertiary · 0 (auto) or 1 (near-me) |
+| Settings-ish surfaces | None exist in V1 | Tesler's Law, by omission | n/a | n/a |
+
+**My take on the field shape (Aviran asked directly, §3.1):** four is right, I wouldn't add a fifth. Cost folded into Flow rather than kept separate — say the word and I'll split it back out. Didn't add a states/accessibility column — that's per-feature-spec and rendering-spec territory (§6, `map-rendering-spec.md`), not this doc's job.
 
 ---
 
@@ -93,6 +95,18 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 
 *A tourist, first time opening the app, has just landed in Tel Aviv.*
 
+```mermaid
+flowchart TD
+    A[Tap app icon] --> B[Map renders: heat + tag,<br/>city-wide, both categories]
+    B --> C{Location permission}
+    C -->|Denied| J6[[Journey 6:<br/>degraded run]]
+    C -->|Granted| D[Recenter · Places<br/>detection begins]
+    D --> E[Tap a zone] --> F[Zone sheet: blurb + spots]
+    F --> G[Tap a spot] --> H[Spot sheet:<br/>tag, save, Go]
+    H -->|Go| I[["Native Maps/Waze —<br/>exits Passenger"]]
+    I -.backgrounded, geofence.-> J4[[Journey 4:<br/>local-QA hook]]
+```
+
 1. Taps the app icon. Map renders immediately: Tel Aviv, default center, heat + tag on for "now," both categories always shown together (decision #25 — there's no category filter on the map itself anymore), "Tel Aviv, right now" title fading in and out.
 2. A few seconds in, the OS location-permission sheet appears without blocking the map underneath. She taps **Allow** — map animates to her real location, a "you are here" marker appears, and Places-detection can begin in its limited, When-In-Use form (the reliable background version waits on the Always upgrade, §3). *(The denied branch gets its full walk-through in Journey 6, not repeated here.)*
 3. She taps a zone near her hotel, both categories mixed together in the list that opens. A bottom sheet slides up with a hand-curated blurb and a scrollable list of tagged spots — short enough (decision #12's bounded curation) that she doesn't need to narrow it by category to scan it.
@@ -107,6 +121,14 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 
 *A Tel Aviv resident, opening the app on a random Tuesday evening, deciding where to go later.*
 
+```mermaid
+flowchart TD
+    A[Tap app icon] --> B["Drag slider ~+3h<br/>(heat redraws, tag doesn't move)"]
+    B --> C[Browse a couple<br/>of zones back to back]
+    C --> D[Open a spot sheet] --> E[Tap save icon]
+    E --> F(("Saved —<br/>Journey 3 continues"))
+```
+
 1. Taps the app icon — not his first launch, so no permission re-prompt. Map opens centered on his current location. Slider resets to "now," as it always does.
 2. He drags the slider forward to roughly +3 hours. The heat layer redraws live as he drags; the tag layer doesn't move — a place's localness doesn't change because it's later.
    - **Unhappy path:** at +3h, one zone shows almost no heat at all — not an error, just real information (nothing relevant there at that hour), which is exactly what he needed to see.
@@ -119,6 +141,15 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 ### Journey 3 — Coming back to something saved
 
 *Same resident, a few hours later, ready to actually go.*
+
+```mermaid
+flowchart TD
+    A[Tap app icon] --> B[Tap Places icon]
+    B --> C["Places list<br/>(Saved / Auto-saved / Visited)"]
+    C --> D["Tap saved row<br/>(skips zone sheet)"]
+    D --> E["Spot sheet<br/>(heat re-read, tag unchanged)"]
+    E -->|Go| F[["Native Maps/Waze —<br/>exits Passenger"]]
+```
 
 1. Opens the app, taps the **Places** icon — one icon now, not two (decision #26 merges Saved and Visited).
 2. The Places list opens. The bar he saved in Journey 2 sits in it, labeled **Saved** — but it's not the only thing there anymore: whatever else the app has quietly logged (a lunch spot that dwelled its way in, somewhere he merely passed near) shows up in the same list, each row carrying its own short provenance word so a deliberate choice doesn't read as identical to something that saved itself. He taps the bar.
@@ -133,6 +164,20 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 *Either the tourist from Journey 1 or the resident from Journey 3, sometime after actually visiting a place.*
 
 **Rewritten twice now — decision #24 changed how the ask arrives, decision #26 changed what else happens at the same moment.** The old version had her opening the Visited list out of curiosity and finding the ask embedded in a sheet. That's gone. There is no spot-sheet version of this ask anymore, in any form — one ask mechanism, not two, per Aviran's explicit call. I'm not quietly keeping a fallback for the case where the notification gets missed; the coverage this trades away is real and named explicitly in §9 rather than solved by bolting a second mechanism back on.
+
+```mermaid
+flowchart TD
+    A["At the spot ~25 min<br/>(geofence confirms presence)"] --> B{Dwell ≥ 20 min?}
+    B -->|Yes| C["Auto-saves into Places<br/>(guard: tagged spots only)"]
+    B -->|No, but present| D[Logs as Visited]
+    C --> E{"Permission sequence<br/>(first time only)"}
+    D --> E
+    E -->|Always + Notifications granted| F[Local notification fires]
+    E -->|Either denied| G["Degraded: no notification,<br/>and/or shakier background detection"]
+    F --> H[She taps the notification] --> I["Toast drops from top:<br/>Local / Mix / Tourist"]
+    I -->|answered| J["Thanks — shared with<br/>other travelers"]
+    I -->|ignored| K[Auto-dismisses, no reminder]
+```
 
 1. She's at the bar from Journey 1 for a while — say, 25 minutes, a drink and something to eat. Two things happen on the strength of that alone, both automatic: the geofence confirms she's actually there (not just passing by), and because 25 minutes clears the dwell threshold, the bar **auto-saves itself into her Places list** — a distinct state from a plain "visited" entry, which is what a shorter stop would have logged instead (§9 connects this threshold to the one below).
    - **Guard, worth restating inline because it's load-bearing:** this only happens because the bar is already a tagged spot in Passenger's own places table. If she'd instead spent 25 minutes at her Airbnb or a friend's apartment, none of this fires — auto-save never touches an arbitrary coordinate, no matter how long anyone dwells there.
@@ -152,6 +197,16 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 
 *A resident whose friend just texted "go to Port Said" — or anyone chasing a specific craving, not interested in browsing.*
 
+```mermaid
+flowchart TD
+    A[Tap search icon] --> B["Type query, or tap<br/>a category chip"]
+    B --> C{Result type}
+    C -->|no match| D["'Nothing matching' —<br/>field stays open"]
+    C -->|place / keyword| E["Spot sheet<br/>(same as tapping the pin)"]
+    C -->|neighborhood| F["Zone sheet<br/>(same as tapping the zone)"]
+    E -->|Go| G[["Native Maps/Waze —<br/>exits Passenger"]]
+```
+
 1. Taps the search icon in map chrome. A sheet opens over the map with a single text field, plus the two category chips (Food & drinks / Things to do) — the only place either now lives (decision #25). No default suggestions needed to start.
 2. Types "Port Said." Matches appear as she types. The same field matches three kinds of things: place names (this one), keywords ("hummus," "rooftop bar"), and neighborhoods ("Florentin"). Tapping a category chip instead of typing does the same thing a text query does — produces a result set that dims the map down to matching pins/zones, just scoped by category instead of by text.
    - **Unhappy path (no results):** "Nothing matching 'Port Said' right now" and the field stays open and editable — same empty-state convention used everywhere else (a line, not a dead end).
@@ -166,6 +221,18 @@ Six journeys, chosen to partition V1's surface without duplicating it: two disco
 ### Journey 6 — The degraded run
 
 *Anyone, location denied and/or offline for the whole session.*
+
+```mermaid
+flowchart TD
+    A[Cold open] --> B{Location denied?}
+    B -->|Yes| C["Default city-wide,<br/>near-me greyed"]
+    B -->|Granted, but offline| D["Detection still works<br/>(on-device, no server call)"]
+    C --> E["Browse cached data,<br/>manual save still works"]
+    E --> F["Places: only Saved<br/>entries populate"]
+    D --> G["Auto-save / toast still fire,<br/>sync once back online"]
+    E --> H["Search: cached only"] 
+    E --> I[["Go: still hands off,<br/>even offline"]]
+```
 
 1. Cold open with location denied (or offline entirely). Map renders at the default Tel Aviv city-wide center — no recenter, no "you are here" marker.
 2. The near-me button stays visible but greyed. Tapping it doesn't re-trigger the system permission dialog (iOS won't, once denied) — it shows inline copy pointing to Settings instead.
@@ -203,6 +270,8 @@ The local-QA toast (decision #24) sits outside this rule entirely, not as an exc
 
 ## 6. State & density of the map
 
+**Per note 2:** the requirement is plain — the user can tell tourist-vs-not, via Local/Mix/Tourist. Everything below is *my proposed solution* to that requirement, already through one feedback loop with Aviran (badge → stroke). Left as stated fact, not reopened as a question, since the rest of the doc is written against it — flagged in Open Q12 in case that reading is wrong.
+
 **Revised this round.** Aviran's pushback, verbatim: *"how do you show tag layer on every location on the map? its gonna be too much information on one layer."* He was right — the previous version of this section badged every close-zoom pin, then stacked a warning badge on top of that. Worst case (Florentin at 8pm, dozens of pins) was heat fill plus a tag badge plus sometimes a warning badge, once per pin, all at once. That doesn't survive contact with a real dense neighborhood. Rewritten below around one governing fix: **tag gets the same progressive disclosure heat already has, instead of trying to render at every zoom simultaneously.**
 
 **Revised again this round — the fix over-corrected, and the contradiction it created had to go.** Moving tag to neighborhood-zoom-only badges solved the density problem, but it left tag with zero rendering at city-wide zoom — the zoom cold open actually shows — while §2 kept claiming tag was "on by default, the first thing you see," 0 taps. Aviran caught it: that made cold open heat-only, which is the half of this product anyone already gets from Google Maps. The fix is a channel change, not a placement change — heat keeps the fill, tag moves to the zone's **outline stroke**, a channel nothing else was using. Full rendering detail lives in `design/map-rendering-spec.md`; this section states the resulting rule.
@@ -235,49 +304,7 @@ The local-QA toast (decision #24) sits outside this rule entirely, not as an exc
 
 ## 7. Flow diagrams
 
-### Primary flow
-
-```mermaid
-flowchart TD
-    A[Tap app icon] --> B[Map renders: Tel Aviv, now,<br/>heat fill + tag stroke on, city-wide]
-    B --> C{Location permission}
-    C -->|Granted| D[Recenter on user, Places detection starts]
-    C -->|Denied| E[Stay on default city-wide view, near-me greyed]
-    D --> F[Steady state: map + slider, no chips here anymore]
-    E --> F
-    F --> G[Tap a zone shape] --> ZS[Zone sheet: blurb + spot list]
-    F --> T["Neighborhood button<br/>(shows at neighborhood zoom)"] --> ZS
-    F --> H[Tap a spot pin] --> M[Spot sheet: tag, save, Go]
-    ZS --> M
-    F --> I[Drag time slider]
-    F --> K[Tap Places icon] --> P["Places list — manual/auto/visited,<br/>one merged list (decision #26)"] --> M
-    F --> S["Tap Search icon"] --> SS["Search sheet: name / keyword /<br/>neighborhood / category chips"]
-    SS -->|place or keyword result| M
-    SS -->|neighborhood result| ZS
-    SS -->|category chip| SS
-    M -->|Go| N[Hands off to native Maps/Waze — exits Passenger]
-    M -->|save icon, manual| O[Saved into Places]
-```
-
-### Post-visit local-QA and auto-save (async — not part of the flow above)
-
-```mermaid
-flowchart TD
-    V[Geofence + dwell timer running] --> DW{Dwell ≥ 20 min<br/>at a tagged spot?}
-    DW -->|Yes| AS["Auto-saves into Places<br/>(guard: tagged spots only)"]
-    DW -->|No, but present| VIS[Logs as Visited in Places]
-    AS --> W{Notification permission<br/>already decided?}
-    VIS --> W
-    W -->|first time: priming card, then ask| X{Granted?}
-    W -->|already granted| Y[Local notification fires]
-    X -->|Yes| Y
-    X -->|No| Z[No notification ever fires<br/>for this or future visits]
-    Y --> AA{App already foregrounded?}
-    AA -->|No| BB[User taps the notification] --> CC[Toast drops from top:<br/>Local / Mix / Tourist]
-    AA -->|Yes| CC
-    CC -->|answered| DD[Toast collapses: Thanks]
-    CC -->|ignored| EE[Auto-dismisses, no reminder]
-```
+Per-journey diagrams now live inline in §4, next to each journey's plain-text walkthrough — not repeated here. The two below are structural, not journey-specific: the permission *policy* (§3) and the full navigation tree (§5).
 
 ### Permission sequence (§3) — two moments, not three scattered asks
 
@@ -345,3 +372,4 @@ Two things are parked as of this revision — Scenic View and Live Events both m
 9. **Whether the local-QA notification should reuse decision #26's 20-minute auto-save threshold, or needs its own.** Q1's refined recommendation defaults to reusing it. The case for a separate, stricter number: a push notification is a bigger interruption than quietly adding a row to a list, so "worth asking about" could reasonably demand more than "worth saving." Needs data-engineer/architect input either way, not a pure UX call.
 10. **Permission sequence — flagged hard, per the instruction that came with decision #26.** V1 now needs three system permissions (Location When-In-Use, Location Always, Notifications) for a product whose decision #8 explicitly rules out a permission gate at launch. §3 proposes a concrete ordering — one prompt at cold open, then a single in-app priming line before Always and Notifications fire back to back at the first real visit — but it's a proposal, not a confirmed sequence. **Recommendation:** confirm the proposed ordering, or replace it, before this becomes a build spec; don't let three unordered permission asks reach `ios-developer` by default.
 11. **The merged Places list's name and provenance display — recorded open on decision #26, and I'm proposing rather than leaving blank.** Name: **"Places."** Provenance: a short word per row — **Saved / Auto-saved / Visited** — with manual save always winning the displayed label if it ever applies to a place, auto-save next, plain Visited last, so a place never shows two conflicting explanations for why it's in the list. **Recommendation:** confirm both, or overrule either — everything in §2, §4 (Journeys 3–4), and `design/map-rendering-spec.md` §6 is written against this proposal, so a change here is a find-and-replace, not a redesign.
+12. **Does note 2 ("don't write solutions") reach past §2's tag-layer line into §6's rendering solution too?** Fixed the literal flagged text in §2 (plain requirement now, not "Localness accent"). Left §6's stroke/zoom solution as stated fact, not reopened — it already passed one feedback loop, and the nav model, both diagrams, and all six journeys are written against it. **Recommendation:** treat §6 as settled unless told otherwise; confirm which reading was intended.

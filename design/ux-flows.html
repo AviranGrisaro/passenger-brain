@@ -209,6 +209,14 @@
   .item-name { font-weight: 700; font-size: 0.92rem; }
   .item-why { grid-column: 1 / -1; font-size: 0.85rem; color: var(--muted); }
   .item-why strong { color: var(--fg); }
+  .item-meta {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 3px 18px;
+    margin-top: 2px; font-size: 0.78rem; color: var(--muted);
+  }
+  .item-meta b {
+    font-family: var(--mono); font-size: 0.6rem; text-transform: uppercase;
+    letter-spacing: 0.05em; font-weight: 800; color: var(--fg); margin-right: 4px;
+  }
   .cost {
     font-family: var(--mono); font-variant-numeric: tabular-nums;
     font-size: 0.72rem; font-weight: 700; white-space: nowrap;
@@ -420,7 +428,7 @@
     <div class="status-row">
       <span class="status-chip"><span class="dot"></span>Draft — awaiting Aviran's read</span>
       <span>Owner: designer</span>
-      <span>2026-07-27</span>
+      <span>2026-07-28 (revised per Aviran's 5 notes)</span>
     </div>
 
     <h1 class="wordmark">V1 UX Flows</h1>
@@ -438,7 +446,7 @@
     <p class="eyebrow">The core of this doc</p>
     <h2>Feature hierarchy</h2>
     <div class="prose">
-      <p>Three tiers, ranked by how unavoidable each thing is. Cost is measured in <strong>taps from cold open</strong> — tapping the app icon is 0.</p>
+      <p>Four fields per component: <strong>what it is</strong>, <strong>Principle</strong> (cites <code>design-principles.md</code>), <strong>UX intent</strong> (the user goal), <strong>Flow</strong> (tier + tap cost from cold open, app icon = 0).</p>
     </div>
 
     <div class="tier t1">
@@ -446,55 +454,65 @@
         <span class="tier-name">Primary</span>
         <span class="tier-desc">Permanently on the map. The user cannot avoid seeing it.</span>
       </div>
-      <div class="tier-note">This list is short, and got shorter again this round. Category chips (decision #25, overriding my own earlier flagged call) are the second thing to leave permanent map chrome, after spot-level tag badges left it last round. What's actually left, permanently, on the map: the map itself, heat, tag (zone granularity only), the fading title, the slider, and the near-me button — plus the neighborhood button, conditionally. Six things, one of them conditional.</div>
+      <div class="tier-note">Six things, one conditional: the map, heat, tag (zone granularity), the fading title, the slider, near-me — plus the neighborhood button, conditional. Category chips left this list last round (decision #25, moved to Secondary/search).</div>
       <div class="item">
         <span class="item-name">The map</span><span class="cost">0 taps</span>
-        <span class="item-why">Tel Aviv, MapKit, always the base layer. It's the whole product — strategy: "one map, and the whole product lives on it."</span>
+        <span class="item-why">Tel Aviv, MapKit base layer.</span>
+        <span class="item-meta"><b>Principle</b> §1 Maslow precedence · §3 Sovereign posture <b>Intent</b> "busy right now" in one glance</span>
       </div>
       <div class="item">
         <span class="item-name">Heat layer</span><span class="cost">0 taps</span>
-        <span class="item-why">Crowd-density fill in stepped bands, no gradients (decision #17). On by default, the first thing you see.</span>
+        <span class="item-why">Crowd-density fill, stepped bands (decision #17).</span>
+        <span class="item-meta"><b>Principle</b> §3 never color alone <b>Intent</b> is it busy, before any tap</span>
       </div>
       <div class="item">
         <span class="item-name">Tag layer</span><span class="cost">0 taps</span>
-        <span class="item-why">Localness accent, three plain-language values: <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — on by default, orthogonal to heat, never blended. <strong>Heat + tag is the entire V1 map</strong> — two layers, exactly as the north star describes. <strong>This row contradicted Map state for one revision, fixed now:</strong> tag renders as the zone's outline stroke, not a badge, genuinely visible at every zoom including city-wide — the same 0-tap claim heat gets, honestly true this time.</span>
+        <span class="item-why">Tells the user if a place feels tourist or not — <span class="tag-chip tag-local">Local</span> <span class="tag-chip tag-mix">Mix</span> <span class="tag-chip tag-tourist">Tourist</span> — not a score.</span>
+        <span class="item-meta"><b>Principle</b> §3 never color alone · Tesler's Law <b>Intent</b> "local or touristy" without asking</span>
       </div>
       <div class="item">
         <span class="item-name">"Tel Aviv, right now" title</span><span class="cost">0 taps</span>
-        <span class="item-why">Fading ambient label on cold open. Decision #8, verbatim.</span>
+        <span class="item-why">Fading ambient label, ~2s.</span>
+        <span class="item-meta"><b>Principle</b> §2 omit needless chrome · decision #8 <b>Intent</b> orient, then get out of the way</span>
       </div>
       <div class="item">
         <span class="item-name">Time slider</span><span class="cost">0 to see · 1 drag</span>
-        <span class="item-why"><span class="flag">DESIGN CALL</span>Now → +12h, bottom-third thumb zone. Permanently visible, never dismissed, and it reshapes the primary view — that's Primary chrome, not a sheet you invoke. <strong>Overrulable in one line.</strong></span>
+        <span class="item-why">Now → +12h, bottom-third.</span>
+        <span class="item-meta"><b>Principle</b> §3 Thumb Zone · §2 Poka-Yoke <b>Intent</b> preview later hours without leaving the map</span>
       </div>
       <div class="item">
         <span class="item-name">Near-me button</span><span class="cost">0 to see · 1 tap</span>
-        <span class="item-why">Recenter affordance. Persistent icon, part of map chrome.</span>
+        <span class="item-why">Recenter, persistent icon.</span>
+        <span class="item-meta"><b>Principle</b> §2 Fitts's Law <b>Intent</b> one tap back to "where am I"</span>
       </div>
       <div class="item">
-        <span class="item-name">Neighborhood button<span class="sub" style="display:block; font-weight:500; color:var(--muted); font-size:0.78rem;">"See all of [Neighborhood]"</span></span><span class="cost">0 to see at neighborhood zoom · 1 tap</span>
-        <span class="item-why"><span class="flag">DESIGN CALL</span>Explicit, Bump-inspired affordance naming the dominant zone in view — a second, more reliable door into the same zone sheet a polygon tap already opens. Map-surface chrome, not a sheet, so it belongs with Primary by construction — but it's the first <em>conditional</em> Primary item here: visible only at neighborhood zoom, not from anywhere the way the slider or near-me button are. Exists because a loosely-bounded polygon is a hard-to-discover tap target (Fitts's Law) — tapping the zone shape still works.</span>
+        <span class="item-name">Neighborhood button<span class="sub" style="display:block; font-weight:500; color:var(--muted); font-size:0.78rem;">"See all of [Neighborhood]"</span></span><span class="cost">0 at neighborhood zoom · 1 tap</span>
+        <span class="item-why"><span class="flag">CONDITIONAL</span>Names the dominant zone; second door to the zone sheet.</span>
+        <span class="item-meta"><b>Principle</b> §2 Fitts's Law <b>Intent</b> reliable target beats a loose polygon edge</span>
       </div>
     </div>
-    <p style="font-size:0.85rem; color:var(--muted); margin: -8px 0 20px;"><del>Category chips (Food &amp; drinks / Things to do)</del> — <strong>moved to Secondary, inside the search sheet (decision #25).</strong> Directly overrides my own earlier call, flagged twice, that chips belonged in Primary chrome. Aviran's override, not re-argued here — see Secondary below.</p>
+    <p style="font-size:0.85rem; color:var(--muted); margin: -8px 0 20px;"><del>Category chips</del> — <strong>moved to Secondary, inside search (decision #25)</strong>, overriding my own earlier flagged call. Not re-argued here.</p>
 
     <div class="tier t2">
       <div class="tier-head">
         <span class="tier-name">Secondary</span>
         <span class="tier-desc">Invoked from the map.</span>
       </div>
-      <div class="tier-note">Lighter than it might otherwise be. V1 hands off to native Maps/Waze at the moment of "go" rather than building its own routing screen, so there's no in-app takeover surface to place here. Three items now, not two — search (decision #23) joins zone sheet and spot sheet.</div>
+      <div class="tier-note">No in-app routing screen — V1 hands off to Maps/Waze — so nothing sits above these three.</div>
       <div class="item">
         <span class="item-name">Zone sheet</span><span class="cost">1 tap</span>
-        <span class="item-why">Hand-curated neighborhood blurb + tagged spot list. Reached by tapping a zone shape <em>or</em> the neighborhood button when one's showing — two doors, same destination. Bottom sheet; the map stays visible behind it.</span>
+        <span class="item-why">Blurb + tagged spot list.</span>
+        <span class="item-meta"><b>Principle</b> Miller's Law (decision #12 bounds it) · §3 Sovereign/Transient <b>Intent</b> read a place without losing the map</span>
       </div>
       <div class="item">
         <span class="item-name">Spot sheet</span><span class="cost">1–2 taps</span>
-        <span class="item-why">Name, category, vibe tag, save icon, "Go" button. One level under a zone sheet, or reachable directly from a close-zoom pin. <strong>"Go" hands off to native Maps/Waze — an exit from Passenger, not a screen inside it.</strong></span>
+        <span class="item-why">Name, category, tag, save, "Go".</span>
+        <span class="item-meta"><b>Principle</b> Hick's Law · Von Restorff (Go is the one filled action) <b>Intent</b> one decision: go or not — <strong>Go exits Passenger</strong></span>
       </div>
       <div class="item">
         <span class="item-name">Search sheet</span><span class="cost">1 tap</span>
-        <span class="item-why"><strong>Secondary, not Primary — Aviran's explicit call, and the reasoning matters:</strong> a permanent search bar sitting in front of a product whose whole pitch is "you don't need to ask" undercuts that pitch. One tap away, gone when you're done, keeps the map itself as the thing you look at rather than a results page waiting for a query. Matches place names, keywords, and neighborhoods — <strong>plus the two category chips, the only place either now lives (decision #25).</strong> Folding chips in here is the same reasoning applied a second time: one fewer permanent control competing for space on the map.</span>
+        <span class="item-why">Query field + the two category chips (decision #25).</span>
+        <span class="item-meta"><b>Principle</b> Hick's Law (2 chips) · Fogg B=MAT <b>Intent</b> "I know what I want" without a standing question mark</span>
       </div>
     </div>
 
@@ -504,22 +522,27 @@
         <span class="tier-desc">Opt-in, low-frequency. Doesn't block the core loop.</span>
       </div>
       <div class="item">
-        <span class="item-name">Places<span class="sub" style="display:block; font-weight:500; color:var(--muted); font-size:0.78rem;">merges Saved + Visited — decision #26, supersedes #16</span></span><span class="cost">1 tap (floating icon)</span>
-        <span class="item-why">One list, fed three ways: <strong>manual save</strong> (the save icon), <strong>auto-save</strong> (dwell 20+ minutes at a spot — the Bump mechanic, pulled forward from Phase 3), and <strong>geofence detection</strong> (present, however briefly). <strong>Guard, load-bearing, not an optimization:</strong> auto-save only ever fires on places already in Passenger's own places table — a home or a friend's apartment is never a tagged spot, so it never saves itself, no matter how long anyone stays. Each row shows which of the three put it there — a short word (<strong>Saved</strong> / <strong>Auto-saved</strong> / <strong>Visited</strong>), not a separate list per mechanism. <strong>Naming and provenance display are recorded open on decision #26 — "Places" and the three-word labels are my proposal, not yet confirmed;</strong> see Open questions. Also renders on the map now, not only as a list — see Map state.</span>
+        <span class="item-name">Places<span class="sub" style="display:block; font-weight:500; color:var(--muted); font-size:0.78rem;">merges Saved + Visited — decision #26</span></span><span class="cost">1 tap (floating icon)</span>
+        <span class="item-why">Manual save, auto-save (20+ min dwell, tagged spots only — guard), or geofence detection; each row shows provenance (<strong>Saved / Auto-saved / Visited</strong>). Naming/provenance my proposal, not confirmed — see Open questions.</span>
+        <span class="item-meta"><b>Principle</b> Miller's Law · Poka-Yoke (guard) <b>Intent</b> easy return without conflating deliberate and incidental</span>
       </div>
       <div class="item">
-        <span class="item-name">Local-QA answering</span><span class="cost">no cold-open cost — push-triggered</span>
-        <span class="item-why"><strong>Rewritten for decision #24, not patched.</strong> A post-visit toast, not an embedded card: the geofence detects a visit, a local notification fires while Passenger is backgrounded, opening it drops a non-blocking toast from the top of the screen — same three words, Local / Mix / Tourist. <strong>Still Tertiary, but the reasoning changed underneath it:</strong> it used to be Tertiary because it rendered inside a Secondary surface with no primary value to the answerer. It no longer renders inside anything — it's an unprompted interruption that arrives on its own. It stays Tertiary anyway, purely on importance-to-the-user grounds: still pure goodwill, still skippable by ignoring the notification, still no incentive until Phase 3's points system. See Journeys for the full flow, and Open questions for the two real costs this trades in (a second permission prompt, and V1's first notification). Once it fires: 1 tap to open the notification, 1 tap or ignore to answer.</span>
+        <span class="item-name">Local-QA answering</span><span class="cost">push-triggered</span>
+        <span class="item-why">Post-visit toast (decision #24): notification → non-blocking toast, Local/Mix/Tourist.</span>
+        <span class="item-meta"><b>Principle</b> Von Restorff · Fogg B=MAT · §2 ask-once ethics <b>Intent</b> real signal at the freshest moment, no obligation</span>
       </div>
       <div class="item">
         <span class="item-name">Location permission</span><span class="cost">0 auto · 1 via near-me</span>
-        <span class="item-why">System sheet plus in-app fallback copy if denied. One-time, OS-owned, not app chrome.</span>
+        <span class="item-why">System sheet + in-app fallback copy.</span>
+        <span class="item-meta"><b>Principle</b> §2 ask-once ethics · decision #8 <b>Intent</b> access without gating the map</span>
       </div>
       <div class="item">
         <span class="item-name">Settings</span><span class="cost">n/a</span>
-        <span class="item-why"><strong>None exist in V1.</strong> No account, no preferences, no toggles beyond what's already Primary chrome.</span>
+        <span class="item-why">None exist in V1.</span>
+        <span class="item-meta"><b>Principle</b> Tesler's Law, by omission <b>Intent</b> n/a</span>
       </div>
     </div>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:10px;"><strong>My take on the field shape (Aviran asked directly):</strong> four is right, no fifth needed. Cost folded into Flow — say the word and I'll split it back out. No states/accessibility column here — that's per-feature-spec and rendering-spec territory.</p>
   </section>
 
   <section class="block" id="launch">
@@ -574,6 +597,13 @@
         <p class="journey-title">Just landed, knows nothing</p>
         <p class="journey-who">A tourist, first time opening the app, has just landed in Tel Aviv.</p>
       </div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Tap icon</span><span class="arrow">→</span>
+        <span class="node pri">Map renders</span><span class="arrow">→</span>
+        <span class="node sec">Zone sheet</span><span class="arrow">→</span>
+        <span class="node sec">Spot sheet</span><span class="arrow">→</span>
+        <span class="node exit">Go<span class="sub">exits to Maps/Waze</span></span>
+      </div></div></div>
       <ol class="jsteps">
         <li>Taps the app icon. Map renders immediately — Tel Aviv, default center, heat + tag on for "now", both categories always shown together (decision #25 — no category filter on the map itself anymore), "Tel Aviv, right now" fading in and out.</li>
         <li>A few seconds in, the OS location sheet appears without blocking the map underneath. She taps <strong>Allow</strong> — the map animates to her real location, a "you are here" marker appears, and Places-detection can begin in its limited, When-In-Use form (the reliable background version waits on the Always upgrade).</li>
@@ -598,6 +628,13 @@
         <p class="journey-title">Home and bored, planning tonight</p>
         <p class="journey-who">A Tel Aviv resident, opening the app on a random Tuesday evening, deciding where to go later.</p>
       </div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Tap icon</span><span class="arrow">→</span>
+        <span class="node pri">Drag slider +3h</span><span class="arrow">→</span>
+        <span class="node sec">Browse zones</span><span class="arrow">→</span>
+        <span class="node sec">Spot sheet, save</span><span class="arrow">→</span>
+        <span class="node term">Saved<span class="sub">Journey 3 continues</span></span>
+      </div></div></div>
       <ol class="jsteps">
         <li>Taps the app icon — not his first launch, so no permission re-prompt. Map opens centered on his location. Slider resets to "now", as it always does.</li>
         <li>He drags the slider forward to roughly <strong>+3 hours</strong>. Heat redraws live as he drags; the tag layer doesn't move — a place's localness doesn't change because it's later.
@@ -621,6 +658,13 @@
         <p class="journey-title">Coming back to something saved</p>
         <p class="journey-who">Same resident, a few hours later, ready to actually go.</p>
       </div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Tap icon</span><span class="arrow">→</span>
+        <span class="node ter">Places icon</span><span class="arrow">→</span>
+        <span class="node sec">Places list</span><span class="arrow">→</span>
+        <span class="node sec">Spot sheet<span class="sub">skips zone sheet</span></span><span class="arrow">→</span>
+        <span class="node exit">Go<span class="sub">exits to Maps/Waze</span></span>
+      </div></div></div>
       <ol class="jsteps">
         <li>Opens the app, taps the <strong>Places</strong> icon — one icon now, not two (decision #26 merges Saved and Visited).</li>
         <li>The Places list opens. The bar he saved in Journey 2 sits in it, labeled <strong>Saved</strong> — but it's not the only thing there: whatever else the app has quietly logged (a lunch spot that dwelled its way in, somewhere he merely passed near) shows up in the same list, each row carrying its own short provenance word so a deliberate choice doesn't read as identical to something that saved itself. He taps the bar.</li>
@@ -644,6 +688,13 @@
         <p class="journey-who">Either the tourist from Journey 1 or the resident from Journey 3, sometime after actually visiting a place.</p>
       </div>
       <div class="snag" style="margin: 0 20px 14px;"><span class="k">Rewritten twice now</span>Decision #24 changed how the ask arrives, decision #26 changed what else happens at the same moment. The old version had her opening the Visited list and finding the ask embedded in a sheet — that's gone, in any form. One ask mechanism, not two, per Aviran's explicit call. No quiet spot-sheet fallback for a missed notification; the coverage that trades away is real and named in Open questions rather than solved by bolting a second mechanism back on.</div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Dwell ~25 min</span><span class="arrow">→</span>
+        <span class="node pri">Auto-saves<span class="sub">guard: tagged spots only</span></span><span class="arrow">→</span>
+        <span class="node ter">Permission sequence</span><span class="arrow">→</span>
+        <span class="node sec">Notification tapped</span><span class="arrow">→</span>
+        <span class="node term">Toast: Local/Mix/Tourist</span>
+      </div></div></div>
       <ol class="jsteps">
         <li>She's at the bar from Journey 1 for a while — say, 25 minutes, a drink and something to eat. Two things happen on the strength of that alone, both automatic: the geofence confirms she's actually there, and because 25 minutes clears the dwell threshold, the bar <strong>auto-saves itself into her Places list</strong> — distinct from a plain "visited" entry, which is what a shorter stop would have logged instead.
           <span class="snag"><span class="k">The guard, restated because it's load-bearing</span>This only happens because the bar is already a tagged spot in Passenger's own places table. Twenty-five minutes at her Airbnb or a friend's apartment triggers none of this — auto-save never touches an arbitrary coordinate.</span>
@@ -673,6 +724,12 @@
         <p class="journey-title">I already know what I'm looking for</p>
         <p class="journey-who">A resident whose friend just texted "go to Port Said" — or anyone chasing a specific craving, not interested in browsing.</p>
       </div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Tap search icon</span><span class="arrow">→</span>
+        <span class="node pri">Type / tap chip</span><span class="arrow">→</span>
+        <span class="node sec">Result: spot or zone</span><span class="arrow">→</span>
+        <span class="node exit">Go<span class="sub">exits to Maps/Waze</span></span>
+      </div></div></div>
       <ol class="jsteps">
         <li>Taps the search icon in map chrome. A sheet opens over the map with a single text field, plus the two category chips (Food &amp; drinks / Things to do) — the only place either now lives (decision #25). No default suggestions needed to start.</li>
         <li>Types "Port Said." Matches appear as she types. The same field matches three kinds of things: place names (this one), keywords ("hummus," "rooftop bar"), and neighborhoods ("Florentin"). Tapping a category chip instead of typing does the same thing a text query does — produces a result set that dims the map down to matching pins/zones, just scoped by category.
@@ -700,6 +757,12 @@
         <p class="journey-title">The degraded run</p>
         <p class="journey-who">Anyone, location denied and/or offline for the whole session.</p>
       </div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Cold open, denied</span><span class="arrow">→</span>
+        <span class="node sec">Browse cached data</span><span class="arrow">→</span>
+        <span class="node sec">Manual save</span><span class="arrow">→</span>
+        <span class="node term">Places<span class="sub">Saved entries only</span></span>
+      </div></div></div>
       <ol class="jsteps">
         <li>Cold open with location denied (or offline entirely). Map renders at the default Tel Aviv city-wide center — no recenter, no "you are here" marker.</li>
         <li>The near-me button stays visible but greyed. Tapping it doesn't re-trigger the system dialog — iOS won't, once denied — so it shows inline copy pointing to Settings instead.</li>
@@ -759,6 +822,8 @@
     <p class="eyebrow">What the map shows, when</p>
     <h2>Map state &amp; density</h2>
 
+    <p class="prose" style="font-size:0.85rem; color:var(--muted);"><strong>Per note 2:</strong> the requirement is plain — the user can tell tourist-vs-not, via Local/Mix/Tourist. Everything below is my proposed solution to that requirement, already through one feedback loop with Aviran (badge → stroke). Left as stated fact, not reopened as a question, since the rest of the doc is written against it — flagged in Open Q12 in case that reading is wrong.</p>
+
     <div class="snag" style="margin-bottom:18px;">
       <span class="k">Revised this round — the fix over-corrected</span>Aviran's pushback, verbatim: <em>"how do you show tag layer on every location on the map? its gonna be too much information on one layer."</em> The last pass moved tag to neighborhood-zoom-only badges and solved the density problem — but that left tag with <strong>zero</strong> rendering at city-wide zoom, the zoom cold open actually shows, while Feature hierarchy still claimed tag was "on by default, the first thing you see," 0 taps. Aviran caught the contradiction: heat-only at cold open is the half of this product anyone already gets from Google Maps. The fix is a channel change, not a placement change — heat keeps the fill, tag moves to the zone's <strong>outline stroke</strong>, a channel nothing else was using, so it can be visible at every zoom without reopening the density problem.
     </div>
@@ -815,113 +880,7 @@
   <section class="block" id="diagrams">
     <p class="eyebrow">At a glance</p>
     <h2>Diagrams</h2>
-
-    <h3>Launch to steady state</h3>
-    <div class="diagram">
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node">Tap app icon</span>
-          <span class="arrow">→</span>
-          <span class="node pri">Map renders<span class="sub">Tel Aviv, now, heat fill + tag stroke, city-wide</span></span>
-          <span class="arrow">→</span>
-          <span class="node">Location permission<span class="sub">lazy, non-blocking</span></span>
-        </div>
-      </div>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node ter">granted</span>
-          <span class="arrow">→</span>
-          <span class="node">Recenter on user<span class="sub">Places detection starts</span></span>
-          <span class="arrow">→</span>
-          <span class="node term">Steady state</span>
-        </div>
-      </div>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node ter">denied</span>
-          <span class="arrow">→</span>
-          <span class="node">Stay city-wide<span class="sub">near-me greyed</span></span>
-          <span class="arrow">→</span>
-          <span class="node term">Steady state</span>
-        </div>
-      </div>
-
-      <p style="font-size:0.82rem; color:var(--muted); margin:14px 0 8px;">From steady state, six things are reachable without leaving the map — category chips no longer among them (decision #25), Saved and Visited merged into one (decision #26):</p>
-      <div class="fan">
-        <span class="node sec">Tap a zone shape<span class="sub">→ zone sheet</span></span>
-        <span class="node pri">Neighborhood button<span class="sub">→ zone sheet · neighborhood zoom only</span></span>
-        <span class="node sec">Tap a spot pin<span class="sub">→ spot sheet</span></span>
-        <span class="node pri">Drag slider<span class="sub">heat redraws</span></span>
-        <span class="node ter">Places<span class="sub">→ spot sheet · manual/auto/visited merged</span></span>
-        <span class="node sec">Search<span class="sub">→ spot or zone sheet, or category browse</span></span>
-      </div>
-      <p style="font-size:0.8rem; color:var(--muted); margin-top:6px;">Zone shape, neighborhood button, and a search neighborhood result are three doors into the same zone sheet — none of them a different destination.</p>
-
-      <p style="font-size:0.82rem; color:var(--muted); margin:18px 0 8px;">Search branches on result type — the one entry point that can land on either sheet:</p>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node sec">Search sheet<span class="sub">name · keyword · neighborhood</span></span>
-          <span class="arrow">→</span>
-          <span class="node sec">Spot sheet<span class="sub">place / keyword result</span></span>
-        </div>
-      </div>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node sec">Search sheet<span class="sub">name · keyword · neighborhood</span></span>
-          <span class="arrow">→</span>
-          <span class="node sec">Zone sheet<span class="sub">neighborhood result</span></span>
-        </div>
-      </div>
-
-      <p style="font-size:0.82rem; color:var(--muted); margin:18px 0 8px;">And the deepest path, end to end — note where it leaves the app:</p>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node sec">Zone sheet<span class="sub">blurb + spots</span></span>
-          <span class="arrow">→</span>
-          <span class="node sec">Spot sheet<span class="sub">tag · save · Go</span></span>
-          <span class="arrow">→</span>
-          <span class="node exit">Maps/Waze<span class="sub">exits Passenger</span></span>
-        </div>
-      </div>
-    </div>
-
-    <h3>Post-visit local-QA and auto-save <span style="font-weight:500; color:var(--muted); font-size:0.85rem;">(async — not part of the flow above)</span></h3>
-    <div class="diagram">
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node">Geofence + dwell timer running</span>
-          <span class="arrow">→</span>
-          <span class="node ter">Dwell ≥ 20 min<span class="sub">at a tagged spot?</span></span>
-          <span class="arrow">→</span>
-          <span class="node pri">Auto-saves into Places<span class="sub">guard: tagged spots only</span></span>
-        </div>
-      </div>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node ter">Dwell &lt; 20 min<span class="sub">but present</span></span>
-          <span class="arrow">→</span>
-          <span class="node">Logs as Visited in Places</span>
-        </div>
-      </div>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node">Either path</span>
-          <span class="arrow">→</span>
-          <span class="node ter">First time?<span class="sub">priming card, then ask notification permission</span></span>
-          <span class="arrow">→</span>
-          <span class="node">Local notification fires<span class="sub">if granted — else never, for any visit</span></span>
-        </div>
-      </div>
-      <div class="dgm-scroll">
-        <div class="chain">
-          <span class="node">User taps notification<span class="sub">(or app was already foregrounded)</span></span>
-          <span class="arrow">→</span>
-          <span class="node pri">Toast drops from top<span class="sub">Local / Mix / Tourist</span></span>
-          <span class="arrow">→</span>
-          <span class="node term">Answered, or auto-dismisses<span class="sub">no reminder either way</span></span>
-        </div>
-      </div>
-    </div>
+    <p class="prose" style="font-size:0.88rem; color:var(--muted);">Per-journey diagrams now live inline in each journey card above, next to its plain-text walkthrough — not repeated here. The two below are structural, not journey-specific: the permission <em>policy</em> and the full navigation tree.</p>
 
     <h3>Permission sequence <span style="font-weight:500; color:var(--muted); font-size:0.85rem;">— two moments, not three scattered asks</span></h3>
     <div class="diagram">
@@ -1124,11 +1083,17 @@
         <p>Name: <strong>"Places."</strong> Provenance: a short word per row — <strong>Saved / Auto-saved / Visited</strong> — with manual save always winning the displayed label if it ever applies to a place, auto-save next, plain Visited last, so a place never shows two conflicting explanations for why it's in the list.</p>
         <p class="rec"><b>Recommendation:</b> confirm both, or overrule either — everything in Feature hierarchy, Journeys 3–4, and <code>design/map-rendering-spec.md</code> is written against this proposal, so a change here is a find-and-replace, not a redesign.</p>
       </li>
+      <li>
+        <span class="qn">Q12</span>
+        <span class="qt">Does note 2 ("don't write solutions") reach past the tag-layer line into Map state's rendering solution too?</span>
+        <p>Fixed the literal flagged text in Feature hierarchy (plain requirement now, not "Localness accent"). Left Map state's stroke/zoom solution as stated fact, not reopened — it already passed one feedback loop, and the nav model, diagrams, and all six journeys are written against it.</p>
+        <p class="rec"><b>Recommendation:</b> treat Map state as settled unless told otherwise; confirm which reading was intended.</p>
+      </li>
     </ol>
   </section>
 
   <footer class="doc-footer">
-    <p>Passenger — V1 UX Flows. Drafted by the designer agent for Aviran Grisaro, 2026-07-27.</p>
+    <p>Passenger — V1 UX Flows. Drafted by the designer agent for Aviran Grisaro, 2026-07-27. Revised 2026-07-28 per Aviran's 5 numbered notes.</p>
     <p>Reading view of <code>design/ux-flows.md</code>. Built on the token system from <code>strategy/passenger-north-star.html</code> — flat color, no gradients.</p>
   </footer>
 
