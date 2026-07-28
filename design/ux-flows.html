@@ -428,7 +428,7 @@
     <div class="status-row">
       <span class="status-chip"><span class="dot"></span>Draft — awaiting Aviran's read</span>
       <span>Owner: designer</span>
-      <span>2026-07-28 (revised per Aviran's 5 notes)</span>
+      <span>2026-07-28 (revised per Aviran's 5 notes; stamp-collection/Passport Phase 2 preview added)</span>
     </div>
 
     <h1 class="wordmark">V1 UX Flows</h1>
@@ -437,7 +437,7 @@
     <div class="prose">
       <p class="lede">Passenger is one map. You open the app and you're looking at Tel Aviv, right now — how packed everywhere is, and whether each place feels local or touristy.</p>
       <p style="margin-top:18px;">You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places — sometimes on purpose, sometimes because you lingered somewhere long enough that it saved itself — and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter.</p>
-      <p><strong>There is no feed, no profile, nothing to scroll.</strong> If you already know what you're after, search is one tap away — a sheet you open, not a box that's always staring back at you: a product whose whole pitch is "you don't need to ask" shouldn't put a question mark in front of you by default. Every screen is either the map, or something the map handed you.</p>
+      <p><strong>There is no feed, no profile, nothing to scroll.</strong> (A private, single-user <strong>"Passport"</strong> stats screen — level + stamp grid, parked Phase 2/3, see Where Phase 2 &amp; 3 features slot in — is not an exception to this: nobody else ever sees it, no friend graph, no following. This line still holds for V1.) If you already know what you're after, search is one tap away — a sheet you open, not a box that's always staring back at you: a product whose whole pitch is "you don't need to ask" shouldn't put a question mark in front of you by default. Every screen is either the map, or something the map handed you.</p>
       <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Source: <code>strategy/passenger-strategy.md</code> (2026-07-27) + <code>strategy/decisions.md</code> (decisions 18–26). Markdown twin: <code>design/ux-flows.md</code>. Cross-feature flows reference, not a per-feature design spec — no PRDs exist yet to trace against.</p>
     </div>
   </header>
@@ -543,6 +543,7 @@
       </div>
     </div>
     <p style="font-size:0.85rem; color:var(--muted); margin-top:10px;"><strong>My take on the field shape (Aviran asked directly):</strong> four is right, no fifth needed. Cost folded into Flow — say the word and I'll split it back out. No states/accessibility column here — that's per-feature-spec and rendering-spec territory.</p>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:10px;"><strong>No row added for stamp collection / Passport.</strong> These tables are V1-only, per this doc's own framing — and the feature is a parked Phase 2/3 candidate (strategy.md), not something being built now. If it ships, it would land <strong>Tertiary</strong>-shaped (opt-in, low-frequency, doesn't block the core loop), same tier as Places and Local-QA answering above. See Where Phase 2 &amp; 3 features slot in for the full treatment and Journey 7 for a preview walkthrough.</p>
   </section>
 
   <section class="block" id="launch">
@@ -589,6 +590,7 @@
       <p>Chosen to partition V1's surface without duplicating it: two discovery contexts (tourist and resident, who use the same map differently), one return visit, one feedback loop, one search-first context, and one full pass under degraded conditions — because location-denied and offline don't touch one step, they touch nearly every step at once.</p>
       <p><strong>Search earns its own journey</strong> rather than folding into an existing one: every other journey starts with <em>reading</em> the map — a zone, a slider drag, a saved list — while search is the one path that starts with already knowing what you want and skips the reading entirely. It sits right before the degraded run: a normal alternate entry point, followed by the stress-test pass that touches everything that came before it, search included.</p>
       <p>Every V1 interaction appears in at least one journey. Where something can go wrong, it's attached to the step where it bites.</p>
+      <p>A seventh journey follows these six — a <strong>Phase 2/3 preview</strong>, not committed V1 scope, not counted among the six above.</p>
     </div>
 
     <div class="journey">
@@ -778,6 +780,39 @@
       <div class="journey-out">
         <span class="k">Outcome</span>
         <span>She can still browse, search, read blurbs and tags, manually save places, and get routed out — manual save is the one Places feed path that never depends on location at all. If location was denied outright, she loses the other two feed paths and any chance to answer a local-QA question — but pure offline with location granted doesn't cost her any of that; everything still happens, it just syncs late. Nothing crashes and nothing lies to her about data being fresher than it is — that's the bar, not full feature parity.</span>
+      </div>
+    </div>
+
+    <div class="journey">
+      <div class="journey-head">
+        <span class="journey-eyebrow">Journey 7 · <span class="flag">PHASE 2/3 PREVIEW</span></span>
+        <p class="journey-title">Collecting a stamp</p>
+        <p class="journey-who">Either traveler from the journeys above, sometime after Journey 4's post-visit moment. A parked candidate (strategy.md, added 2026-07-28) — previewed here so the structure exists once Phase 2 actually scopes it. Not committed V1 scope, no PRD yet.</p>
+      </div>
+      <div class="diagram"><div class="dgm-scroll"><div class="chain">
+        <span class="node">Geofence signal<span class="sub">reuses decision #24</span></span><span class="arrow">→</span>
+        <span class="node ter">Stamp added<span class="sub">per place, shape TBD</span></span><span class="arrow">→</span>
+        <span class="node ter">Level checked<span class="sub">thresholds TBD</span></span><span class="arrow">→</span>
+        <span class="node ter">Passport screen<span class="sub">opt-in, later</span></span><span class="arrow">→</span>
+        <span class="node term">Level + stamp grid<span class="sub">passport-book UI</span></span>
+      </div></div></div>
+      <ol class="jsteps">
+        <li>She clears the same genuine-presence signal Journey 4 already walks through — geofence-verified dwell at a locally-recommended, already-tagged spot. <strong>No new detection:</strong> this is a second consumer of decision #24's existing signal, not a separate check. Anti-gaming comes free from the reuse — a stamp requires the same real-presence bar as the local-QA ask, never just opening the app.
+          <span class="snag"><span class="k">Timing vs. the local-QA toast</span>Whether this fires alongside Journey 4's toast or as a separate moment is unresolved — a Phase 2 scoping question, not answered here.</span>
+        </li>
+        <li>A stamp for that place is added to her collection.
+          <span class="snag"><span class="k">Stamp shape</span><span class="flag">OPEN</span>Per-place or per-category (a coffee stamp, a nightlife stamp) — a product/design call for when this gets scoped, per strategy.md.</span>
+        </li>
+        <li>If her total stamp count crosses a threshold, her level advances one step on the seven-tier ladder — <strong>Tourist</strong> (default) → <strong>Wanderer</strong> → <strong>Regular</strong> → <strong>Local</strong> → <strong>Insider</strong> → <strong>Native</strong> → <strong>Legend</strong>. Thresholds are illustrative only, TBD.
+          <span class="snag"><span class="k">Level-up moment</span><span class="flag">OPEN</span>Whether a level-up gets any in-the-moment surfacing, or stays silent until she next opens Passport, is undesigned here.</span>
+        </li>
+        <li><strong>Later, opt-in:</strong> she taps into the <strong>Passport</strong> screen — a new, private, single-user Tertiary surface (Feature hierarchy, Where Phase 2/3 features slot in). She sees her current level and a stamp-collection grid, passport-book UI. Nobody else ever sees this screen — no friend graph, no following, no social surface of any kind.
+          <span class="snag"><span class="k">Not designed here</span>The Legend tier's floated "submit your own recommendations" unlock — strategy.md flags it as an open call (new user-write surface, moderation/abuse questions unresolved), not an assumed inclusion.</span>
+        </li>
+      </ol>
+      <div class="journey-out">
+        <span class="k">Outcome</span>
+        <span>A personal, private record of real visits turned into a collectible — same underlying signal Journey 4 already uses, at zero extra detection cost. This entire journey previews a parked candidate, not build scope — treat every step above as illustrative until Phase 2 actually scopes the feature.</span>
       </div>
     </div>
   </section>
@@ -987,6 +1022,11 @@
         <span class="parked-body">Enters as a third overlay toggle on the map — additive chrome, since it extends the base map's visualization rather than opening a new surface. <strong>Displaces nothing.</strong> The two-layer hero view doesn't need to change shape to gain a third toggle later, which is exactly why cutting Events from V1 costs nothing structurally now. (Category chips are no longer a map-chrome neighbor it would sit beside — decision #25 moved them into the search sheet — but that doesn't change where Events itself would land.)</span>
       </div>
       <div class="parked-item">
+        <span class="parked-tier">Phase 2 · Tertiary · added 2026-07-28, founder-direct</span>
+        <span class="parked-name">Stamp collection &amp; status levels — "Passport" screen</span>
+        <span class="parked-body">A collectible-per-place record (possibly per category — a coffee stamp, a nightlife stamp; exact shape TBD) accumulating toward a seven-tier status ladder: <strong>Tourist</strong> (default, 0) → <strong>Wanderer</strong> → <strong>Regular</strong> → <strong>Local</strong> → <strong>Insider</strong> → <strong>Native</strong> → <strong>Legend</strong>, generic and global, no per-city flavor yet. <strong>Reuses decision #24's geofence-verified presence signal as a second consumer — no new detection.</strong> Anti-gaming comes free from that reuse: a stamp requires the same genuine-presence signal as local-QA, never app-open alone. Surfaces as a new Tertiary screen — level + stamp-collection grid, passport-book UI, opt-in, low-frequency, doesn't block the core loop. Displaces nothing structurally in V1. <strong>Not called "profile":</strong> the requested surface collided directly with this doc's "no profile" frame and the standing scope-gate's literal "no profiles" prohibition — shipping it as a private, single-user <strong>"Passport"</strong> instead avoids the tripwire word without changing the ask. Naming is <span class="flag">ASSUMPTION</span>, needs Aviran's explicit sign-off (Open questions, strategy.md). Legend's floated "submit your own recommendations" unlock is <strong>not designed here</strong> — open call per strategy.md. Relationship to Phase 3's points system is also open. Preview journey: Journey 7.</span>
+      </div>
+      <div class="parked-item">
         <span class="parked-tier">Phase 2 · Secondary</span>
         <span class="parked-name">Proximity intelligence + arrival card</span>
         <span class="parked-body">A new Secondary surface, but geofence-triggered rather than tap-invoked — a time-triggered variant of the spot sheet, appearing when the user is already en route. Extends the spot sheet; displaces nothing.</span>
@@ -1089,11 +1129,16 @@
         <p>Fixed the literal flagged text in Feature hierarchy (plain requirement now, not "Localness accent"). Left Map state's stroke/zoom solution as stated fact, not reopened — it already passed one feedback loop, and the nav model, diagrams, and all six journeys are written against it.</p>
         <p class="rec"><b>Recommendation:</b> treat Map state as settled unless told otherwise; confirm which reading was intended.</p>
       </li>
+      <li>
+        <span class="qn">Q13</span>
+        <span class="qt">Stamp collection / Passport (Where Phase 2 &amp; 3 features slot in, Journey 7) — three questions parked in strategy.md, not re-litigated here</span>
+        <p>Per-city flavor names for the tier ladder (explicitly deferred cosmetic idea, not level-logic); confirming <strong>"Passport"</strong> as the surface name instead of "profile" (needs Aviran's explicit sign-off — "profile" is a literal scope-gate tripwire); and whether this is the same mechanic as Phase 3's points system or two systems that coexist. Full text lives in <code>strategy/passenger-strategy.md</code>'s Open questions section — not restated here per the doc-ladder rule.</p>
+      </li>
     </ol>
   </section>
 
   <footer class="doc-footer">
-    <p>Passenger — V1 UX Flows. Drafted by the designer agent for Aviran Grisaro, 2026-07-27. Revised 2026-07-28 per Aviran's 5 numbered notes.</p>
+    <p>Passenger — V1 UX Flows. Drafted by the designer agent for Aviran Grisaro, 2026-07-27. Revised 2026-07-28 per Aviran's 5 numbered notes; stamp-collection/Passport Phase 2 preview added same day.</p>
     <p>Reading view of <code>design/ux-flows.md</code>. Built on the token system from <code>strategy/passenger-north-star.html</code> — flat color, no gradients.</p>
   </footer>
 

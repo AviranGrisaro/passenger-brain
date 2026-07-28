@@ -1,7 +1,7 @@
 # Passenger V1 — UX Flows
 
 **Owner:** designer (drafted for Aviran)
-**Date:** 2026-07-28 (revised per Aviran's 5 numbered notes, live chat)
+**Date:** 2026-07-28 (revised per Aviran's 5 numbered notes, live chat; stamp-collection/Passport Phase 2 preview added)
 **Status:** Draft — awaiting Aviran's read
 **Source:** `strategy/passenger-strategy.md` (2026-07-27) + `strategy/decisions.md` (decisions 18–26, 2026-07-27)
 **Document type:** cross-feature UX flows reference. This is not a per-feature design spec — it doesn't carry a PRD-traceability table or a high-fidelity mockup link, because no PRD exists yet to trace against (`prds/INDEX.md` is empty). Once `product` writes the six V1 PRDs this doc predicts, each gets its own spec under `design/<phase-slug>/` that does carry those.
@@ -10,7 +10,7 @@
 
 ## 1. The frame
 
-Passenger is one map. You open the app and you're looking at Tel Aviv, right now — how packed everywhere is, and whether each place feels local or touristy. You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places — sometimes on purpose, sometimes because you lingered somewhere long enough that it saved itself — and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter. There is no feed, no profile, nothing to scroll. If you already know what you're after, search is one tap away — a sheet you open, not a box that's always staring back at you: a product whose whole pitch is "you don't need to ask" shouldn't put a question mark in front of you by default. Every screen is either the map, or something the map handed you.
+Passenger is one map. You open the app and you're looking at Tel Aviv, right now — how packed everywhere is, and whether each place feels local or touristy. You drag a slider to see the next 12 hours, tap a neighborhood to read about it, tap a place and get handed off to Maps or Waze to actually walk there. You save places — sometimes on purpose, sometimes because you lingered somewhere long enough that it saved itself — and the app quietly remembers where you've actually been. Occasionally it asks you, in passing, whether a place felt local — because that's how the map gets smarter. There is no feed, no profile, nothing to scroll. (A private, single-user **"Passport"** stats screen — level + stamp grid, parked Phase 2/3, §8 — is not an exception to this: nobody else ever sees it, no friend graph, no following. This line still holds for V1.) If you already know what you're after, search is one tap away — a sheet you open, not a box that's always staring back at you: a product whose whole pitch is "you don't need to ask" shouldn't put a question mark in front of you by default. Every screen is either the map, or something the map handed you.
 
 ---
 
@@ -55,6 +55,8 @@ No in-app routing screen — V1 hands off to Maps/Waze — so nothing sits above
 
 **My take on the field shape (Aviran asked directly, §3.1):** four is right, I wouldn't add a fifth. Cost folded into Flow rather than kept separate — say the word and I'll split it back out. Didn't add a states/accessibility column — that's per-feature-spec and rendering-spec territory (§6, `map-rendering-spec.md`), not this doc's job.
 
+**No row added for stamp collection / Passport.** These tables are V1-only, per this doc's own framing — and the feature is a parked Phase 2/3 candidate (strategy.md), not something being built now. If it ships, it would land **Tertiary**-shaped (opt-in, low-frequency, doesn't block the core loop), same tier as Places and Local-QA answering above. See §8 for the full treatment and §4 Journey 7 for a preview walkthrough.
+
 ---
 
 ## 3. Primary flow — cold open to action
@@ -90,6 +92,8 @@ This turns three scattered asks into two moments — one at launch, one contextu
 ## 4. End-to-end journeys
 
 Six journeys, chosen to partition V1's surface without duplicating it: two discovery contexts (tourist / resident, since they use the same map differently), one return-visit context, one feedback context, one search-first context, and one whole-journey pass under degraded conditions. Search earns its own journey rather than folding into an existing one — every other journey starts with *reading* the map (a zone, a slider drag, a saved list); search is the one path that starts with already knowing what you want and skips the reading entirely. It sits right before the degraded run: a normal alternate entry point, followed by the stress-test pass that touches everything that came before it, search included. Every V1 interaction appears in at least one journey below; where an unhappy path is specific to a single step, it's attached right there rather than pulled into a separate list.
+
+A seventh journey follows these six — a **Phase 2/3 preview**, not committed V1 scope, not counted among the six above.
 
 ### Journey 1 — Just landed, knows nothing
 
@@ -244,6 +248,29 @@ flowchart TD
 8. She taps **Go** anyway. The hand-off to native Maps/Waze still works even offline — it's just handing coordinates to another app, not requesting anything from Passenger's own servers.
 9. **Outcome:** she can still browse, search, read blurbs and tags, manually save places, and get routed out to a destination — manual save is the one Places feed path that never depends on location at all. If location was denied outright, she loses the other two feed paths and any chance to answer a local-QA question, since nothing was ever detected to ask about — but pure offline with location granted doesn't cost her any of that; everything still happens, it just syncs late. Nothing crashes and nothing lies to her about data being fresher than it is — that's the actual bar here, not full feature parity.
 
+### Journey 7 — Collecting a stamp *(Phase 2/3 preview — not committed V1 scope, no PRD yet)*
+
+*Either traveler from the journeys above, sometime after Journey 4's post-visit moment — a parked candidate (strategy.md, added 2026-07-28), previewed here so the structure exists once Phase 2 actually scopes it.*
+
+```mermaid
+flowchart TD
+    A["Dwell/geofence signal fires<br/>(reuses decision #24 — same signal as Journey 4,<br/>no new detection)"] --> B["Stamp added to collection<br/>(per-place, maybe per-category — shape TBD)"]
+    B --> C{Level threshold crossed?}
+    C -->|Yes| D["Level advances<br/>e.g. Tourist → Wanderer"]
+    C -->|No| E[Stamp banked,<br/>level unchanged]
+    D --> F[["Passport screen<br/>(opt-in, later — Tertiary)"]]
+    E --> F
+    F --> G["Level + stamp grid<br/>passport-book UI"]
+```
+
+1. She clears the same genuine-presence signal Journey 4 already walks through — geofence-verified dwell at a locally-recommended, already-tagged spot. **No new detection**: this is a second consumer of decision #24's existing signal, not a separate check. Anti-gaming comes free from the reuse — a stamp requires the same real-presence bar as the local-QA ask, never just opening the app.
+   - **Whether this fires alongside Journey 4's local-QA toast, or as a separate moment, is unresolved** — a Phase 2 scoping question, not answered here.
+2. A stamp for that place is added to her collection. **[open, per strategy.md]** Whether a stamp is per-place or per-category (a coffee stamp, a nightlife stamp) is a product/design call for when this gets scoped — not decided in this preview.
+3. If her total stamp count crosses a threshold, her level advances one step on the seven-tier ladder — **Tourist** (default) → **Wanderer** → **Regular** → **Local** → **Insider** → **Native** → **Legend**. Thresholds are illustrative only, TBD. **[open]** Whether a level-up gets any in-the-moment surfacing (a celebratory beat) or stays silent until she next opens Passport is undesigned here.
+4. **Later, opt-in:** she taps into the **Passport** screen — a new, private, single-user Tertiary surface (§2, §8). She sees her current level and a stamp-collection grid, passport-book UI. Nobody else ever sees this screen — no friend graph, no following, no social surface of any kind.
+   - **Not designed here:** the Legend tier's floated "submit your own recommendations" unlock — strategy.md flags it as an open call (new user-write surface, moderation/abuse questions unresolved), not an assumed inclusion.
+5. **Outcome:** a personal, private record of real visits turned into a collectible — same underlying signal Journey 4 already uses, at zero extra detection cost. This entire journey is a **preview of a parked candidate**, not build scope; treat every numbered beat above as illustrative until Phase 2 actually scopes the feature.
+
 ---
 
 ## 5. Navigation model
@@ -351,6 +378,7 @@ Two things are parked as of this revision — Scenic View and Live Events both m
 - **Scenic View (Phase 2)** replaces V1's "Go" hand-off with a full-screen in-app routing surface that favors interesting streets over the fastest path. This isn't just an addition — it changes what leaving the spot sheet *means*. In V1, tapping Go ends the in-app journey (an exit, nothing to reconstruct on return). With Scenic View, the user's journey continues inside Passenger during transit, which reopens two things V1 currently sidesteps entirely: what re-entering the spot/zone context looks like after arrival (V1 has no "you've arrived" moment, since the app was never watching), and the depth rule, which goes back to 3 levels (map → zone → spot → Scenic View) the moment this ships. Worth scoping alongside Phase 2's proximity intelligence (arrival card) — both concern the in-transit experience and would likely share build surface.
   - The earlier open question about Scenic View's depth (full in-app turn-by-turn vs. a route-preview-then-handoff) still applies whenever Phase 2 gets scoped — but it's no longer a V1 blocker, so it's dropped from §9's list below and flagged here instead, for whoever picks up Phase 2.
 - **Live Events (Phase 2)** enters as a third overlay toggle on the map — Primary tier, additive chrome, since it extends the base map's visualization rather than opening a new surface. It displaces nothing in V1's structure: the two-layer hero view (heat + tag) doesn't need to change shape to gain a third toggle later, which is exactly why cutting Events from V1 costs nothing structurally now. (Category chips are no longer a map-chrome neighbor it would sit beside — decision #25 moved them into the search sheet — but that doesn't change where Events itself would land.)
+- **Stamp collection & status levels — "Passport" screen (Phase 2, added 2026-07-28, founder-direct):** a collectible-per-place record (possibly per category — a coffee stamp, a nightlife stamp; exact shape TBD) that accumulates toward a seven-tier status ladder: **Tourist** (default, 0) → **Wanderer** → **Regular** → **Local** → **Insider** → **Native** → **Legend**, generic and global, no per-city flavor yet. **Reuses decision #24's geofence-verified presence signal as a second consumer — no new detection.** Anti-gaming comes free from that reuse: a stamp requires the same genuine-presence signal as local-QA, never app-open alone. Surfaces as a new **Tertiary** screen — level + stamp-collection grid, passport-book UI, opt-in, low-frequency, doesn't block the core loop. Displaces nothing structurally in V1 — it's a wholly new surface, not a rework of an existing one. **Not called "profile":** the requested surface collided directly with this doc's §1 frame ("no profile") and the standing scope-gate's literal "no profiles" prohibition (`BOARD.md`, `CLAUDE.md`) — shipping it as a private, single-user **"Passport"** instead avoids the tripwire word without changing the ask. Naming is **[ASSUMPTION]**, needs Aviran's explicit sign-off (§9, strategy.md Open questions). Legend's floated "submit your own recommendations" unlock is **not designed here** — open call per strategy.md (new user-write surface, moderation/abuse questions unresolved). Relationship to Phase 3's points system (same mechanic renamed, or two coexisting systems) is also open. Preview journey: §4 Journey 7.
 - **Proximity intelligence + arrival card (Phase 2):** a new **Secondary** surface, automatically triggered (geofence) rather than tap-invoked — a time-triggered variant of the spot sheet appearing when the user is already en route. Extends the spot sheet; doesn't displace it.
 - **AI local guide persona, audio-first, personalization (Phase 3):** a different product mode on the same engine, not a sheet off the map. Would need its own **Primary-adjacent entry point** — a real structural change, not an addition. Flag clearly if Phase 3 ever gets scoped: it's the one candidate that breaks V1's "single primary surface" simplicity rather than extending it.
 - **Shake-to-decide (Phase 3):** a gesture-triggered **Secondary** action, roughly parallel to the spot sheet — a random-suggestion overlay triggered by a device gesture instead of a tap. Purely additive.
@@ -373,3 +401,4 @@ Two things are parked as of this revision — Scenic View and Live Events both m
 10. **Permission sequence — flagged hard, per the instruction that came with decision #26.** V1 now needs three system permissions (Location When-In-Use, Location Always, Notifications) for a product whose decision #8 explicitly rules out a permission gate at launch. §3 proposes a concrete ordering — one prompt at cold open, then a single in-app priming line before Always and Notifications fire back to back at the first real visit — but it's a proposal, not a confirmed sequence. **Recommendation:** confirm the proposed ordering, or replace it, before this becomes a build spec; don't let three unordered permission asks reach `ios-developer` by default.
 11. **The merged Places list's name and provenance display — recorded open on decision #26, and I'm proposing rather than leaving blank.** Name: **"Places."** Provenance: a short word per row — **Saved / Auto-saved / Visited** — with manual save always winning the displayed label if it ever applies to a place, auto-save next, plain Visited last, so a place never shows two conflicting explanations for why it's in the list. **Recommendation:** confirm both, or overrule either — everything in §2, §4 (Journeys 3–4), and `design/map-rendering-spec.md` §6 is written against this proposal, so a change here is a find-and-replace, not a redesign.
 12. **Does note 2 ("don't write solutions") reach past §2's tag-layer line into §6's rendering solution too?** Fixed the literal flagged text in §2 (plain requirement now, not "Localness accent"). Left §6's stroke/zoom solution as stated fact, not reopened — it already passed one feedback loop, and the nav model, both diagrams, and all six journeys are written against it. **Recommendation:** treat §6 as settled unless told otherwise; confirm which reading was intended.
+13. **Stamp collection / Passport (§8, Journey 7) — three questions parked in `strategy/passenger-strategy.md`'s own Open questions, not re-litigated here:** per-city flavor names for the tier ladder (explicitly deferred cosmetic idea, not level-logic); confirming **"Passport"** as the surface name instead of "profile" (needs Aviran's explicit sign-off — "profile" is a literal scope-gate tripwire, §8 above); and whether this is the same mechanic as Phase 3's points system or two systems that coexist. Full text lives in strategy.md per the doc-ladder rule — not restated here.
