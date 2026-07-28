@@ -45,6 +45,20 @@ Entry format:
 
 ---
 
+### 2026-07-28 — chief-of-staff — strategy.md: stamp collection = Phase 3 points system, unified; Phase 2 confirmed
+
+- **Provenance:** founder-direct, live chat, relayed via the coordinating session. Aviran answered the two remaining open items from the stamp-collection docs pass: (1) Phase placement is Phase 2, confirmed, not just a candidate assumption; (2) the Phase 3 "points system" and stamp collection are the same mechanic, not two separate systems — reconcile the docs. Item #3 (stamp-vs-toast timing, level-up surfacing) stays open, no answer, not chased further.
+- **Did:** Edited `strategy/passenger-strategy.md` directly (Aviran-gated-file exception, same as prior stamp-collection edits):
+  1. **Phase 2 candidate block:** retitled with a parenthetical noting it was formerly described separately as Phase 3's "points system," added "**Phase placement confirmed by Aviran, 2026-07-28**" replacing the old parked-candidate framing, and added a new lead bullet stating plainly these are the same mechanic (not "overlaps in spirit," not an open question) — the points-system framing (rewards for local-QA answers + visiting) folds into this entry.
+  2. **Phase 3 AI local guide block:** struck through the old standalone "Points system" bullet with a pointer to the unified Phase 2 entry, rather than deleting it silently.
+  3. **Three scattered "Phase 3 points system" references fixed:** the V1-scope local-QA risk callout (line ~38), the Key risks bullet (line ~144), and the Open Questions "pull forward into V1" question (line ~158) — all now say "Phase 2" and "stamp-collection incentive layer" instead of "Phase 3 points system."
+  4. **Open Questions:** removed the now-resolved "stamp collection vs. Phase 3 points system — same or different?" row entirely, added a second "(Resolved 2026-07-28...)" pointer alongside the existing naming one rather than deleting history silently.
+  5. **Rollout sequence table:** added stamp collection & status levels ("Passport" screen) to Phase 2's "what ships" cell, gating marked TBD (unaffected by this round — still an open Business-model call).
+- **Evidence:** `strategy/passenger-strategy.md` grepped for "points" post-edit — five hits remain, all either explaining the unification/history or the struck-through pointer; none describe it as still a live, separate Phase 3 item.
+- **Left behind:** Item #3 (does the stamp fire alongside or separately from the Journey 4 local-QA toast; does a level-up get in-the-moment surfacing) is now the **sole remaining open UX question** on this feature — no strategy-level ambiguity left. Dispatching `designer` (relay via `main`) to make the matching reconciliation in `design/ux-flows.md`/`ux-flows.html` (§8 bullet, §9 Q13, Journey 7) — its entry to follow once it reports back.
+
+---
+
 ### 2026-07-28 — chief-of-staff — strategy.md: "Passport" naming confirmed by Aviran
 
 - **Provenance:** founder-direct, live chat, relayed via the coordinating session. Aviran confirmed flagged item #1 from the stamp-collection docs pass — go with "Passport" naming. Items #2 (Phase 2/3 placement) and #3 (stamp-vs-points-system relationship) remain open, no word yet.
