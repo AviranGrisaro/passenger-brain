@@ -1,7 +1,7 @@
 # Passenger Strategy
 
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-27
+**Last updated:** 2026-07-28
 **Related:** [V1 decision record](decisions.md) · [North star](passenger-north-star.html)
 
 ## North star
@@ -61,6 +61,15 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - Additive on top of heat + tag, not a rework of the core map.
 - Subscription-gated when it ships (see Business model).
 - If Events ever grows a business side (ticketing commission, promoter placement), that's B2B-shaped monetization and conflicts with the standing "no business-facing monetization" line. Needs an explicit call if it comes up, not an assumed exception.
+
+**Phase 2 — Stamp collection & status levels.** A collectible-per-place record that turns "I came back and it counted" into loot — the retention/return-visit loop V1 itself doesn't have yet (see Key risks: "V1 has no habit loop"). Added 2026-07-28, founder-direct.
+- **Reuses the existing detected-visit signal, does not reinvent it.** A stamp fires off the same geofence-verified "were you actually there" check decision #24 already built for local-QA — `data-engineer` owns that detection; this only adds a new consumer of it. Anti-gaming for free: a stamp requires the same genuine-presence signal as local-QA, never just opening the app.
+- A stamp is a collectible object per place, possibly split by place-category (a coffee stamp, a nightlife stamp) — exact shape is a product/design call, not decided here.
+- Total stamp count maps to a seven-tier status ladder, generic and global for now (no per-city flavor — see Open questions): **Tourist** (default, 0 stamps) → **Wanderer** (first few) → **Regular** (repeat visitor, knows a few spots) → **Local** (solid count, knows the city) → **Insider** (deep cuts, off-map spots) → **Native** (rare, near-total coverage) → **Legend** (top tier, easter-egg status, profile flex). Exact thresholds TBD (e.g. 0/5/15/30/60/100 illustrative only) — `product` to decide when this is scoped.
+- **Legend may unlock submitting your own recommendations.** Floated, not decided — that's a new user-write surface into a currently curated+algorithmic pipeline (moderation, quality, abuse questions all open) and needs its own call, not an assumed inclusion.
+- **Naming/scope conflict, flagged not resolved.** The requested surface is "a profile screen" showing level + stamp grid, passport-book style. V1's own frame says "nothing routes through a feed or a profile," and the standing scope gate (`passenger-brain/CLAUDE.md`) bans profiles as a social feature by name. This is a **private, single-user** stats view — no other user ever sees it, no friend graph, no following, nothing social — so it isn't the social-profile pattern the gate exists to catch, but it uses the exact banned word. Proposing it ships as a **"Passport"** screen (matches the passport-book UI ask), not a "profile" — naming as [ASSUMPTION], needs Aviran's explicit sign-off before any PRD cites this line, precisely because "profile" is a scope-gate tripwire.
+- Overlaps in spirit with Phase 3's points system (rewards for local-QA answers + visiting) below — whether this is the same mechanic under a different name, or two separate systems that both exist, is open, not decided here.
+- Subscription-gated or free: not decided — see Business model when this gets scoped.
 
 **Phase 3 — AI local guide.** A different product bolted onto the same engine: planning, not discovery.
 - A named local persona (imagine "a local from Tokyo") is the guide, not a generic assistant — tell her what you're into, she builds the day.
@@ -148,5 +157,8 @@ Everything resolves on its own except scope/strategy calls, money, App Store act
 - What's the right algorithm/local-QA balance as cities scale — does QA involvement shrink over time, or stay constant per city forever?
 - Does the points system need to pull forward into V1 since local QA depends on it, or is early-user goodwill actually enough for a small first cohort in one city?
 - Is the free/premium line now permanent at "V1 scope stays free forever," or could something currently in it (the places list, search) move behind the subscription later? The Phase 2 additions are settled as paid; what's already free is the part still worth pinning down.
+- **Stamp collection — per-city flavor names** (e.g. renaming the top tier to local slang per city): explicitly a future cosmetic idea, not level-logic, not in scope now. Needs an answer only once a second city is real.
+- **Stamp collection — "Passport" naming.** Confirm the private single-user stats screen ships as "Passport," not "profile" — the feature needs the surface, but "profile" is a literal scope-gate tripwire (see Phase 2 candidate above).
+- **Stamp collection vs. Phase 3 points system.** Same mechanic renamed, or two separate systems that coexist? Decide before either gets a PRD.
 - **Scenic View depth**, when Phase 2 scopes it: full in-app turn-by-turn navigation, or a route preview that still hands off to native maps for the actual walking? Real build-cost difference. No longer a launch blocker, but it's the first thing Phase 2 has to answer.
 - Does removing Events from V1 change what the time slider is for? It was carrying two kinds of information — how packed a place will be, and what's happening there. Now it carries one.
