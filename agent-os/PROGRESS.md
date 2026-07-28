@@ -31,6 +31,15 @@ Entry format:
 
 ---
 
+### 2026-07-28 — chief-of-staff — strategy.md: "Passport" naming confirmed by Aviran
+
+- **Provenance:** founder-direct, live chat, relayed via the coordinating session. Aviran confirmed flagged item #1 from the stamp-collection docs pass — go with "Passport" naming. Items #2 (Phase 2/3 placement) and #3 (stamp-vs-points-system relationship) remain open, no word yet.
+- **Did:** Edited `strategy/passenger-strategy.md` directly (same Aviran-gated-file exception as the original addition) — reworded the Phase 2 candidate's naming bullet from "flagged not resolved... [ASSUMPTION]... needs Aviran's explicit sign-off" to "Naming confirmed by Aviran, 2026-07-28... no longer an open assumption." Removed the now-resolved "Passport naming" row from Open Questions, replacing it with a one-line "(Resolved 2026-07-28...)" pointer rather than silently deleting the history. Left the per-city-flavor-names and stamp-vs-points-system rows untouched — still open.
+- **Evidence:** `strategy/passenger-strategy.md` diff is a targeted reword of one bullet plus one Open Questions row — no other content touched.
+- **Left behind:** Dispatching `designer` (relay via `main`) to make the matching update in `design/ux-flows.md`/`ux-flows.html` — its [ASSUMPTION] markers on "Passport" naming (§8 bullet, §9 Q13) need the same confirmed-not-pending update. That entry will follow once designer reports back. Items #2/#3 still open in both docs.
+
+---
+
 ### 2026-07-28 — chief-of-staff — strategy.md: stamp collection system added as Phase 2/3 candidate
 
 - **Did:** Added the stamp-collection/status-level feature to `strategy/passenger-strategy.md` myself rather than dispatching `product`, because that file is Aviran-gated ("no agent edits it... not from a PRD, not from a ticket, not from a chat message" — `passenger-brain/CLAUDE.md`). Treating this live founder-direct chat instruction the same way the 2026-07-14 prd-review-retirement edit was handled: the coordinating session makes the edit directly, under explicit live instruction, and documents it plainly rather than routing it through a normal agent/gate that doesn't fit an unattended handoff. Landed as a new **"Phase 2 — Stamp collection & status levels"** bullet block (between Live Events and the AI local guide, in "The product" section) plus three new rows in "Open questions." [ASSUMPTION] scoped it as a Phase 2/3 parked retention candidate, not V1 build scope — the strategy doc's own doctrine is "everything downstream is parked until Phase 1 proves retention," and this is squarely a downstream retention mechanic, not core map scope. Flagging for Aviran to correct if V1 inclusion was actually intended.
