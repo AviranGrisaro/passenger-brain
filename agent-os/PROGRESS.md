@@ -13,6 +13,40 @@ Entry format:
 
 ---
 
+### 2026-07-28 — chief-of-staff — founder-direct request stub: stamp collection system (strategy + UX flows)
+
+- **Provenance:** founder-direct, live chief-of-staff chat (not Linear, not a prior PROGRESS.md entry).
+- **Verbatim brief from Aviran:**
+  > Focus for this run: new feature — add to strategy and UX flow docs.
+  >
+  > Feature: stamp collection system. User collects a stamp each time they check in / get verified presence at a locally-recommended place (reuse existing presence/heatmap detection owned by data-engineer — do not reinvent detection). Stamps accumulate toward a status level.
+  >
+  > Approved leveling ladder (generic, global, no per-city localization yet — that's an explicit future idea, not in scope now):
+  > 1. Tourist — default, 0 stamps
+  > 2. Wanderer — first few stamps, still exploring
+  > 3. Regular — repeat visitor, knows a few spots by name
+  > 4. Local — solid stamp count, knows the city
+  > 5. Insider — deep cuts, off-map spots
+  > 6. Native — rare tier, near-total city coverage
+  > 7. Legend — top tier, easter-egg status, profile flex, maybe unlocks ability to submit own recommendations
+  >
+  > Mechanics to spec (product/design to nail down exact numbers):
+  > - Stamp = collectible object per place, possibly per place-category (e.g. "coffee stamp", "nightlife stamp")
+  > - Level = function of total stamp count, thresholds TBD (e.g. 0/5/15/30/60/100 — product to decide)
+  > - Anti-gaming: stamp only fires on genuine presence signal, not just app open
+  > - Surface: profile screen shows level + stamp collection grid (passport-book UI)
+  > - Open question for later: per-city flavor names (e.g. top tier renamed to local slang per city) — cosmetic layer only, not level-logic change, explicitly deferred, should be logged as an open question, not built now
+  >
+  > Docs to update (route through product/designer as appropriate):
+  > - passenger/passenger-brain/strategy/passenger-strategy.md — add under "The product" section (~line 27), frame as retention/return-visit loop driver
+  > - passenger/passenger-brain/design/ux-flows.md — add a new journey ("collecting a stamp"), slot into hierarchy (§2, line ~17) and "where parked features slot in" (§8, line ~347)
+  > - Add the per-city localization idea to "Open questions for Aviran" in ux-flows.md (§9) or "Open questions" in strategy.md, not as active scope
+  >
+  > This is a docs-first pass: get the feature properly specified in strategy + UX flow docs. Do not have ios-developer/developer start building yet unless your normal pipeline logic calls for kicking off downstream work after doc approval — use your judgment per your standard gating process.
+- **Status:** `strategy/passenger-strategy.md` is Aviran-gated per `passenger-brain/CLAUDE.md` ("no agent edits it... not from a PRD, not from a ticket, not from a chat message"). Since this is Aviran instructing directly in a live chief-of-staff session, treating it like the 2026-07-14 prd-review-retirement precedent: the coordinating session (this one) makes the strategy.md edit itself rather than dispatching `product` to touch a file it's barred from. Dispatching `designer` (relay via `main`) for `design/ux-flows.md`. [ASSUMPTION] treating this as a Phase 2/3 parked retention candidate (like Scenic View/Live Events), not V1 build scope — "everything downstream is parked until Phase 1 proves retention" — flagging for Aviran to correct if he meant something else. Detailed worklog entries from chief-of-staff (strategy.md) and designer (ux-flows.md) to follow after both land.
+
+---
+
 ### 2026-07-28 — designer — UX flows doc revised per Aviran's 5 founder-direct notes
 
 - **Provenance:** founder-direct, live chat, relayed by chief-of-staff (see that agent's stub entry immediately below this one for the verbatim brief — not re-quoted here). Ad hoc doc revision, not tied to a Linear ticket or BOARD.md row; no design-approval/design-review gate applies.
