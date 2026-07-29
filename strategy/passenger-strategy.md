@@ -1,7 +1,7 @@
 # Passenger Strategy
 
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-28
+**Last updated:** 2026-07-29
 **Related:** [V1 decision record](decisions.md) · [North star](passenger-north-star.html)
 
 ## North star
@@ -33,13 +33,13 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - Time slider, now → +12 hours. A place's relevance changes by the hour; the map knows that.
 - Three vibe tags, plain language, no scores: **Local** (trust it) · **Mix** · **Tourist**. There's no separate "tourist trap" tag — packed-and-touristy is what to avoid, and it reads off the two layers together rather than needing a label of its own.
 - Two categories: Food & drinks, Things to do — selected inside the search sheet, not from permanent chrome on the map (decision #25).
-- Tap a zone → hand-curated neighborhood blurb + tagged spots. Tap a spot → hands off to native Maps/Waze for directions. No in-app routing in V1; Scenic View is a Phase 2 candidate.
+- Tap a zone → hand-curated neighborhood blurb + tagged spots. Tap a spot → preview a fast or scenic route as a polyline on the map for comparison, then hand off to native Maps/Waze for actual turn-by-turn navigation. No in-app turn-by-turn, voice, or rerouting in V1 — routing preview only. Free in V1, no paywall (monetize later if at all). Added 2026-07-29, founder-direct.
 - No onboarding. Straight to the map + location permission.
 - **Localness is decided by algorithm plus local QA, together.** The algorithm proposes; real users, asked in-app whether a spot is actually local, verify and correct it — crowdsourced from the user base, not a hired/managed team. That combination is the permanent pipeline — not hand-curation alone, waiting for an algorithm to someday replace it solo. **The ask is triggered by a detected visit** — when the geofence logs that someone was actually somewhere, a local notification fires and a toast drops from the top of the screen asking whether the place felt local or touristy (decision #24). Asked while the visit is fresh, from someone who was genuinely there. Two open risks this trades in for the staffing risk it removes: **cold start** (a new city has no users yet to ask, on day one) and **incentive** (no reward system exists in V1 to make anyone bother answering — see Phase 2's stamp collection & status levels, and the risk that creates).
 - **Density is a synthetic feed for now**, time-bound to the slider hour, while a live popular-times data source is evaluated separately.
 - Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.
 - **One list of places, fed three ways** (decision #26): you save somewhere manually, you dwell somewhere 20+ minutes and it saves itself, or the geofence detects you were there. Saved and Visited are no longer separate lists. The list also renders on the map, so your own places are visible in place rather than only in a list. Auto-save only ever fires on places already in Passenger's own places table — your flat and your office are not tagged spots, so they never get saved.
-- No Events overlay in V1; that's a Phase 2 candidate. The V1 map is heat + tag, and nothing else.
+- Live Events overlay ships in V1 as a third map layer alongside heat + tag — but it's launch-blocking: V1 does not ship until data-engineer has a working live-events ingestion pipeline (scoping ticket PAS-5). Real timeline/dependency risk, not yet proven buildable in the Phase 1 window. Added 2026-07-29, founder-direct.
 - **Search**, reached from an icon in the map chrome, opening as a sheet. Covers place names, keywords ("hummus", "rooftop bar"), and neighborhoods — a name or keyword jumps to the spot, a neighborhood pans the map and opens its zone sheet. Results carry the same heat and tag signals as the map and honor the slider hour; search filters the map, it doesn't bypass it. Added 2026-07-27 (decision #23).
 
 **Out of scope:** itineraries, bookings, Android, social features of any kind (no friends, no posting, no following, no presence), any business-facing monetization.
@@ -52,14 +52,11 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 - Location access only turns on while you're actually en route to a suggestion — never standing, never background.
 - Real cost is on the build side (permissions + geofencing logic + generated UI), not design — scope it properly before committing, don't assume it's cheap because the UI is thin.
 
-**Phase 2 — Scenic View.** In-app routing to a tapped spot, favoring interesting/local streets over the fastest path.
-- Replaces V1's flat hand-off to native Maps/Waze — the same tap, a different destination.
-- Real routing-engine build scope, not a UI skin on MapKit/Google Maps. Cost swings hard on depth: full in-app turn-by-turn versus a route preview that still hands off for the actual walking. Needs an answer before committing.
-- Subscription-gated when it ships (see Business model).
+**Phase 2 — Scenic View, full in-app navigation.** V1 now ships a route preview only — polyline comparison of scenic vs. fast, then hand-off to native Maps/Waze for the actual walk (see V1 scope, added 2026-07-29). What's still a Phase 2 candidate is whether that preview ever grows into full in-app turn-by-turn navigation.
+- Real routing-engine build scope if it happens — full turn-by-turn is a different cost tier than the V1 preview, not an incremental step from it.
+- Gating undecided. Proximity intelligence is the only confirmed subscription feature now (see Business model, updated 2026-07-29); whether full turn-by-turn is ever paid is an open call, not an assumed default.
 
-**Phase 2 — Live Events.** A live events overlay on the time slider, on top of the two core layers.
-- Additive on top of heat + tag, not a rework of the core map.
-- Subscription-gated when it ships (see Business model).
+**Phase 2 — Live Events, business layer.** The live events map overlay itself is V1 scope now, launch-blocking on data-engineer's ingestion pipeline (see V1 scope, added 2026-07-29). What remains a Phase 2 candidate is only a further monetization layer on top of that overlay, not the overlay itself.
 - If Events ever grows a business side (ticketing commission, promoter placement), that's B2B-shaped monetization and conflicts with the standing "no business-facing monetization" line. Needs an explicit call if it comes up, not an assumed exception.
 
 **Phase 2 — Stamp collection & status levels** *(formerly described below as Phase 3's separate "points system" — unified, see below).* A collectible-per-place record that turns "I came back and it counted" into loot — the retention/return-visit loop V1 itself doesn't have yet (see Key risks: "V1 has no habit loop"). Added 2026-07-28, founder-direct. **Phase placement confirmed by Aviran, 2026-07-28** — this is a committed Phase 2 item, not a parked candidate awaiting a placement call (still subject to the standing rule that Phase 2 doesn't start until Phase 1 proves retention, same as every other Phase 2 item).
@@ -95,7 +92,7 @@ V1 is a single map, and the whole product lives on it. Nothing routes through a 
 Freemium: core map free forever, subscription unlocks premium features on top.
 
 - Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, the places list, hand-off to native maps. That's the full V1 scope, and it never goes behind a paywall.
-- Subscription unlocks premium features as they ship: **proximity intelligence, Scenic View, and Live Events**, all arriving in Phase 2. One recurring price, not gated per-feature.
+- Subscription unlocks premium features as they ship: **proximity intelligence**, arriving in Phase 2. (Scenic/Fast routing preview and Live Events moved into free V1 scope, 2026-07-29 — see V1 scope above — and are no longer Phase 2 subscription features.) One recurring price, not gated per-feature.
 - **AI local guide** (Phase 3) is a further purchase on top of the subscription — its own upsell, not included even for subscribers.
 - Free core reaches every tourist who'd never subscribe for a 3-day trip — it's the growth engine. Subscription is the monetization layer on top of people who already show up, not a gate in front of them.
 - Price point is TBD — test once there's a premium feature worth charging for and real paid traffic to test against.
@@ -112,8 +109,8 @@ Subscription launches in Phase 2, alongside proximity intelligence and marketing
 
 | Phase | What ships | Question it answers |
 |---|---|---|
-| **1 — Build to launch** | Full V1: two-layer map (heat + algo/local-QA localness), time slider, synthetic density, hero flow, hand-curated blurbs, native Maps/Waze hand-off, QA validation in Tel Aviv. Ships to real strangers, not friends/family. Ends in the App Store release. | Does the core product work end-to-end, and does a real stranger actually come back within a week? |
-| **2 — Marketing + first features** | Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence, Scenic View, Live Events, and live popular-times density; stamp collection & status levels ("Passport" screen) also ships this phase, gating TBD; core map stays free | Will people upgrade once acquired, and does the product hold up as real features and real users land at the same time? |
+| **1 — Build to launch** | Full V1: three-layer map (heat + algo/local-QA localness + live events), time slider, synthetic density, hero flow, hand-curated blurbs, routing preview (scenic/fast polyline) + native Maps/Waze hand-off, QA validation in Tel Aviv. Launch-blocked on a working live-events ingestion pipeline (data-engineer, PAS-5). Ships to real strangers, not friends/family. Ends in the App Store release. | Does the core product work end-to-end, and does a real stranger actually come back within a week? |
+| **2 — Marketing + first features** | Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence and live popular-times density (Scenic/Fast routing preview and Live Events moved to V1, 2026-07-29 — see above); stamp collection & status levels ("Passport" screen) also ships this phase, gating TBD; core map stays free | Will people upgrade once acquired, and does the product hold up as real features and real users land at the same time? |
 | **3 — More features** | Second city (proves the approach isn't Tel Aviv-specific), localness algorithm + local QA scaling to new cities, AI local guide (paid add-on on top of the subscription) | Does this generalize past one city, and is there a genuine next tier to the product? |
 
 ## How it gets built
@@ -136,7 +133,7 @@ Everything resolves on its own except scope/strategy calls, money, App Store act
 
 - **Frontend:** native iOS, Swift/SwiftUI. No cross-platform framework, no Android.
 - **Backend:** Supabase (Postgres) — Realtime subscriptions, RLS for per-viewer access control.
-- **Mapping:** MapKit/Google Maps SDK, native heatmap layer. In-app routing for Scenic View is Phase 2 scope, not built for V1.
+- **Mapping:** MapKit/Google Maps SDK, native heatmap layer. A route-preview polyline (scenic + fast, comparison only, no turn-by-turn) is V1 scope as of 2026-07-29. Full in-app turn-by-turn remains Phase 2/undecided (see Open questions).
 - **Monetization plumbing:** RevenueCat, wired but dormant — paused along with the rest of Business model, until Phase 1 proves retention.
 
 ## Key risks
@@ -146,8 +143,8 @@ Everything resolves on its own except scope/strategy calls, money, App Store act
 - **Scenic View is real routing-engine scope, whenever it ships.** In-app routing is new build surface on top of the map/heatmap shell, and cost swings a lot depending on depth. Out of the launch build now, but the cost doesn't go away — it moves to Phase 2, where it lands alongside proximity intelligence and paid acquisition all at once.
 - **Density is synthetic at launch.** The "right now" promise is only as real as the popular-times data source landing later — without it, "right now" stays simulated.
 - **Subscription pricing is unvalidated** — moot until Phase 1 proves retention; don't spend more time on it before then.
-- **Premium-conversion assumption is unproven.** Free core guarantees reach, but subscription only works if people actually upgrade rather than staying on the free map forever. Moving Scenic View and Events behind the subscription makes the paid tier meaningfully thicker than proximity intelligence alone — which cuts both ways: a better offer to convert against, and three features' worth of build cost landing in the same phase as paid acquisition.
-- **V1 is now a thinner bet.** Pulling Scenic View and Events out leaves the launch build as heat + tag + slider + zone/spot detail + search + the places list. That's the leanest possible test of the core premise, which is the point — but it also means the week-one-return question gets answered by the two layers alone, with nothing else to carry it if they're not enough on their own.
+- **Premium tier just got thinner, not thicker.** Scenic/Fast routing preview and Live Events moved into free V1 scope 2026-07-29 — proximity intelligence is now the only confirmed subscription feature (see Business model). One feature has to carry the entire paid-conversion case; if it alone isn't compelling enough, there's nothing else in the subscription to fall back on.
+- **V1 is now a thicker bet, with real new dependency risk.** Adding routing preview and a live events layer (launch-blocking on data-engineer's ingestion pipeline, PAS-5) makes the launch build heat + tag + events + slider + zone/spot detail + routing preview + search + the places list — more surface area and a real external dependency, versus the leaner two-layer build this replaces. That's more to validate the core "comes back within a week" bet against, and more that can slip the launch date if the events pipeline isn't ready in time.
 - **Liability.** Steering someone toward a spot that turns out unsafe or misleading needs a disclaimer/liability posture before any public paywall.
 - **Google is the closest real threat, not a distant one.** They already have real popular-times data at global scale and already index local content — "local vs. touristy" is a metadata layer they could ship if they decided to. The competitive gap here is real but closeable, not structural.
 
@@ -160,5 +157,5 @@ Everything resolves on its own except scope/strategy calls, money, App Store act
 - **Stamp collection — per-city flavor names** (e.g. renaming the top tier to local slang per city): explicitly a future cosmetic idea, not level-logic, not in scope now. Needs an answer only once a second city is real.
 
 (Resolved 2026-07-28: "Passport" naming confirmed by Aviran — no longer open, see Phase 2 candidate above. Resolved 2026-07-28: stamp collection IS the Phase 3 "points system," unified as one Phase 2 mechanic, not two separate systems — no longer open, see Phase 2 candidate above and the now-struck-through "Points system" bullet under Phase 3.)
-- **Scenic View depth**, when Phase 2 scopes it: full in-app turn-by-turn navigation, or a route preview that still hands off to native maps for the actual walking? Real build-cost difference. No longer a launch blocker, but it's the first thing Phase 2 has to answer.
-- Does removing Events from V1 change what the time slider is for? It was carrying two kinds of information — how packed a place will be, and what's happening there. Now it carries one.
+- **Scenic View depth beyond V1's preview**: V1's answer is settled — route preview only, hands off to native maps for the actual walking (added 2026-07-29). What's still open for Phase 2: does it ever grow into full in-app turn-by-turn, and is that worth the routing-engine build cost? Not a launch blocker either way now.
+- (Resolved 2026-07-29: Events is back in V1 as a third layer alongside heat + tag — the time slider carries both kinds of information again, how packed and what's happening. No longer open.)
