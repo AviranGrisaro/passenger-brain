@@ -23,7 +23,7 @@ Read the PRD first; nothing here restates it. This document decides the seven th
 | 3 | Ingest cadence (PRD req 7, `[ASSUMPTION]`) | **Hourly at `:20`.** But the requirement is made true by the *fetch horizon exceeding the serve horizon*, not by the cadence | §4.4, §5.1 |
 | 4 | Retention period on expired rows (PRD req 5, `[ASSUMPTION]`) | **90 days past `end_at`**, then hard-deleted. `events` holds no user data of any kind, so this is hygiene, not privacy | §3.5 |
 | 5 | Where ingest runs | **Supabase Edge Function on a `pg_cron` schedule.** Migration `002`'s own comment pre-authorizes exactly this case | §2.1, §6 |
-| 6 | Event→Hood attribution with no PostGIS | **A shared SQL `hood_for_point()`** — the same primitive `places-dataset` req 1 needs. One implementation, two consumers | §4.1 |
+| 6 | Event→Hood attribution with no PostGIS | **A SQL `hood_for_point()`, owned here.** `places-dataset` needs the same predicate offline in Python and keeps its own — two implementations, held to **one algorithm spec and one shared fixture**, not unified | §4.1 |
 | 7 | Whether the client ever sees an unservable row | **No — the served set is a database view, not a client query with filters** | §4.2 |
 
 **Three things the PRD does not name that this design has to handle** (detail in §8): an event **cancelled or withdrawn at source** is a staleness case distinct from expiry; **`end_at` is absent from many real feeds**, which turns req 2's strict drop into a silent majority-discard; and req 6's allowed input list includes **"proximity"**, which contradicts its own same-order-for-every-device bullet unless proximity means something static.
@@ -68,12 +68,12 @@ Exactly two places: `functions/ingest-events/adapters/*.ts`, and rows in `event_
 
 ## 3. Data model
 
-Four new tables. No table here holds, derives from, or can be joined to any user — there is no identity in V1 and this pipeline introduces none. Migration number: **do not hardcode.** `003` is already claimed by T-033's TRD, and T-040/T-042 have TRDs in flight that will claim more; `developer` takes the next unclaimed number at write time and records it in `database/README.md`'s Status table (§9, and see the board note in §8).
+Four new tables. No table here holds, derives from, or can be joined to any user — there is no identity in V1 and this pipeline introduces none. **All four `create table` and every `create index` below use `if not exists`**, matching migrations `001`/`002`'s idempotency convention — a bare `create table`/`create index` would fail on re-run and this TRD's earlier drafts omitted the guard. Migration number: **do not hardcode.** `003` is already claimed by T-033's TRD, and T-040/T-042 have TRDs in flight that will claim more; `developer` takes the next unclaimed number at write time and records it in `database/README.md`'s Status table (§9, and see the board note in §8).
 
 ### 3.1 `event_sources` — the recorded decision, in data
 
 ```sql
-create table public.event_sources (
+create table if not exists public.event_sources (
   key                      text primary key,          -- 'some-feed'
   display_name             text not null,
   enabled                  boolean not null default false,
@@ -94,7 +94,7 @@ Two of PRD req 1's three bullets are enforced rather than asserted. **A source c
 ### 3.2 `events` — one row per real-world event
 
 ```sql
-create table public.events (
+create table if not exists public.events (
   id                uuid primary key default gen_random_uuid(),
   dedup_key         text not null unique,                          -- §4.5
   name              text not null,
@@ -114,14 +114,15 @@ create table public.events (
   constraint end_after_start check (end_at > start_at)
 );
 
-create index events_start_at_idx on public.events (start_at) where withdrawn_at is null;
-create index events_end_at_idx   on public.events (end_at);
-create index events_hood_idx     on public.events (hood_id);
+create index if not exists events_start_at_idx on public.events (start_at) where withdrawn_at is null;
+create index if not exists events_end_at_idx   on public.events (end_at);
+create index if not exists events_hood_idx     on public.events (hood_id);
 ```
 
-Five decisions inside that schema:
+Six decisions inside that schema:
 
 - **`hood_id` is nullable, and an unattributed event is stored, not dropped.** PRD req 3's second bullet says an event in no Hood "is not ingested." The *observable* requirement — it never reaches the map — is met by the view (§4.2). Storing it with `hood_id = null` is what makes req 3's **third** bullet ("attribution is re-resolvable: a Hood boundary correction re-attributes existing events") actually possible; a dropped row cannot be re-attributed by anything. Same reasoning as req 5's own no-hard-delete-on-expiry rule. **Deliberate deviation from the PRD's literal wording, flagged for `trd-review`.**
+- **`on delete set null`, not `restrict` — a stated divergence from `places.hood_id`, not a silent one, and the more correct choice here rather than a defect.** `hood-dataset/TRD.md` (T-040, §8 risk table) expects `events.hood_id` to follow `places.hood_id`'s `restrict` rule; here it does not, deliberately. `places.hood_id` must be `restrict` because a place silently losing its Hood is data loss — curated, hand-authored rows meant to always resolve to exactly one Hood. `events` rows are the opposite in kind: numerous, machine-ingested, ephemeral (90-day retention, §3.5), and already re-attachable by design — `hood_id = null` is a normal, expected state from the moment of ingest (the bullet above), not a failure state a constraint should guard. Concretely, `restrict` here would **break T-040's own build step**: `hood-dataset/TRD.md` §3.3 prunes stale Hood rows with a scoped `delete from public.hoods where city = 'tel-aviv' and id not in (...)` whenever the real dataset replaces placeholder rows; any placeholder Hood with attributed events would make that `delete` fail outright under `restrict`, wherever `hood_density` cascades cleanly today. `reattribute_events()` (§4.1) is the designed repair path regardless of cause — a Hood-row deletion nulls the affected rows exactly as a boundary revision would, and the next pass resolves what it can.
 - **No `place_id` column in this migration.** PRD says `places-dataset` is needed "only if venue matching is wanted; no P0 here requires it." Adding a nullable FK to a table that does not exist yet would make this migration depend on T-042 for no P0 benefit. It is additive later (§4.3's venue-corroboration rank term degrades to zero without it).
 - **`id` is a uuid, not a slug.** Hoods and places are hand-curated and get stable slugs; events are machine-ingested and numerous. The uuid is stable across runs because the row survives upsert-on-`dedup_key` — T-034's marker identity does not churn between fetches.
 - **`ingested_at` means "last confirmed by a source,"** which is what req 7's freshness bound needs; `first_ingested_at` is kept separately so "how long have we known about this" stays answerable.
@@ -130,14 +131,14 @@ Five decisions inside that schema:
 ### 3.3 `event_source_links` — dedup, and req 4's uniqueness
 
 ```sql
-create table public.event_source_links (
+create table if not exists public.event_source_links (
   source          text not null references public.event_sources(key),
   source_event_id text not null,
   event_id        uuid not null references public.events(id) on delete cascade,
   last_seen_at    timestamptz not null default now(),
   primary key (source, source_event_id)
 );
-create index event_source_links_event_idx on public.event_source_links (event_id);
+create index if not exists event_source_links_event_idx on public.event_source_links (event_id);
 ```
 
 This is the whole of req 4. `(source, source_event_id)` is the primary key, so re-ingesting a source can never duplicate. Two sources carrying the same real event produce **two link rows pointing at one `events` row**, so the client sees one marker and provenance is not lost. `last_seen_at` is what the withdrawal reconcile reads (§5.3).
@@ -147,7 +148,7 @@ No raw source payload is stored. Debugging belongs in the function's logs, not i
 ### 3.4 `event_ingest_runs` — req 8's second bullet, and P1's health readout
 
 ```sql
-create table public.event_ingest_runs (
+create table if not exists public.event_ingest_runs (
   id           bigint generated always as identity primary key,
   source       text not null references public.event_sources(key),
   started_at   timestamptz not null default now(),
@@ -176,7 +177,7 @@ The same scheduled job deletes `events` rows whose `end_at` is more than **90 da
 
 `developer` and `data-engineer` build against this section and do not need each other's code. T-034's `ios-developer` needs **only §4.2**.
 
-### 4.1 Hood attribution — shared with `places-dataset`
+### 4.1 Hood attribution — one algorithm spec and one fixture shared with `places-dataset`, two implementations
 
 ```sql
 -- Even-odd ray casting over hoods.polygon's flattened ring, bbox prefilter.
@@ -186,15 +187,42 @@ create function public.hood_for_point(p_lng double precision, p_lat double preci
 
 -- Re-runs attribution. Called after any Hood geometry revision. Returns rows changed.
 create function public.reattribute_events(p_hood_id text default null) returns int;
+
+revoke execute on function public.hood_for_point(double precision, double precision),
+                          public.reattribute_events(text)
+  from public, anon, authenticated;
 ```
+
+The `revoke` is not optional, same reasoning as §4.3's: Postgres grants EXECUTE to PUBLIC on every new function and Supabase auto-exposes each as a PostgREST RPC — the exact HIGH finding `security-auditor` raised on migration `002`. `reattribute_events()` is the sharper of the two exploits: it performs a bulk `update` across `events` and, without this revoke, would be callable as `rpc/reattribute_events` with the app's public anon key — an unauthenticated write-amplification endpoint. It is currently blunted only *implicitly*, by `events`' own RLS (§4.2) denying the row-level write the function would otherwise perform — exactly the kind of accidental protection §4.3 already warns against relying on: if any future migration ever grants `authenticated` a narrower write on `events`, this reopens silently with nothing here having changed. `hood_for_point()` is read-only and lower-risk on its own, but gets the identical treatment for the same reason nothing in §4.3 was left ungated: a reviewer should never have to reason about which of a file's functions "happen to be" safe.
 
 **PostGIS stays disabled.** T-031's TRD §2.3 turned it down and said enabling it later is additive; this is the first server-side spatial need, and it still does not justify it. Ray casting over dozens of single-ring polygons is trivial at this scale, and enabling an extension is an Aviran-gated dashboard action (migration `002`'s `pg_cron` note is the precedent for that friction). Rejecting PostGIS also keeps `hoods.polygon`'s stored shape exactly as migration `001` committed it.
 
-**`places-dataset` req 1 needs the identical predicate** ("the stored `hood_id` equals the Hood whose polygon contains the place's coordinates — verified at authoring time"). Specifying it once, here, is deliberate: two independent point-in-polygon implementations would disagree at boundaries, and a place and an event at the same coordinate landing in different Hoods is a bug nobody would find. **Whichever of T-042 and T-043 builds first owns the function; the other consumes it.** Flagged for both `trd-review`s (§8).
+**`places-dataset` req 1 needs the identical predicate** ("the stored `hood_id` equals the Hood whose polygon contains the place's coordinates — verified at authoring time"). An earlier draft of this TRD called that "one implementation, two consumers," with whichever task built first owning the function. **That was wrong, and `trd-review` corrected it** — `developer`, `data-engineer` and `code-reviewer` all reached the same reading independently across T-040's, T-042's and this task's reviews. The resolution:
 
-A third implementation of this predicate already ships — `HoodHitTester.swift`, client-side, for tap targets. That is a different job (44pt tolerance, screen space) and is not a candidate for consolidation. The database is authoritative for attribution; the client never re-attributes anything.
+**Two implementations. Both necessary. Neither unifiable.**
+
+| | T-040 / T-042 | T-043 (this task) |
+|---|---|---|
+| Where | `database/scripts/validate_dataset.py` | `public.hood_for_point()` |
+| Language | stdlib Python | `plpgsql`, inside Postgres |
+| When | offline, authoring time, once per dataset edit | live, at ingest, per event, hourly |
+| Reads | the checked-in authored Hood source file | the live `hoods` table |
+| DB credentials | **none, by design** (`hood-dataset/TRD.md` §2.1) | runs inside the database |
+
+No bridge exists in either direction, and none is proposed anywhere: a cron-triggered Deno Edge Function shelling out to a Python subprocess per ingested event does not belong in a hot path, and pointing the offline validator at a live database reintroduces exactly the Aviran-gated `DATABASE_URL` dependency T-040 inverted its whole pipeline to escape. Forcing one implementation would break one of the two consumers.
+
+**What is actually shared, and is binding on both sides:**
+
+1. **One algorithm spec, stated identically in all three TRDs** — closed single-ring WGS84 `[[lng,lat],…]` (migration `001`'s committed format), even-odd ray cast, bbox prefilter, and **on-boundary → no Hood**. `hood_for_point()` returns `null` for a point exactly on a ring edge or vertex, matching `point_strictly_inside`'s `False` (`hood-dataset/TRD.md` §2.3 predicate 1). This is pinned as a value, not left to each implementation's rounding: without it, a place and an event at the identical coordinate on a shared Hood edge attribute differently, which is the precise bug this section exists to prevent and the one nobody would find by inspection.
+2. **One checked-in fixture file** — `database/data/fixtures/hood-containment-cases.json`, point→expected-`hood_id` cases (strictly inside, outside, on-edge, on-vertex, in-bbox-outside-ring, concave notch, shared edge between two adjacent Hoods, swapped lat/lng), **asserted against both implementations** (§9 A3 here; `places-dataset/TRD.md` §9 B2a; `hood-dataset/TRD.md` §9 B1). Whichever task builds first writes the file; neither side adds a case without adding it for both. A boundary-case fix in one language cannot then silently stay wrong in the other.
+
+Flagged for both `trd-review`s (§8 F7).
+
+A third implementation of this predicate already ships — `HoodHitTester.swift`, client-side, for tap targets. That is a different job (44pt tolerance, screen space), is not a candidate for consolidation, and is **not** held to the fixture above. The database is authoritative for attribution; the client never re-attributes anything.
 
 ### 4.2 `events_public` — the only thing the client may read
+
+**`with (security_invoker = false)` requires Postgres 15+** (the `security_invoker` view option was added in that release; on an older server this clause is a syntax error, not a silent no-op). **Needs confirming against this project's actual Supabase Postgres version before A2 is built** — Supabase's default tier has shipped 15+ for a while, but no TRD in this project has stated the confirmed version, and this is the first clause anywhere in the schema that depends on one. If the project is on an older version, the fallback is a `security definer` function wrapping the same `select` instead of the view option — same access boundary, different syntax — not a redesign.
 
 ```sql
 create view public.events_public
@@ -216,6 +244,8 @@ grant select on public.events_public to anon, authenticated;
 ```
 
 RLS is enabled on all four base tables with **no policy of any kind** — denial by absence, the same idiom migration `001` used for writes. The view is the access-control boundary and is therefore deliberately `security_invoker = false`. **This inverts `001`'s public-read-policy pattern and reviewers should expect the Supabase linter to flag `security definer view`.** It is the right shape here because the filter *is* the contract: expiry, withdrawal, attribution and the selection floor cannot be forgotten by a caller, and the columns the client has no business seeing (`dedup_key`, `primary_source`, `ingested_at`, `end_at_estimated`) are not projected. It exposes no user-scoped data because none exists. `security-auditor` should confirm the base-table revokes independently — migration `002`'s HIGH finding was exactly a default grant nobody revoked.
+
+**Required build-time check, not just stated intent:** the four tables are `events`, `event_sources`, `event_source_links`, `event_ingest_runs`. A1/A2's migration must issue `alter table ... enable row level security` on **all four individually**, and `code-review`/`security-auditor` must confirm all four — not three-of-four — by querying `pg_class.relrowsecurity` (or the Supabase dashboard's RLS column) for each table name explicitly before sign-off. A table that quietly ships without its own `enable row level security` line is invisible until something queries it directly through PostgREST, the same silent-until-probed failure mode as an unrevoked function.
 
 Client request (T-034, mirroring T-031 §4.5's shape — one fetch alongside the density load, re-filtered locally per hour):
 
@@ -281,6 +311,8 @@ pg_cron  '20 * * * *'   →  pg_net POST  {project}/functions/v1/ingest-events
 At `:20`, not `:05` — migration `002`'s density generator already owns `:05`, and the two should not contend. Hourly is the **[ASSUMPTION]**; req 7's real guarantee does not depend on it (§5.1).
 
 The service key is read from `supabase_vault` at cron-schedule time and **never inlined into the `cron.job` command**, which is a readable table. `pg_net` and Vault both need enabling on the project — the same Aviran-gated dashboard step `002` already flagged for `pg_cron`, and it must be named in the hand-off, not discovered at apply time.
+
+**`pg_net`'s own internal tables need the identical check as the `cron.job` table, and this TRD did not previously say so.** `pg_net` logs every outbound call it makes — request included — into its own schema (`net.http_request_queue`, `net._http_response`). The call this section describes carries the service-role Bearer token as a request header; if `anon` or `authenticated` ever had `select` on those tables, the same secret this paragraph protects by routing through Vault would leak straight back out through a different table entirely. **Required build-time check for A4:** confirm neither `anon` nor `authenticated` holds any grant on the `net` schema or its tables. `pg_net`'s default install does not grant them, but that must be verified against the actual project after enabling — not assumed from the extension's documentation — the same discipline §4.2 requires for the four event tables' RLS.
 
 **Concurrency:** each run takes a per-source advisory lock. An invocation that finds the lock held exits immediately and writes an `outcome='skipped'` row. A slow feed can therefore never produce two interleaved runs against the same source, which is what would make the withdrawal reconcile unsafe.
 
@@ -416,7 +448,7 @@ A source outage never blanks the served set. The accepted degradation is that **
 - **F4 — Source attribution may be a ToS obligation with no surface.** Some feeds require visible "powered by" credit. T-034's sheet renders name, time, location, route — no source line. `source_name` is projected so the client *can* comply without a schema change, but whether it must is unanswered and depends on which source lands. **Product's, alongside `PAS-6` item 10.**
 - **F5 — A long-running event only ever renders in its start hour.** `live-events-overlay` req 1 buckets on start time, so a six-hour festival vanishes from the map an hour after it begins while still running. That is T-034's specified behaviour and not this TRD's to change; the data supports either reading (`start_at` and `end_at` are both served). Worth product's read.
 - **F6 — Migration numbering is contended.** Four TRDs (T-033, T-040, T-042, this one) are in flight and each needs a migration. `003` is claimed by T-033. Numbers are assigned at write time and recorded in `database/README.md`; **for `chief-of-staff`'s board, not mine to sequence.**
-- **F7 — `hood_for_point()` is needed identically by `places-dataset`.** Whichever builds first owns it; the other consumes it. Both `trd-review`s should see this so it is not implemented twice.
+- **F7 — `hood_for_point()` is needed identically by `places-dataset`, and it is *not* the same implementation. Resolved at `trd-review`, correcting this TRD's own earlier claim.** This document originally said "one implementation, two consumers — whichever builds first owns it." `developer`, `data-engineer` and `code-reviewer` independently found that unbuildable: T-040/T-042's check is stdlib Python running offline over authored files with no DB credentials by design, and this task's is `plpgsql` running live inside Postgres against the `hoods` table. **Both are kept.** What is shared is one algorithm spec (including **on-boundary → no Hood**) and one checked-in point→expected-`hood_id` fixture asserted against both implementations — see §4.1. `hood-dataset/TRD.md` §2.2 carried the mirror-image error ("`validate_dataset.py` is called by T-043's build") and is corrected in step. **No longer open; A3 builds against §4.1's two-implementation wording.**
 
 **Risks:**
 
@@ -428,7 +460,7 @@ A source outage never blanks the served set. The accepted degradation is that **
 | **R4** — A source outage silently stops withdrawal detection | Accepted, and the reason the 24h health check (B6) is P0 rather than P1. The map degrades to slightly-stale, never to blank. |
 | **R5** — `security definer` view will be flagged by the Supabase linter and looks like `002`'s HIGH finding | Deliberate and documented (§4.2): the view *is* the access boundary, base tables are revoked, no user data exists in any of them. `security-auditor` verifies the revokes independently rather than trusting the view. |
 | **R6** — A ranker tuned before real data degrades to "show everything" | Req 6's pass condition is a build step with an artifact (B5), not a review opinion. The floor is one value in one function, changeable by migration. |
-| **R7** — Two server-side spatial implementations if T-042 forks its own | F7. One function, named in both TRDs. |
+| **R7** — The Python validator and this SQL function drift apart on boundary cases, so a place and an event at the same coordinate attribute to different Hoods | Two implementations is now the ratified design (F7, §4.1), so the risk is **divergence, not duplication**. Mitigated by the two binding shared artifacts: one algorithm spec with **on-boundary → no Hood** pinned as a value, and one checked-in fixture asserted against both. A case added to one side must be added to both — that rule is the actual control; the fixture is only its evidence. |
 | **R8** — Source ToS or access turns out not to permit the use | The `enabled_requires_verified_terms` CHECK makes this fail closed rather than at launch. |
 
 **Alternatives considered and rejected:** pure SQL + `pg_net` ingestion (§6 — no retry, no pagination, secrets in the DB); GitHub Actions or an external worker (§6 — no git remote exists, new account, new secret store); PostGIS for attribution (§4.1 — an Aviran-gated extension for a predicate that is 30 lines at this scale); `pg_trgm` fuzzy dedup in V1 (§4.5 — untunable before real data, and a bad merge is harder to undo than a missed one); a `duplicate_of` self-FK instead of a link table (§3.3 — leaves duplicate rows visible to any query that forgets the join); per-hour rank ordinals (§4.3 — a row per event-hour for no gain once time is a filter); RLS-policy-as-filter on `events` instead of a view (splits one contract across a policy and a column grant — harder for a reviewer to verify as a single rule); dropping unattributed events outright (§3.2 — makes req 3's own re-attribution bullet impossible).
@@ -444,9 +476,9 @@ Ordered. **No `[iOS]` step exists in this TRD, and that was confirmed rather tha
 | # | Step | Tag |
 |---|---|---|
 | A1 | Migration: `event_sources`, `events`, `event_source_links`, `event_ingest_runs`, all CHECKs, FKs and indexes (§3). Take the next unclaimed number (F6); add a `functions/` row to `database/README.md`'s Layout (§2.3) | **[Backend]** |
-| A2 | RLS enabled on all four, **no policy on any**; `events_public` view; `revoke all` on base tables; `grant select` on the view (§4.2) | **[Backend]** |
-| A3 | `hood_for_point()` + `reattribute_events()`, with unit cases: inside, outside, in-bbox-outside-ring, concave notch, on-boundary. **Coordinate with T-042 first — do not build a second copy** (F7) | **[Backend]** |
-| A4 | `pg_cron` → `pg_net` → Edge Function, service key from Vault, `'20 * * * *'`; retention prune (§3.5). Hand-off names `pg_net` + Vault + per-source secret as Aviran-gated (§7) | **[Backend]** |
+| A2 | RLS enabled on all four (`events`, `event_sources`, `event_source_links`, `event_ingest_runs`) — **verify each individually via `pg_class.relrowsecurity`, not three-of-four**; **no policy on any**; `events_public` view; `revoke all` on base tables; `grant select` on the view (§4.2) | **[Backend]** |
+| A3 | `hood_for_point()` + `reattribute_events()`, both with `revoke execute` (§4.1) — same non-optional treatment B4 gives the ranking functions — **This is a second, deliberate implementation of the containment predicate — build it (§4.1, F7); do not try to call T-042's offline Python validator, and do not treat it as a duplicate to be removed.** Assert it against the **shared** fixture `database/data/fixtures/hood-containment-cases.json` (`places-dataset/TRD.md` §9 B2a) rather than a private case list: strictly inside, outside, in-bbox-outside-ring, concave notch, **on-edge and on-vertex (expected `null` — no Hood)**, **a shared edge between two adjacent Hoods (expected `null`, not either Hood)**, swapped lat/lng. Whichever of the three tasks builds first writes the fixture; a case added here is added on the Python side too | **[Backend]** |
+| A4 | `pg_cron` → `pg_net` → Edge Function, service key from Vault, `'20 * * * *'`; retention prune (§3.5). Hand-off names `pg_net` + Vault + per-source secret as Aviran-gated (§7). **Verify `anon`/`authenticated` hold no grant on the `net` schema's request/response log tables** (§4.4) — those tables carry the outbound Bearer token in stored request headers | **[Backend]** |
 
 **Track B — the pipeline itself.**
 
