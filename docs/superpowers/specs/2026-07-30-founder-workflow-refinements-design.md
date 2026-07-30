@@ -1,4 +1,4 @@
-# Founder Workflow — Refinements
+# Agentic Flow Development — Refinements
 
 **Date:** 2026-07-30
 **Status:** Approved, pending write-back to `agent-os/FOUNDER-WORKFLOW.md` + the founder-workflow artifact.
