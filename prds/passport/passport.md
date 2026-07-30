@@ -42,7 +42,8 @@
    - [ ] A place logged only as **Visited** earns no sticker.
    - [ ] A manually **Saved** place earns no sticker on the save alone.
    - [ ] One Been place yields exactly one sticker; revisiting adds none.
-   - [ ] Sticker shape matches the place's type — a coffee cup for a café (#29). The data field this needs does not exist yet; see Open questions.
+   - [ ] Sticker shape matches the place's type — a coffee cup for a café (#29). The field is `places.place_type`, now spec'd in [`places-dataset`](../places-dataset/places-dataset.md) req 3: a closed enumeration, internal-only, one sticker shape per value, non-null on every row. It does not exist in any migration yet.
+   - [ ] Every `place_type` value has a sticker shape, so no Been place can earn a shapeless sticker (`places-dataset` req 3 fails validation on a value with no shape).
    - [ ] Stickers file under the city's page; Tel Aviv is the only page in V1.
 
 4. **Per-Hood Local status is the whole progression.**
@@ -81,6 +82,7 @@
 
 - **Data model:** stickers are **derived from the Places feature's Been rows** — no second store of truth, so a sticker can never disagree with the list. Passport adds no per-place table.
 - **Data model:** `hoods.designated_for_progression` plus one configured Local threshold. Per-Hood progress computes on read as the count of Been places in that Hood, so changing the threshold needs no backfill.
+- **Data sourcing (added 2026-07-30, standing rule).** Passport stores nothing of its own; it reads three things none of which exist yet. `hoods.designated_for_progression` is [`hood-dataset`](../hood-dataset/hood-dataset.md) req 5. `places.place_type` is [`places-dataset`](../places-dataset/places-dataset.md) req 3. **The Local threshold is a configured number nobody has stated** — and it has a dataset consequence, not just a config one: `places-dataset` req 7 requires every designated Hood to contain at least that many curated places, or Local is unreachable there by construction and req 4 can never pass. The threshold must land before the places dataset is sized, not after.
 - **APIs / contract:** no new writes. Reads Hood geometry to attribute a Been place to a Hood, and the designated flag with the rest of the static Hood payload.
 - **Architecture notes:** V1 adds no identity, so Passport is device-local for the same reason Places is — it inherits that store rather than adding another. `SALVAGE.md` has nothing reusable here; `Services/AuthService.swift` is BURN and nothing here reopens it.
 - **Dependencies:** **hard upstream on `places-been-saved`** (the Been signal) and `map-hoods-heat` (Hood polygons for attribution, plus the chrome the Profile button sits in). Nothing depends on Passport.
@@ -94,8 +96,8 @@
 
 ## Open questions & risks
 
-- **Two numbers are missing and this cannot ship without them:** how many Been places make a Hood "Local," and which Hoods are designated. Aviran's or `data-engineer`'s; neither is invented here.
-- **`place_type` does not exist in the data model.** #29 requires a sticker shaped to place type — café vs. bar — but `places` carries exactly two category values and nothing finer (#11, #33: *"no third value, no null, no 'other'"*). Either the curated dataset gains a `place_type` field, or V1 ships two sticker shapes and #29 is not met. A dependency on the dataset, not a rendering detail.
+- **Two numbers are missing and this cannot ship without them:** how many Been places make a Hood "Local," and which Hoods are designated. Aviran's or `data-engineer`'s; neither is invented here. **The threshold now also gates dataset sizing** — see the Technical design's data-sourcing bullet.
+- ~~**`place_type` does not exist in the data model.**~~ **Field spec'd 2026-07-30** in [`places-dataset`](../places-dataset/places-dataset.md) req 3 — a closed internal enumeration alongside, not inside, the two-value `category` (#11, #33: *"no third value, no null, no 'other'"* still holds for `category`). **Still open, and it is Aviran's:** whether an internal-only place type is the reading he intended, or whether place type is meant to be user-facing — the latter reopens `hood-place-detail` req 6 and `search-quick-filters` req 3. Until confirmed, `places-dataset` carries it as an **[ASSUMPTION]**. The dataset still has to be authored either way; without it V1 ships two sticker shapes and #29 is not met.
 - **Nothing rewards answering local-QA.** Strategy's stamp write-up folds in *"rewards for answering local-QA questions, visiting new places, and more"*, but #29 ties stickers to Been places and #40 retired the ladder carrying the rest. So the incentive layer rewards visiting, not answering — while the localness pipeline's cold-start risk is precisely that nobody answers. Aviran's call; same gap flagged in the tourist-trap PRD.
 - **Reinstall loses the album**, inherited from Places. Fixing it means anonymous server identity, which strategy parks until Phase 3.
 - **Naming drift is the standing risk.** "Profile" is a confirmed *naming* exception (#39), not a licence. Any later ticket reading the tab name as permission for accounts, avatars, or a social surface should be rejected at the scope gate.
@@ -108,3 +110,5 @@
 | 2026-07-30 | Seven-tier ladder excluded outright, including as a derived status | #40: the per-Hood mechanic "replaces the seven-tier global ladder outright" |
 | 2026-07-30 | Stickers derived from Places' Been rows, not stored separately | One signal, three consumers — stops Passport and Places disagreeing |
 | 2026-07-30 | Local threshold and designated-Hood set left unset rather than estimated | No source states either; inventing a number is what the scope gate exists to stop |
+| 2026-07-30 | `place_type` and `designated_for_progression` given owning PRDs; the Local threshold's *dataset-sizing* consequence surfaced | Standing rule, founder-direct 2026-07-30. Both fields were flagged as missing and left as open questions with no deliverable behind them; the threshold's effect on how many places a designated Hood needs was not noticed at all |
+

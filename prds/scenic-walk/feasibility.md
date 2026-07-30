@@ -39,3 +39,21 @@ The routing algorithm itself (reweight each edge as `cost = distance − λ·att
 **Not buildable in the Phase 1 window as genuinely weighted routing** (version 2). **Buildable now** as the already-locked comparison-polyline preview (version 1), which is what V1 should ship. Treat version 2 as a fast-follow once the places/heat schema and a real attractiveness signal both exist.
 
 This is a recommendation, not a resolution — Linear `PAS-6` item 8 ("ship the lighter locked version now, or slip V1 for weighted routing?") is still open and is Aviran's call, not data-engineer's or product's. `product` should not write a PRD assuming either answer until that lands; this note gives the technical basis for that decision, it doesn't make it.
+
+---
+
+## Data/schema needs — addendum by `product`, 2026-07-30
+
+Added under the standing data/schema rule (founder-direct 2026-07-30, `agent-os/PROGRESS.md`). **This is not a PRD and does not resolve `PAS-6` item 8** — it records what each version would need from the data layer, so whoever writes the PRD after Aviran's call doesn't re-derive it. `data-engineer`'s text above is unchanged.
+
+**Version 1 (comparison polylines + via-waypoint heuristic) — the existing schema covers it. No supporting PRD needed.**
+
+- "Nearby tagged/local Hoods" resolves to fields already spec'd: `hoods.polygon` (for a centroid to route via) and `hoods.is_tourist_trap` — both [`prds/hood-dataset/`](../hood-dataset/hood-dataset.md) req 5. Candidate waypoints inside a Hood come from `places` coordinates ([`prds/places-dataset/`](../places-dataset/places-dataset.md) req 1).
+- One caveat worth writing into the eventual PRD rather than discovering at QA: `is_tourist_trap` is **nullable**, and a Hood that has never been rated ships `null`. A "route via non-touristy Hoods" heuristic that treats `null` as `false` will happily route through unrated Hoods and call them local. That is a pass/fail criterion the PRD owes, not an implementation detail.
+- Nothing here is a new table, a new field, or a sourcing job. It is a read over data two other PRDs already deliver.
+
+**Version 2 (weighted routing) — needs a supporting PRD of its own, and it is exactly the founder's own example.**
+
+- A **street graph** (segments with geometry and topology) and a per-segment **Attractiveness weight** are two datasets that do not exist in any form, in any PRD, in any migration. The standing rule's own illustration is *"if Scenic Walk needs a street-graph + attractiveness signal."*
+- Per §"Recommended approach" above, the weight has no adequate source: the cheap proxy is not what "attractiveness" means as a walking concept, and the real version is hand-curation (the staffing model decision #22 exited) or a research project.
+- If Aviran chooses version 2, that data need is its own deliverable and gets its own PRD **before** any routing PRD — the routing algorithm is solved, the input is what is missing.

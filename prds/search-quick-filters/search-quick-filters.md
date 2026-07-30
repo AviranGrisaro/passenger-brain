@@ -84,7 +84,8 @@
 
 ## Technical design
 
-- **Data model:** no new tables. Reads `places` (name, category, hood_id) and `hoods` (name), both public-read and already cached by the map PRD. **Keyword matching needs a searchable text field on `places` that no PRD specifies** — see Open questions.
+- **Data model:** no new tables. Reads `places` (name, category, hood_id) and `hoods` (name), both public-read and already cached by the map PRD.
+- **Data sourcing (added 2026-07-30, standing rule).** ~~Keyword matching needs a searchable text field on `places` that no PRD specifies.~~ **Now spec'd:** [`places-dataset`](../places-dataset/places-dataset.md) req 4 — an authored keyword set per place, at least one per row, validated against a documented probe list that includes strategy's own "hummus" and "rooftop bar". Req 2's three match types map to three fields: `places.name`, `places.keywords`, `hoods.name`. Neither table exists yet, so all of req 2 is unfalsifiable until [`hood-dataset`](../hood-dataset/hood-dataset.md) and `places-dataset` land. A zero-result probe is a **dataset** defect, not a search defect — worth stating before QA judges this feature on data quality it does not own.
 - **APIs / contract:** matching runs client-side against the cached place and Hood payloads. No per-keystroke round trip — that is what makes both the 400ms budget and the offline requirement achievable.
 - **Architecture notes:** the sheet reads the single `selectedHour` source of truth the slider owns (`time-slider`), never its own copy. Native sheet presentation (`ux-flows.md` §2.1), subject to the open layout call. `SALVAGE.md` marks `Services/PlaceSearchService.swift` REUSE — start there.
 - **Dependencies:** `map-hoods-heat` (place/Hood data, dim behaviour), `hood-place-detail` (both destinations), `time-slider` (selected hour). `tourist-trap-flag` supplies the modal's flag line but does not block this.
@@ -99,7 +100,7 @@
 ## Open questions & risks
 
 - **The sheet's layout is unresolved and it is Aviran's call.** His ask was a literal 50/50 top/bottom map-over-list split; design review recommended native `.medium`/`.large` detents (`ux-flows.md` §2, §9 Q15). Nothing here resolves it; `ios-developer` must not build against either reading first.
-- **Keyword search has no data behind it.** "hummus", "rooftop bar" need a per-place keyword field; `places` has name, one of two categories, coordinates, hood_id. Without it, keyword search degrades to name-matching and the strategy line goes unmet. Escalation, not a build detail.
+- ~~**Keyword search has no data behind it.**~~ **Field spec'd 2026-07-30** (`places-dataset` req 4). What is still open is the **authoring load**: keywords are hand-written per place, on top of per-Hood blurbs, and nobody has said who writes them or how many places V1 ships with. Same staffing shape decision #22 exited for localness. Escalation, not a build detail.
 - **Decision #23 makes search a watch-item** — reaching for search before reading the map means the map failed — and nothing in V1 measures that. No analytics pipeline exists.
 - **Req 7's interrupted-vs-completed rule is `designer`'s reconciliation** of two decisions made in different sessions, flagged at `ux-flows.md` §9 Q17 as needing Aviran's confirmation.
 
@@ -110,3 +111,5 @@
 | 2026-07-30 | PRD created | Decision #41 settled sheet-internal placement — the last thing holding it (`prds/INDEX.md`) |
 | 2026-07-30 | Sheet layout left open rather than assumed | §9 Q15 — Aviran's literal-split ask vs. design's detent recommendation is unresolved |
 | 2026-07-30 | Rows carry no tourist-trap line, labelled **[ASSUMPTION]** | `tourist-trap-flag` req 6 gives the flag one home; a per-row line would reopen that PRD |
+| 2026-07-30 | Keyword field given an owning PRD (`places-dataset` req 4); the residual open item narrowed to authoring load | Standing rule, founder-direct 2026-07-30. The gap was correctly flagged but had no deliverable behind it — a flagged gap with no owner is how it reaches `build` unbuilt |
+

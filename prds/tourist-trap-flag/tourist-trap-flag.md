@@ -83,6 +83,7 @@
 
 - **Data model:** `hoods.is_tourist_trap` and `places.is_tourist_trap` as **nullable booleans** — `null` not yet rated, `false` not flagged, `true` flagged. Three storage states, two rendered states, which is what reqs 4 and 7 need. Public-read.
 - **Data model:** `local_qa_answers` (place_id, answer, install_id, answered_at). Insert-only, never client-readable; unique on (place_id, install_id) enforces ask-once.
+- **Data sourcing — the flag ships with a value, and this PRD does not produce it (added 2026-07-30, standing rule).** Neither column exists yet: `hoods.is_tourist_trap` is [`prds/hood-dataset/`](../hood-dataset/hood-dataset.md) req 5, `places.is_tourist_trap` is [`prds/places-dataset/`](../places-dataset/places-dataset.md) req 6, both nullable so req 4's three storage states hold. The **values** come from the proposing algorithm (`data-eng/discovery-engine-spec.md`), which does not exist. If it does not land, every row ships `null` and this feature renders blank everywhere — legal per req 4, but it means V1 launches with only half its signal. Named as a risk below, not assumed away.
 - **APIs / contract:** the flag ships inside the existing Hood and place payloads and caches with them — static reference data, no Realtime, not hour-bound. An answer is one insert, queued offline.
 - **Architecture notes:** no accounts in V1 (strategy: *"no accounts/login added"*), so an answer carries an anonymous install id — `SALVAGE.md` marks `Services/AuthService.swift` BURN, *"spec it fresh — anonymous-first."* `Models/DensityContract.swift` REUSE and load-bearing: it encodes the never-one-blended-score rule. **`Features/Map/LocalnessBadge.swift` is marked REUSE but must not be** — it renders the five superseded vibe tags.
 - **Dependencies:** `map-hoods-heat` (Hood geometry, stroke channel) and `hood-place-detail` (the modal line) first. The dwell/geofence detector is shared with Places and Passport — one detector, three consumers, `data-engineer`'s.
@@ -97,6 +98,7 @@
 ## Open questions & risks
 
 - **Cold start:** a new city has no users to ask, so the flag starts entirely algorithm-proposed with nothing verifying it (strategy, Key risks).
+- **Worse than cold start: the proposer may not exist at launch.** Every requirement here is about rendering and correcting a value; nothing in V1 is scheduled to *produce* the first one. A dataset of all-`null` flags passes every bullet in this PRD and ships a product strategy itself calls *"the half anyone already gets from Google Maps."* Aviran's, and it should be answered before this feature reaches `build`.
 - **Nothing rewards answering.** Strategy's stamp write-up folds in *"rewards for answering local-QA questions"*, but #29 ties stickers to Been places and #40 retired the ladder carrying the rest. Aviran's call.
 - **Notification-denied is a named coverage gap** (§9 Q8): that user is never asked about any visit.
 - **Copy-fit at Hood level:** §3 renders "Tourist-heavy spot" at a Hood centroid, but a Hood is a polygon. `designer`'s (PAS-8 residual).
@@ -110,3 +112,5 @@
 | 2026-07-30 | Written against the boolean model only, no graduated read retained | #37 is a clean supersession of #18 — the graduated tag is gone |
 | 2026-07-30 | Rendering referenced, not restated | `map-rendering-spec.md` §§2–3 were already rewritten against #37 by `designer` (PAS-8) |
 | 2026-07-30 | Nullable boolean over a separate `is_rated` column | Accessibility (req 7) needs three states stored while the map renders two |
+| 2026-07-30 | Data-sourcing bullet added; the "nothing produces the first flag value" gap promoted from implicit to a named risk | Standing rule, founder-direct 2026-07-30. The PRD scoped the proposing algorithm out — correctly — but never said the feature ships blank if it never lands |
+

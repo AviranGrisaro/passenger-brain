@@ -80,6 +80,7 @@
 
 - **Data model:** one row per (place, provenance), precedence applied at read time rather than by overwriting — so a manual save never destroys the record that a dwell happened. Fields: place_id, provenance enum {saved, been, visited}, created_at.
 - **Data model:** closed state belongs to the place, not the entry — `places.permanently_closed`, refreshed from Apple Maps, so no two surfaces disagree.
+- **Data sourcing (added 2026-07-30, standing rule).** The `places` table does not exist and this PRD does not author it — rows, coordinates, categories and `permanently_closed` are [`prds/places-dataset/`](../places-dataset/places-dataset.md)'s deliverable (its req 5 carries the closed-state field, its source, a `closed_checked_at` staleness stamp, and the refresh cadence). **Req 4's fourth bullet needs that refresh to exist:** a place that closes *after* being saved cannot show the badge on next render if closed state is only read once at authoring time. That refresh currently has no owner and no cadence — raised below.
 - **Storage — the load-bearing call.** V1 adds no accounts (strategy: *"no accounts/login added"*), so the list is **device-local** (SwiftData/Core Data): no per-user server table, no RLS surface. Consequence, stated rather than hidden: **it does not survive reinstall or a new device.**
 - **APIs / contract:** reads the shared static `places` payload for name, category, coordinates, closed state. Writes nothing server-side in V1.
 - **Architecture notes:** `SALVAGE.md` marks `Models/VisitedPlace.swift`, `Services/SavedPlacesStore.swift`, `Features/Places/SavedPlacesSheet.swift`, `PlaceDetailCard.swift` REUSE; `VisitedPlacesStore.swift`, `VisitDetectionService.swift`, `CityGeofenceMonitor.swift` REFERENCE only — entangled with logic the old repo scoped to Phase 3. `AuthService.swift` is BURN: *"spec it fresh — anonymous-first."*
@@ -98,6 +99,7 @@
 - **Background Location Always reliability** is load-bearing for Been and Visited both (`ux-flows.md` §9 Q4); needs the architect's read.
 - **Permission sequence is a proposal, not a decision** (§9 Q10) — three system permissions for a product whose #8 rules out a permission gate.
 - **Row density risk:** a row can carry a provenance word, a closed badge, and a tourist-heavy line at once, where `design-principles.md` §2 allows one special element. Designer's, at `design-review`.
+- **The closed-state refresh has no owner and no cadence.** Req 4 requires a place that closes after being saved to badge on next render; nothing schedules the check that would make that true. Spec'd as a field in `places-dataset` req 5, but the job that runs it is unassigned. `data-engineer`'s or `developer`'s — needs assigning before this feature's req 4 can be QA'd honestly.
 - **Visited is the weakest of the three** — a row the user never chose, for somewhere they walked past. No upstream decision addresses pruning it.
 
 ## Decisions log
@@ -108,3 +110,5 @@
 | 2026-07-30 | Closed state spec'd on the place, not the saved entry | #38: "a factual state about the place, not a judgment about its character" |
 | 2026-07-30 | Badge visual and copy deliberately unspecified | #38 assigns both to `designer` |
 | 2026-07-30 | Device-local storage spec'd, reinstall consequence raised as an open question | Strategy locks "no accounts/login added"; the data loss is Aviran's to accept or reject |
+| 2026-07-30 | Data-sourcing bullet added; closed-state refresh promoted from an open *technical* question to a named ownerless job | Standing rule, founder-direct 2026-07-30. "Refreshed from Apple Maps" was stated as a property of the column, with nothing scheduled to do the refreshing — req 4's fourth bullet silently depended on it |
+

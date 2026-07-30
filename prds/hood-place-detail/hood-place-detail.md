@@ -72,9 +72,10 @@
 ## Technical design
 
 - **Data model:** `places` (id, name, category enum of exactly two values, coordinates, hood_id) plus curated blurb text on `hoods`. Public-read. `saved_places` is user-scoped and spec'd by the held Places PRD, not here.
+- **Data sourcing (added 2026-07-30, standing rule).** Neither table has rows and neither is authored by this PRD. The `hoods.blurb` column does not exist in migration `001` and every blurb is a person-authored artifact — [`prds/hood-dataset/`](../hood-dataset/hood-dataset.md) req 4. The `places` table does not exist at all; its rows, its two-value category constraint, and its coordinates→`hood_id` containment check are [`prds/places-dataset/`](../places-dataset/places-dataset.md) reqs 1–2. Both are hard upstream of this feature: req 2 and req 6 are unfalsifiable against an empty dataset.
 - **APIs / client-server contract:** Hood sheet reads places by `hood_id`; the modal reads one place row. Static curated data — no Realtime, no hour-binding. Save writes locally first so the affordance responds inside the 400ms budget regardless of network.
 - **Architecture notes:** native sheet presentation with detents (`design/ux-flows.md` §2.1 — platform primitive, not a custom sheet). `SALVAGE.md` marks `Models/Place.swift`, `Services/DirectionsService.swift`, `Services/SavedPlacesStore.swift` REUSE.
-- **Dependencies:** the map PRD lands first. Downstream: routing-mode selector waits on PAS-7, the Places list on PAS-6 item 2.
+- **Dependencies:** the map PRD lands first, and [`hood-dataset`](../hood-dataset/hood-dataset.md) + [`places-dataset`](../places-dataset/places-dataset.md) supply everything both sheets render. Downstream: routing-mode selector waits on PAS-7, the Places list on PAS-6 item 2.
 - **Open technical questions:** whether the two-value category enum is enforced in Postgres or only client-side; whether "Eat & Drink" is stored as display text or a stable key.
 
 ## Open questions & risks
@@ -92,4 +93,5 @@
 | 2026-07-30 | Category rename to "Things to do" / "Eat & Drink" spec'd as a hard requirement | Decision #33; rename is confirmed even though the filter placement is not |
 | 2026-07-30 | Filter placement, tag line, and routing-mode selection excluded rather than assumed | PAS-6 items 1 and 6, PAS-7 — scope gate forbids specing against unconfirmed lines |
 | 2026-07-30 | Localness-label copy resolved to "tourist-heavy spot" | Decision #42, at PAS-9 acceptance. Only the copy — the mechanic and filter placement were reconciled separately, below |
+| 2026-07-30 | Data-sourcing bullet added: the blurb column and the whole `places` table are named as other PRDs' deliverables | Standing rule, founder-direct 2026-07-30. The PRD stated the *shape* of both and left "who authors the rows" implicit; reqs 2 and 6 cannot pass against an empty dataset |
 | 2026-07-30 | Three stale PAS-6 exclusions rewritten: tag mechanic (#37), filter placement (#41), closed-place save (#38) | All three resolved live by Aviran; the tag line and the closed badge now have owning PRDs. Scope unchanged — only the reasons and the pointers |
