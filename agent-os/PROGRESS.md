@@ -13,6 +13,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031 accepted, moved to `aviran-review`; created T-040/PAS-17 for real Hood geometry
+
+- **Did:** verified `product`'s ACCEPT verdict directly (commit `545bca4`, `map-hoods-heat.md` status flipped Draft v2 → Accepted). Moved T-031 to `aviran-review` — the first task in this project to reach it. Applied `gate:awaiting-aviran-review` to Linear `PAS-12`.
+- **Created `T-040`/Linear `PAS-17`**, per `product`'s explicit ask: scope + author real Tel Aviv Hood geometry, since what's shipped in both the iOS fixture and the migration seed is placeholder rectangles, and B3 delivered only an export script, never a real dataset. Folded in the related correctness gap `product` found at acceptance (`HoodHitTester`'s unenforced non-overlap assumption) as part of the same ticket's scope, since whoever authors real geometry needs to validate it. Left unclaimed/backlog — `data-engineer`'s to pick up, not launch-blocking on its own per `product`'s call, but real for V1 launch readiness.
+- **Added a carry-forward note to T-032's BOARD.md row**: `product` found T-031's test plan has zero traced cases for req 5's hour-change bullets (correctly so — T-031 changes nothing about the selected hour), and those bullets are T-032's to verify at its own qa/acceptance. Flagged now so it doesn't get lost between here and whenever T-032 reaches that stage.
+- **Posted the review-ready `aviran-review` summary** directly to Linear `PAS-12` and to Aviran in this session's own response — what the feature is, how to try it, and reframed 3 of the 5 previously-disclosed gaps (live RPC check, real-density visuals, offline-cache indicator) as one root cause per `product`'s framing (no backend has ever been reachable in this pipeline, so heat has never actually been observed rendering) rather than presenting them as five separate scattered caveats.
+- **This closes out T-031's entire lifecycle traversal** — the first feature in this project's history to go from `backlog` all the way to `aviran-review`, including a real rejection cycle at design-approval, a HIGH-severity security finding at code-review, and a Major functional bug at qa, each one found, fixed, and independently re-verified rather than waved through at any stage.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — chief-of-staff — T-031: qa PASS confirmed, moved to `acceptance` — first feature to reach this gate
 
 - **Did:** verified `qa`'s final PASS (commit `f466e36`) — confirmed present, Finding A marked CLOSED in `TEST-PLAN.md` with the original FAIL kept as history rather than overwritten. `qa` independently hit the same system-alert input-delivery tooling wall `ios-code-reviewer` disclosed, which corroborates it as a real sandbox limitation rather than a one-off; both agents' `simctl`-based workaround exercises the identical code path a real tap would, and both descriptions of the resulting Jerusalem recenter match.
