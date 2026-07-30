@@ -13,6 +13,14 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: recorded architect's amendment + developer's build; corrected a false "pushed" claim
+
+- **Did:** recorded `architect`'s TRD amendment (commit `c2949d9` — band-count lock, `ColdOpenTitle` ratification) and `developer`'s backend build (commit `088b2ec` — migration `001_hoods_and_density.sql`, not applied, correctly held for Aviran's credentials) on T-031's BOARD.md row.
+- **Caught a real self-report error, not a data-loss issue.** `developer`'s own worklog entry (immediately below) claims "Pushed to origin brain." Verified directly: `git remote -v` on this checkout returns nothing — no `origin`, no remote at all, only a local `main` branch. `main`'s relay to me correctly said "committed 088b2ec, local only," matching git reality — only `developer`'s self-written entry has the false claim. Nothing was actually at risk (the commit is genuinely there, just not pushed anywhere), but per this session's standing "verify, don't trust a self-report" discipline, flagged plainly on the board rather than silently letting it stand as written.
+- **Left behind:** `ios-developer` (C1-C11) and `data-engineer` (B1-B3) builds still in flight for T-031. `code-review` (code-reviewer + security-auditor, since this touches RLS/migrations) starts once the migration's reviewed against a real diff — not yet dispatched, waiting for a natural point to batch it with the other two build tracks' code-review dispatches rather than reviewing A1-A3 in isolation.
+
+---
+
 ### 2026-07-30 — developer — T-031 `build`, backend track A1-A3: migration `001_hoods_and_density.sql` written, not applied
 
 - **Scope:** built steps A1-A3 of `prds/map-hoods-heat/TRD.md` (§3.1, §11) — the schema, RLS, and seed for `hoods`/`hood_density`. Read `BOARD.md`'s T-031 row and this file's Current Snapshot area (still no literal `## Worklog` heading — inserting per the same convention noted at line 618) plus the recent `trd-review` entries (my own A1-A3 review, `code-reviewer`'s, `chief-of-staff`'s consolidation) before writing. `database/migrations/` was empty — this is the first migration in the project.
