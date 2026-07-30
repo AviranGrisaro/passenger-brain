@@ -13,6 +13,25 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — data-chain saga closed: T-040/T-042/T-043 all `build`-ready
+
+- **Did:** verified the consolidation architect's pass (`293ddb2`) directly — all 6 fixes present as claimed, including the data-seed renumber and the C-HOOD-1 clause-4 correction (handled cleanly: T-042's own clause-4 text is untouched since it correctly describes T-042's own containment check; the correction for how it was *misapplied* to T-040's non-overlap estimate lives in T-040's document, where the misapplication occurred).
+- **Resolved the 2 items architect flagged as needing routing:** the clause-4 item turned out to already be properly handled (verbatim quote preserved, correction stated alongside rather than editing the source), so no further action was needed. The stale T-043 migration-number comment ("003 claimed by T-033") was a one-line mechanical fix with no design judgment involved — corrected it directly to state the settled `005`, rather than spinning up another dispatch for a single sentence.
+- **Independently re-verified `developer`'s T-043 REQUEST CHANGES verdict is fully resolved**, not just assumed superseded — read the verdict's own two findings (missing revoke, FK divergence) against the already-verified security-fix commit and confirmed both are exactly what that commit addressed.
+- **All 3 data-chain TRDs (T-040, T-042, T-043) are now genuinely `build`-ready** — every `trd-review` finding across 4+ review passes and dozens of individual findings has been resolved and independently re-verified, not taken on any single agent's word. Marked `build` on all 3 BOARD.md rows; none dispatched yet in this pass, given the scale of this thread — natural next step for a subsequent run.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
+### 2026-07-31 — chief-of-staff — T-043's `trd-review` fully closed: security fix verified, all findings resolved
+
+- **Did:** verified `developer`'s security fix directly against the file (commit `27911b0`) before treating the HIGH finding as closed — `revoke execute` present on both `hood_for_point()` and `reattribute_events()`, with the rationale paragraph mirroring §4.3's established pattern. Confirmed the 2 lower-severity verification notes are now explicit TRD requirements (all 4 base tables named, `pg_net`'s internal tables checked), not left as private asides.
+- **Confirmed all 3 relayed add-ons were judged on their merits, not blindly applied:** `events.hood_id`'s `set null` kept as-is with its rationale now stated explicitly (matching `code-reviewer`'s own lean that `restrict` would break T-040's Hood-prune step) rather than flipped or left as a silent divergence; `if not exists` guards added; the Postgres-15+ requirement flagged with a named fallback rather than just noted.
+- **T-043's entire `trd-review` is now closed** — all findings from all 4 reviewers resolved. Combined with T-040's (6/6) and T-042's (3/3) already-closed reviews, all 3 data-chain TRDs have cleared their review gates. The consolidated architect text-cleanup pass has also landed (see entry immediately below) — all 3 tasks should now be formally `build`-ready pending my own verification of that pass.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-31 — architect — T-040/T-042/T-043: applied the 7 decided cross-TRD text fixes from the consolidated `trd-review` pass
 
 - **Did:** applied `chief-of-staff`'s consolidated fix list (dispatch commit `47c0825`) across `prds/hood-dataset/TRD.md`, `prds/places-dataset/TRD.md`, `prds/live-events-pipeline/TRD.md`. Read the full `trd-review` trail first — `developer`'s, `data-engineer`'s and `code-reviewer`'s verdicts on all three tasks — rather than working from the dispatch summary. **Every fix was a decision already reached by reviewers; none is a new architecture call of mine.**

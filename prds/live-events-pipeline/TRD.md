@@ -68,7 +68,7 @@ Exactly two places: `functions/ingest-events/adapters/*.ts`, and rows in `event_
 
 ## 3. Data model
 
-Four new tables. No table here holds, derives from, or can be joined to any user — there is no identity in V1 and this pipeline introduces none. **All four `create table` and every `create index` below use `if not exists`**, matching migrations `001`/`002`'s idempotency convention — a bare `create table`/`create index` would fail on re-run and this TRD's earlier drafts omitted the guard. Migration number: **do not hardcode.** `003` is already claimed by T-033's TRD, and T-040/T-042 have TRDs in flight that will claim more; `developer` takes the next unclaimed number at write time and records it in `database/README.md`'s Status table (§9, and see the board note in §8).
+Four new tables. No table here holds, derives from, or can be joined to any user — there is no identity in V1 and this pipeline introduces none. **All four `create table` and every `create index` below use `if not exists`**, matching migrations `001`/`002`'s idempotency convention — a bare `create table`/`create index` would fail on re-run and this TRD's earlier drafts omitted the guard. Migration number: **`005`**, settled — `003` = `hood-dataset` (T-040), `004` = `places-dataset` (T-042), `005` = this task. (Corrected 2026-07-31: this line previously said "do not hardcode, 003 is claimed by T-033" — stale; T-033's TRD amendment struck its own migration entirely and the sequence above is what `trd-review` actually confirmed across all three sibling TRDs.) `developer` records the applied filename in `database/README.md`'s Status table (§9).
 
 ### 3.1 `event_sources` — the recorded decision, in data
 
