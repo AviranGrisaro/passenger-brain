@@ -57,6 +57,16 @@ $$;
 comment on function public.density_band_for_score is
   'B1: score-to-band cutoffs (quiet/moderate/busy locked at 3 bands, TRD §1). Busy pinned at the top 30% of [0,1] deliberately -- it is a warning-worthy state for tourist-trap-flag (map-rendering-spec.md L42), not a default outcome of an even split.';
 
+-- Security (code-review/security-auditor finding, T-031): Postgres grants
+-- EXECUTE to PUBLIC on every newly created function by default, and Supabase
+-- auto-exposes every function as a PostgREST RPC -- so without this revoke,
+-- `anon`/`authenticated` (i.e. anyone holding the app's public anon key)
+-- could call this directly via POST /rest/v1/rpc/density_band_for_score.
+-- Pure/stateless, so no exploit path, but closing it for consistency with
+-- the other two functions below -- no client-facing caller needs this at
+-- all, it's only ever invoked from inside generate_synthetic_density().
+revoke execute on function public.density_band_for_score(numeric) from public, anon, authenticated;
+
 -- ---------------------------------------------------------------------------
 -- B2a: deterministic per-Hood "vibrancy" weight
 -- ---------------------------------------------------------------------------
@@ -82,6 +92,12 @@ $$;
 
 comment on function public.hood_vibrancy_weight is
   'Deterministic per-Hood multiplier in [0.65, 1.20], hashed from hood_id. Not a real signal -- a synthetic stand-in so the diurnal curve varies by Hood without inventing per-Hood data or requesting a schema column.';
+
+-- Security: same reasoning as density_band_for_score above -- pure/stateless,
+-- no exploit path, but no client-facing caller needs this either; revoked
+-- for consistency and to close the default-PUBLIC-EXECUTE gap everywhere in
+-- this file, not just on the one function with a real exploit.
+revoke execute on function public.hood_vibrancy_weight(text) from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- B2b: the generator itself
@@ -119,12 +135,28 @@ set search_path = public
 as $$
 declare
   v_anchor_utc timestamptz;
+  v_horizon_hours int;
+  v_retention_buffer_hours int;
   v_curve numeric[] := array[
     0.05,0.03,0.02,0.02,0.03,0.05,0.10,0.20,   -- 00:00-07:00
     0.30,0.35,0.40,0.45,0.55,0.60,0.55,0.50,   -- 08:00-15:00
     0.48,0.50,0.58,0.68,0.78,0.85,0.80,0.55    -- 16:00-23:00
   ];
 begin
+  -- Defense-in-depth (code-reviewer/security-auditor finding, T-031):
+  -- clamp both parameters internally so a future accidental grant change
+  -- (or a call from somewhere other than the revoked-execute path below)
+  -- can't reopen the two concrete exploits both reviewers found --
+  -- p_retention_buffer_hours negative enough to push the prune cutoff into
+  -- the future (matches/deletes every row -- table-wipe DoS), or
+  -- p_horizon_hours large enough to force an unbounded generate_series
+  -- cross-join upsert (write/cost amplification). Bounds are generous
+  -- relative to the function's actual intended use (13 buckets / 2h buffer,
+  -- both defaults) so legitimate manual re-runs still work, but nowhere
+  -- near unbounded.
+  v_horizon_hours := greatest(1, least(p_horizon_hours, 24));
+  v_retention_buffer_hours := greatest(0, least(p_retention_buffer_hours, 24));
+
   -- Pin this transaction's timezone explicitly -- does not affect the
   -- caller's session (set_config's third argument, is_local, scopes it here).
   perform set_config('timezone', 'Asia/Jerusalem', true);
@@ -143,7 +175,7 @@ begin
       ))
     )
   from public.hoods h
-  cross join generate_series(0, p_horizon_hours - 1) as n
+  cross join generate_series(0, v_horizon_hours - 1) as n
   on conflict (hood_id, hour_bucket)
   do update set band = excluded.band;
 
@@ -155,12 +187,36 @@ begin
   -- aggregate rows (passenger-code/CLAUDE.md's minimization rule, applied
   -- here too).
   delete from public.hood_density
-  where hour_bucket < v_anchor_utc - (p_retention_buffer_hours * interval '1 hour');
+  where hour_bucket < v_anchor_utc - (v_retention_buffer_hours * interval '1 hour');
 end;
 $$;
 
 comment on function public.generate_synthetic_density is
-  'B2: synthetic density feed. Upserts 13 rolling absolute-UTC-hour buckets per Hood; diurnal shape computed in Asia/Jerusalem local time via an explicit, transaction-scoped timezone pin (not a session-default assumption). Prunes rows older than the retention buffer trailing "now". Scheduled hourly -- see below.';
+  'B2: synthetic density feed. Upserts 13 rolling absolute-UTC-hour buckets per Hood; diurnal shape computed in Asia/Jerusalem local time via an explicit, transaction-scoped timezone pin (not a session-default assumption). Prunes rows older than the retention buffer trailing "now". Both parameters clamped internally (horizon 1-24, retention buffer 0-24) as defense-in-depth on top of the execute revoke below. Scheduled hourly -- see below.';
+
+-- Security (code-review/security-auditor finding, T-031, HIGH -- the
+-- blocking finding on this migration): this function is `security definer`
+-- with no revoke, so Postgres's default PUBLIC-EXECUTE grant on new
+-- functions stood, and Supabase auto-exposes every function as a PostgREST
+-- RPC (`POST /rest/v1/rpc/generate_synthetic_density`) -- meaning `anon`
+-- (the app's public anon key, necessarily shipped inside the iOS bundle)
+-- could call this directly, running with the owning role's elevated
+-- (RLS-bypass) privileges regardless of caller. Confirmed exploits: (1) a
+-- large negative p_retention_buffer_hours pushed the prune cutoff into the
+-- future, matching/deleting every row in hood_density on demand -- a
+-- repeatable, free, standing DoS on the whole heat feature; (2) a large
+-- p_horizon_hours forced an unbounded generate_series cross-join upsert --
+-- unauthenticated write/cost amplification; (3) even without abusing the
+-- parameters, repeated calls re-roll the +/-4% noise term, letting a client
+-- hammer the endpoint until a specific Hood/hour crosses (or stays under)
+-- the busy threshold it wants displayed -- defeating the "server decides,
+-- client is indifferent" contract TRD §3.1/§10 rely on. The clamps above
+-- close (1) and (2) as defense-in-depth even if this revoke is ever
+-- accidentally reversed; this revoke is the actual fix for all three, since
+-- none of them are reachable at all once nothing but the function owner can
+-- invoke it. pg_cron's own scheduled invocation (below) is unaffected -- it
+-- runs as the scheduling role, never through PostgREST.
+revoke execute on function public.generate_synthetic_density(int, int) from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- B2c: scheduling -- the gap not specified anywhere else in the TRD
