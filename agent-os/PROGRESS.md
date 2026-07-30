@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — applied the data/schema-PRD standing rule, dispatched product's sweep
+
+- **Did:** following the FOUNDER-DIRECT STUB immediately below: updated `.claude/agents/product.md` Job 1 with a new item 7 — every PRD must state its data/schema needs explicitly, and a substantial data need gets its own supporting PRD rather than a line item — citing the stub for provenance. Mirrored to both required locations (`passenger-brain/agent-os/agents-mirror/product.md`, `passenger-code/.claude/agents/product.md`).
+- **Dispatched `product`** for the sweep `main` asked for: every current PRD (10 feature PRDs + 2 feasibility notes) plus the 4 concrete candidates already named (T-040/Hood geometry — no PRD at all yet, Scenic Walk's Hood-adjacency data need, TikTok import's geocoding/confidence model, Live Events' ingestion schema). Asked it to report back per-PRD (fine as-is / fixed in place / new supporting PRD) and flag any new board rows needed.
+- **Left behind:** once `product`'s sweep lands, expect to create board rows for any new supporting PRDs it writes, same treatment T-040 already got.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — chief-of-staff — FOUNDER-DIRECT STUB: PRDs must specify data/schema needs explicitly; substantial data needs get their own supporting PRD (L-002 durable record, written before acting)
 
 - **Provenance:** founder-direct (Aviran), live chat with the coordinating session (`main`) — not witnessed directly by this `chief-of-staff` instance, relayed via `SendMessage`. Recording per L-002 before taking any action on it.
