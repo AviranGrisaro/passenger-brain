@@ -238,6 +238,22 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031 PASSED design-approval; design-review gate opened (Linear PAS-12, hilos post to Serge + Aviran)
+
+- **Did — product's re-verdict landed: PASS.** Product independently re-fetched the mockup source itself (not trusting chief-of-staff's or designer's word), re-checked all 9 findings, re-ran a full scope-gate sweep from scratch (zero hits on any banned social/onboarding surface) and a full PRD-traceability sweep (all 7 P0s + 2 P1s still homed in §5, nothing quietly dropped). One new non-blocking defect found and correctly not bounced on: the mockup's new `.settings-hint` link uses `--focus` (#1E66E0), which passes 4.5:1 in light mode but only hits 3.28:1 in dark — a mockup-hex issue, not a build-contract error (the spec's normative text already states 4.5:1 correctly), so rejecting over it would have tripped the loop-guard and stalled T-032 through T-037 for a color value. Judgment call endorsed.
+- **Did — both halves of `design-approval` now in: `chief-of-staff` + `product`, PASS.** Per the operating contract, this clears the gate and moves T-031 to `design-review` (Serge + Aviran).
+- **Did — opened the `design-review` gate, following the protocol exactly:**
+  - Created Linear issue **PAS-12** ("Map — Hoods & Heat area (T-031)") in project Passenger V1.
+  - Created two new labels that didn't exist yet in this reset workspace: `gate:awaiting-design-review`, `gate:design-approved`.
+  - Applied `gate:awaiting-design-review` to PAS-12.
+  - Posted a comment with the design spec path, the mockup link, the Components list (7 items: map shell, Hood layer, heat area layer, location permission flow, density feed client, near-me button, Hood name label — matching the spec's own component table), and the 3 non-blocking follow-ups product and I surfaced during the approval passes (dark-mode contrast defect on the Settings-hint link, the near-me-in-not-asked-state authorization fidelity gap for the TRD, a straight/curly-quote copy nit) so none of them get lost between now and build.
+  - Posted the gate message in hilos `#general` (message `0d1bdb25`), addressed to `@sergoh` and `@avirangrisaro` by name, with the Linear link, mockup link, a short Components summary, and the explicit "reply approve or reject in this thread — takes effect on my next run" instruction the protocol requires.
+- **Did — `BOARD.md`:** T-031 moved to `design-review`, owner `designer` (no owner change needed — the row just reflects who built what's under review). Noted PAS-12 and the hilos message ID for traceability.
+- **Left behind:** T-031 now waits on two independent human verdicts (Serge + Aviran), via either Linear comment or the hilos thread, mixed routes fine. Next run: re-fetch PAS-12's labels/comments fresh (never trust cached state per the gate protocol) and check the hilos thread before touching this task again. If both land, apply `gate:design-approved` myself (the one label I apply on a human's behalf) and advance to `trd`. T-035/036/037 remain queued behind this — designer is free to start once dispatched, but I haven't dispatched them yet this run (design-review being open doesn't unblock them; T-031's rendering only becomes stable for them to build against once it's actually approved, not just submitted for review).
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
