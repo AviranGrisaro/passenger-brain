@@ -195,6 +195,26 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031 rejection fix pass verified clean; resubmitted to product for design-approval re-verdict
+
+- **Did — independently re-verified all 9 findings against the rebuilt mockup source and spec text**, same discipline as the original rejection: fetched the republished artifact's raw HTML/CSS/JS directly (same URL, same `WebFetch` approach) and grepped the local spec file (`design/phase-1/map-hoods-heat-design.md`, commit `f2591e3`) rather than trust designer's per-finding claims.
+  1. `.blurred` class and its JS toggle (`heatGroup.classList.toggle('blurred', ...)`) are gone entirely from both CSS and JS. Confirmed.
+  2. `var op = bandOpacity[band];` — no conditional, no `Math.min`, unconditional at every zoom. Confirmed.
+  3. The `data-bandlabel` text element that rendered "no data yet" on the map surface is gone from `buildHoods()`. Confirmed — the only remaining text-bearing elements are the Hood name label (always) and the VoiceOver caption (only visible via the explicit preview toggle, with a code comment stating it's not rendered as visible map text in the shipped app).
+  4. Same element removal covers this — no visible "quiet"/"moderate"/"busy" word renders anywhere now; code carries an explicit comment citing `prds/tourist-trap-flag/` and `map-rendering-spec.md` §2/§3 as the reason that channel is reserved.
+  5. All three `setTimeout` call sites for the system prompt (`notasked` handler, reset button, initial page load) now use `3400` (was `1200`). Title fade-out completes ~3200ms (2200ms hold + ~1000ms CSS transition), so the prompt now fires after, not during.
+  6. Spec §1 now reads: "The map underneath stays visible but is not interactive while the system dialog is up — this is standard iOS system-alert modality, not a Passenger design choice." Accurate, confirmed by grep.
+  7. Real `.settings-hint` DOM element added, anchored above the near-me button, shown via `classList.add('show')` on tap-while-denied with a 3200ms auto-dismiss — not just the `scenarioCaption` reviewer string anymore.
+  8. System alert purpose string changed to *"Passenger uses your location to center the map on you and show a 'you are here' marker."* — personalized-crowd-data framing gone.
+  9. Spec §5 now has an explicit new row: P0-1's "<3s on oldest device" is stated as **not resolved in this spec**, flagged for architect/ios-developer against real MapKit init cost — not falsely claimed as covered.
+- **Conclusion: clean fix pass, no rescoping detected.** Designer fixed exactly the 9 findings, nothing more, nothing less, as instructed.
+- **Did — `BOARD.md`:** T-031 moved back to `design-approval`, owner `designer → product`. Re-passed my own half after the re-verification above.
+- **Did — dispatched `product`** (relay via `main`) for its re-verdict, with explicit instructions to fetch the source itself rather than trust either the designer's per-finding claims or my own re-verification, and flagged that a second REJECT here would trigger the loop-guard (design↔design-approval bouncing twice) rather than a third bounce.
+- **Left behind:** T-031 at `design-approval`, pending product's second verdict. If PASS: this task can finally move to `design-review` (the Serge/Aviran gate) — will need to find/create the matching Linear issue, post the Components list + mockup link, and post the hilos gate message, per the design-review protocol. If REJECT again: stop dispatching, summarize both sides in two lines, escalate to `blocked-on-aviran` per the loop-guard rule rather than bounce a third time.
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
