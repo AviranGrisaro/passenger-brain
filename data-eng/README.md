@@ -7,4 +7,5 @@ Feasibility scoping and algorithm-design writeups owned by the `data-engineer` a
 ## Status
 
 - `scenic-walk-tiktok-feasibility.md` — PAS-7 scoping (Scenic Walk weighted routing + TikTok place extraction + Google Maps import read).
+- `tourist-trap-algorithm-rescope.md` — impact read on decision #22's localness-algorithm pipeline now that decision #37 (2026-07-30) confirms a boolean tourist-trap flag replaces the old 3-way tag.
 - PAS-5 (live-events ingestion pipeline scoping) expected to land here too, same convention, whenever that session completes.
