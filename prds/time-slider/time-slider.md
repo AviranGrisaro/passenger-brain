@@ -54,6 +54,7 @@
    - [ ] VoiceOver exposes a discrete, announceable step — each step announces the hour it lands on; the control is not continuous-drag-only.
    - [ ] The control's touch target is ≥44pt (`design/design-principles.md` §2, Fitts's Law).
    - [ ] The control remains usable and legible at the largest supported Dynamic Type size.
+   - [ ] Every text label in the control — the numeral, the "now" tick label, the end-of-track labels — meets 4.5:1 against its own surface in **both** light and dark; the track line and the "now" tick meet 3:1 as non-text UI (`design/design-principles.md` §5, WCAG AA). *Bullet added at `design-approval`, 2026-07-30: the design pass asserted this exact bar in its §4/§7 and missed it on two labels, and no gate had an objective bullet to fail it on. L-009 applied early rather than at acceptance.*
 
 ### Nice-to-have (P1)
 
@@ -79,3 +80,4 @@
 | Date | Decision / change | Why |
 |---|---|---|
 | 2026-07-30 | PRD created | First PRD pass over the 2026-07-30 V1 lock (PAS-10); slider is the one item strategy marks unchanged |
+| 2026-07-30 | Req 6 gains an explicit contrast bullet (4.5:1 text / 3:1 non-text, both themes) | `design-approval` found the design spec asserting that bar and the mockup missing it at 3.22:1 light / 3.61:1 dark on the end-of-track and "now"-tick labels. The PRD had no contrast bullet at all, so no gate — QA included — had anything objective to fail it on. Adds a testable criterion; does not change scope (L-009, applied at design-approval rather than acceptance) |
