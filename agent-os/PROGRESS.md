@@ -310,6 +310,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-033 delivered; new standing rule: `ui-design-review` applied, not cited; own design-approval half passed
+
+- **Did — independently verified T-033's deliverable against the raw mockup source**, not the relay summary: fetched `https://claude.ai/code/artifact/06f8a49b-7de4-430f-a701-96279db74611` directly and read the full spec (`design/phase-1/hood-place-detail-design.md`, 215 lines). Confirmed against actual code: the Save button's glyph (🔖) stays constant across states — only `classList.toggle('saved', ...)` and a real `aria-pressed` attribute change, no icon/label swap; the "no curated places" empty state has a genuine `<button class="empty-cta">Explore another Hood</button>`; the route hand-off action sheet offers exactly Maps and Waze, no Scenic/Fast split (correctly excluded per PAS-7); the tourist-heavy flag line renders exactly "Tourist-heavy spot" only when `state.placeState === 'flagged'`, matching `tourist-trap-flag` req 6's locked string/condition, with an inline `T-035 slot` tag so a reviewer can't mistake the placeholder for a finished T-035 design. **My own `design-approval` half passes.**
+- **Process note worth recording as a standing rule, not just this task's footnote:** Aviran asked mid-task (relayed by the coordinating session to `designer`, not to me directly) that designers explicitly *apply* the `ui-design-review` skill rather than merely cite it. Designer complied for this spec — §2.3 runs a real Passes/Issues/Quick-Wins review against the vendored manual and catches two genuine problems before submission (a Save-icon meaning-swap to a checkmark, which the manual's own Ch14 toggle-button rule flags almost exactly; a CTA-less empty state, which both the manual and Passenger's own `design-principles.md` §4 require). **Baked this into `designer.md` as standing item 8** (all three copies — live `.claude/agents/`, `agent-os/agents-mirror/`, `passenger-code/.claude/agents/` — kept byte-identical) rather than letting it be a one-off instruction that has to be re-given every future design dispatch. The new rule requires the same three-part shape (Passes / Issues-found-and-fixed / Quick-wins-considered-not-applied) in every spec going forward, citing T-033's §2.3 as the model.
+- **Did — `BOARD.md`:** T-033 moved to `design-approval`, owner `designer → product`, noting the new-rule provenance and my own verification.
+- **Did — dispatched `product`** (relay via `main`) for the other required signature, with the mockup/spec/PRD all specified for direct verification.
+- **Left behind:** T-033 at `design-approval` pending product's verdict. T-032 (time slider) still in flight from the same original batch, no result yet.
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only, `passenger-brain` branch `main`. `designer.md` mirror edits committed separately in `passenger-brain` (agents-mirror copy) and `passenger-code` (its own repo) — see those commits.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
