@@ -1,7 +1,7 @@
 # Map — Hoods & Heat Area — TRD
 
-**Task:** T-031 · **Linear:** `PAS-12` · **Status:** ready for `trd-review`
-**Owner:** architect · **Date:** 2026-07-30
+**Task:** T-031 · **Linear:** `PAS-12` · **Status:** `trd-review` cleared — 5/5 verdicts PASS/APPROVE, in `build`
+**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-30 post-`trd-review` (§1 band-count lock, §8 D1 mockup-deviation ratification)
 **PRD:** [`map-hoods-heat.md`](./map-hoods-heat.md) (Draft v2) · **Design spec:** [`design/phase-1/map-hoods-heat-design.md`](../../design/phase-1/map-hoods-heat-design.md) (Draft v2, `design-approval` PASS, `design-review` cleared on Aviran's approval)
 **Mockup:** https://claude.ai/code/artifact/967ade63-ea5b-46c9-89a8-d606ed11a819 — reference only. Where this TRD and the mockup disagree, this TRD wins (see §8 D1, D2).
 
@@ -24,7 +24,11 @@ Read the PRD and the design spec first; nothing here restates them. This documen
 | 5 | Dark-mode Settings-hint link contrast | Semantic asset-catalog color set + underline + a contrast unit test. No mockup hex. | §8 D1 |
 | 6 | Near-me in the "not asked" state | Marker is bound to authorization status, never to a tap. The mockup's unconditional marker is a mockup bug. | §8 D2 |
 
-Band count and thresholds stay a `data-engineer` call (PRD Technical design). This TRD makes the client indifferent to it: the client reads an integer band and never computes a threshold.
+**Band count and names are locked here; only the numeric thresholds stay a `data-engineer` call.** *(Amended 2026-07-30 after `trd-review` — `code-reviewer`, `developer`, and `data-engineer` each independently flagged that §3.1's CHECK and §4.1's `HeatBand` enum already hardcode 3 bands while this section still called the count open. They were right; this narrows the open item to what is genuinely open.)*
+
+- **Locked: three bands, named `quiet` / `moderate` / `busy`.** Not just a count — the *names* are already load-bearing outside this TRD: `design/map-rendering-spec.md` L42 keys the tourist-trap flag's warning stroke on heat crossing "the busy threshold," so a sibling PRD (`prds/tourist-trap-flag/`) is coupled to a specifically-named third band. Changing the count later is not a schema tweak; it is a migration *plus* an iOS release (a `CaseIterable` enum gains a case) *plus* a rendering-rule change in a shipped sibling feature. That is worth locking now rather than discovering at integration.
+- **Open, and genuinely `data-engineer`'s (B1): the numeric score-to-band cutoffs.** The client is indifferent to these by construction — it reads an integer band and never computes a threshold, so cutoffs can be retuned server-side with no app release (§3.1).
+- **The schema does not restate the lock.** Migration `001` writes `check (band > 0)`, not `check (band between 1 and 3)` — `developer`'s call at `trd-review`, adopted here. The lock lives in this document and in `HeatBand`; a forward-compatible constraint costs nothing and means a hypothetical future band count never requires reissuing an applied migration. Strictly safer than a hardcoded upper bound, and it does not weaken the lock — the client rejects an unknown band integer at the boundary (§4.5) regardless of what the CHECK permits.
 
 ---
 
@@ -102,7 +106,7 @@ create table public.hoods (
 create table public.hood_density (
   hood_id     text        not null references public.hoods(id) on delete cascade,
   hour_bucket timestamptz not null check (hour_bucket = date_trunc('hour', hour_bucket)),
-  band        smallint    not null check (band between 1 and 3),
+  band        smallint    not null check (band > 0),   -- see §1: forward-compatible, not a loosened lock
   primary key (hood_id, hour_bucket)
 );
 create index hood_density_hour_idx on public.hood_density (hour_bucket);
@@ -115,6 +119,7 @@ Three decisions inside that schema:
 - **`hour_bucket` is an absolute UTC timestamp, not an offset and not an hour-of-day.** This resolves the PRD's open key-shape question and T-032 §8 item 4. Offsets rot the moment the clock crosses an hour; hour-of-day cannot express "tomorrow 01:00," which the +12h window reaches every evening. Absolute keying is also what makes the offline path in §3.4 correct rather than approximately correct.
 - **No `band = 0`.** "No data" is the *absence of a row*, not a band value. The client type is `HeatBand?`, so the compiler carries the distinction the map has to render silently (PRD req 7).
 - **Band is stored, not computed client-side.** Thresholds stay entirely server-side, so `data-engineer` can retune them without an app release. If a raw score is later wanted for the pipeline's own use, it is an additive column that does not touch the client contract.
+- **The CHECK is `band > 0`, not `between 1 and 3`, deliberately** — §1 locks the count at 3 named bands in this document and in `HeatBand`; the constraint stays forward-compatible so an applied migration never has to be reissued. Bands 1/2/3 are the only values the generator writes and the only values the client accepts.
 
 ### 3.2 Client — bundled Hood geometry
 
@@ -337,6 +342,7 @@ The mockup's `--focus` `#1E66E0` measures 5.21:1 on the light surface and **3.28
 - A semantic asset-catalog color set **`LinkOnSurface`** with light and dark variants — the pattern `design-principles.md` §5 already prescribes ("each with light+dark variants"), not a literal from a mockup. Light `#1E66E0` (5.21:1, verified by `product`). Dark **`#6EA8FF`** — computed 7.08:1 against `#1A1C1F` by WCAG relative luminance; `ios-developer` recomputes against the app's actual dark surface token rather than inheriting this number on trust.
 - **The "Settings" run is underlined as well as coloured**, so the affordance survives never-color-alone (`design-principles.md` §3) and does not depend on the token being right.
 - **The hint renders on an opaque surface-token background, not directly over the map.** A contrast ratio against a map is not a number anyone can verify — this applies equally to `ColdOpenTitle`, whose §4 claim of "4.5:1 against the map background" is otherwise unmeasurable. Not `.ultraThinMaterial`: its effective luminance varies with whatever the map draws underneath, which reintroduces the same unverifiability.
+  - **This is a deliberate, engineering-necessary deviation from the approved mockup's literal rendering — not an oversight, and not unflagged drift.** `ios-code-reviewer` verified at `trd-review` that the mockup renders `ColdOpenTitle` ("Tel Aviv, right now") as bare text floating over the live map, legible only via a CSS `text-shadow` glow, with no background chip; the Settings hint, by contrast, already sits on an opaque card there, so only the title changes. The glow trick has no measurable contrast ratio against an unpredictable live map, so the design spec's own 4.5:1 requirement for this element is unsatisfiable as drawn — an opaque backdrop is the only way to make the approved *requirement* true, and where the two conflict this TRD wins (header note). **Ratified at the TRD level by `chief-of-staff` (2026-07-30), same handling as this feature's dark-mode contrast carry-forward: engineering-justified and proportionate to record here rather than re-run a full design-approval cycle.** `designer` was not looped back in. The visual weight of the backdrop is still design's call — build it as the quietest treatment that clears 4.5:1 (surface token, no border, fading with the title), and if `designer` later wants a different treatment that keeps a measurable ratio, that is a swap inside C4, not a re-architecture.
 - **A unit test asserts ≥4.5:1 in both appearances**, using the salvaged `ContrastRatio.swift`. A contrast claim that is not executable is a claim that regresses silently — this is the second time this exact defect has appeared in this feature's artifacts.
 - Tapping the run opens `UIApplication.openSettingsURLString` (design §4 calls it a deep link). It never re-invokes the system dialog, which iOS would ignore anyway.
 
@@ -396,10 +402,10 @@ Ordered. Tags name the agent(s) each step dispatches to.
 
 | # | Step | Tag |
 |---|---|---|
-| A1 | Migration `001`: `hoods` + `hood_density` per §3.1, with both check constraints and the FK | **[Backend]** |
+| A1 | Migration `001`: `hoods` + `hood_density` per §3.1, with both check constraints (`band > 0`, not a hardcoded upper bound — §1) and the FK | **[Backend]** |
 | A2 | RLS: enable on both, one public `select` policy each, no write policy | **[Backend]** |
 | A3 | Seed `hoods` with the Tel Aviv polygon set (salvage `022_create_neighborhoods` / `024a_seed_neighborhoods_placeholder` as reference) | **[Backend]** + **[Algo/Data]** |
-| B1 | Band count and thresholds — the PRD's open `data-engineer` call. Does not block the client. | **[Algo/Data]** |
+| B1 | Band **thresholds only** — the numeric score-to-band cutoffs. Count and names are locked at 3 (`quiet`/`moderate`/`busy`, §1); B1 does not decide them. Does not block the client. | **[Algo/Data]** |
 | B2 | Synthetic density generator writing 13 rolling absolute-hour buckets per Hood (salvage `gen_heat.py`) | **[Algo/Data]** |
 | B3 | Export `hoods-tel-aviv.json` from the seeded table, hand to the iOS track (D3) | **[Algo/Data]** + **[iOS]** |
 
