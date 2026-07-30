@@ -351,6 +351,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-033 design-approval REJECTED (product); independently verified; bounced to designer
+
+- **Did — independently re-verified all 3 blocking findings**, reusing the raw mockup source already fetched for the prior review pass rather than re-fetching (same content, confirmed unchanged): `.sheet-backdrop.show{pointer-events:auto}` combined with `inset:0` and `onclick="closeAll()"` does swallow every tap over the map whenever a sheet is open — contradicts the spec's own "interactive behind the sheet" claim. `state.saved = false` runs unconditionally inside both `openPlace()` and `openPlaceFromHood()` — confirmed, reopening a previously-saved place always shows unsaved. `.sheet-close` (32×32) and `.empty-cta` (min-height 32px) are both confirmed below the 44pt requirement. Also confirmed the should-fix item: `--primary` is used for the Route fill *and* the saved-Save tint/border *and* the empty-CTA text — the spec's "used nowhere else" claim is false.
+- **Conclusion: well-founded rejection, first pass, no loop-guard concern.** Product's own framing (all craft-level, no PRD amendment needed, all 3 failed requirements already had falsifiable bullets) checks out — this is a "the design didn't do what the spec and PRD both already correctly demand," not a scoping problem.
+- **Did — `BOARD.md`:** T-033 moved back to `design`, owner `designer`, with the full concrete-findings list (3 blocking + 3 should-fix). Noted the cross-task flag on **T-038's row too** — `ux-flows.md` L59 makes the identical unspecified "map interactive underneath" claim for the search sheet, so whoever designs T-038 should check whether T-033's eventual fix produced a reusable, documented mechanism before re-deriving the same problem from scratch.
+- **Did — dispatched `designer`** (relay via `main`) with all 6 findings, plus a non-blocking suggestion to document the background-interaction mechanism somewhere shared (`design-principles.md` or `ux-flows.md`) rather than leaving it local to this one spec, given T-038 will need the identical thing.
+- **Left behind:** `designer` fixing T-033's 6 findings, in flight. T-032 (time slider) also still in flight from the earlier batch, no result yet. Once T-033's fix lands, re-verify against source before re-dispatching product, same discipline as T-031's second pass.
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
