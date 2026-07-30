@@ -81,7 +81,7 @@
 
 - **The localness line is missing from both sheets.** `design/map-rendering-spec.md` §4 makes the place sheet the tag's only home, and PAS-6 item 1 has not settled what the tag is. Both sheets are buildable without it; neither is complete until it lands.
 - **"Quick filters" placement is unresolved** (PAS-6 item 6). Decision #25 moved category chips into the search sheet; decision #33 reintroduces "quick filters" without saying where. This PRD names the categories and stops there deliberately.
-- **"Tourist trap" copy is being softened** (decision #36, PAS-9). Any label this feature shows should wait for that term.
+- ~~**"Tourist trap" copy is being softened** (decision #36, PAS-9). Any label this feature shows should wait for that term.~~ **Resolved 2026-07-30 (decision #42, PAS-9 ACCEPTed):** the public-facing term is **"tourist-heavy spot."** Any label this feature shows uses that wording, not "tourist trap." `design/map-rendering-spec.md` §3 already renders it at Hood level — see the copy-fit follow-up in that spec's own review (a Hood is not a "spot").
 - **[ASSUMPTION]** "Tagged spots" means curated places belonging to the Hood, not places carrying a localness tag. Same rows either way; flagged because the wording is ambiguous.
 
 ## Decisions log
@@ -91,3 +91,4 @@
 | 2026-07-30 | PRD created | First PRD pass over the 2026-07-30 V1 lock (PAS-10) |
 | 2026-07-30 | Category rename to "Things to do" / "Eat & Drink" spec'd as a hard requirement | Decision #33; rename is confirmed even though the filter placement is not |
 | 2026-07-30 | Filter placement, tag line, and routing-mode selection excluded rather than assumed | PAS-6 items 1 and 6, PAS-7 — scope gate forbids specing against unconfirmed lines |
+| 2026-07-30 | Localness-label copy resolved to "tourist-heavy spot" | Decision #42, at PAS-9 acceptance. Only the copy — the two remaining Open questions above (tag mechanic, filter placement) are settled by decisions #37/#41 and still need their own reconciliation pass across all four PRDs |
