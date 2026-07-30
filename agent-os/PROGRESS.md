@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: code-review fully cleared (all 3 tracks), moved to `qa`
+
+- **Did:** recorded `ios-code-reviewer`'s APPROVE WITH MINORS verdict (confirmed present in this file, matching the relayed report exactly, including the honest 26-vs-27 test-count correction) — the last of T-031's 3 code-review tracks (migrations, migration security, iOS diff). All 3 landed clean; the one HIGH finding along the way was fixed and independently re-confirmed twice. Rewrote T-031's BOARD.md row to a fresh concise summary and moved it to `qa`.
+- **Updated Linear `PAS-12`**: consolidated comment, description, relabeled `owner:qa` (created the label).
+- **Dispatched `qa`**, carrying forward everything not yet resolved rather than letting it evaporate at the handoff: the security fix's real closing step (verify 401/403 on the 3 RPC endpoints once migrations are applied — flagged explicitly as untestable from most sandboxes, don't skip silently), `ios-code-reviewer`'s 4 non-blocking should-fix findings (edge-tap tolerance nil-fallback, `SettingsHint` touch target, cold-open Hood-visibility framing, `ContrastRatio`'s discarded return), C11's still-simulator-only performance number, and the placeholder-geometry caveat for both the iOS fixture and the backend seed.
+- **This is Passenger's first feature to traverse the entire pipeline** — spec through code-review — in this workspace. Once `qa` lands, `acceptance` (`product`) is the last gate before `done`.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — ios-code-reviewer — T-031 `code-review`, iOS track: **APPROVE WITH MINORS**
 
 - **Scope:** reviewed `passenger-code` commit `6f75a7c` (C1-C11, first real screen) against `prds/map-hoods-heat/TRD.md`, the approved mockup, and my own prior `trd-review` findings. Read every changed file, not a sample. Built and ran the actual app rather than reviewing on paper alone: `xcodebuild build` (BUILD SUCCEEDED, zero warnings, confirmed `SWIFT_STRICT_CONCURRENCY = complete` / `SWIFT_VERSION = 6.0` genuinely set in `project.pbxproj`), `xcodebuild test -only-testing:PassengerTests` (26 tests, all pass — one less than the worklog's claimed "27," an arithmetic slip from double-counting the 2-style parameterized contrast test, not fabrication; matches the commit message's own "26"), `xcodebuild test -only-testing:PassengerUITests` (`ColdOpenPerformanceTests` passes, 0.462s avg on iPhone 17 Pro sim, consistent with the claimed 0.472s). Also installed and launched the built app on the simulator to see the first screen render for real, not just read code — this surfaced one observation neither `trd-review` pass could have caught from a design doc alone (below).
