@@ -4,7 +4,7 @@
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
 **Last updated:** 2026-07-30
-**Scope note:** two flagged items are deliberately left unanswered here — "quick filters" placement (decision #33, PAS-6 item 6) and the localness / tourist-trap line in either sheet (decision #28, PAS-6 item 1).
+**Scope note, updated 2026-07-30:** both items this PRD left unanswered are now **resolved upstream and owned by other PRDs**, not open questions here. The tourist-trap line in the place modal is decision #37, spec'd in [`../tourist-trap-flag/`](../tourist-trap-flag/tourist-trap-flag.md) req 6. Quick-filters placement is decision #41 — sheet-internal, decision #25 stands — and belongs to the search PRD, not this one. This PRD's own scope is unchanged.
 
 ## Description
 
@@ -13,7 +13,7 @@
 - **Place detail modal:** name, category, save, and the route hand-off.
 - Categories are renamed to **"Things to do"** and **"Eat & Drink"** (decision #33) — exactly two, everywhere they appear.
 - The route action hands off to native Maps or Waze; Passenger draws no turn-by-turn.
-- **Not in scope:** where category filters live — chrome vs. sheet-internal is unconfirmed (PAS-6 item 6); any localness / tourist-trap line in either sheet (PAS-6 item 1); Scenic Walk vs. fastest-route selection and any route polyline (PAS-7); the Places list surface, Been/Saved provenance, and the permanently-closed-place case (PAS-6 item 2); search; Passport; live events.
+- **Not in scope:** where category filters live — settled sheet-internal (decision #41) and owned by the search PRD; the tourist-trap line's content and rendering (owned by [`tourist-trap-flag`](../tourist-trap-flag/tourist-trap-flag.md), which places one text line in this modal); Scenic Walk vs. fastest-route selection and any route polyline (PAS-7); the Places list surface, Been/Saved provenance, and the permanently-closed badge (owned by [`places-been-saved`](../places-been-saved/places-been-saved.md), decision #38); search; Passport; live events.
 
 ## Motivation
 
@@ -62,7 +62,7 @@
 7. **Save writes to the manual path only.**
    - [ ] The save action adds the place to the manual "Saved" path, never to the dwell-detected "Been" path (decisions #26, #30).
    - [ ] The action's state is visible on reopen — a saved place reads as saved.
-   - [ ] Behaviour when Apple Maps marks the place permanently closed is **not** specified here — PAS-6 item 2, Aviran's own open question. Do not build a guess.
+   - [ ] Saving a place Apple Maps marks permanently closed **succeeds** — no block, no preventing dialog (decision #38, 2026-07-30). The badge that results is spec'd in [`places-been-saved`](../places-been-saved/places-been-saved.md) req 4, not here.
 
 ### Nice-to-have (P1)
 
@@ -79,8 +79,8 @@
 
 ## Open questions & risks
 
-- **The localness line is missing from both sheets.** `design/map-rendering-spec.md` §4 makes the place sheet the tag's only home, and PAS-6 item 1 has not settled what the tag is. Both sheets are buildable without it; neither is complete until it lands.
-- **"Quick filters" placement is unresolved** (PAS-6 item 6). Decision #25 moved category chips into the search sheet; decision #33 reintroduces "quick filters" without saying where. This PRD names the categories and stops there deliberately.
+- ~~**The localness line is missing from both sheets.**~~ **Resolved 2026-07-30 (decision #37).** `design/map-rendering-spec.md` §4 makes the place modal the flag's only home; that line is now spec'd in [`tourist-trap-flag`](../tourist-trap-flag/tourist-trap-flag.md) req 6. This PRD's modal must leave room for one text line it does not itself own.
+- ~~**"Quick filters" placement is unresolved.**~~ **Resolved 2026-07-30 (decision #41):** sheet-internal, decision #25 stands unreversed. Chips never return to map chrome. This PRD still only names the two categories; the sheet itself is the search PRD's.
 - ~~**"Tourist trap" copy is being softened** (decision #36, PAS-9). Any label this feature shows should wait for that term.~~ **Resolved 2026-07-30 (decision #42, PAS-9 ACCEPTed):** the public-facing term is **"tourist-heavy spot."** Any label this feature shows uses that wording, not "tourist trap." `design/map-rendering-spec.md` §3 already renders it at Hood level — see the copy-fit follow-up in that spec's own review (a Hood is not a "spot").
 - **[ASSUMPTION]** "Tagged spots" means curated places belonging to the Hood, not places carrying a localness tag. Same rows either way; flagged because the wording is ambiguous.
 
@@ -91,4 +91,5 @@
 | 2026-07-30 | PRD created | First PRD pass over the 2026-07-30 V1 lock (PAS-10) |
 | 2026-07-30 | Category rename to "Things to do" / "Eat & Drink" spec'd as a hard requirement | Decision #33; rename is confirmed even though the filter placement is not |
 | 2026-07-30 | Filter placement, tag line, and routing-mode selection excluded rather than assumed | PAS-6 items 1 and 6, PAS-7 — scope gate forbids specing against unconfirmed lines |
-| 2026-07-30 | Localness-label copy resolved to "tourist-heavy spot" | Decision #42, at PAS-9 acceptance. Only the copy — the two remaining Open questions above (tag mechanic, filter placement) are settled by decisions #37/#41 and still need their own reconciliation pass across all four PRDs |
+| 2026-07-30 | Localness-label copy resolved to "tourist-heavy spot" | Decision #42, at PAS-9 acceptance. Only the copy — the mechanic and filter placement were reconciled separately, below |
+| 2026-07-30 | Three stale PAS-6 exclusions rewritten: tag mechanic (#37), filter placement (#41), closed-place save (#38) | All three resolved live by Aviran; the tag line and the closed badge now have owning PRDs. Scope unchanged — only the reasons and the pointers |
