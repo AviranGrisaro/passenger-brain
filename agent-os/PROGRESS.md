@@ -45,6 +45,18 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — processed product's data-requirements sweep: 3 new PRDs → T-040/T-042/T-043 dispatched, PAS-6 gained 6 items, git-remote blocker escalated
+
+- **Did:** verified both sweep commits (`73bcf14`, `0a12773`) and all 3 new PRDs directly (`prds/hood-dataset/`, `prds/places-dataset/`, `prds/live-events-pipeline/`) before acting. Confirmed the sweep's biggest find independently: `places` genuinely has no migration anywhere in `database/migrations/`.
+- **Reconciled with tasks I'd already created this session** rather than duplicating: T-040 (created earlier for the Hood-geometry gap) now links `hood-dataset`'s real PRD instead of being a bare backlog item; T-042 (created earlier for the curated-place-dataset gap) now links `places-dataset`'s real PRD. Only `live-events-pipeline` needed a genuinely new task, `T-043`. All 3 route straight to `trd` (pure-build/data, no UX surface, per `product`'s own call) — created/updated Linear `PAS-17`/`PAS-19`/`PAS-20`, dispatched `architect` for all 3 TRDs in the dependency order `product` specified (hood-dataset → places-dataset → live-events-pipeline for the schema contracts, though TRD-writing itself doesn't need to wait since it's referencing already-written PRDs).
+- **Added brief data-requirements notes to the 6 existing PRD rows `product` fixed in place** (T-033, T-034, T-035, T-036, T-037, T-038) so each row states what changed without duplicating the full sweep detail, which lives here.
+- **Added 6 new items (11-16) to `PAS-6`** for the escalations `product` surfaced but didn't decide — who authors the places dataset, the Local-threshold dataset-sizing consequence, `place_type`'s internal-vs-user-facing question, whether anything produces the first tourist-trap value, OSM/municipal licensing, and a real TikTok-import schema collision (extracted places have no `id` to save against in the curated store — one fix path reopens a rule strategy already refused by name). Recorded as the durable Linear copy alongside `product`'s live relay to Aviran, so these don't go stale if that conversation moves on.
+- **Escalated the standing no-git-remote gap as a tracked blocker**, `PAS-21`, per tonight's retrospective addition to `passenger-brain/CLAUDE.md` rule 9 — this had been reported in nearly every recent worklog entry without ever becoming an owned item, exactly the failure mode the new rule names.
+- **Left behind:** T-041 (pin clustering) remains unowned — `product`'s sweep correctly didn't pick it up (it's a behavior/ownership gap, not a data/schema need in the sweep's sense), still needs a future pass. `places-been-saved.md`'s stale dependency line (flagged last turn) — did not confirm whether `product`'s sweep actually fixed it; worth checking next time that PRD is touched.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files (`CLAUDE.md`, `LESSONS.md`, and the 7 sweep-touched PRDs are all `product`'s/`retrospective`'s own commits, already landed).
+
+---
+
 ### 2026-07-31 — chief-of-staff — T-032/T-033 TRDs recorded, held at `trd` pending Aviran's nav-row answer; T-041/T-042 created
 
 - **Investigated before deciding, per `main`'s own ask.** Checked `passenger-code/Passenger/Map/MapScreen.swift` directly: T-031 shipped `NearMeButton` as a single standalone circular button (`.overlay(alignment: .bottom)`, its own `VStack`), no shared container, no nav row of any kind — `CachedDataIndicator` is a separate top-trailing overlay. Read both new TRDs' actual nav-row content (`prds/time-slider/TRD.md` D1, `prds/hood-place-detail/TRD.md`'s cross-task rule) rather than reasoning from the relay summaries alone.
