@@ -10,9 +10,9 @@
 ## Description
 
 - The backend job that gets real Tel Aviv events into the `events` table the overlay reads, and decides which ones surface.
-- Two halves with different risk profiles (`data-eng/live-events-feasibility.md`): **ingestion** (get structured events in at all) and **ranking** (decide which are "likely-interesting").
-- Ingest from structured feeds; do not mine social content. That is Aviran's own framing in `data-eng/discovery-engine-spec.md` and matches the strategy line word for word.
-- The `rank` column is the contract boundary: this pipeline writes it, the client only sorts and truncates by it.
+- Two halves, different risk profiles: **ingestion** (get structured events in at all) and **ranking** (decide which are "likely-interesting").
+- Ingest from structured feeds; do not mine social content — Aviran's own framing in `data-eng/discovery-engine-spec.md`.
+- `rank` is the contract boundary: this pipeline writes it, the client only sorts and truncates by it.
 - **Not in scope:** the client surface, markers, detail sheet, and toggle (`live-events-overlay`); ticketing, booking, or promoter placement (strategy fences B2B outright); user-submitted events; personalization of any kind; choosing the source set (`PAS-6` item 10).
 
 ## Motivation
@@ -72,10 +72,10 @@
 
 ## Technical design
 
-- **Data model:** new `public.events` — `id`, `source`, `source_event_id`, `name`, `start_at`, `end_at`, `lat`, `lng`, `venue_name`, `hood_id` (FK → `hoods.id`), `category`, `rank`, `ingested_at`. Unique on `(source, source_event_id)`. Public-read, no user-scoped rows. This extends the sketch in `live-events-overlay`'s technical design with the ingest-side fields that sketch omitted (source identity, dedup key, ingest time).
-- **APIs / contract:** the client fetches the whole now → +12h window alongside the density load and re-filters locally per hour (`live-events-overlay`). The served set is already deduped, expired-filtered, Hood-attributed and ranked — the client applies no business logic.
-- **Architecture notes:** ingest runs server-side on a schedule (`pg_cron` is already the pattern migration `002` established for synthetic density). Source credentials are env/config only, never committed (`CLAUDE.md`).
-- **Dependencies:** **`hood-dataset` first** — req 3's attribution is impossible without real polygons, and `data-eng/live-events-feasibility.md` §2 already sequences this work after the Hoods schema. `places-dataset` is needed only if venue matching against known places is wanted (it is not required by any P0 here). Blocks `live-events-overlay`'s real-data path; the client ships without it, empty.
+- **Data model:** new `public.events` — `id`, `source`, `source_event_id`, `name`, `start_at`, `end_at`, `lat`, `lng`, `venue_name`, `hood_id` (FK → `hoods.id`), `category`, `rank`, `ingested_at`. Unique on `(source, source_event_id)`. Public-read, no user-scoped rows. Extends `live-events-overlay`'s sketch with the ingest-side fields it omitted (source identity, dedup key, ingest time).
+- **APIs / contract:** the client fetches the whole now → +12h window alongside the density load and re-filters locally per hour. The served set is already deduped, expired-filtered, attributed and ranked — the client applies no business logic.
+- **Architecture notes:** ingest runs server-side on a schedule; `pg_cron` is already the pattern migration `002` set for synthetic density. Source credentials are env/config only, never committed (`CLAUDE.md`).
+- **Dependencies:** **`hood-dataset` first** — req 3's attribution is impossible against placeholder rectangles, and `data-eng/live-events-feasibility.md` §2 already sequences this after the Hoods schema. `places-dataset` only if venue matching is wanted; no P0 here requires it. Blocks `live-events-overlay`'s real-data path.
 - **Open technical questions:** whether `rank` is absolute or per-hour (`live-events-overlay`'s question, unresolved); the on-screen marker cap, unknowable until real Tel Aviv event volume is measured; whether the ranker runs at ingest or at read.
 
 ## Assumptions
@@ -85,10 +85,10 @@
 
 ## Open questions & risks
 
-- **`PAS-6` item 10 is open and this PRD does not close it.** `data-engineer`'s call was **conditional**: the thin ticketed-only version is buildable in Phase 1; the version that makes "something's happening near you right now" feel true is a **data-access gap, not an engineering-hours gap**. Whether the thin version meets the bar that made this launch-blocking is Aviran's, and the launch date genuinely depends on it.
-- **The informal-events layer has no reachable source.** Facebook Events is very likely dead as a feed; local Israeli platforms' API access is unverified; an aggregator is a procurement conversation with unverified Israel coverage; manual or crowd curation repeats the staffing and cold-start tradeoffs decisions #22 and #24 already moved away from. All four paths are outside `data-engineer`'s unilateral reach.
-- **Cost:** roughly 3–5 weeks for a thin single-feed v1 with basic ranking, sequenced after the Hoods schema, before any iOS work (`data-eng/live-events-feasibility.md` §2). Each additional source is another 1–2 weeks.
-- Three launch-blocking feasibility questions stack — events, Scenic Walk, TikTok import. Any one can slip the date (strategy, Key risks).
+- **`PAS-6` item 10 is open and this PRD does not close it.** `data-engineer`'s call was **conditional**: thin ticketed-only is buildable in Phase 1; the version that makes "something's happening near you right now" feel true is a **data-access gap, not an engineering-hours gap**. Whether thin meets the bar that made this launch-blocking is Aviran's, and the date depends on it.
+- **The informal-events layer has no reachable source.** Facebook Events likely dead as a feed; local Israeli platforms' API access unverified; an aggregator is a procurement conversation; manual/crowd curation repeats decisions #22 and #24's tradeoffs. All four are outside `data-engineer`'s unilateral reach.
+- **Cost:** ~3–5 weeks for a thin single-feed v1 with basic ranking, after the Hoods schema, before any iOS work. Each additional source ~1–2 weeks.
+- Three launch-blocking feasibility questions stack — events, Scenic Walk, TikTok. Any one can slip the date.
 
 ## Decisions log
 

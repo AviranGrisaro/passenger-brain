@@ -11,8 +11,8 @@
 - The real Tel Aviv Hood dataset: polygons, names, hand-curated blurbs, and the three attribute fields other V1 features read off a Hood.
 - Replaces the placeholder T-031 shipped — 4 hand-authored rectangles in `passenger-code/Passenger/Resources/hoods-tel-aviv.json`, 5 rough rows in migration `001`'s seed.
 - One authored source produces both artifacts (DB seed + bundled iOS fixture) through the existing `export_hoods_geojson.py`, same `id` slugs, so the two can never disagree.
-- Sourcing method is open (OSM extraction / municipal open data / manual authoring) — this PRD states what the output must satisfy, not how to obtain it.
-- The dataset ships attribute **values**; the pipelines that later *change* them (localness algorithm, local-QA correction) are not this PRD's.
+- Sourcing method is open (OSM / municipal open data / manual authoring) — this states what the output must satisfy, not how to get it.
+- Ships attribute **values**; the pipelines that later *change* them are not this PRD's.
 - **Not in scope:** `hood_density` and the synthetic generator (built, `map-hoods-heat` + migrations `001`/`002`); the tourist-trap algorithm that proposes a flag value (`data-eng/discovery-engine-spec.md`); the curated places that sit inside Hoods (`prds/places-dataset/`); any city other than Tel Aviv; map rendering of any kind.
 
 ## Motivation
@@ -70,10 +70,10 @@
 
 ## Technical design
 
-- **Data model:** extends the existing `public.hoods` (migration `001`: `id`, `name`, `city`, `polygon`, `updated_at`) with `blurb text null`, `is_tourist_trap boolean null`, `designated_for_progression boolean not null default false`. New migration, not an edit to `001` — `001` is already reviewed and pending Aviran's apply.
-- **Polygon format:** unchanged from `001` — single-ring WGS84 `[[lng,lat], …]` in `jsonb`. A real municipal boundary may need multi-ring or a hole; if the sourced geometry does, that is a format change and a schema decision, not a data detail. **Open.**
-- **APIs / contract:** unchanged. Hood payload is static reference data, fetched once per session and cached (`map-hoods-heat` technical design). Adding three columns adds no round trip.
-- **Architecture notes:** `export_hoods_geojson.py` (delivered by T-031's B3 step) is the export path; it has never been run against a real dataset. The non-overlap validator in req 2 does not exist and is new work.
+- **Data model:** extends `public.hoods` (migration `001`) with `blurb text null`, `is_tourist_trap boolean null`, `designated_for_progression boolean not null default false`. New migration — `001` is reviewed and pending Aviran's apply.
+- **Polygon format:** unchanged from `001` — single-ring WGS84 `[[lng,lat], …]` in `jsonb`. **Open:** a real municipal boundary may need multi-ring or a hole, which is a schema decision, not a data detail.
+- **APIs / contract:** unchanged — static reference data, fetched once per session and cached. Three columns add no round trip.
+- **Architecture notes:** `export_hoods_geojson.py` (T-031's B3) is the export path and has never run against a real dataset. Req 2's non-overlap validator does not exist and is new work.
 - **Dependencies:** nothing upstream. **Blocks** `places-dataset` (`hood_id` resolution), `passport` (designation + attribution), `tourist-trap-flag` (the stroke's source value), `live-events-pipeline` (event→Hood mapping), and the real-geometry half of `map-hoods-heat` req 3.
 - **Open technical questions:** whether the sourced geometry needs multi-ring/hole support; whether the non-overlap validator runs in the export script or as a separate CI step; how a Been place is re-attributed when a Hood boundary is corrected (`passport`'s own open question).
 
@@ -84,10 +84,10 @@
 
 ## Open questions & risks
 
-- **Two numbers Passport cannot ship without are not here and are not inventable.** How many Been places make a Hood "Local," and which Hoods are designated (`passport` Open questions). This PRD provides the *field*; the values are Aviran's or `data-engineer`'s.
-- **Seeding `is_tourist_trap` needs a proposing algorithm that does not exist yet.** `data-eng/discovery-engine-spec.md` owns it. If it does not land, every Hood ships `null` — which renders correctly (blank, per `tourist-trap-flag` req 4) but means the product's second signal is empty at launch, and strategy calls heat alone *"the half of this product anyone already gets from Google Maps."* Escalation, not a build detail.
-- **Sourcing method is unchosen and the options differ in licence, not just effort.** OSM extraction carries ODbL attribution obligations; municipal open data carries its own terms. Needs checking before a dataset is derived from either — `data-engineer`'s to raise, Aviran's to accept.
-- Editorial load scales per city. Tel Aviv's dozens of blurbs are tractable; the second city repeats it (strategy, cold-start risk).
+- **Two numbers Passport needs are not here and are not inventable:** the Local threshold, and which Hoods are designated. This PRD provides the *field*; the values are Aviran's or `data-engineer`'s.
+- **Seeding `is_tourist_trap` needs a proposing algorithm that does not exist yet** (`data-eng/discovery-engine-spec.md`). If it never lands, every Hood ships `null` — renders correctly per `tourist-trap-flag` req 4, but the product's second signal is empty at launch. Escalation, not a build detail.
+- **The sourcing options differ in licence, not just effort.** OSM carries ODbL attribution obligations; municipal open data carries its own terms. Check before deriving from either.
+- Blurb authoring scales per city — Tel Aviv is tractable, the second city repeats it.
 
 ## Decisions log
 

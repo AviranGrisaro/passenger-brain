@@ -10,9 +10,8 @@
 
 - The curated Tel Aviv places dataset — the rows every other V1 feature reads, plus the fields three of them need and `places` does not have.
 - One authored dataset, one schema, public-read. Not a user-generated surface.
-- Fields fall in three groups: **identity** (name, coordinates, Hood), **classification** (the two user-facing categories, plus a finer internal `place_type`), **state** (permanently closed, tourist-trap flag).
-- Adds `place_type` (Passport's sticker shapes) and a searchable keyword field (search's "hummus" / "rooftop bar") — both currently specified as gaps in the PRDs that need them.
-- The dataset ships attribute **values**; the pipelines that later change them are not this PRD's.
+- Adds the two fields currently specified as gaps in the PRDs that need them: `place_type` (Passport's sticker shapes) and a searchable keyword field (search's "hummus" / "rooftop bar").
+- Ships attribute **values**; the pipelines that later change them are not this PRD's.
 - **Not in scope:** the Hood polygons places are attributed to (`prds/hood-dataset/`); the device-local Saved/Been/Visited store (`places-been-saved` — that is per-install state, not dataset); the tourist-trap proposing algorithm (`data-eng/discovery-engine-spec.md`); TikTok-extracted places (held, `PAS-6` item 9); any place outside Tel Aviv; any UI.
 
 ## Motivation
@@ -78,9 +77,9 @@
 ## Technical design
 
 - **Data model:** new `public.places` — `id` (stable slug), `name`, `category` (enum/CHECK, exactly two values), `place_type` (enum), `keywords` (text[] or tsvector), `lat`, `lng`, `hood_id` (FK → `hoods.id`), `permanently_closed` (boolean, default false), `closed_checked_at` (timestamptz), `is_tourist_trap` (boolean null). New migration; does not edit `001`/`002`.
-- **APIs / contract:** one static payload fetched with the map's initial load and cached — the same pattern `hoods` uses. `search-quick-filters` matches client-side against that cache, which is what makes its 400ms and offline requirements achievable; that only holds if the whole Tel Aviv payload is small enough to cache. **Open:** at what row count that stops being true.
-- **Architecture notes:** `SALVAGE.md` marks `Models/Place.swift` REUSE — check it against `place_type` and `keywords`, neither of which the Locali model had.
-- **Dependencies:** `hood-dataset` first (req 1's FK and containment check). **Blocks** `hood-place-detail`, `places-been-saved`, `passport`, `search-quick-filters`, `tourist-trap-flag`'s place-level half, and `live-events-pipeline`'s venue matching.
+- **APIs / contract:** one static payload fetched with the map's initial load and cached, same pattern as `hoods`. `search-quick-filters` matches client-side against that cache — which is what makes its 400ms and offline requirements achievable, and only holds while the whole payload fits. **Open:** at what row count it stops fitting.
+- **Architecture notes:** `SALVAGE.md` marks `Models/Place.swift` REUSE — check it against `place_type` and `keywords`, neither of which Locali had.
+- **Dependencies:** `hood-dataset` first (req 1's FK and containment check). **Blocks** `hood-place-detail`, `places-been-saved`, `passport`, `search-quick-filters`, and `tourist-trap-flag`'s place-level half.
 - **Open technical questions:** whether keyword matching is `text[]` + client filter or Postgres full-text; whether `place_type` is a Postgres enum or a lookup table (a lookup table makes req 3's "every value has a shape" checkable in SQL); where the closed-state refresh runs (client `MKMapItem` lookup vs. a scheduled server job — `places-been-saved`'s own open question).
 
 ## Assumptions
@@ -90,9 +89,9 @@
 
 ## Open questions & risks
 
-- **Nobody has said how many places V1 ships with, or who authors them.** Every requirement here is about shape and validity; volume and authorship are unstated. This is the largest unspecified input in V1 — six PRDs read this table and none of them creates a row in it. Aviran's.
-- **Two fields are being added because a PRD needs them, not because a decision authorized them.** `place_type` traces to strategy's "shaped to match the place type"; `keywords` traces to strategy's "hummus", "rooftop bar". Both are verbatim strategy lines, so the scope gate clears — but neither has a decision record fixing its enumerated values. The value sets are open.
-- **Keyword authoring is per-place editorial load on top of per-Hood blurbs.** Same staffing shape decision #22 exited for localness. Worth Aviran's read before the dataset is sized.
+- **Nobody has said how many places V1 ships with, or who authors them.** Every requirement here is about shape and validity. This is the largest unspecified input in V1 — six PRDs read this table and none creates a row in it. Aviran's.
+- **`place_type` and `keywords` each trace to a verbatim strategy line, so the scope gate clears — but neither has a decision record fixing its enumerated values.** Both value sets are open.
+- **Keyword authoring is per-place editorial load on top of per-Hood blurbs** — the staffing shape decision #22 exited for localness. Worth Aviran's read before the dataset is sized.
 - **Closed-state refresh has no owner.** `places-been-saved` req 4 requires it; nothing schedules it.
 
 ## Decisions log
