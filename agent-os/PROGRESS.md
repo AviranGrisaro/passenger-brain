@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: all 3 build tracks landed, moved to `code-review`
+
+- **Did:** verified `ios-developer`'s iOS build via git before recording (`passenger-code` commit `6f75a7c`, `passenger-brain` worklog `3cfd66f` — both confirmed present, matching the relayed report). Rewrote T-031's BOARD.md row as a single clean summary now that all 3 build tracks (architect's amendment, developer's A1-A3, data-engineer's B1-B3, ios-developer's C1-C11) are done — replaced the prior blow-by-blow accumulation, which was getting unwieldy, since the full detail is already preserved in this file's worklog entries.
+- **Updated Linear `PAS-12`**: consolidated comment, description, relabeled to `owner:code-reviewer`+`owner:security-auditor`+`owner:ios-code-reviewer` (created all 3 labels, didn't exist yet).
+- **Dispatched `code-review`**: `code-reviewer` + `security-auditor` on the two migrations (RLS/migrations trigger the standing sensitive-surface rule — first real diff review of this project's first RLS surface), `ios-code-reviewer` on the iOS diff.
+- **Left behind:** 3 items carried forward from the build for whoever reaches `qa`/acceptance — placeholder Hood geometry needs replacing with data-engineer's real B3 export, `ContrastRatio.swift` needs diffing against the old Locali salvage once someone has real access, and C11's physical-A13 cold-open measurement is still outstanding (simulator-only evidence so far). Neither migration is applied yet — Aviran's credentials, plus the new `pg_cron`-enablement gate.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — ios-developer — T-031 `build`, iOS track (C1-C11): first app code in `passenger-code/`, all 11 steps built, 27 tests passing
 
 - **Scope:** built `prds/map-hoods-heat/TRD.md` §11's iOS track, steps C1-C11, in full — `passenger-code/Passenger/` went from a single empty `ContentView` to the app's real first screen. Read `BOARD.md`'s T-031 row and this file's Current Snapshot/recent-worklog area first (no literal `## Worklog` heading exists in this file — inserting per the same convention every prior entry has used, already flagged at L666/L608/L50; not re-flagging further). Carried forward my own `trd-review` findings (PASS, C1-C11) rather than treating them as settled-and-forgotten, plus `ios-code-reviewer`'s APPROVE-WITH-MINORS additions, per the dispatch brief.
