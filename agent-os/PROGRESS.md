@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: recenter-fix code-review cleared, dispatched final `qa` pass
+
+- **Did:** recorded `ios-code-reviewer`'s APPROVE WITH MINORS on the fix diff (commit `555597a`) — confirmed present, `isNewGrant`'s correctness verified by direct inspection, build/test evidence clean. Noted the disclosed live-repro limitation honestly rather than treating it as a full pass: `ios-code-reviewer` couldn't literally tap the system permission alert in its sandbox (6 input methods failed), and used `simctl privacy grant location` as a same-code-path substitute instead — flagged as such, not silently equated to the literal tap.
+- **Dispatched `qa`** for the final pass, specifically re-verifying its own original finding (TEST-PLAN.md case 17) rather than a full re-run — explicitly told it to attempt the literal system-alert tap first (same as its original repro) and only fall back to `simctl` if it hits the identical tooling wall, disclosing which one it used either way.
+- **Left behind:** if `qa` passes, T-031 moves to `acceptance` (`product`) — the last gate before `done`. The 4 non-blocking findings from this review round (TRD doc-hygiene gap, test-permutation coverage, a `recenterOnUser()` refactor opportunity, a harmless double camera-set) don't block anything but are worth `product`/`architect` picking up as small follow-ups at some point.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — chief-of-staff — T-031: verified ios-developer's recenter fix, dispatched a fresh code-review pass
 
 - **Did:** verified `ios-developer`'s fix (commit `f31816c`) directly against the code before treating `qa`'s Major finding as resolved — confirmed the new `.onChange(of: locationStore.authorizationStatus)` (L110) and the `isNewGrant(from:to:)` static predicate (L130) both genuinely exist, plus the new `PassengerTests/MapScreenTests.swift` (9 tests). Did not just take the relay's description on faith.
