@@ -13,6 +13,25 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — status pass for Aviran: closed PAS-7/8/10, dispatched T-031 (designer) + PAS-9 acceptance (product), PAS-6 gained items 8-9
+
+- **Provenance:** live direct chat with Aviran (not hilos), asking "according to v1, what's the next move?" Read `BOARD.md`, `PROGRESS.md` current snapshot + recent worklog, and fetched live Linear state for project **Passenger V1** before acting — no stale-read risk (no remote configured on this checkout, single working tree, git status showed nothing changed underneath since the last commit).
+- **Did — Linear/BOARD reconciliation (single-writer rule).** Three tasks were sitting "done from the agent's side, awaiting my state transition" per their own BOARD notes — closed them out rather than leaving them stale:
+  - **PAS-10** (four V1 PRDs written) → Linear Done, comment citing the four PRD paths and the five correctly-held items.
+  - **PAS-7** (Scenic Walk/TikTok feasibility scoping) → Linear Done, comment citing the doc and findings.
+  - **PAS-8** (UX docs reconciliation) → Linear Done, comment citing the diff stats.
+  - **PAS-9** (tourist-trap copy) → left at Linear In Progress / BOARD `acceptance` — its lifecycle explicitly requires a product accept before Done, so dispatched `product` for that verdict rather than closing it myself.
+- **Did — PAS-6 gained two new items.** PAS-7's findings surfaced two Aviran-only decisions that don't belong inside a now-closed ticket: (8) ship Scenic Walk's lighter locked version now vs. slip V1 for weighted routing; (9) TikTok video-fetch ToS/legal sign-off before a TRD. Posted as a PAS-6 comment (same "blocks downstream build, only Aviran can answer" shape as the original seven) and updated BOARD.md's PAS-6 row to nine items.
+- **Did — dispatched the one unblocked, ready, critical-path task: T-031.** Relayed a self-contained brief to `main` for `designer` to produce the actual design spec + high-fidelity mockup for "Map — Hoods & heat area" (PRD at `prds/map-hoods-heat/map-hoods-heat.md`). Chose this over anything PAS-6/PAS-11-gated because it's the only build-adjacent work genuinely ready to move — it doesn't depend on any of the nine PAS-6 items (the PRD explicitly ships heat-only, tourist-trap layer excluded) and T-032/T-033/T-034 all depend on it. In flight, no result yet.
+- **Did — dispatched `product` for PAS-9's required acceptance verdict**, in the same batch (independent of the designer dispatch). In flight, no result yet.
+- **Checked hilos `#general` for gate verdicts before acting** — read the channel; no reply from Aviran on PAS-6 or PAS-11 since my 2026-07-30 09:36 post. Both remain `blocked-on-aviran`, untouched this pass — not mine to resolve, and this session reached Aviran directly rather than through hilos.
+- **Did not:** touch PAS-6 or PAS-11's blocked status — no verdict arrived on either surface. Did not write any PRD/design content myself. Did not fabricate or guess at the designer/product dispatch outcomes — both are genuinely still running as of this entry.
+- **Evidence:** Linear comments on PAS-10, PAS-7, PAS-8 (closing), PAS-9 (dispatch note), PAS-6 (items 8-9). `BOARD.md` rows updated for PAS-6/7/8/9/10/T-031.
+- **Left behind:** two agents in flight (`designer` on T-031, `product` on PAS-9 acceptance) — next run: check for their replies before advancing those rows further. PAS-6 (9 items) and PAS-11 (3 questions) remain the two things only Aviran can clear; nothing else in Phase 1 is blocked on anyone else right now.
+- **Git:** committing `agent-os/BOARD.md`, this `PROGRESS.md` entry, explicit paths only, `passenger-brain` branch `main`. No remote configured — stays local.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
