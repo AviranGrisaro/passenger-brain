@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: code-review REQUEST CHANGES on a HIGH-severity security finding, bounced to `build`
+
+- **Did:** verified `security-auditor`'s HIGH finding directly against the actual migration file before acting — confirmed `security definer` at `002_synthetic_density_generator.sql` line 117, no `revoke execute` anywhere in either migration. This is a real, exploitable gap: the function is auto-exposed as a public PostgREST RPC and runs with RLS-bypass privileges, so an unauthenticated caller can wipe `hood_density` on demand (negative `p_retention_buffer_hours`) or force unbounded writes (large `p_horizon_hours`). `code-reviewer`'s independent, parallel migration review landed on the identical finding unprompted, plus one more angle (repeated calls let a client game the random-noise term to bias which band displays). Strong convergence from two independent reviewers — treating this as confirmed, not provisional.
+- **Moved T-031 back to `build`** (BOARD.md, Linear `PAS-12` — relabeled `owner:developer`+`owner:data-engineer`, description updated). Dispatched `developer` to apply the `revoke execute` fix (migration 002 isn't applied yet, so this is a direct file edit, not a new migration), `data-engineer` looped in for the recommended parameter clamps since it's their function.
+- **Not blocked, and said so explicitly:** `ios-code-reviewer`'s iOS diff review is still in flight, entirely unaffected by this backend-only finding — didn't hold it back or imply it needs to restart.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — code-reviewer — T-031 `code-review`, backend diff (migrations 001+002): **REQUEST CHANGES — one blocking finding, migration 002**
 
 - **Scope:** real-diff review (not the illustrative TRD SQL this time) of `database/migrations/001_hoods_and_density.sql` (`developer`, `088b2ec`) and `002_synthetic_density_generator.sql` (`data-engineer`, `382ef41`), against `prds/map-hoods-heat/TRD.md` §3.1/§3.4/§4.5/§9/§11 and my own `trd-review` pass. Read `BOARD.md`'s T-031 row and this file's `trd-review`/`build` entries first. `security-auditor` reviewing the same two files in parallel for the security angle — this is the general correctness/quality pass, overlap expected and not suppressed.
