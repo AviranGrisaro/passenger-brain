@@ -1,10 +1,10 @@
 # Map — Hoods & Heat Area — PRD
 
-**Status:** Draft v1
+**Status:** Draft v2
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
 **Last updated:** 2026-07-30
-**Scope note:** the localness / tourist-trap layer is deliberately **excluded** from this PRD — decision #28 is flagged unconfirmed (Linear PAS-6 item 1). This PRD specs the base map, Hoods, and heat only.
+**Scope note (rewritten at `design-approval`, 2026-07-30):** the tourist-trap layer is still **excluded** from this PRD, but **not because it is blocked** — decision #37 resolved PAS-6 item 1 the same day this PRD was first written, and the layer now has its own PRD (`prds/tourist-trap-flag/tourist-trap-flag.md`). The split is by rendering channel, per `design/map-rendering-spec.md` §2: **heat owns the Hood's area fill, the flag owns the Hood's outline stroke, and they never share a channel at any zoom.** This PRD specs the base map, Hoods, and the fill.
 
 ## Description
 
@@ -14,7 +14,7 @@
 - Each Hood carries a **heat area**: crowd density for the currently selected hour, drawn as stepped bands, never a gradient (decision #17).
 - Density is a synthetic feed in V1, time-bound to the selected hour.
 - Location permission is asked lazily and never blocks the map.
-- **Not in scope:** the localness / tourist-trap layer and its rendering (PAS-6 item 1); the time slider and heat modal; Hood and place detail sheets; search and quick filters; the live-events layer; Places, Passport, routing, TikTok import; any city other than Tel Aviv.
+- **Not in scope:** the tourist-trap layer and its rendering — a sibling PRD, `prds/tourist-trap-flag/tourist-trap-flag.md`, which owns the Hood outline stroke and the centroid word label; the time slider and heat modal; Hood and place detail sheets; search and quick filters; the live-events layer; Places, Passport, routing, TikTok import; any city other than Tel Aviv.
 
 ## Motivation
 
@@ -44,8 +44,9 @@
 
 4. **Heat area rendering.**
    - [ ] Heat renders as a stepped-band fill over the Hood area. Zero gradients anywhere in the layer (decision #17).
+   - [ ] **No blur, feather, or soft edge is applied to the fill at any zoom.** Band boundaries follow Hood boundaries exactly. `map-rendering-spec.md` §2 calls city-wide heat "neighborhood-scale blobs, stepped bands" — "blob" is the coarseness of the *shape*, never a softened edge; a blurred band is a gradient and fails decision #17. *(Added at `design-approval` 2026-07-30 — the original bullet was read as permitting a city-wide blur.)*
    - [ ] Heat is visible at 0 taps on cold open; no control gates it.
-   - [ ] The same band always means the same density value, at every zoom.
+   - [ ] The same band always means the same density value, at every zoom. **The band→appearance mapping is one fixed table: no zoom-dependent opacity clamp, no per-zoom recolouring, no compression of the gap between adjacent bands.** *(Second sentence added at `design-approval` 2026-07-30.)*
    - [ ] Heat encodes crowd density and nothing else — no blended "is it good" score is ever computed or drawn (`SALVAGE.md`: `DensityContract.swift`).
 
 5. **Heat is bound to one hour at a time.**
@@ -60,12 +61,13 @@
 
 7. **Degraded data is silent, not broken.**
    - [ ] A Hood with no density value for the selected hour renders with no fill and no error copy.
+   - [ ] **No on-map text of any kind announces the gap** — not "no data", not "not rated", at any zoom. On the map surface a gapped Hood is indistinguishable from a not-yet-curated one; the sentence lives in the Hood sheet (T-033), which is reached by tapping. Same convention as `map-rendering-spec.md` §3: the map never pre-announces absence. *(Added at `design-approval` 2026-07-30 — "no error copy" was read as permitting a neutral "no data yet" label.)*
    - [ ] If the density feed is unreachable, the base map and Hood geometry still render and remain interactive.
 
 ### Nice-to-have (P1)
 
 - Near-me recenter button (`design/ux-flows.md` §2 lists it as Primary chrome).
-- Hood name label at neighborhood zoom.
+- Hood name label at neighborhood zoom. **The name and nothing else** — heat may not put a word at a Hood centroid. That channel is reserved: `map-rendering-spec.md` §2/§3 assign the centroid word label to the tourist-trap flag ("Tourist-heavy spot" / "busy and tourist-heavy"), and `prds/tourist-trap-flag/` req 3 builds it there. A density word beside the name would put two word labels on one centroid — the stacked-signal density Aviran rejected verbatim (`map-rendering-spec.md` §1). Density's non-visual channel is the VoiceOver label, per §7 of that doc. *(Added at `design-approval` 2026-07-30.)*
 
 ## Technical design
 
@@ -81,9 +83,9 @@
 
 ## Open questions & risks
 
-- **The second layer is missing and this is the main risk.** Decision #28 (tourist-trap boolean vs. decision #18's Local/Mix/Tourist tag) is unconfirmed — PAS-6 item 1 — so no localness signal is spec'd here. `design/map-rendering-spec.md` §1 makes the cost explicit: heat alone is the half of this product anyone already gets from Google Maps. This PRD is buildable without it; the product is not shippable without it.
+- **The second layer is no longer blocked, only separate — and that changes the risk's shape.** Decision #37 (2026-07-30) resolved PAS-6 item 1: the tourist-trap boolean fully replaces decision #18's Local/Mix/Tourist tag. The layer is now specced in `prds/tourist-trap-flag/tourist-trap-flag.md`, whose Dependencies put this PRD first (it needs Hood geometry and the stroke channel). The residual risk is **sequencing, not scope**: `map-rendering-spec.md` §1 is explicit that heat alone is the half of this product anyone already gets from Google Maps, so shipping this feature is not shipping a product. Nothing built here may consume the outline stroke or the centroid word label (reqs 4, 7, P1) — those are the flag's channels, and a design that borrows them forces a redesign when the flag lands.
 - Density is synthetic at launch, so "right now" is simulated until a live popular-times source lands (strategy, Key risks).
-- `agent-os/BOARD.md`'s scope-gate section still says Live Events and Scenic View are out of V1 (2026-07-27). Strategy reversed both; the board text is stale and should not be read as a prohibition.
+- ~~`agent-os/BOARD.md`'s scope-gate section still says Live Events and Scenic View are out of V1 (2026-07-27).~~ **Resolved 2026-07-30** — the board's scope-gate section now carries the reversal struck-through and explicitly says not to read it as a prohibition. No longer a live risk.
 
 ## Decisions log
 
@@ -91,3 +93,5 @@
 |---|---|---|
 | 2026-07-30 | PRD created, covering base map + Hoods + heat only | First PRD pass over the 2026-07-30 founders-meeting V1 lock (PAS-10) |
 | 2026-07-30 | Localness / tourist-trap layer excluded rather than spec'd with a guess | Decision #28 flagged unconfirmed; scope gate forbids specing against an unconfirmed line (PAS-6 item 1) |
+| 2026-07-30 | Draft v2. Exclusion of the tourist-trap layer **kept**, reasoning replaced: no longer "blocked on PAS-6 item 1" (decision #37 resolved it hours after v1 was written) but "owned by a sibling PRD, split by rendering channel — fill here, stroke there" | Called at `design-approval` on T-031. Reopening this PRD's scope would duplicate `prds/tourist-trap-flag/` and stall the three PRDs that depend on this one; the channel split is already locked in `map-rendering-spec.md` §2 |
+| 2026-07-30 | Three requirement bullets tightened and one P1 constrained (reqs 4, 7, P1 — blur/feather, per-zoom band mapping, on-map gap text, centroid word label) | T-031's design read each original bullet the permissive way. The bullets were falsifiable enough to reject the design; they were not specific enough to have prevented it (L-009 shape, applied at design rather than acceptance) |
