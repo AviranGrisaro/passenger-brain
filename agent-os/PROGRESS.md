@@ -13,6 +13,14 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — STUB: founder-direct, live hilos chat — new Phase 2 feature concept "local personas"
+
+- **Provenance:** founder-direct, live hilos chat (`@chief` mention), 2026-07-30, from Aviran (product). Durable-record stub per L-002, written before any doc edit or dispatch.
+- **Verbatim request:** "add a new feature concept to Phase 2 of the roadmap: 'local personas.' Concept as given: user can follow local personas and travel like them — see their favorite places, neighborhoods/hoods, etc. Essentially curated local-guide profiles the user can follow and use as a lens for discovering/traveling through a city (favorite spots, hoods, routes)." Explicitly scoped as concept/idea only for Phase 2 — not approved-for-build, no implementation to start.
+- **Action this session:** record as a Phase 2 candidate in `strategy/passenger-strategy.md` (Aviran-gated file, edited directly under the same live-instruction exception used for prior founder-direct passes) and `strategy/decisions.md`; file a Linear backlog issue in **Passenger V1**; dispatch to `product` for concept-level scoping/flagging (not a full PRD — Phase 2 hasn't started). Full detail in the entry immediately below this stub once that lands.
+
+---
+
 ### 2026-07-30 — designer — PAS-8: reconcile `design/ux-flows.md` / `map-rendering-spec.md` against the founders-meeting V1 scope lock
 
 - **Provenance:** dispatched by `chief-of-staff` alongside `product` (PAS-10), `marketing` (PAS-9), and `data-engineer` (PAS-7) — see that entry below ("FINAL V1 scope lock applied..."). Read `passenger-brain/CLAUDE.md`, `BOARD.md`, `strategy/passenger-strategy.md` and `strategy/decisions.md` in full (decisions #27-36), and this file's Current Snapshot/recent worklog — including the three sibling agents' entries that landed before mine (PAS-10, PAS-9, PAS-7) — before editing.
