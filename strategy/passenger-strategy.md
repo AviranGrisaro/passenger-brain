@@ -128,19 +128,7 @@ Subscription launches in Phase 2, alongside proximity intelligence and marketing
 
 ## How it gets built
 
-A role-based agent team runs day-to-day execution, dispatched by a **chief-of-staff** agent:
-
-```
-backlog → spec (product) → design (designer) → build (developer/ios-developer)
-        → code-review (code-reviewer/ios-code-reviewer) → qa (qa) → acceptance (product) → done
-
-rejection loops: code-review ↩ build · qa ↩ build · acceptance ↩ build/design
-stops only at: blocked-on-aviran (scope/strategy calls, money, App Store, credentials)
-```
-
-**Roles:** `product` (reads this strategy, generates its own tasks, writes PRDs, accepts finished work) · `architect` (turns PRDs into technical designs) · `designer` (UX specs + mockups, gated jointly by Serge + Aviran) · `developer` (Supabase backend/schema/RLS) · `ios-developer` (Swift/SwiftUI client) · `data-engineer` (Yeari's domain — the localness/density algorithm and ingestion pipeline) · `code-reviewer` / `ios-code-reviewer` (gate every diff, security pass mandatory) · `qa` (tests against the PRD) · `marketing` (per-phase GTM) · `competitor-research` · `project-manager` (hygiene) · `retrospective` (process learning).
-
-Everything resolves on its own except scope/strategy calls, money, App Store actions, and credentials — those stop for Aviran.
+See `agent-os/FOUNDER-WORKFLOW.md` — the four-founder agentic process, PRD/Linear gates, and human-in-the-loop approval points.
 
 ## Technical architecture
 
