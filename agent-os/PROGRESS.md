@@ -30,6 +30,15 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB: no grouped nav-row bar — separate icons side by side (L-002 durable record, written before acting)
+
+- **Provenance:** founder-direct (Aviran), live chat with the coordinating session (`main`) — not witnessed directly by this `chief-of-staff` instance, relayed via `SendMessage`. Recording per L-002 before taking any action on it, since this directly conflicts with T-032's just-written TRD (architect delivered it this same session, commit `2f955fe`) and could affect design work in flight for T-034/T-036/T-037/T-038.
+- **Verbatim relay from `main`** (this is `main`'s own message text to me — a direct quote of Aviran's own words, per `main`'s framing, not `main`'s paraphrase of a longer exchange): *"I don't want a nav row. I want separate icons side by side."*
+- **As I read it:** Aviran is rejecting the grouped/unified 3-button nav-row bar T-032's TRD just defined as the shared bottom-chrome pattern for every later bottom-anchored feature — in favor of independent icons positioned side by side, not a single visually-joined control. **[ASSUMPTION]** whether this is a pure visual/layout preference (same z-order/stacking logic, rendered as separate elements instead of one grouped bar) or a deeper "no grouped/joined control, ever" rule is not resolved by the quote alone — `main` itself flagged this ambiguity and asked me to get it nailed down before deciding scope, rather than guess. Not resolving it by inference; investigating what's actually shipped/specced first, then asking a scoped clarifying question if still ambiguous after that.
+- **Action taken this pass:** see PROGRESS.md/BOARD.md entries immediately following this one for what was actually investigated and decided/asked.
+
+---
+
 ### 2026-07-30 — chief-of-staff — applied the data/schema-PRD standing rule, dispatched product's sweep
 
 - **Did:** following the FOUNDER-DIRECT STUB immediately below: updated `.claude/agents/product.md` Job 1 with a new item 7 — every PRD must state its data/schema needs explicitly, and a substantial data need gets its own supporting PRD rather than a line item — citing the stub for provenance. Mirrored to both required locations (`passenger-brain/agent-os/agents-mirror/product.md`, `passenger-code/.claude/agents/product.md`).
