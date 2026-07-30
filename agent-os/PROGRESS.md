@@ -254,6 +254,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — Aviran's T-031 design-review verdict recorded (1 of 2); did not apply the combined gate label
+
+- **What happened:** the coordinating session relayed that Aviran approved PAS-12 directly, live, in chat — not via a Linear comment or the hilos gate thread — with an explicit instruction to record it in Linear as a comment plus the `gate:design-approved` label.
+- **Did — recorded the verdict, but did not apply the combined label as literally instructed.** Posted a PAS-12 comment recording Aviran's APPROVE verdict, its provenance (live chat with the coordinating session, outside the protocol's two normal routes — a Linear comment or a verified hilos reply), and stated plainly that this is being recorded for the durable audit trail on the strength of Aviran being the unambiguous live principal in that session, same reasoning class as the founder-direct-live-instruction handling used elsewhere in this workspace (the L-002 stub pattern, the prd-review retirement precedent). Left `gate:awaiting-design-review` in place rather than swapping to `gate:design-approved`.
+- **Why I diverged from the literal instruction:** `gate:design-approved` is defined, by this workspace's own protocol, as the marker for *both* required signatures being in — Serge on craft, Aviran on product fit, independently. The instruction itself said in the same breath that Serge's verdict is still outstanding, which is logically inconsistent with applying the "both signed off" label right now. Complying with the letter of the instruction here would have meant jumping the gate on one signature, which is exactly the failure this protocol exists to prevent (see the standing rule: "a single approval isn't enough; leave the task at design-review until both are in"). Recording Aviran's verdict durably and clearly, without prematurely closing the gate, satisfies the actual intent (get this on the record, keep the pipeline honest) without the side effect.
+- **Did — `BOARD.md`:** T-031 row updated to show 1 of 2 signatures in (Aviran: APPROVE, recorded), still waiting on Serge via either Linear PAS-12 or the hilos thread.
+- **Left behind:** once Serge's verdict lands (either route), apply `gate:design-approved` for real and advance T-031 to `trd`. T-035/036/037 stay queued, not yet dispatched.
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
