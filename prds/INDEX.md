@@ -13,6 +13,7 @@ One folder per feature, flat — `prds/<feature-slug>/<feature-slug>.md`. Phase 
 | Tourist-trap flag & local QA | 1 | Draft v1 | [`tourist-trap-flag/`](tourist-trap-flag/tourist-trap-flag.md) — the boolean flag (decision #37), its Hood-stroke channel, the place-modal line, and the binary post-visit local-QA toast. Fills the layer `map-hoods-heat` leaves out. |
 | Places — Been & Saved | 1 | Draft v1 | [`places-been-saved/`](places-been-saved/places-been-saved.md) — one list, three provenance states, permanently-closed badge (decision #38), binary map ring. Device-local: does not survive reinstall. |
 | Passport | 1 | Draft v1 | [`passport/`](passport/passport.md) — private sticker album + per-Hood Local status (decision #40, ladder retired), under the Profile tab (decision #39). Depends on Places. |
+| Search & quick filters | 1 | Draft v1 | [`search-quick-filters/`](search-quick-filters/search-quick-filters.md) — sheet over the map, one field matching names/keywords/Hoods, two category chips (#25, #41), results honouring the slider hour. **Sheet layout still open** (`design/ux-flows.md` §9 Q15, Aviran's call). |
 
 ## Expected V1 shape
 
@@ -20,13 +21,15 @@ One folder per feature, flat — `prds/<feature-slug>/<feature-slug>.md`. Phase 
 
 **`product` pass, 2026-07-30 (PAS-10):** four written — map, time slider, Hood/place detail, live events. Five held: three on PAS-6, two on PAS-7.
 
-**Second `product` pass, 2026-07-30 (after PAS-6's resolution):** the three PAS-6-held items are written — tourist-trap flag, Places, Passport — against decisions #37–#40, confirmed live by Aviran. **Seven of nine written.** Still genuinely held: Scenic Walk (PAS-6 item 8, Aviran's ship-vs-slip call) and TikTok import (item 9, ToS sign-off). **Newly unblocked and not yet written: search + quick filters** — decision #41 settled placement as sheet-internal, so nothing blocks it any more; it is the next PRD.
+**Second `product` pass, 2026-07-30 (after PAS-6's resolution):** the three PAS-6-held items are written — tourist-trap flag, Places, Passport — against decisions #37–#40, confirmed live by Aviran. **Seven of nine written.** Still genuinely held: Scenic Walk (PAS-6 item 8, Aviran's ship-vs-slip call) and TikTok import (item 9, ToS sign-off).
+
+**Third `product` pass, 2026-07-30:** search + quick filters written against decisions #23/#25/#33/#41. **Eight of nine to ten written.** The remaining two are the same two — Scenic Walk and TikTok import, both on Aviran, neither a PRD-writing problem. One item inside the new PRD is genuinely open and deliberately not resolved: the search sheet's layout (Aviran's own literal 50/50 split ask vs. design review's native-detent recommendation, `design/ux-flows.md` §9 Q15) — the PRD's requirements are written to hold either way.
 
 - The map itself: cold open, Hoods (decision #27), heat area, Tel Aviv only — **written**
 - **Tourist-trap flag** (boolean, decision #37) plus the binary local-QA loop that corrects it — **written**
 - Time slider: now → +12h, hour snapping (unchanged) — **written**
 - Hood and place detail: hand-curated blurb, tagged spots/places, two categories (renamed "Things to do" / "Eat & Drink", decision #33), hand-off to native Maps/Waze — **written**
-- Quick filters + search: icon in map chrome opening a sheet; place names, keywords, and Hoods, results carrying heat + flag and honoring the slider hour (decision #23) — **unblocked, not yet written.** Placement is settled sheet-internal (decision #41); decision #25 stands unreversed
+- Quick filters + search: icon in map chrome opening a sheet; place names, keywords, and Hoods, results carrying heat + flag and honoring the slider hour (decision #23) — **written.** Placement settled sheet-internal (decision #41), #25 unreversed; sheet *layout* still Aviran's call (§9 Q15)
 - Places: Been (dwell auto-save) + Saved (manual), visually/functionally distinct (decisions #26, #29, #30), permanently-closed badge (decision #38) — **written**
 - Passport: per-Hood Local status (decision #40 retires the seven-tier ladder), stickers (#29), Profile tab (#39) — **written**
 - Scenic Walk + fastest-route mode: weighted street-segment routing (decision #32) — **launch-blocking on `data-engineer`'s feasibility scoping**, don't spec ahead of that
