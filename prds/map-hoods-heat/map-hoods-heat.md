@@ -1,6 +1,6 @@
 # Map — Hoods & Heat Area — PRD
 
-**Status:** Draft v2
+**Status:** Accepted (T-031, 2026-07-30) — two named data gaps carried past acceptance, see the Decisions log
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
 **Last updated:** 2026-07-30
@@ -39,7 +39,9 @@
 
 3. **Hoods.**
    - [ ] Each Hood is a named polygon; Tel Aviv ships dozens of them, not thousands (decision #12's bound).
+     - **Unmet at `acceptance` 2026-07-30 — carried, not waived.** The shipped artifact holds 4 hand-authored rectangles in the client bundle (`Resources/hoods-tel-aviv.json`) and 5 rough placeholders in migration `001`'s seed. That is not "dozens." No gate failed it because every gate correctly read it as placeholder data pending B3, and B3 shipped an export *script* with no real dataset to export. **Real Tel Aviv Hood geometry needs its own board row and its own review; this bullet is satisfied there, not by T-031.**
    - [ ] Hood polygons do not overlap: any coordinate resolves to at most one Hood.
+     - **Pass condition (added at `acceptance` 2026-07-30 — the bullet had none, so no gate could fail it).** With the shipped geometry loaded, no coordinate in Tel Aviv opens two different Hood sheets on repeat taps, and no Hood's fill paints over a neighbour's. **Nothing enforces this today** — `HoodHitTester` documents non-overlap as a premise it relies on and resolves any overlap silently to file order (`hoods.first(where:)`), and no test asserts the invariant. The geometry must therefore be overlap-validated *before* it is bundled, and a violation must fail that validation loudly rather than render. Latent while the fixture is 4 disjoint rectangles; live the moment real municipal boundaries land.
    - [ ] One tap inside a Hood opens that Hood's sheet — never a two-step "tap to preview, tap again to open".
 
 4. **Heat area rendering.**
@@ -53,6 +55,7 @@
    - [ ] The map reads "now" until something changes the selected hour.
    - [ ] Changing the selected hour repaints heat for that hour and leaves every other layer untouched.
    - [ ] Repaint completes inside the Doherty budget — under 400ms (`design/design-principles.md` §2).
+   - **Verification split (added at `acceptance` 2026-07-30).** Only bullet 1 is exercisable inside this PRD's scope — nothing here changes the selected hour (the slider is T-032), so `qa` traced no behavioral case to this requirement at all and no gate had anything to fail. Bullet 1 is met by `DensityStoreTests` (`selectedHour` starts at the current hour; `band(for:hour:)` never triggers a fetch, so an hour change is a pure repaint). **Bullets 2 and 3 transfer to T-032's acceptance** and must be verified there against a real slider drag with real density data. They are not satisfied by T-031.
 
 6. **Lazy location permission.**
    - [ ] The When-In-Use system prompt appears only after the map is on screen.
@@ -84,6 +87,7 @@
 ## Open questions & risks
 
 - **The second layer is no longer blocked, only separate — and that changes the risk's shape.** Decision #37 (2026-07-30) resolved PAS-6 item 1: the tourist-trap boolean fully replaces decision #18's Local/Mix/Tourist tag. The layer is now specced in `prds/tourist-trap-flag/tourist-trap-flag.md`, whose Dependencies put this PRD first (it needs Hood geometry and the stroke channel). The residual risk is **sequencing, not scope**: `map-rendering-spec.md` §1 is explicit that heat alone is the half of this product anyone already gets from Google Maps, so shipping this feature is not shipping a product. Nothing built here may consume the outline stroke or the centroid word label (reqs 4, 7, P1) — those are the flag's channels, and a design that borrows them forces a redesign when the flag lands.
+- **This feature was accepted without anyone ever seeing heat render.** No backend was reachable at any point in the pipeline — migrations `001`/`002` are unapplied, so every observation from `build` through `qa` was of the permanent no-data state. Every heat bullet (req 4, req 5, req 7's first bullet) passed *by construction* — code read, unit test, single-argument palette signature — not by observation. Three of the five acknowledged gaps (live RPC 401/403, offline-with-cache indicator, toy geometry) are one root cause wearing three hats. **The first time the map is seen painted will be after Aviran applies the migrations and enables `pg_cron`; treat that as a real verification event, not a formality.** *(Added at `acceptance` 2026-07-30.)*
 - Density is synthetic at launch, so "right now" is simulated until a live popular-times source lands (strategy, Key risks).
 - ~~`agent-os/BOARD.md`'s scope-gate section still says Live Events and Scenic View are out of V1 (2026-07-27).~~ **Resolved 2026-07-30** — the board's scope-gate section now carries the reversal struck-through and explicitly says not to read it as a prohibition. No longer a live risk.
 
@@ -95,4 +99,6 @@
 | 2026-07-30 | Localness / tourist-trap layer excluded rather than spec'd with a guess | Decision #28 flagged unconfirmed; scope gate forbids specing against an unconfirmed line (PAS-6 item 1) |
 | 2026-07-30 | Draft v2. Exclusion of the tourist-trap layer **kept**, reasoning replaced: no longer "blocked on PAS-6 item 1" (decision #37 resolved it hours after v1 was written) but "owned by a sibling PRD, split by rendering channel — fill here, stroke there" | Called at `design-approval` on T-031. Reopening this PRD's scope would duplicate `prds/tourist-trap-flag/` and stall the three PRDs that depend on this one; the channel split is already locked in `map-rendering-spec.md` §2 |
 | 2026-07-30 | Three requirement bullets tightened and one P1 constrained (reqs 4, 7, P1 — blur/feather, per-zoom band mapping, on-map gap text, centroid word label) | T-031's design read each original bullet the permissive way. The bullets were falsifiable enough to reject the design; they were not specific enough to have prevented it (L-009 shape, applied at design rather than acceptance) |
+| 2026-07-30 | **ACCEPTED at `acceptance`.** Status flipped to Accepted (L-006). Two P0 bullets carried past acceptance as named gaps rather than waived: req 3's "dozens of Hoods" (shipped data is 4+5 placeholders — needs its own board row) and every heat-rendering bullet (verified by construction only, never observed with data) | `qa`'s 24 traced cases cover every P0 that this task's scope can exercise; the two carried gaps are data-availability, not build defects, and no rejection loop to `build` or `design` could close either — both need Aviran (migrations, `pg_cron`) or a separate geometry deliverable |
+| 2026-07-30 | Two missing pass/fail criteria written in at `acceptance` (L-009): req 3's non-overlap bullet gained a rendered-consequence pass condition + the note that nothing enforces it; req 5 gained a verification split assigning bullets 2-3 to T-032 | Neither bullet was falsifiable against anything this task produces — `qa` traced zero cases to req 5 and no case to the non-overlap invariant, so no gate could have failed either. `HoodHitTester` relies on non-overlap as an unchecked premise, which becomes a live defect the moment real municipal boundaries replace the 4 disjoint fixture rectangles |
 | 2026-07-30 | Open-technical-questions line rewritten: all three resolved in the TRD. **Band count and names locked at three (`quiet`/`moderate`/`busy`); the open `data-engineer` call narrows to thresholds only** | `trd-review` — `code-reviewer`, `developer`, and `data-engineer` each independently caught that the TRD's schema and `HeatBand` enum already hardcoded 3 bands while this line still called the count open. `data-engineer` added the decisive reason: `map-rendering-spec.md` L42 already keys the tourist-trap flag's warning stroke to a band named "busy," so a sibling PRD couples the count and naming regardless (TRD §1) |
