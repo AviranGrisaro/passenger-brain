@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: verified ios-developer's recenter fix, dispatched a fresh code-review pass
+
+- **Did:** verified `ios-developer`'s fix (commit `f31816c`) directly against the code before treating `qa`'s Major finding as resolved — confirmed the new `.onChange(of: locationStore.authorizationStatus)` (L110) and the `isNewGrant(from:to:)` static predicate (L130) both genuinely exist, plus the new `PassengerTests/MapScreenTests.swift` (9 tests). Did not just take the relay's description on faith.
+- **Moved T-031 to a fresh `code-review`** (BOARD.md, Linear `PAS-12` — relabeled `owner:ios-code-reviewer`) rather than straight back to `qa`, per the standing rejection-loop discipline (code changed, so it needs review before the next QA pass). Dispatched `ios-code-reviewer` with a narrow, targeted brief — review just this diff, not a full re-review of everything already approved — and asked it to reproduce `qa`'s original repro scenario itself rather than trust `ios-developer`'s report.
+- **Left behind:** backend tracks (migrations, security fix) are untouched by this fix — no need to re-dispatch `code-reviewer`/`security-auditor`. Once `ios-code-reviewer` clears this, back to `qa` for a final pass.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — ios-developer — T-031: fixed qa's Major finding (recenter-on-grant), back to `code-review`
 
 - **Did:** `passenger-code/Passenger/Map/MapScreen.swift` — added `.onChange(of: locationStore.authorizationStatus)` that recenters the camera (`camera = .userLocation(fallback: .region(Self.telAvivCityWide))`) on the transition into an authorized state, gated by a new pure static predicate `MapScreen.isNewGrant(from:to:)` (true only for not-authorized → authorized*, never for a lateral `.authorizedWhenInUse` ↔ `.authorizedAlways` move or a repeat of the same status). This is the missing reaction qa found: previously the only place `camera` was ever set to `.userLocation(fallback:)` was inside `handleNearMeTap()`, so nothing recentered when permission was granted via the app's own auto-scheduled system prompt instead of a button tap. Added `PassengerTests/MapScreenTests.swift` — 9 unit tests on `isNewGrant` covering both grant paths (`notDetermined`/`denied`/`restricted` → `authorizedWhenInUse`/`authorizedAlways`), both lateral authorized↔authorized moves (must NOT re-fire), same-status repeats, and revocation (authorized → denied, must NOT count as a grant).
