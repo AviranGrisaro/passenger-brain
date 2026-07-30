@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-032 and T-033: Aviran's design-review approval recorded, both advanced to `trd`
+
+- **Provenance:** Aviran approved both T-032 (`PAS-15`) and T-033 (`PAS-13`) directly, live in chat with the coordinating session, naming both by their specific Linear IDs — relayed to `chief-of-staff` with an instruction to record and advance both. Treated as legitimate per-task approvals (not an ambiguous blanket statement) precisely because each task was named specifically — the same bar T-033 was held to earlier this session when a genuinely vague blanket statement wasn't enough on its own.
+- **Did:** recorded Aviran's APPROVE as a comment on both `PAS-15` and `PAS-13` with provenance noted, applied `gate:design-approved` to both, relabeled both `owner:architect`/`In Progress`, advanced both to `trd`. Updated both BOARD.md rows. Dispatched `architect` for both TRDs in parallel, each brief carrying forward the load-bearing content from that task's own design-approval history (T-032: the `ZStack`-not-`.sheet()` catch, the existing `DensityStore` seam it binds to, T-031's carried-forward test-plan gap for hour-change bullets; T-033: the `.presentationBackgroundInteraction` mechanism that's the single most important thing to get right, `PAS-16`'s open centralization ticket, binding to T-031's already-shipped `HoodCatalog`).
+- **Left behind:** both TRDs are now in flight. Once each lands, standard `trd-review` dispatch follows.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — chief-of-staff — T-031 accepted, moved to `aviran-review`; created T-040/PAS-17 for real Hood geometry
 
 - **Did:** verified `product`'s ACCEPT verdict directly (commit `545bca4`, `map-hoods-heat.md` status flipped Draft v2 → Accepted). Moved T-031 to `aviran-review` — the first task in this project to reach it. Applied `gate:awaiting-aviran-review` to Linear `PAS-12`.
