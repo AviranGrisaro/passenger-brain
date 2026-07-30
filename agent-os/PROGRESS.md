@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: qa FAIL, verified the finding, bounced to `build`
+
+- **Did:** verified `qa`'s Major finding directly against the actual code before acting — confirmed `passenger-code/Passenger/Map/MapScreen.swift` has no `.onChange(of: locationStore.authorizationStatus)` anywhere (only `.onChange(of: scenePhase)` exists), and `camera = .userLocation(fallback:)` is set in exactly two places, both inside `handleNearMeTap()` (L159/161). This is a genuine gap: the camera only ever recenters on a manual near-me tap, never in reaction to the authorization status itself changing — which is exactly what happens when the user grants permission via the app's own auto-scheduled system prompt rather than tapping near-me. `qa` reproduced this live (simulated Jerusalem location, granted via the system prompt, marker appeared but camera never moved over 60+ seconds) — a confirmed Major miss on PRD req 6's primary flow, correctly not waved through.
+- **Also confirmed genuine:** commit `104d63a` and the new `prds/map-hoods-heat/TEST-PLAN.md` (24 traced cases) both exist as claimed.
+- **Bounced T-031 back to `build`** (BOARD.md, Linear `PAS-12` — relabeled `owner:ios-developer`, description updated). Dispatched `ios-developer` to add reactive handling for the authorization-status transition, mirroring what `handleNearMeTap()` already does — explicitly asked for a real reproduction of `qa`'s exact scenario (grant via system prompt, not a tap) as the verification, not just a unit test.
+- **Left behind:** the 4 non-blocking should-fix items (edge-tap tolerance, `SettingsHint` touch target, `ContrastRatio`'s discarded return, cold-open framing) are explicitly NOT why this bounced — left for `ios-developer`'s discretion on whether to bundle any trivial ones in, not required.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — qa — T-031 `qa`: **FAIL — one Major finding, back to `build`**
 
 - **Did:** wrote the retroactive test plan (`prds/map-hoods-heat/TEST-PLAN.md`, 24 traced cases + carried-forward triage + explicit unverifiable list — should have existed since `trd`, flagging that gap for `retrospective`). Built and ran the app for real rather than re-reviewing the diff: `xcodebuild build` (BUILD SUCCEEDED), then the **full test target in one invocation** (`PassengerTests` + `PassengerUITests` together, not scoped) — 26/26 unit tests + 1/1 UI test, 0 failures, cold-open signpost 0.464s avg (third independent simulator reproduction: 0.462s `ios-code-reviewer`, 0.472s `ios-developer`, 0.464s here — consistent, still simulator-only). Then installed and drove the actual app on iPhone 17 Pro sim across ~10 launch cycles: fresh-install cold open, Hood tap → stub sheet, denied-permission flow (icon state, no re-prompt across 2 relaunches), granted-permission flow (with `simctl location set`, first near the default camera then deliberately far from it at Jerusalem coordinates to make any recenter unmistakable), pan/zoom outside Tel Aviv, and a source sweep confirming the 4 `ios-code-reviewer` should-fix findings are all still genuinely present in the built code (not silently fixed).
