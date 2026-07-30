@@ -3,7 +3,7 @@
 **Owner:** data-engineer
 **Date:** 2026-07-30
 **Provenance:** `strategy/decisions.md` #37 — Aviran confirmed live, 2026-07-30, that the boolean tourist-trap flag (1/0) fully replaces the three-way **Local · Mix · Tourist** vibe tag (decision #18). This doc scopes what that reversal actually changes in decision #22's "algorithm proposes, local QA verifies" pipeline — the strategy/UX lock resolved *what the tag is*; this is the follow-on read on *what the algorithm now has to predict*.
-**Related:** `strategy/passenger-strategy.md` (V1 scope, Key risks), `strategy/decisions.md` #22/#24/#37, `design/ux-flows.md` §4 Journey 4 (local-QA toast, now binary), `design/map-rendering-spec.md` §3 (rendering, already rewritten to the boolean model).
+**Related:** `strategy/passenger-strategy.md` (V1 scope, Key risks), `strategy/decisions.md` #22/#24/#37, `design/ux-flows.md` §4 Journey 4 (local-QA toast, now binary), `design/map-rendering-spec.md` §3 (rendering, already rewritten to the boolean model), `data-eng/discovery-engine-spec.md` (the underlying algorithm design this rescope is scoped against — see its note on keeping `local_score`/`tourist_score` separate internally even though the user-facing flag is now binary).
 
 ---
 

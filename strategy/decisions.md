@@ -68,6 +68,8 @@ Locali's own strategy was already tourist-first ("where should I walk right now 
 
 All open items from the 2026-07-29 founders-meeting brief that were tracked on Linear `PAS-6` are resolved as of decisions #37–41 above, confirmed live by Aviran the same day. `strategy/passenger-strategy.md` and `design/ux-flows.md` (plus `design/map-rendering-spec.md`, which the tag-model reversal touches directly) are updated to match and are no longer in Draft status on these points. Google Maps saved-list import (decision #35) remains explore-only, not committed — the one item from the founders-meeting brief still deliberately open.
 
+**Same day, separately:** `data-eng/discovery-engine-spec.md` — Aviran's working spec (v0.1, 2026-07-27) for the discovery/localness algorithm itself, written for Yeari — was recovered from a Claude Artifact that had never been saved into this repo, and is now in `data-eng/`. It's the detailed design thinking underneath decision #22's "algorithm proposes, local QA verifies" pipeline, and it independently arrives at the TikTok share-in mechanism that decision #34/#45's TikTok import feature builds on. Cross-referenced from `data-eng/tourist-trap-algorithm-rescope.md`.
+
 ## Knowing deviations from the brief
 
 - ~~**Events kept**~~ — reversed by #20. Events is Phase 2; V1 is back to the brief's two-layer map.
