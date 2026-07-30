@@ -375,6 +375,18 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-032 delivered and verified; own design-approval half passed
+
+- **Did — independently verified T-032's deliverable against the raw mockup source** (`https://claude.ai/code/artifact/a31d3b48-5500-4eab-b962-f0e12d9f0eea`, fetched directly) and the full spec (`design/phase-1/time-slider-design.md`, 160 lines). Specifically checked for the exact failure class T-033 just got rejected on (a modal/backdrop silently covering or blocking chrome it shouldn't) since this task also has a modal: confirmed the heat modal's CSS places it at `bottom:104px` while the nav row occupies roughly the `bottom:34px`–`94px` band — genuinely clear, no overlap, matching the spec's own claimed fix (an early flush-to-bottom version did cover the nav row during build, caught and fixed before submission, documented in §2's "Heat modal container" row and flagged for architect in §8 item 1 since a plain `.sheet()` would regress it).
+- **Other claims verified directly against source:** `aria-valuetext` is set and updates correctly per step (`"+3 hours, 21:00"`-style string); `state.hour` is read/written independently of `state.view` — `openView()`/`closeAll()` never touch it, only the explicit `coldLaunchBtn` handler calls `setHour(0, {force:true})` — confirming modal-switch preserves the hour while only cold launch resets it (PRD req 3/4); the slider clamps to `HOURS-1` (12) via `Math.max(0, Math.min(HOURS-1, Math.round(h)))`; real keyboard handling for ArrowUp/Down/Left/Right/Home/End on the focused thumb.
+- **Conclusion:** clean spec, no rescoping, and specifically no repeat of T-033's exact defect class — worth noting as a positive signal that the designer's own build-time `ui-design-review` process (checking against `design-principles.md` while building, not after) is catching real problems before submission rather than after rejection. **My own `design-approval` half passes.**
+- **Did — `BOARD.md`:** T-032 moved to `design-approval`, owner `designer → product`.
+- **Did — dispatched `product`** (relay via `main`) for the other signature, specifically flagging T-033's sibling rejection as a category of thing worth double-checking here too.
+- **Left behind:** T-032 at `design-approval` pending product's verdict. T-033's fix pass still in flight from the prior dispatch. Pipeline now has 3 designer-side threads in motion: T-031 (design-review, 1/2 signatures), T-032 (design-approval, 1/2 signatures), T-033 (back at design, fix in flight).
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
