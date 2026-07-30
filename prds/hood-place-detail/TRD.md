@@ -1,7 +1,7 @@
 # Hood & Place Detail — TRD
 
-**Task:** T-033 · **Linear:** `PAS-13` · **Status:** ready for `trd-review`
-**Owner:** architect · **Date:** 2026-07-30
+**Task:** T-033 · **Linear:** `PAS-13` · **Status:** held at `trd` (separate nav-row question, `BOARD.md` T-033 row) · ready for `trd-review` when that clears
+**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-31 — §3.1 schema ownership handed to T-042 / T-040; see §3.1, §8 D7, §11
 **PRD:** [`hood-place-detail.md`](./hood-place-detail.md) (Draft v1) · **Design spec:** [`design/phase-1/hood-place-detail-design.md`](../../design/phase-1/hood-place-detail-design.md) (revised post-REJECT, `design-approval` PASS, `design-review` cleared on Aviran's approval)
 **Mockup:** https://claude.ai/code/artifact/06f8a49b-7de4-430f-a701-96279db74611 — reference only. Where this TRD and the mockup disagree, this TRD wins.
 **Builds on:** [`map-hoods-heat/TRD.md`](../map-hoods-heat/TRD.md) (T-031, built and accepted). Every module boundary, naming convention, and concurrency rule there applies here unchanged; this document extends that layout, it does not restate it.
@@ -25,7 +25,7 @@ Read the PRD and the design spec first. This document resolves what they left op
 
 Found by reading `passenger-code/` against the PRD's P0 bullets, not assumed:
 
-- **There is no `places` table and no `blurb` column.** Migration `001` ships `hoods(id, name, city, polygon, updated_at)` and `hood_density` only. The PRD's technical-design section names both as if they exist. **This feature is not iOS-only** — it needs migration `003`. See §3.1.
+- **There is no `places` table and no `blurb` column.** Migration `001` ships `hoods(id, name, city, polygon, updated_at)` and `hood_density` only. The PRD's technical-design section names both as if they exist. ~~**This feature is not iOS-only** — it needs migration `003`.~~ **Amended 2026-07-31: still true as a finding, no longer this task's to fix.** Two later TRDs written specifically to own this schema now define both — `places-dataset` (T-042) owns `places`, `hood-dataset` (T-040) owns `hoods.blurb`. **T-033 is now iOS-only in practice**: it depends on their migrations landing and creates neither. See §3.1.
 - **There is no place pin layer.** T-031's PRD excludes place detail entirely and its shipped `MapScreen` renders Hood polygons and nothing else. `places-been-saved` (T-036) lists "`map-hoods-heat` (pins, ring channel)" as a dependency — that dependency is unmet. PRD req 3's "opens directly on one tap of a pin" is a P0 that cannot be satisfied without it, so **T-033 builds the minimal pin layer** (§4.5). Clustering (`map-rendering-spec.md` §5) and the personal-place ring (§6) are explicitly **not** built here — the ring is T-036's; clustering has no PRD and no owner, flagged in §10.
 - **There is no Hood button.** PRD req 1 requires "the Hood button when it is showing" as a second door. T-031's PRD lists only near-me as chrome, and no such control exists in the code. **T-033 builds it** (§4.7) — it is ~30 lines and the alternative is a P0 satisfied only by hitting a polygon edge. Its *visual* treatment is undesigned; §8 D4 records how that gap is handled.
 
@@ -86,41 +86,38 @@ Xcode synchronized file groups are on; adding a file to the folder is enough.
 
 ## 3. Data model
 
-### 3.1 Backend — migration `003_places_and_hood_blurb.sql`
+### 3.1 Backend — **this task writes no migration** (amended 2026-07-31)
 
-`002` is the synthetic density generator, so this is `003`. Idempotent, per `database/README.md`.
+> **Amendment, 2026-07-31.** This section originally defined its own migration `003_places_and_hood_blurb.sql`, creating `public.places` and adding `hoods.blurb`. **Both are struck.** Two newer TRDs, written specifically to own this schema, now define them — and a column or table specified in two TRDs is a column that acquires two different nullability rules eventually. **T-033 now depends on those migrations rather than building either.** The struck DDL is not reproduced here; read the owning TRDs.
 
-```sql
-alter table public.hoods add column if not exists blurb text;
+| What this feature reads | Owned by | Authoritative spec |
+|---|---|---|
+| `public.places` (+ `public.place_types`, its FK target) | **T-042** `places-dataset` (TRD delivered, commit `4d126f1`) | [`places-dataset/TRD.md`](../places-dataset/TRD.md) §3.1–§3.3 |
+| `hoods.blurb` | **T-040** `hood-dataset` (TRD in flight) | [`hood-dataset/TRD.md`](../hood-dataset/TRD.md) §3.1 |
 
-create table if not exists public.places (
-  id          text primary key,                       -- stable slug, e.g. 'port-said'
-  name        text not null,
-  category    text not null
-              check (category in ('eat-drink', 'things-to-do')),
-  hood_id     text not null references public.hoods(id) on delete cascade,
-  latitude    double precision not null check (latitude between -90 and 90),
-  longitude   double precision not null check (longitude between -180 and 180),
-  updated_at  timestamptz not null default now()
-);
+Both reconciliations are those TRDs' explicit decisions, not this TRD's reinterpretation of them: `places-dataset/TRD.md` **D1** (§2.1) and `hood-dataset/TRD.md` **D7** (§8). Ratifying them is `trd-review`'s job for all three tasks.
 
-create index if not exists places_hood_idx on public.places (hood_id);
+**The iOS track is not blocked by any of this.** §3.4's bundled seed floor is exactly the mechanism that makes that true: the client builds, demos, reviews and QAs against a local fixture with no backend reachable at all. Only this task's two backend steps move (§11 A1/A2 below); C1–C12 are untouched and un-resequenced.
 
-alter table public.places enable row level security;
+#### What survives the strike, and what does not
 
-drop policy if exists places_public_read on public.places;
-create policy places_public_read
-  on public.places for select to anon, authenticated using (true);
-```
+- **The category resolution survives, and T-042 inherited it verbatim.** A Postgres `CHECK` on `text` with the stable keys `eat-drink` / `things-to-do`, display strings client-only in `PlaceCategory.displayName` (`places-dataset/TRD.md` §3.2, first bullet, cites this TRD by name). Design spec §8 item 3 and PRD req 6 stay resolved exactly as §4.3 and D4 describe. This TRD's §3.2 client enum and §4.3 boundary rule are unchanged.
+- **The `blurb` nullability rule survives, and T-040 inherited it verbatim.** Nullable, `null` means "not curated," `''` is not a permitted value, the client normalises `""`/whitespace to `nil` at the boundary (`hood-dataset/TRD.md` §3.1 and its validator rule V8 state both halves). PRD req 2's ban on placeholder copy is unaffected.
+- **The no-write-policy call survives.** T-042 §3.3 writes public-read `select` only, no insert/update/delete policy, absence-is-denial — the same shape this section specified and the same shape `001` established. There is still no client write path in this feature; saved state remains device-local (§3.5).
+- **The "`permanently_closed` and a keyword column are deliberately absent" call is obsolete.** It was correct on the grounds given — "adding them speculatively would put two unowned fields in a shipped schema" — and that reason has expired: both fields now have an owner (T-042 req 4/5), so T-042's `places` ships them, plus `place_type`, `closed_checked_at` and `is_tourist_trap`. See "consequences" below.
+- **`on delete cascade` → `on delete restrict`, accepted.** The struck DDL wrote `hood_id … on delete cascade`; T-042 §3.2 deliberately uses `restrict`, so that a Hood-geometry revision which drops a Hood row fails loudly instead of silently deleting the curated places attached to it. **Confirmed for T-033: nothing in this feature depends on cascade behaviour** — verified against every place-reading path here, not assumed. `PlaceCatalog` is read-only, no client code path deletes a Hood or a place, and §4.3's boundary table already specifies the only orphan case this client can observe (a `hood_id` absent from the bundled catalog → **keep** the place; it renders as a pin and appears in no Hood sheet). That rule is a client-side tolerance, not a database behaviour, and it is unchanged by the FK's delete action. `restrict` is strictly safer here and this TRD ratifies it.
+- **The seed-data gap paragraph is superseded, not resolved.** The placeholder seed this section promised is now T-042's step **A4** (explicitly-labelled placeholder `place_types` rows plus a handful of real Tel Aviv places inside `001`'s five placeholder Hoods, `on conflict do nothing`) and the real curated dataset is T-042's step **B5**, blocked on T-040's real geometry and on Aviran (`PAS-6` item 11). Same gap, now owned. §9's "placeholder place data makes the Hood sheet look toy-sized" risk stands unchanged.
 
-Four decisions inside that schema:
+#### Consequences this task must absorb
 
-- **The category enum is enforced in Postgres, as a `CHECK` on `text`, and stored as a stable key.** This resolves the PRD's open technical question and design spec §8 item 3. A `CHECK` rather than a native `enum` type: it matches migration `001`'s idiom, it needs no `ALTER TYPE` to change, and PostgREST returns it as a plain string either way. A stable key rather than display text because PRD req 6's "no string reading 'Food & drinks' survives anywhere in the shipped app or data" is a guarantee about *data* — a key the user never sees cannot carry a retired display string, and the next rename is a client change with no migration. Display strings live in `PlaceCategory.displayName` and nowhere else.
-- **`blurb` is nullable, and null means "not curated."** PRD req 2 forbids placeholder copy standing in for a missing blurb. Null is the only representation of that; empty string is not permitted (the client treats `""` as null at the boundary anyway, §4.3).
-- **No write policy is written at all.** Absence of a policy is the denial. There is no client write path in this feature — saved state is device-local (§3.5), so nothing here needs an identity, an auth surface, or an RLS write rule to reason about.
-- **`permanently_closed` and a keyword/search column are deliberately absent.** They belong to T-036 and T-038 respectively, and both are additive columns that change no contract in §4. Adding them speculatively would put two unowned fields in a shipped schema.
+T-042's `places` is a superset of what was struck, and two of its added columns are `not null` with no default. Named here so they cannot fall through the floor between tasks — `places-dataset/TRD.md` §2.2 assigns both to T-033:
 
-**Seed data is a real gap, the same shape as T-040.** `SALVAGE.md` marks the old `002_seed_tel_aviv_places` REUSE and calls the Tel Aviv place seed "the most expensive data to recreate" — but the old repo is not reachable from these sessions (migration `001`'s own note records the same access wall). Migration `003` therefore seeds a small, explicitly-labelled placeholder set so RLS and the client contract are verifiable; the real curated dataset is a `data-engineer` deliverable (§11 step B1) and a genuine launch-readiness gap, not a build blocker. §10 records it.
+| Consequence | Where it lands | Status |
+|---|---|---|
+| `places-tel-aviv.json` (§3.4) gains `place_type`, `keywords`, `permanently_closed`, `is_tourist_trap` | §11 step B2 | **Accepted.** The fixture must round-trip whatever the export produces, and `place_type`/`keywords` are `not null` at source. |
+| `Place` (§3.2) gains the four fields | §3.2, §11 step C2 | **Flagged, not accepted — see §8 D7.** A model field with no reader in this task contradicts this TRD's own "don't build for a feature that isn't specced yet" (D2's reasoning). |
+
+**Fetch contract unaffected.** §4.3's embedded `GET` still works verbatim — T-042's §4.5 states the same request with a wider `select` list, and the FK it relies on is declared in T-042's `places` exactly as it was here.
 
 ### 3.2 Client types
 
@@ -166,12 +163,14 @@ One request, once per session, at the same lifecycle point as the density load.
 
 Precedence when the catalog loads: **live fetch → last-good disk cache → bundled seed → empty.**
 
-The seed is a build-time export of the `places` table plus each Hood's blurb, committed to `passenger-code/`, same drift rule as `hoods-tel-aviv.json` (whoever changes the data re-exports in the same change). It exists for two reasons, one of them non-obvious:
+The seed is a build-time export of the `places` table, committed to `passenger-code/`, same drift rule as `hoods-tel-aviv.json` (whoever changes the data re-exports in the same change). It exists for two reasons, one of them non-obvious:
 
 1. **First-run offline has real content** instead of an error banner on a device that has never had a successful fetch.
 2. **It closes the root-cause gap `product` named at T-031's acceptance** — "no backend has ever been reachable in this whole pipeline, so nobody has actually *seen* heat render." Every visual bullet in this feature would inherit that same fate: unobservable until Aviran applies a migration. With a seed floor, `ios-developer`, `ios-code-reviewer`, and `qa` all see the real Hood sheet with real rows, on a device with no credentials and no network, and the acceptance gate reads observed behaviour rather than construction.
 
 The seed is a **floor, never a cache**: a successful fetch always wins, and the seed is never written to, refreshed, or merged. `PlaceCatalog.Source` gains a `.seed` case so `qa` and the code reviewers can tell which path produced what they are looking at.
+
+**Amended 2026-07-31 — this file carries places only, not Hood blurbs.** It originally exported "the `places` table plus each Hood's blurb." `hood-dataset/TRD.md` **D7** (amendment 2 of 2) moves the bundled blurb to `hoods-tel-aviv.json`, which T-040 already extends to `schemaVersion` 2 with `blurb`, `isTouristTrap` and `designatedForProgression` (its §3.5, §4.3). Accepted: one field, one bundled home — a field with two homes drifts. **Precise wiring consequence for C3/C7, so it isn't discovered at build time:** `PlaceCatalog.blurb(for:)` (§4.4) keeps its signature and keeps returning the *live* blurb from §4.3's embedded `GET`, which still selects `hoods.blurb`. Only the **fallback** changes — when `source` is `.seed`, the blurb comes from `HoodCatalog`'s bundled Hood record, not from this file, because this file no longer carries one. `HoodSheet` still reads exactly one accessor and still cannot tell the difference. **Consequence for the fixture's column set:** it gains `place_type`, `keywords`, `permanently_closed` and `is_tourist_trap` per §3.1's consequences table.
 
 ### 3.5 Saved state — device-local, per-place, durable
 
@@ -188,7 +187,7 @@ The seed is a **floor, never a cache**: a successful fetch always wins, and the 
 
 ## 4. Contracts
 
-`ios-developer` needs §4.1–§4.8. `developer` needs §3.1 and §4.3's response shape. Neither needs the other's code.
+`ios-developer` needs §4.1–§4.8. `developer` needs §3.1 (which, since the 2026-07-31 amendment, points at T-042's and T-040's schema rather than defining any) and §4.3's response shape. Neither needs the other's code.
 
 ### 4.1 Presentation — `DetailRouter`, the depth-2 state machine
 
@@ -413,17 +412,17 @@ Per `SALVAGE.md`, leaf code only, read line by line and adapted to Swift 6:
 - `Services/SavedPlacesStore.swift` (REUSE, 55 lines) — the closest prior art to §3.5. Read before writing; do not carry its storage choice on trust.
 - `Features/Places/PlaceDetailCard.swift` (REUSE, 85 lines) — layout reference for the modal only. **Not** its action hierarchy: the design spec's Route-primary/Save-demoted split (§2.2 there) is a decision made *against* the three-equal-buttons anti-pattern the old card and `ux-flows.md` §8a both carry.
 - `Features/Map/PlacePin.swift` (REUSE, 18 lines) — pin rendering.
-- `002_seed_tel_aviv_places` — the Tel Aviv place seed, for §11 step B1, **if the archive becomes reachable** (§3.1's access note).
+- ~~`002_seed_tel_aviv_places` — the Tel Aviv place seed, for §11 step B1, **if the archive becomes reachable**.~~ **Amended 2026-07-31:** no longer this task's — the curated dataset is `places-dataset` (T-042) step **B5**. The salvage lead itself is still live and worth carrying: `SALVAGE.md` marks the old seed REUSE and calls it "the most expensive data to recreate," and the old repo was not reachable from these sessions (migration `001`'s note records the same access wall). **Flagged for T-042's `trd-review`** — its B5 should try the archive before authoring from scratch.
 
 ---
 
 ## 7. Rollout & migration
 
 - **No feature flag.** The off-state of a flag here is a map whose taps do nothing — a regression, not a safe default.
-- **Migration `003` applying is Aviran-gated** (he holds the credentials). `developer` writes and hands it off; no agent applies it.
-- **The client ships independently of the backend.** The bundled seed floor (§3.4) means the iOS build is demoable, reviewable, and QA-able before `003` is applied or a single row exists — and unlike T-031, the feature's primary visual output is *observed* rather than passed by construction.
-- **Backward compatibility:** `003` is purely additive (`add column if not exists`, `create table if not exists`). No existing row, policy, or client contract changes. T-031's app build keeps working against a database with `003` applied, and vice versa.
-- **Forward compatibility:** T-036 adds `places.permanently_closed`; T-038 adds a keyword field; both are additive columns whose absence the client already tolerates (unknown JSON keys are ignored by `Decodable`). T-036's migration off `saved-places.json` is §8 D2's named import path.
+- ~~**Migration `003` applying is Aviran-gated.**~~ **Amended 2026-07-31 — this task hands off no migration at all** (§3.1). It **depends on** T-042's `places` migration and T-040's `hoods.blurb` migration. Both are still Aviran-gated to apply (he holds the credentials), and both are written and handed off by their own tasks; no agent applies either.
+- **The client ships independently of the backend.** The bundled seed floor (§3.4) means the iOS build is demoable, reviewable, and QA-able before either migration is applied or a single row exists — and unlike T-031, the feature's primary visual output is *observed* rather than passed by construction. **This is why the §3.1 amendment delays no C-track work:** the iOS build never waited on a migration in the first place.
+- **Backward compatibility:** both depended-on migrations are purely additive (`add column if not exists`, `create table if not exists`) and their authors state so. No existing row, policy, or client contract changes. T-031's app build keeps working against a database with either applied, and vice versa.
+- **Forward compatibility:** ~~T-036 adds `places.permanently_closed`; T-038 adds a keyword field~~ — **amended: both now arrive with T-042's `places`, not later**, so the forward-compatibility case they described no longer exists. The client tolerates them regardless (unknown JSON keys are ignored by `Decodable`), which is what makes the amendment cost this task nothing. T-036's migration off `saved-places.json` is §8 D2's named import path and is unchanged.
 
 ---
 
@@ -455,11 +454,21 @@ PRD req 6's "no string reading 'Food & drinks' survives anywhere in the shipped 
 
 ### D5 — Pin layer scope
 
-Built: single pins at close zoom, category glyph, ≥44pt target, VoiceOver name + category, tap → modal. Not built: **clustering** (`map-rendering-spec.md` §5 — no PRD, no design spec, no owner; see §10) and the **personal-place ring** (§6 — T-036's, and its channel must not be borrowed here, same discipline T-031 applied to the tourist-trap stroke). The pin's close-zoom span threshold is **[ASSUMPTION]** ~0.02 latitude delta; `ios-developer` tunes it against the real dataset once B1 lands, since a threshold picked against five placeholder rectangles proves nothing.
+Built: single pins at close zoom, category glyph, ≥44pt target, VoiceOver name + category, tap → modal. Not built: **clustering** (`map-rendering-spec.md` §5 — no PRD, no design spec, no owner; see §10) and the **personal-place ring** (§6 — T-036's, and its channel must not be borrowed here, same discipline T-031 applied to the tourist-trap stroke). The pin's close-zoom span threshold is **[ASSUMPTION]** ~0.02 latitude delta; `ios-developer` tunes it against the real dataset once **T-042 step B5** lands (was this task's B1 before the 2026-07-31 amendment), since a threshold picked against five placeholder rectangles proves nothing.
 
 ### D6 — The Hood button's visual treatment is undesigned
 
 §1.2 and §4.7: the button is required by PRD req 1 and specified nowhere. This TRD specifies its **behaviour and trigger condition** and directs `ios-developer` to build it to the existing `NearMeButton` chrome idiom — a floating capsule in the same bottom band, same materials, same Reduce Motion handling. That is an engineering default standing in for a design call, flagged rather than presented as designed. If `designer` wants a different treatment, it is a swap inside one file, not a re-architecture.
+
+### D7 — Schema ownership handed to T-042 and T-040; `Place`'s four new fields flagged, not accepted (added 2026-07-31)
+
+The substance is in §3.1. Recorded here because it changes what this task builds, and because one half of it is a **question for `trd-review`, not a resolved call**.
+
+**Accepted without reservation:** `places` is defined once, in T-042 (`places-dataset/TRD.md` D1); `hoods.blurb` is defined once, in T-040 (`hood-dataset/TRD.md` D7); `on delete cascade` becomes `on delete restrict` (§3.1 — confirmed no path in this feature depends on cascade); the bundled fixture drops Hood blurbs and gains T-042's four columns (§3.4). Each of those is another TRD's decision that this task's own reasoning independently supports, and the alternative — two TRDs defining one table — is the failure this reconciliation exists to prevent.
+
+**Flagged, not accepted: `Place` (§3.2) gaining `placeType`, `keywords`, `permanentlyClosed`, `isTouristTrap`.** `places-dataset/TRD.md` §2.2 assigns this amendment to T-033. It is in genuine tension with this TRD's own standing rule — D2's "don't build for a feature that isn't specced yet," which is the reason `created_at` is absent from §3.5 and the reason §3.1 originally excluded these very columns. In this task none of the four has a reader: `permanentlyClosed` is T-036's badge, `isTouristTrap` is T-035's flag line (§4.8 reserves the line and deliberately owns neither the value nor the phrasing), `placeType` is T-037's sticker shape, `keywords` is T-038's matching. Adding all four to `Place` now ships four fields with no reader and pre-empts four downstream design calls.
+
+**Recommendation, for T-033's and T-042's reviewers to settle together:** the *fixture* carries all four (it must — it round-trips the export, and `place_type`/`keywords` are `not null` at source), and the *Swift model* gains each field in the task that first reads it. `Decodable` ignores unknown JSON keys, so a fixture wider than the model is already a supported state and costs nothing. If reviewers prefer the model to mirror the fixture in one step, that is a defensible call — it is just not one this TRD should make silently on T-035/T-036/T-037/T-038's behalf.
 
 ---
 
@@ -471,7 +480,7 @@ Built: single pins at close zoom, category glyph, ≥44pt target, VoiceOver name
 | Sheet content swapping in place (Hood A → Hood B, or place modal → Hood sheet) animates badly or drops detents | Both content views declare their own detents; `qa` exercises the swap explicitly. Fallback is a brief dismiss/re-present, which is worse UX but not a re-architecture. |
 | Two rapid Save taps persist the wrong final state | The generation counter in §4.4. Cheap, and the alternative is a bug that only appears under fast taps. |
 | Placeholder place data makes the Hood sheet look toy-sized in testing | Expected, same root as T-040's placeholder Hood geometry. The sheet's structure, empty states, and error states are all verifiable against placeholder rows; only visual density is not. Named here so `qa` doesn't file it as a defect. |
-| The curated Tel Aviv place dataset does not exist and the archive holding the old seed is unreachable | §3.1, §11 step B1, §10. Real launch-readiness gap, tracked; not a build blocker because the client contract is identical either way. |
+| The curated Tel Aviv place dataset does not exist and the archive holding the old seed is unreachable | §3.1, §6, §10. **Amended 2026-07-31: now owned** — `places-dataset` (T-042) step B5, itself blocked on T-040's real geometry and on Aviran (`PAS-6` item 11). Still a real launch-readiness gap; still not a build blocker here, because the client contract is identical either way. |
 | A place whose `hood_id` is missing from the bundled catalog renders as a pin in no Hood sheet | Deliberate (§4.3). Dropping it would hide curated content for an invisible reason. T-040's real geometry closes the mismatch. |
 | Saved places lost on reinstall | Follows from the no-accounts lock, already flagged for Aviran under T-037. Not re-opened here. |
 | T-032 and T-033 both modify `MapScreen` | §4.2's cross-task rule, flagged for both `trd-review`s. The surfaces barely overlap — T-032 owns an overlay and `selectedHour`, T-033 owns sheets and tap resolution. |
@@ -483,7 +492,7 @@ Built: single pins at close zoom, category glyph, ≥44pt target, VoiceOver name
 ## 10. Flagged for `chief-of-staff` — not this TRD's to create
 
 1. **Pin clustering has no owner.** `map-rendering-spec.md` §5 specifies it in full (screen-distance threshold, neutral count badge, zoom-on-tap, never heat- or tag-coloured) and no PRD claims it. It is not needed for correctness — §4.5's nearest-within-tolerance resolution works at any density — but it is needed for legibility once a real Tel Aviv dataset lands. Sibling in shape to T-040.
-2. **The curated Tel Aviv place dataset does not exist** (§3.1). Same shape as T-040's Hood geometry: `data-engineer`'s to source, blocking real V1 launch readiness, not blocking this build.
+2. ~~**The curated Tel Aviv place dataset does not exist** (§3.1).~~ **Resolved as an ownership gap, 2026-07-31 — now `places-dataset` (T-042) step B5.** The *data* still does not exist, and B5 is blocked on T-040's real geometry and on Aviran (`PAS-6` item 11). Still blocks real V1 launch readiness; still does not block this build.
 3. **`places-been-saved` (T-036) has a stale dependency line** — it lists "`map-hoods-heat` (pins, ring channel)" as satisfied. Pins arrive in T-033, not T-031; its ring accent depends on §4.5's `PlaceLayer`.
 4. **D3 needs `product`'s answer on Waze.** Not blocking.
 
@@ -493,15 +502,15 @@ Built: single pins at close zoom, category glyph, ≥44pt target, VoiceOver name
 
 Ordered. Tags name the agent(s) each step dispatches to.
 
-**Backend / data track — independent of the iOS track throughout.**
+**Backend / data track — amended 2026-07-31. This task no longer builds schema or seeds data; it confirms two other tasks' migrations have landed and reads their output.** Independent of the iOS track throughout, and the iOS track is not blocked by any of it (§3.1, §7).
 
 | # | Step | Tag |
 |---|---|---|
-| A1 | Migration `003`: `hoods.blurb`, `places` table with both range checks, the category `CHECK`, the FK and index (§3.1) | **[Backend]** |
-| A2 | RLS on `places`: enable, one public `select` policy, no write policy (§3.1) | **[Backend]** |
-| A3 | Seed a small, explicitly-labelled placeholder place set + Hood blurbs, so the contract is verifiable before B1 (§3.1) | **[Backend]** |
-| B1 | The real curated Tel Aviv place dataset and Hood blurbs — sourcing scope first, then the data (salvage `002_seed_tel_aviv_places` if the archive becomes reachable). Does not block the iOS track. | **[Algo/Data]** |
-| B2 | Export `places-tel-aviv.json` from the seeded tables — the §3.4 seed floor. Same drift rule as `hoods-tel-aviv.json`. | **[Algo/Data]** + **[iOS]** |
+| A1 | ~~Migration `003`: `hoods.blurb`, `places` table, checks, FK, index~~ → **Confirm T-042's `places` migration and T-040's `hoods.blurb` migration have landed** as written in `places-dataset/TRD.md` §3.2 and `hood-dataset/TRD.md` §3.1. **This task's iOS build reads that schema; it does not create it.** Nothing here writes SQL. | **[Backend]** |
+| A2 | ~~RLS on `places`~~ → **Confirm T-042's RLS is as specified** (`places-dataset/TRD.md` §3.3: enabled on `places` and `place_types`, one public `select` each, **no write policy**) and that §4.3's embedded `GET` returns the expected shape against it. A verification step, not a change. | **[Backend]** |
+| ~~A3~~ | ~~Seed a small placeholder place set + Hood blurbs~~ → **struck.** Now T-042 step **A4** (placeholder seed, `on conflict do nothing`) and T-040 step **B5** (blurbs). | — |
+| ~~B1~~ | ~~The real curated Tel Aviv place dataset and Hood blurbs~~ → **struck.** Now T-042 step **B5** (places, blocked on T-040's geometry and on Aviran, `PAS-6` item 11) and T-040 step **B5** (blurbs). The salvage lead moves with it (§6). | — |
+| B2 | Export `places-tel-aviv.json` — the §3.4 seed floor. **Amended:** places only, no Hood blurbs (§3.4); columns per §3.1's consequences table. Same drift rule as `hoods-tel-aviv.json`. **Ownership needs one line settling at `trd-review`** — `places-dataset/TRD.md` §2.2 leaves this file with T-033 ("owns the export, its step B2") while its own step **B3** has `export_places.py` producing `places-tel-aviv.json` in the same run as the DB seed. Both cannot own the emitter. **Recommendation: T-042's B3 emits it** (it already holds the validated source and the DB seed, and a second emitter is a second chance to drift); T-033 keeps only the drift rule and the fixture's use. | **[Algo/Data]** + **[iOS]** |
 
 **iOS track.**
 
@@ -520,4 +529,6 @@ Ordered. Tags name the agent(s) each step dispatches to.
 | C11 | VoiceOver pass: rows and pins announce "Name, Category"; Save announces "Save"/"Saved"; Dynamic Type at the largest accessibility sizes wraps rather than truncates (design spec §4) | **[iOS]** |
 | C12 | Re-run the launch metric to confirm the two new `.task` loads didn't touch T-031 §7's cold-open budget; grep the shipped app and data for "Food & drinks" (D4). Numbers in the build report. | **[iOS]** |
 
-**`trd-review` sign-off needed from:** `ios-developer` + `ios-code-reviewer` (C1–C12, the bulk), `developer` + `code-reviewer` (A1–A3), `data-engineer` + `code-reviewer` (B1–B2). §4.2's cross-task rule should also be put in front of whoever holds T-032's TRD.
+**`trd-review` sign-off needed from:** `ios-developer` + `ios-code-reviewer` (C1–C12, now the whole build), `developer` + `code-reviewer` (A1–A2, now confirmation steps rather than schema authorship), `data-engineer` + `code-reviewer` (B2). §4.2's cross-task rule should also be put in front of whoever holds T-032's TRD.
+
+**Cross-task ratification this amendment needs** (2026-07-31): T-042's and T-040's reviewers should confirm §3.1 and D7 match their own D1/D7 — and settle the two items this TRD flags rather than decides, **D7's `Place` model question** and **B2's export ownership**.
