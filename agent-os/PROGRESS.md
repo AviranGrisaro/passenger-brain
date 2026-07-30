@@ -285,6 +285,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-038 (search & quick filters) board row added; caught and fixed a real dispatch backlog (T-032/T-033)
+
+- **Did — recorded T-038.** The coordinating session dispatched `product` directly (Aviran's own ask, bypassing the normal relay) for a Search & Quick Filters PRD — `prds/search-quick-filters/search-quick-filters.md` (Draft v1, commit `7f98fe0`). Spot-checked the file directly (header, authorizing decision #41 citation, description) before adding the board row. Created **T-038**, state `design`, owner `designer (queued)`. Two real findings from product carried into the row: (1) sheet layout (50/50 split vs. native detents) is genuinely open, same rework-risk shape as T-031's lesson — worth resolving alongside the design brief rather than after; (2) keyword search ("hummus," "rooftop bar") has no data behind it yet — places table has no keyword field. One labeled `[ASSUMPTION]` also carried forward: product read the tourist-trap-flag PRD's single-home requirement (place modal only, no per-pin flag) as satisfied by the dim-map + destination-sheet pattern rather than a result-row flag line.
+- **Caught a real problem while reviewing the full board for this update: T-032, T-033, and T-034 have sat at `design`, completely undispatched, since PAS-10 landed this morning** — every run since then went to T-031's rejection cycle and the 3+1 new PRDs, and this genuinely fell through. This is exactly the "finish before starting" failure mode in miniature: work already in the pipeline, sitting idle, while I kept processing whatever landed in the relay queue.
+- **Did — dispatched `designer` for T-032 (time slider) and T-033 (Hood & place detail)**, both in the same batch since they're independent of each other. Judged both safe to start now: they depend only on T-031, and T-031 is stable — design-approval passed cleanly on resubmission, and 1 of 2 design-review signatures (Aviran) is already in. Did not dispatch T-034 (live events) yet — it depends on both T-031 *and* T-032, and T-032 is only now starting.
+- **Did — `BOARD.md`:** added T-038 row with full findings; updated T-032/T-033 rows to reflect dispatch, noting plainly that they'd sat idle since this morning and why.
+- **Left behind:** `designer` now has two parallel tasks in flight (T-032, T-033) plus T-035/036/037/038 still queued behind them (all depend on T-031, several also depend on T-032/T-033 landing). T-034 to be dispatched once T-032 lands. Still waiting on Serge's T-031 design-review verdict. Two Aviran-facing items from T-038 (sheet layout, keyword-search data gap) join the existing pile (PAS-6 items 8-9, PAS-11, the 3 Passport findings) — none urgent, none launch-blocking.
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
