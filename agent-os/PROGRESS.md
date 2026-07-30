@@ -30,6 +30,18 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — T-032/T-033 TRDs recorded, held at `trd` pending Aviran's nav-row answer; T-041/T-042 created
+
+- **Investigated before deciding, per `main`'s own ask.** Checked `passenger-code/Passenger/Map/MapScreen.swift` directly: T-031 shipped `NearMeButton` as a single standalone circular button (`.overlay(alignment: .bottom)`, its own `VStack`), no shared container, no nav row of any kind — `CachedDataIndicator` is a separate top-trailing overlay. Read both new TRDs' actual nav-row content (`prds/time-slider/TRD.md` D1, `prds/hood-place-detail/TRD.md`'s cross-task rule) rather than reasoning from the relay summaries alone.
+- **Genuinely ambiguous, not resolved by inference:** whether "no nav row, separate icons side by side" is (A) visual-only — independent buttons, same exclusivity/z-order logic both TRDs already built — or (B) structural — no shared "one active, others closed" behavior at all, which would require reopening `ux-flows.md` §2.1 itself. Sent a scoped question back through `main` rather than guess, given the stakes: 2 freshly-written TRDs and 5 downstream tasks (T-034/T-036/T-037/T-038) all sit in this same chrome model.
+- **Held both T-032 and T-033 at `trd`** — did not dispatch `trd-review` for either, since reviewing against a premise that might change wastes both review pairs' work. Recorded each TRD's actual content in full on its BOARD.md row regardless (nav-row load-bearing status, the near-me-position deviation, T-031 carry-forwards, T-033's 3 not-yet-built things — migration 003, place-pin layer, Hood button — and its escalated Waze question).
+- **Created `T-041`** (pin clustering — fully specified in `map-rendering-spec.md` §5, claimed by no PRD) and **`T-042`** (curated Tel Aviv place dataset — `places` table will exist via T-033's migration 003 but nothing to seed it with), both surfaced by T-033's TRD, both flagged for `product`'s current data-requirements sweep rather than dispatched immediately.
+- **Found and flagged (not fixed myself) a stale PRD line:** `prds/places-been-saved/places-been-saved.md` L86 credits T-031 with the place-pin/ring channel; T-033 actually builds that layer. Noted on T-036's BOARD.md row for `product`'s sweep to correct, since PRD content is `product`'s writing turf, not mine.
+- **Left behind:** waiting on `main`'s relay of Aviran's answer before re-dispatching `architect` for either TRD (if (B)) or folding a small revision into both (if (A)) and then proceeding to `trd-review`.
+- **Did not:** touch `strategy/passenger-strategy.md`, `design/ux-flows.md` (Locked, and this is exactly the kind of decision that belongs to whoever gets Aviran's actual answer — not to be pre-empted). Did not edit `places-been-saved.md`'s stale dependency line myself. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB: no grouped nav-row bar — separate icons side by side (L-002 durable record, written before acting)
 
 - **Provenance:** founder-direct (Aviran), live chat with the coordinating session (`main`) — not witnessed directly by this `chief-of-staff` instance, relayed via `SendMessage`. Recording per L-002 before taking any action on it, since this directly conflicts with T-032's just-written TRD (architect delivered it this same session, commit `2f955fe`) and could affect design work in flight for T-034/T-036/T-037/T-038.
