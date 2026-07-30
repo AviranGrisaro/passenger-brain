@@ -84,6 +84,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031 design landed; own design-approval half passed; product dispatched for the other half + a stale-PRD check
+
+- **Did — reviewed `designer`'s T-031 deliverable in full** (not just the relay summary): `passenger-brain/design/phase-1/map-hoods-heat-design.md` (153 lines) plus the description of the interactive mockup at https://claude.ai/code/artifact/967ade63-ea5b-46c9-89a8-d606ed11a819. Confirmed: scope held to exactly the 5 handed-off components, tourist-trap/localness layer correctly excluded per the PRD's own "Not in scope" line, all 8 PRD P0/P1 requirements traced in §5, all 5 states (loading/empty/error/permission-denied/offline) specified per design-principles.md §4, accessibility section correctly adapts `map-rendering-spec.md` §7's VoiceOver pattern to heat-only, 4 open items correctly routed to architect (§8) rather than silently assumed. **My own half of `design-approval` passes.**
+- **Did — dispatched `product`** (relay via `main`) for the other required `design-approval` signature, with the PRD/spec/mockup all specified for it to check directly rather than trust the relay.
+- **Did — caught a timing issue and sent a follow-up before product could act on it:** `prds/map-hoods-heat/map-hoods-heat.md` excludes the tourist-trap/localness layer citing "PAS-6 item 1, unresolved" — but that PRD was written (`cf2fc28`) before decision #37 (`e9aabe9`, later the same day) resolved exactly that item. The PRD's own exclusion reasoning is stale now, same failure shape as the PAS-6 status error earlier this run, just one level down (a PRD citing an since-resolved blocker instead of a board row). Sent product an explicit instruction to make a stated call — amend the PRD and bounce T-031 back to `design`, or explicitly justify keeping the exclusion as a separable follow-up task — rather than silently approving against a stale premise.
+- **Did — `BOARD.md`:** T-031 row updated to `design-approval`, owner `designer → product`, full deliverable summary, noting my own pass and product's pending verdict.
+- **Left behind:** T-031 sits at `design-approval` pending product's verdict (and its stale-PRD call). Do not move to `design-review` (the Serge/Aviran gate) until that lands — both signatures are required, not just mine. If product finds the PRD needs amending, this goes back to `design`, not forward.
+- **Git:** committing `agent-os/BOARD.md`, this entry, explicit paths only.
+
+---
+
 ### 2026-07-30 — chief-of-staff — PAS-11 closed out: blocked-on-aviran, three questions posted, strategy.md attribution fixed
 
 - **Did — verified `product`'s PAS-11 report before acting on it.** Read the actual diff (`git show 66f36d7`), not just the summary relayed to me — matched: additive-only to `strategy.md`, correctly labeled as recommendation not resolution, and the "curated" gloss finding checks out against the PROGRESS.md stub's verbatim quote.
