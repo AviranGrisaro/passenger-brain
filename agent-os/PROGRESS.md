@@ -13,6 +13,17 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031 `trd-review` cleared (all 5 verdicts), moved to `build`
+
+- **Consolidated all 5 `trd-review` verdicts** (code-reviewer, developer, ios-developer, data-engineer, ios-code-reviewer — all PASS/APPROVE WITH MINORS, none sent back to `architect` as a hard blocker). Decision: `trd-review` clears, one narrow amendment needed first, then straight to `build`.
+- **The one real cross-cutting finding** (confirmed independently by 3 reviewers): TRD hardcodes 3 heat bands while framing band count as still open. `developer` already self-mitigated the schema side; `architect` is amending §1's framing to lock band count/names (quiet/moderate/busy) and narrow B1 to thresholds-only.
+- **One design deviation, ratified rather than looped back through a full cycle:** `ios-code-reviewer` found §8 D1's opaque-background fix extends to `ColdOpenTitle`, a locked/approved mockup element currently rendered as bare text. Verified against the live mockup myself before ratifying — true, not asserted. Proportionate to note and ratify (same handling as T-031's earlier contrast carry-forward), not a reason to reopen design-approval for a one-line change.
+- **Did:** updated Linear `PAS-12` (consolidated comment, description, `owner:architect`+`owner:developer`+`owner:ios-developer`+`owner:data-engineer` labels, still `In Progress`), moved T-031's BOARD.md row to `build`. Dispatched 4 agents in parallel: `architect` (the narrow amendment), `ios-developer` (C1-C11), `developer` (A1-A3, migration — explicitly told not to apply it, that's Aviran's call), `data-engineer` (B1-B3). Each build brief carried forward the relevant reviewer findings as build notes (SpatialTapGesture workaround, Sendable check, dynamic-vs-hardcoded contrast test, PrivacyInfo.xcprivacy, os_signpost timing, idempotency guards, Tel Aviv local-time conversion, rolling-bucket scheduling, GeoJSON format pin, salvage-source reachability check) so nothing found during review gets silently dropped at the build handoff.
+- **Left behind:** `security-auditor` should be dispatched at `code-review` once the migration (A1-A3) exists as an actual diff — it reviews diffs, not design docs, so there was nothing for it to review yet at `trd-review`.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — ios-code-reviewer — T-031 `trd-review`, iOS track (C1-C11), second signature: **buildable, APPROVE WITH MINORS. Six findings, none blocking, complementary to `ios-developer`'s parallel pass**
 
 - **Scope:** second-signature design-doc review of `prds/map-hoods-heat/TRD.md` (commit `228ad4f`), focused per dispatch on §4.3 (hit-testing tolerance math), §4.6/§8 D2 (near-me location handling), §8 D1 (dark-mode contrast verification mechanism), and §7 (cold-open performance methodology), plus a general pass. Read `BOARD.md`'s T-031 row, this file's Current Snapshot area and the `architect`/`chief-of-staff`/`ios-developer` 2026-07-30 entries immediately above, the full TRD, the design spec (Draft v2), and the PRD (Draft v2). Read `ios-developer`'s parallel verdict (above) before writing this one so I add to it rather than re-deriving the same ground — no disagreement with their PASS; findings below are additional, not competing.
