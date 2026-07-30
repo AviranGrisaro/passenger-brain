@@ -45,6 +45,11 @@ An approver should be able to verdict from the doc alone, without asking you que
    - **Quick wins considered, not applied** — options you weighed and rejected, with the reasoning, so a reviewer sees the trade-off was made on purpose rather than missed.
    A spec whose review section only restates rules the design already obviously followed, with no real issue ever surfacing, is worth a second look — the point is to actually find things, not perform having looked.
 
+9. **Artifact conformance — check the spec against the published mockup source, both directions, before you submit (standing rule, 2026-07-30).** Items 5 and 7 are written from what you *meant* to build; the artifact is what reviewers actually judge, and it diverges silently. Three specs were rejected in one day on this alone — every blocking finding was a case where the prose said the right thing and the mockup did the opposite (a "never a gradient" spec whose mockup ran `filter: blur(9px)`; an asserted 4.5:1 that computed to 3.22:1; a "used nowhere else" token used three times). So, last thing before submitting, re-read the published artifact's own source and:
+   - **No claim without a source line.** Every number and every absolute ("never", "only", "used nowhere else", "meets 4.5:1") in items 5 and 7 gets recomputed or quoted from that source. If you can't point at the line, the claim is wrong or the artifact is — find out which.
+   - **No rendered element without a spec row.** Anything the mockup draws that has no component row, state row and traceability row is undeclared: either spec it or delete it. A demo/reviewer instrument belongs outside the phone frame, never inside it dressed as app chrome.
+   - Fix divergences in **both** copies, and never by editing the spec to match a mockup you haven't re-checked. This is cheap and it is the only check that finds this class — the `ui-design-review` pass above cannot, because it reads the spec, where the claim lives, not the artifact, where the pixels are.
+
 ## Design principles for Passenger
 - Map-first: every screen answers "where is it busy right now" within one glance.
 - iOS-native: follow Apple HIG; use SwiftUI-native patterns the developer can actually build.
