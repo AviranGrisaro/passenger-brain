@@ -396,7 +396,8 @@
   <header class="hero" id="northstar">
     <div class="status-row">
       <span>Owner: Aviran Grisaro</span>
-      <span>Last updated: 2026-07-27</span>
+      <span>Last updated: 2026-07-30</span>
+      <span class="status-chip"><span class="dot"></span>V1 scope locked</span>
     </div>
 
     <h1 class="wordmark">Passenger Strategy</h1>
@@ -419,8 +420,8 @@
       </div>
       <div class="plus">+</div>
       <div class="layer-box local">
-        <div class="lbl">Tag</div>
-        <div class="desc">Localness, super local → tourist trap</div>
+        <div class="lbl">Tourist-trap flag</div>
+        <div class="desc">Boolean — flagged or not, no graduated tag</div>
       </div>
       <div class="eq">=</div>
       <div class="layer-box result">
@@ -429,7 +430,7 @@
       </div>
     </div>
 
-    <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Related: <a href="../03-prds/passenger-v1/decisions.md">V1 decision record</a> · <a href="../03-prds/passenger-mvp/PRD.md">MVP PRD</a></p>
+    <p style="font-size:0.82rem; color:var(--muted); margin-top:24px;">Related: <a href="decisions.md">V1 decision record</a> · <a href="../prds/INDEX.md">PRD index</a></p>
   </header>
 
   <section class="block" id="rightnow">
@@ -445,33 +446,30 @@
     <p class="eyebrow">The product</p>
     <h2>V1 is one map</h2>
     <div class="prose">
-      <p>V1 is a single map, and the whole product lives on it. Nothing routes through a feed or a profile. <strong>There is no profile in V1</strong> — no account, no avatar, no preferences; the standing no-social prohibition covers it. Search does ship (decision #23), but as a sheet presented over the map rather than a separate navigation destination — you never leave the map screen to reach it.</p>
+      <p>V1 is a single map, and the whole product lives on it. Nothing routes through a feed. Search ships (decision #23), but as a sheet presented over the map rather than a separate navigation destination — you never leave the map screen to reach it. A private, single-user <strong>Passport</strong> stats screen lives under a tab literally named <strong>Profile</strong> — confirmed by Aviran as a naming exception to the standing no-profiles gate, not a reintroduction of accounts or a social profile: no friend graph, no following, nobody else ever sees it.</p>
     </div>
 
-    <h3>V1 scope</h3>
+    <h3>V1 scope — locked 2026-07-30</h3>
     <div class="prose">
       <ul>
-        <li>One map. Two orthogonal layers — <strong>heat</strong> (crowd density) and <strong>tag</strong> (localness) — never one blended score.</li>
+        <li>One map, organized into <strong>Hoods</strong> per city (Tel Aviv only at launch) — the standing product-facing term for neighborhood-granularity. Two orthogonal layers per Hood — <strong>heat</strong> (crowd density) and a <strong>tourist-trap flag</strong> — never one blended score.</li>
+        <li><strong>Tourist-trap flag, boolean (1/0), no graduated tag.</strong> Replaces the old three-way Local/Mix/Tourist read entirely (decision #37) — a Hood or place is flagged or it isn't. Local-QA becomes a binary "is this a tourist-heavy spot?" ask. Public copy: <strong>"tourist-heavy spot,"</strong> never "tourist trap" (decisions #36, #42).</li>
         <li>Time slider, now → +12 hours. A place's relevance changes by the hour; the map knows that.</li>
-        <li>Three vibe tags, plain language, no scores (see strip below).</li>
-        <li>Two categories: Food &amp; drinks, Things to do.</li>
-        <li>Tap a zone → hand-curated neighborhood blurb + tagged spots. Tap a spot → hands off to native Maps/Waze for directions.</li>
+        <li>Two categories, renamed: <strong>Eat &amp; Drink</strong> / <strong>Things to do</strong> — surfaced as quick filters inside the search sheet (sheet-internal confirmed, decision #41; decision #25 stands).</li>
+        <li>Tap a Hood → hand-curated blurb + tagged spots. Tap a place → detail modal (name, category, flag, save, routing).</li>
+        <li><strong>Navigation — "Scenic Walk"</strong> (weighted, per-street "Attractiveness") plus a fastest-route mode, hand-off to native Maps/Waze either way. <span class="assumption">OPEN</span>Data-engineer's feasibility read: not buildable in the Phase 1 window as a true weighted-routing algorithm — recommends shipping the lighter 2026-07-29 polyline-comparison version instead. Ship-call still pending.</li>
         <li>No onboarding. Straight to the map + location permission.</li>
-        <li><strong>Localness is decided by algorithm plus local QA, together.</strong> Algorithm proposes; real users verify/correct in-app — crowdsourced, not a hired team. Permanent pipeline, not a stopgap. Trades staffing risk for two others: <strong>cold start</strong> (new city, no users yet to ask) and <strong>incentive</strong> (no reward system in V1 — see Phase 3's points system).</li>
-        <li><strong>Density is a synthetic feed for now</strong>, time-bound to the slider hour, while a live popular-times data source is evaluated separately.</li>
-        <li>Tel Aviv only at launch. A second city follows once the approach is proven, not before. Serves residents and tourists the same way — same map, same data, no separate mode.</li>
-        <li><strong>One list of places, fed three ways</strong> (decision #26, supersedes #16): a manual save, an auto-save after dwelling somewhere 20+ minutes, or geofence detection that you were there. Saved and Visited are no longer separate lists, and the list renders on the map as well. Auto-save fires only on places already in Passenger's places table, so a home or office is never saved.</li>
-        <li>No Live Events overlay in V1 — moved to Phase 2 (2026-07-27). The V1 map is heat + tag, and nothing else.</li>
-        <li><strong>Search</strong> — an icon in the map chrome opening a sheet. Place names, keywords ("hummus", "rooftop bar"), and neighborhoods. A name or keyword jumps to the spot; a neighborhood pans the map and opens its zone sheet. Results carry the same heat and tag signals and honor the slider hour — search filters the map, it doesn't bypass it.</li>
+        <li><strong>Localness decided by algorithm plus local QA, together</strong> — algorithm proposes, real users verify/correct in-app, crowdsourced. Ask triggered by a detected 20+ minute visit: a local notification, then a binary toast. Two open risks: <strong>cold start</strong> and <strong>incentive</strong> (no reward system in V1 beyond Passport itself).</li>
+        <li><strong>Density is a synthetic feed for now</strong>, time-bound to the slider hour.</li>
+        <li>Tel Aviv only at launch. Serves residents and tourists the same way — same map, same data.</li>
+        <li><strong>"Been" and "Saved" places, visually/functionally distinct</strong> (decision #26/#30): Been = auto-saved on 20+ minute dwell, earns a Passport sticker shaped to match place type. Saved = manual add. A permanently-closed place (per Apple Maps) can still be saved — shown with a distinct "permanently closed" badge, unrelated to the tourist-trap flag (decision #38).</li>
+        <li><strong>Passport — pulled forward into V1.</strong> Per-Hood "Local" progression: a stamp per Been place, working toward Local status in each designated Hood; overall Local means Local in every designated Hood. <strong>Replaces the old seven-tier global ladder outright</strong> — the ladder does not ship (decision #40). Lives under the <strong>Profile</strong> tab (decision #39).</li>
+        <li><strong>TikTok import — new V1 feature.</strong> Save a TikTok video into the app; places mentioned/shown get extracted into Saved Places. <span class="assumption">OPEN</span>Buildable per data-engineer's feasibility read — still needs Aviran's ToS/access sign-off before a TRD.</li>
+        <li><strong>Live Events overlay ships in V1</strong> as a third map layer alongside heat + the flag — algorithmically selected, not a raw feed. Launch-blocking on data-engineer's ingestion pipeline (PAS-5).</li>
+        <li><strong>Search + quick filters</strong> — an icon in the map chrome opening a sheet. Place names, keywords, and Hoods. Results carry the same heat/flag signals and honor the slider hour.</li>
       </ul>
+      <p style="font-size:0.85rem; color:var(--muted);"><span class="assumption">OPEN</span>Google Maps saved-list import — explore only, not committed, not authorized to build (decision #35).</p>
     </div>
-
-    <div class="vibe-strip">
-      <div class="vibe-chip v0">Local<small>trust it</small></div>
-      <div class="vibe-chip v2">Mix<small>&nbsp;</small></div>
-      <div class="vibe-chip v4">Tourist<small>&nbsp;</small></div>
-    </div>
-    <p class="vibe-caption">Plain language, no scores.</p>
 
     <div class="scope-grid">
       <div class="scope-card out">
@@ -489,19 +487,17 @@
         </ul>
       </div>
       <div class="scope-card future">
-        <h4>Phase 2 candidate — Scenic View</h4>
-        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 2 starts. In-app routing to a tapped spot, favoring interesting/local streets over the fastest path — not a flat hand-off to native Maps/Waze.</p>
+        <h4>Phase 2 candidate — Scenic View, full in-app turn-by-turn</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Narrower than before: V1 already ships a route-preview mode (polyline comparison, scenic vs. fast, hand-off to native Maps/Waze). What's still a Phase 2 candidate is only whether that preview ever grows into full in-app turn-by-turn.</p>
         <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
-          <li>V1 ships with a flat hand-off to native Maps/Waze instead — this replaces that, if it ships.</li>
-          <li>Real routing-engine build scope, not a UI skin on top of MapKit/Google Maps — cost depends heavily on depth (full in-app turn-by-turn vs. a route preview that still hands off for actual turn-by-turn). Needs an answer before committing.</li>
+          <li>Real routing-engine build scope if it happens — a different cost tier than the V1 preview, not an incremental step from it.</li>
+          <li>Gating undecided. Proximity intelligence is the only confirmed subscription feature now.</li>
         </ul>
       </div>
       <div class="scope-card future">
-        <h4>Phase 2 — Live Events</h4>
-        <p style="margin:0 0 8px; font-size:0.9rem;">Moved out of V1 on 2026-07-27 (decision #20). A live events overlay on the time slider, additive on top of heat + tag, not a rework of the core map.</p>
+        <h4>Phase 2 candidate — Live Events, business layer</h4>
+        <p style="margin:0 0 8px; font-size:0.9rem;">Narrower than before: the live events map overlay itself is V1 scope now, launch-blocking on data-engineer's ingestion pipeline (PAS-5). What remains a Phase 2 candidate is only a further monetization layer on top of that overlay.</p>
         <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
-          <li>Subscription-gated when it ships, alongside proximity intelligence and Scenic View.</li>
-          <li>Salvage warning: the Locali client had an events overlay shipping unflagged. When the client is rebuilt, it must not come back in from salvage — this is Phase 2 scope now.</li>
           <li>If Events ever grows a business side (ticketing commission, promoter placement), that's B2B-shaped monetization — conflicts with the standing "no business-facing monetization" scope line. Needs an explicit call if/when it comes up, not an assumed exception.</li>
         </ul>
       </div>
@@ -513,7 +509,6 @@
           <li>Loose daily itineraries, assembled from the same time/density logic already powering V1's map.</li>
           <li>Audio-first — listen while walking instead of staring at the phone.</li>
           <li>Personalization that sharpens with use.</li>
-          <li><em>Auto-saved places moved to V1 on 2026-07-27 (decision #26) — no longer a Phase 3 item.</em></li>
           <li>Needs identity + preference tracking neither V1 nor Phase 2 requires — the real reason this waits for Phase 3.</li>
         </ul>
       </div>
@@ -522,14 +517,6 @@
         <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. Shake your phone, get one nearby thing to do. No scrolling, no choosing, just go.</p>
         <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
           <li>Not random — weighted by preference, your places list, and what's hot right now (heat layer). That's why it needs Phase 3's identity + preference tracking, same dependency as the AI local guide.</li>
-        </ul>
-      </div>
-      <div class="scope-card future">
-        <h4>Phase 3 candidate — Points system</h4>
-        <p style="margin:0 0 8px; font-size:0.9rem;">Not committed until Phase 3 starts. Rewards for answering local-QA questions, visiting new places, and more.</p>
-        <ul style="margin:0; padding-left:1.1em; font-size:0.87rem; color:var(--muted);">
-          <li>This is also the incentive layer V1's crowdsourced local QA is missing — but it ships here, in Phase 3, not V1. Until then, V1 runs on early-user goodwill alone.</li>
-          <li>Needs identity + preference tracking neither V1 nor Phase 2 requires — the real reason this waits for Phase 3.</li>
         </ul>
       </div>
       <div class="scope-card future">
@@ -552,14 +539,14 @@
       <p><strong>Paused.</strong> Not being discussed or built further until Phase 1 proves real retention — pricing model doesn't matter with zero users. The shape below is the working plan for when that signal exists, not something to refine further right now.</p>
       <p>Core map free forever. Subscription unlocks premium features on top.</p>
       <ul>
-        <li>Core map stays free, permanently — heat + localness, both categories, time slider, tap-zone detail, search, the places list. No paywall on the thing that makes Passenger Passenger.</li>
-        <li>Subscription unlocks premium features as they ship: <strong>proximity intelligence, Scenic View, and Live Events</strong>, all arriving in Phase 2. One recurring price, not gated per-feature.</li>
+        <li>Core map stays free, permanently — heat + tourist-trap flag, both categories, time slider, tap-Hood detail, Places (Been/Saved), Passport, TikTok import, Scenic Walk/fastest routing, hand-off to native maps. That's the full V1 scope as of the 2026-07-30 lock, and it never goes behind a paywall.</li>
+        <li>Subscription unlocks premium features as they ship: <strong>proximity intelligence</strong>, arriving in Phase 2 — the only confirmed subscription feature now (Scenic/Fast routing preview, Live Events, and Passport all moved into free V1 scope). One recurring price, not gated per-feature.</li>
         <li><strong>AI local guide</strong> (Phase 3) is a further purchase on top of the subscription — its own upsell, not included even for subscribers.</li>
         <li>Free core reaches every tourist who'd never subscribe for a 3-day trip — it's the growth engine. Subscription is the monetization layer on top of people who already show up, not a gate in front of them.</li>
         <li>Price point is TBD — test once there's a premium feature worth charging for and real paid traffic to test against.</li>
       </ul>
       <p>Subscription launches in Phase 2, alongside proximity intelligence and marketing spend. The free core doesn't change.</p>
-      <p><strong>Why freemium over a hard paywall:</strong> V1 has no retention mechanics yet — no push, no habit loop, nothing pulling someone back daily. Betting Phase 2 revenue on "residents will open this weekly" stakes the whole plan on an unproven assumption. Freemium defers that bet — free core proves reach immediately, subscription only has to work on people who already show up.</p>
+      <p><strong>Why freemium over a hard paywall:</strong> V1 still has no habit loop — nothing pulling someone back daily. The one notification it sends (decision #24) fires after a visit the user already made, asking a question that helps the map; it isn't a re-engagement mechanic. Betting Phase 2 revenue on "residents will open this weekly" stakes the whole plan on an unproven assumption. Freemium defers that bet — free core proves reach immediately, subscription only has to work on people who already show up.</p>
       <p><span class="assumption">ASSUMPTION</span>Whether the premium layer is actually worth paying for is unproven — a thin premium tier risks nobody upgrading and the free tier absorbing everyone.</p>
     </div>
   </section>
@@ -576,12 +563,12 @@
         <tbody>
           <tr>
             <td class="phase">1 — Build to launch</td>
-            <td class="what">Full V1: two-layer map (heat + algo/local-QA localness), time slider, synthetic density, hero flow, hand-curated blurbs, native Maps/Waze hand-off, QA validation in Tel Aviv. Ships to real strangers, not friends/family. Ends in the App Store release.</td>
+            <td class="what">Full V1 per the 2026-07-30 lock: Hoods + heat + tourist-trap boolean flag, time slider, synthetic density, hero flow, hand-curated blurbs, Been/Saved places + Passport (per-Hood status, Profile tab), TikTok import (ToS sign-off pending), Scenic Walk weighted routing + fastest mode (ship-vs-scope-down call pending) + native Maps/Waze hand-off, quick filters + search, live events overlay, QA validation in Tel Aviv. Launch-blocked on live-events (PAS-5) and TikTok ToS clearance, and on the Scenic Walk scope call. Ships to real strangers, not friends/family. Ends in the App Store release.</td>
             <td class="q">Does the core product work end-to-end, and does a real stranger actually come back within a week?</td>
           </tr>
           <tr>
             <td class="phase">2 — Marketing + first features</td>
-            <td class="what">Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence, Scenic View, Live Events, and live popular-times density; core map stays free</td>
+            <td class="what">Paid acquisition starts (free core drives installs); subscription launches gating proximity intelligence and live popular-times density; core map stays free</td>
             <td class="q">Will people upgrade once acquired, and does the product hold up as real features and real users land at the same time?</td>
           </tr>
           <tr>
@@ -663,7 +650,7 @@
     <div class="arch-grid">
       <div class="arch-card"><h4>Frontend</h4><p>Native iOS, Swift/SwiftUI. No cross-platform framework, no Android on the roadmap.</p></div>
       <div class="arch-card"><h4>Backend</h4><p>Supabase (Postgres) — Realtime subscriptions, RLS for per-viewer access control.</p></div>
-      <div class="arch-card"><h4>Mapping</h4><p>MapKit/Google Maps SDK, native heatmap layer. In-app routing for Scenic View is a Phase 2 candidate, not built for V1.</p></div>
+      <div class="arch-card"><h4>Mapping</h4><p>MapKit/Google Maps SDK, native heatmap layer. <span class="assumption">OPEN</span>"Scenic Walk" as a real weighted-routing algorithm needs a self-hosted routing engine (GraphHopper/Valhalla/OSRM) — data-engineer's read: not buildable in the Phase 1 window; recommends the lighter polyline-comparison version instead. Full in-app turn-by-turn stays Phase 2/undecided.</p></div>
       <div class="arch-card"><h4>Monetization plumbing</h4><p>RevenueCat, wired but dormant — paused along with the rest of Business model, until Phase 1 proves retention.</p></div>
     </div>
   </section>
@@ -672,20 +659,22 @@
     <p class="eyebrow">Watch list</p>
     <h2>Key risks</h2>
     <ul class="risk-list">
-      <li><strong>Local QA is crowdsourced with no incentive layer in V1.</strong> The points system that's supposed to make users bother answering local-QA questions doesn't ship until Phase 3 — V1 has to get real signal on goodwill alone. If that doesn't produce enough answers, the algorithm has nothing real to check itself against.</li>
+      <li><strong>Local QA is now a binary check, confirmed 2026-07-30.</strong> The graduated Local/Mix/Tourist classification is gone (decision #37); local-QA becomes a simple "is this a tourist-heavy spot, yes/no" report — a real mechanic change, not a relabeling.</li>
       <li><strong>Cold start, every new city.</strong> Crowdsourced local QA needs users to already be there to ask. Day one of any new city, before there's a user base, there's nobody to answer — chicken-and-egg, worse than a staffed-QA model would have been.</li>
-      <li><strong>Scenic View is real routing-engine scope, if it ships.</strong> In-app routing is new build surface on top of the map/heatmap shell — cost swings a lot depending on depth (full turn-by-turn vs. a route preview that still hands off). Deferred to a Phase 2 candidate, not committed.</li>
+      <li><strong>Scenic Walk is real routing-engine scope, and it's in V1 now, not Phase 2.</strong> A weighted street-segment routing algorithm needs a self-hosted routing engine — heavier than the lighter polyline-comparison version locked 2026-07-29. Data-engineer's feasibility read is in (not buildable in the Phase 1 window); the ship-call is still Aviran's to make.</li>
+      <li><strong>TikTok import is a new, unscoped ingestion pipeline.</strong> Extracting places from a saved video is real content/entity-extraction work, not a bookmark feature — buildable per data-engineer, but still needs a ToS/access sign-off before a TRD.</li>
       <li><strong>Density is synthetic at launch.</strong> The "right now" promise is only as real as the popular-times data source landing later — without it, "right now" stays simulated.</li>
       <li><strong>Subscription pricing is unvalidated</strong> — moot until Phase 1 proves retention; don't spend more time on it before then.</li>
-      <li><strong>Premium-conversion assumption is unproven.</strong> Free core guarantees reach, but subscription only works if people actually upgrade for proximity intelligence (and later, the AI guide) rather than just staying on the free map forever.</li>
+      <li><strong>Premium tier keeps getting thinner.</strong> Scenic/Fast routing preview, Live Events, and now Passport all moved into free V1 scope — proximity intelligence is the only confirmed subscription feature left. One feature carries the entire paid-conversion case.</li>
+      <li><strong>V1 got thicker again, with three real new dependency risks.</strong> Passport, TikTok import, and a heavier Scenic Walk routing algorithm stacked on top of the already-thicker 2026-07-29 build (routing preview + live events). Three external feasibility questions now, any one of which can slip the launch date.</li>
       <li><strong>Liability.</strong> Steering someone toward a spot that turns out unsafe or misleading needs a disclaimer/liability posture before any public paywall.</li>
       <li><strong>Google is the closest real threat, not a distant one.</strong> They already have real popular-times data at global scale and already index local content — "local vs. touristy" is a metadata layer they could ship if they decided to. The competitive gap here is real but closeable, not structural.</li>
     </ul>
   </section>
 
   <footer class="doc-footer">
-    <p>Passenger — Strategy. Owner: Aviran Grisaro. Last updated: 2026-07-27.</p>
-    <p>Source: <code>04-strategy/locali-strategy.md</code>. This page is a hand-designed reading view of that document, not a generated twin.</p>
+    <p>Passenger — Strategy. Owner: Aviran Grisaro. Last updated: 2026-07-30.</p>
+    <p>Source: <code>strategy/passenger-strategy.md</code>. This page is a hand-designed reading view of that document, not a generated twin.</p>
     <div class="flat-note">
       <p>Flat color only, no gradients anywhere on this page.</p>
       <div class="flat-swatches">
