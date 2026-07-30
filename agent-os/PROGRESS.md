@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-30 — chief-of-staff — T-031: qa PASS confirmed, moved to `acceptance` — first feature to reach this gate
+
+- **Did:** verified `qa`'s final PASS (commit `f466e36`) — confirmed present, Finding A marked CLOSED in `TEST-PLAN.md` with the original FAIL kept as history rather than overwritten. `qa` independently hit the same system-alert input-delivery tooling wall `ios-code-reviewer` disclosed, which corroborates it as a real sandbox limitation rather than a one-off; both agents' `simctl`-based workaround exercises the identical code path a real tap would, and both descriptions of the resulting Jerusalem recenter match.
+- **Moved T-031 to `acceptance`** (BOARD.md, Linear `PAS-12` — relabeled `owner:product`). Dispatched `product` with the PRD, the test plan, and an explicit list of the 5 already-disclosed, still-unverifiable-from-sandbox gaps (live RPC 401/403 check, physical-device cold-open number, placeholder Hood geometry, VoiceOver-enabled spoken output, offline-cache indicator) — asked it to make its own call on which of those (if any) should actually block acceptance versus ship noted.
+- **This is the first feature in this project to traverse the entire pipeline** — spec through qa, including a real design-approval rejection cycle, a HIGH-severity security finding at code-review, and a Major functional bug at qa, each one found, fixed, and independently re-verified rather than waved through. If `product` accepts, the next and final step is `aviran-review` — `chief-of-staff`'s job to prepare a short, review-ready summary for Aviran, not `product`'s.
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-30 — chief-of-staff — T-031: recenter-fix code-review cleared, dispatched final `qa` pass
 
 - **Did:** recorded `ios-code-reviewer`'s APPROVE WITH MINORS on the fix diff (commit `555597a`) — confirmed present, `isNewGrant`'s correctness verified by direct inspection, build/test evidence clean. Noted the disclosed live-repro limitation honestly rather than treating it as a full pass: `ios-code-reviewer` couldn't literally tap the system permission alert in its sandbox (6 input methods failed), and used `simctl privacy grant location` as a same-code-path substitute instead — flagged as such, not silently equated to the literal tap.
