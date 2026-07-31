@@ -1,0 +1,45 @@
+-- 003_hood_attributes.sql
+-- Task: T-040 (Hood dataset -- real Tel Aviv geometry & attributes)
+-- PRD:  passenger-brain/prds/hood-dataset/hood-dataset.md, req 5
+-- TRD:  passenger-brain/prds/hood-dataset/TRD.md §3.1, §11 step A1
+--
+-- Three additive columns on public.hoods. No index, no RLS change --
+-- `hoods` already has RLS enabled with one public `select` policy from
+-- 001 A2, and new columns inherit it. There is still no write policy
+-- anywhere on this table, which is the correct amount of work for
+-- PRD req 5's last bullet ("public-read with no per-user rows").
+--
+-- Idempotent (safe to re-run), per database/README.md's convention --
+-- every statement below guards against already having been applied.
+--
+-- Column-by-column reasoning (TRD §3.1):
+--
+-- * is_tourist_trap boolean, nullable, no default. Three storage states,
+--   not two: null = not yet rated, false = not flagged, true = flagged.
+--   `tourist-trap-flag` reqs 4 and 7 need all three -- the map renders
+--   null and false identically, VoiceOver does not. A `not null default
+--   false` here would collapse that distinction at the schema level.
+--
+-- * designated_for_progression boolean, not null default false. The
+--   opposite call for the opposite reason: `passport` req 4 has no
+--   "unknown" state -- a Hood either counts toward Local status or it
+--   doesn't -- so null would be a third state nothing renders, and the
+--   default makes every existing row correct with no backfill.
+--
+-- * blurb text, nullable. null means "not curated" -- empty string is
+--   never a permitted value (enforced by database/scripts/validate_dataset.py
+--   V8 at authoring time, and by the client normalising "" -> nil per
+--   hood-place-detail/TRD.md §4.3). `hood-place-detail` req 2 forbids
+--   placeholder copy, and null is the only representation of its absence.
+--
+-- This migration also resolves the `003` filename collision recorded in
+-- hood-dataset/TRD.md §8 D7: hood-place-detail/TRD.md (T-033) previously
+-- declared a migration `003_places_and_hood_blurb.sql` covering both the
+-- `places` table and this `blurb` column. Neither `003` was ever written
+-- to disk. The `places` half now belongs to places-dataset (T-042); the
+-- `blurb` half lands here, since T-040 is first in the dependency chain
+-- and this PRD (req 4) is the one that specifies the field.
+
+alter table public.hoods add column if not exists blurb                      text;
+alter table public.hoods add column if not exists is_tourist_trap            boolean;
+alter table public.hoods add column if not exists designated_for_progression boolean not null default false;

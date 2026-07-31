@@ -1,0 +1,61 @@
+{
+  "_comment": "Shared point -> expected-hood_id fixture, per hood-dataset/TRD.md sec 4.4 (C-HOOD-1 clause 4) and sec 11 B1. Asserted against BOTH database/scripts/validate_dataset.py's resolve_hood() (T-040/T-042, offline) and T-043's live-events-pipeline plpgsql hood_for_point() (in-database) -- two separate implementations of the same even-odd ray cast, held to one spec: closed single-ring WGS84 [[lng,lat],...], bbox prefilter, on-boundary -> no Hood (null). Written first by T-040's build (data-engineer); T-042 and T-043 consume it and must not add a case to one side without adding it here for both.",
+  "algorithmSpec": "even-odd ray cast, bbox prefilter, on-boundary returns no containing Hood (null) -- see hood-dataset/TRD.md sec 2.2",
+  "sourceFile": "database/data/hoods-tel-aviv.source.json",
+  "cases": [
+    {
+      "description": "Interior point, Florentin",
+      "lng": 34.76938,
+      "lat": 32.057943,
+      "expectedHoodId": "florentin"
+    },
+    {
+      "description": "Interior point, Neve Tzedek",
+      "lng": 34.764585,
+      "lat": 32.061571,
+      "expectedHoodId": "neve-tzedek"
+    },
+    {
+      "description": "Interior point, Jaffa (hand-authored core polygon)",
+      "lng": 34.750575,
+      "lat": 32.0547,
+      "expectedHoodId": "jaffa"
+    },
+    {
+      "description": "Interior point, Ramat Aviv",
+      "lng": 34.795852,
+      "lat": 32.10754,
+      "expectedHoodId": "ramat-aviv"
+    },
+    {
+      "description": "Interior point, Ajami",
+      "lng": 34.748504,
+      "lat": 32.044213,
+      "expectedHoodId": "ajami"
+    },
+    {
+      "description": "Interior point, HaTikva",
+      "lng": 34.792632,
+      "lat": 32.050569,
+      "expectedHoodId": "hatikva"
+    },
+    {
+      "description": "Shared boundary vertex between Florentin and Neve Sha'anan -- created by this dataset's V6 non-overlap snap fix (hood-dataset PRD Decisions log, 2026-07-31): a ~18m source-imprecision sliver was resolved by moving one Neve Sha'anan vertex onto the matching Florentin vertex, so the two rings now share this exact point on their common edge. On-boundary must resolve to no Hood in both implementations, not to either neighbour.",
+      "lng": 34.773472,
+      "lat": 32.058822,
+      "expectedHoodId": null
+    },
+    {
+      "description": "Mediterranean Sea, off the Tel Aviv coast -- no Hood covers open water",
+      "lng": 34.72,
+      "lat": 32.07,
+      "expectedHoodId": null
+    },
+    {
+      "description": "Inland gap between non-adjacent hoods (central Tel Aviv, north of Old North's authored polygon) -- not every square meter of the city is covered by a named Hood in this dataset, and an uncovered point must resolve to no Hood rather than to the nearest one",
+      "lng": 34.7745,
+      "lat": 32.08,
+      "expectedHoodId": null
+    }
+  ]
+}
