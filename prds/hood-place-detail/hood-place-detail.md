@@ -1,9 +1,9 @@
 # Hood & Place Detail — PRD
 
-**Status:** Draft v2
+**Status:** **Accepted 2026-08-01** (`acceptance`, second attempt — all 7 P0s pass; awaiting `aviran-review`)
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-30
+**Last updated:** 2026-08-01
 **Scope note, updated 2026-07-30:** both items this PRD left unanswered are now **resolved upstream and owned by other PRDs**, not open questions here. The tourist-trap line in the place modal is decision #37, spec'd in [`../tourist-trap-flag/`](../tourist-trap-flag/tourist-trap-flag.md) req 6. Quick-filters placement is decision #41 — sheet-internal, decision #25 stands — and belongs to the search PRD, not this one. This PRD's own scope is unchanged.
 
 ## Description
@@ -102,4 +102,5 @@
 | 2026-07-30 | Data-sourcing bullet added: the blurb column and the whole `places` table are named as other PRDs' deliverables | Standing rule, founder-direct 2026-07-30. The PRD stated the *shape* of both and left "who authors the rows" implicit; reqs 2 and 6 cannot pass against an empty dataset |
 | 2026-07-30 | Three stale PAS-6 exclusions rewritten: tag mechanic (#37), filter placement (#41), closed-place save (#38) | All three resolved live by Aviran; the tag line and the closed badge now have owning PRDs. Scope unchanged — only the reasons and the pointers |
 | 2026-08-01 | `acceptance` **REJECT**. Two pass/fail bullets added (req 1, req 3) making pin-render/tap-resolution parity falsifiable | The Bug-2 fix gated pin *rendering* on zoom but left tap *resolution* ungated, so at the default camera every populated Hood's polygon-tap door resolves to an invisible pin. No requirement said hit target and drawn pin must agree, so neither code review nor QA had anything to fail it on (L-009) |
+| 2026-08-01 | `acceptance` **ACCEPT** (second attempt). Status flipped to Accepted; routing to `aviran-review`. No requirement added, cut, or changed | Both REJECT findings closed and re-verified against source, not against the QA verdict. Req 1 bullet 4: `MapScreen.handleTap`'s place branch now reads `if showsNames, let place = …` — the same flag gating the pin `ForEach`, so Swift short-circuits the hit test away entirely when pins aren't drawn, and `HoodHitTester` tests containment before tolerance, so a tap inside Florentin resolves to Florentin. Req 3 bullet 4: tolerance is 22 *screen* points converted per-tap, so it is visually constant at every zoom — a hit target can never sit more than a half-finger from a drawn pin. Req 5 bullet 3 (carried untested since the first pass) closed by QA's real Apple Maps hand-off round trip |
 | 2026-07-31 | Build-Phase-1 scoping call: **the bundled seed is authoritative for Phase 1**; the live Supabase fetch is built but inert. Phase-1 fixture specified as a two-file data need. No requirement added, cut, or changed | `BOARD.md` V1 build-phase sequencing. All 7 P0s are demoable and QA-able against a fixture, so nothing in this PRD defers to Phase 2 — but "fake data" without a stated quality floor produces a demo that fails req 2's blurb bullet by omission |
