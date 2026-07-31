@@ -22,6 +22,30 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — Board replanned around Aviran's 3-phase build sequencing (T-040/T-042 held to Build Phase 2, T-043 held to Build Phase 3)
+
+- **Trigger:** Aviran, direct live chat: **"yes, replan board around the 3 phases."** — confirming a 3-phase dev sequencing he'd just set (see FOUNDER-DIRECT STUB immediately below for the verbatim/relay split). Durable stub written before this entry, per L-002.
+- **Did:** added a new `## V1 Build Phases` section to `BOARD.md`, explicitly disambiguated from the two other "phase" vocabularies already in the doc (CLAUDE.md's 5 roadmap phases; `strategy/passenger-strategy.md`'s parked Phase-2/Phase-3 *scope* tiers — Scenic View/Live Events/proximity intelligence/AI guide). This new structure is a **build-sequencing** layer only, entirely inside roadmap Phase 1 / strategy Phase-1 scope — no feature is added, cut, or rescoped by it.
+  - **Build Phase 1 (ACTIVE):** ship the iOS app 100% client-side, no backend, fake/hardcoded data. Mapped: T-031 (done, placeholder-data acceptance now read as intentional Phase-1 scope, not a defect), T-032, T-033*, T-034*, T-035, T-036, T-037, T-038 (all client-only PRDs, currently at design/trd, unchanged in state).
+  - **Build Phase 2:** real Supabase DB connected, historical backfill, verified end-to-end. Mapped: T-040 (Hood dataset), T-042 (places dataset) — both **held at `build`, explicitly not dispatched**. Also re-tagged T-041 (pin clustering, irrelevant at Phase-1's handful of fake pins) and T-044 (closed-state refresh, a real-data maintenance concern) to Phase 2.
+  - **Build Phase 3:** real live data — heat computation against live data, live events, TikTok/Reddit sourcing. Mapped: T-043 (live events ingestion pipeline) — **held at `build`, explicitly not dispatched.** Matches "live events" in Aviran's own phase-3 description exactly.
+- **Did NOT dispatch T-040/T-042/T-043 to build** — all three stay at their current `build`-ready board state, un-touched, with a new HELD flag pointing at the phase section. Their `trd-review` approvals (6/6, 3/3, 4/4) are left standing — per my own judgment call (item 4 of the ask), no reason to re-litigate already-unanimous TRDs; they simply wait for their phase to start. Re-review recommended only if real time passes and a sibling schema shifts underneath them before Phase 2/3 actually begins.
+- **New finding, flagged not fixed:** T-033's landed TRD (`prds/hood-place-detail/TRD.md`) builds its client fetch directly against T-042's/T-040's **real** Supabase tables (`places`, `hoods.blurb`) — a Build-Phase-2 dependency baked into a Build-Phase-1 feature's TRD. T-034's PRD similarly still calls itself "launch-blocking on PAS-5" (the real pipeline, Build Phase 3). Both contradict Phase 1's "100% client-side, no backend" mandate as currently written. Did not rewrite either TRD/PRD myself — that's real architect/product authorship work, out of scope for a board-level replan — but recorded the tension explicitly in `BOARD.md`'s new section so the next `trd`/`build` dispatch for either doesn't proceed against real-schema assumptions that now conflict with Phase 1. Recommend: architect pass swapping the live fetch for a bundled fixture / hardcoded fake dataset for Phase 1, with the real wiring becoming a scoped Phase 2 (T-033) / Phase 3 (T-034) TRD amendment once T-040/T-042/T-043 actually land.
+- **Did not touch Linear ticket status/assignment** — this was a BOARD.md/PROGRESS.md planning update, per the ask's own instruction not to reorganize Linear beyond an optional phase label. Did not attempt the optional phase-label pass this turn (not required, no Linear write tools confirmed available in this session without an auth step) — leaving as a nice-to-have, not blocking.
+- **Left behind:** the T-033/T-034 real-backend-dependency tension needs an architect/product follow-up before either reaches `build`. T-040/T-042/T-043 stay parked exactly as they were, just re-labeled and explicitly not dispatched. Nothing else on the board moved.
+- **Git:** committed to `passenger-brain` (`main`), explicit paths (`agent-os/BOARD.md`, `agent-os/PROGRESS.md`). Committed, not pushed — no remote configured (`PAS-21`, L-015).
+
+---
+
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): 3-phase dev sequencing for V1
+
+- **Provenance:** founder-direct, live chief-of-staff chat, direct (not relayed).
+- **Verbatim request:** "yes, replan board around the 3 phases."
+- **As I read it (restatement, not Aviran's own words — labelled per L-013):** this confirms a 3-phase dev sequencing for shipping V1 that was described to me alongside the request, not quoted from Aviran directly, so treating every specific below as **[ASSUMPTION]** rather than verbatim: Phase 1 — ship the iOS app **[ASSUMPTION]** 100% client-side, no backend, with fake/hardcoded data baked in just enough to demo interactions (examples given: saving places, **[ASSUMPTION]** a 12h time slider). Phase 2 — connect the real Supabase database, **[ASSUMPTION]** backfill with past/historical data, verify it works end-to-end. Phase 3 — connect real live data: **[ASSUMPTION]** heat-area computation, live events, **[ASSUMPTION]** TikTok, Reddit, etc. (given as examples, not a closed list).
+- **Left behind:** proceeding now to replan `BOARD.md` around this structure — see the completion entry directly above this one for what actually changed.
+
+---
+
 ### 2026-07-31 — ios-code-reviewer — T-033/PAS-13 `trd-review` (iOS client track, C1-C12), second signature: APPROVE with minor notes
 
 - **Scope:** second-signature buildability/HIG/security read of `hood-place-detail/TRD.md` (as amended through `431b690`) for C1-C12, alongside `ios-developer`'s pass (above) and the already-landed `developer`/`data-engineer` verdicts. Read the TRD, the PRD, and both schema-owning sibling TRDs (`places-dataset/TRD.md` T-042, `hood-dataset/TRD.md` T-040) directly rather than trusting prior summaries.
