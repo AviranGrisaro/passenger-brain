@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 qa round 3 PASS processed; dispatched to `product` for a 2nd acceptance attempt
+
+- **Did:** confirmed `qa`'s round-3 verdict (`cddca73`, PASS) — `qa` independently re-verified the checkout chain itself (`165fd7f` → `37c402f` → `291c010`) before trusting it, and confirmed both REJECT findings fixed via real manual gestures rather than relying on the unit-test suite alone, including genuinely exercising `product`'s optional case-5.4 upgrade (a real Directions hand-off to Apple Maps and back, not simulated).
+- **Posted the verdict to Linear** (`PAS-13`, `PAS-17`). Updated `BOARD.md` (all 4 rows).
+- **Dispatched `product`** (via `main`) for a second `acceptance` attempt, pointed at the exact requirement bullets its own first REJECT added (req 1's zoom-gate bullet, req 3 bullet 4's intent, req 6 bullet 3's never-hand-edit rule) so it re-checks against the specific bar it set rather than a generic pass.
+- **Left behind:** waiting on the second acceptance verdict. ACCEPT routes both to `aviran-review`; REJECT goes back to `build`/`design` again — this would be the second REJECT-fix-reverify cycle on the same task, worth watching for a third if it recurs, though nothing so far suggests a structural problem, just genuinely separate findings each round.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — qa — T-033/PAS-13 + T-040/PAS-17: round 3 on `165fd7f` — **PASS.** Both acceptance-REJECT findings confirmed fixed by direct re-derivation; optional case 5.4 exercised end-to-end
 
 - **Checkout independently verified before testing**, same discipline as every prior round: `git log -1`/`git log --oneline -3` on `passenger-code` confirmed HEAD is `165fd7f`, chain `165fd7f` → `37c402f` → `291c010` matches the dispatch's description exactly; `git show --stat 165fd7f` confirmed the diff touches only `MapScreen.swift` and `PassengerUITests/DetailSheetInteractionTests.swift`, matching `ios-code-reviewer`'s `1f233a3` re-review record. Fresh clean build (deleted DerivedData), `iPhone 17 Pro` (iOS 26.5).
