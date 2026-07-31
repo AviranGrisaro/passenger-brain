@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hood Dataset — Tel Aviv Geometry &amp; Attributes — TRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>hood-dataset/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="hood-dataset-tel-aviv-geometry-attributes-trd">Hood Dataset — Tel Aviv Geometry &amp; Attributes — TRD</h1>
+<p><strong>Task:</strong> T-040 · <strong>Linear:</strong> <code>PAS-17</code> · <strong>State:</strong> <code>trd-review</code> complete (6/6) → <code>build</code>-ready, <strong>held to Build Phase 2 except for the C1/C2/C2a carve-out</strong> (§8 D10)
+<strong>Owner:</strong> architect · <strong>Date:</strong> 2026-07-31 · <strong>Amended:</strong> 2026-07-31 — <strong>Build-phase split: C1, C2 and a new C2a build in Build Phase 1; B1/B2/B3/B4/B5/B6, A1 and C3/C4/C5 stay Build Phase 2</strong> (§3.5, §8 D10, §11)
+<strong>PRD:</strong> <a href="./hood-dataset.html"><code>hood-dataset.md</code></a> (Draft v1) · <strong>Design spec:</strong> none — pure-build/data task, no UX surface, skips <code>design</code> per <code>BOARD.md</code>'s lifecycle rule.
+<strong>Upstream TRD this extends:</strong> <a href="../map-hoods-heat/TRD.html"><code>map-hoods-heat/TRD.md</code></a> §3.1, §3.2, §8 D3, §11 B3 — T-031 built the schema, the bundle format, and the export script this task replaces the data inside. Nothing here re-derives those; where this TRD changes one of them, it says so by name.
+<strong>Sibling TRD, written in parallel:</strong> <a href="../places-dataset/TRD.html"><code>places-dataset/TRD.md</code></a> (T-042). Its §4.1 <code>C-HOOD-1</code> is the two tasks' shared contract and is quoted here verbatim in §4.4; its §6 stdlib-only dependency call is adopted in §2.3; its §2.1 resolves the other half of the migration <code>003</code> collision recorded in §8 D7. Where the two documents touch, this one defers.</p>
+<hr />
+<h2 id="1-context">1. Context</h2>
+<p>Read the PRD first; nothing here restates it. This document decides the five things it left open and pins the one contract two other PRDs are waiting on.</p>
+<p><strong>What this task is, architecturally:</strong> not a feature. It is a <strong>build-time data pipeline</strong> plus <strong>three additive columns</strong>. No runtime code path changes shape — the client reads the same bundled file it reads today, the same table it queries today. What changes is that the file and the table stop containing rectangles, gain three fields, and start being <em>generated from a checked-in source under a validator that can fail the build</em>.</p>
+<p><strong>Five open calls resolved here</strong> (the PRD's "Open technical questions" plus two found by reading the code):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Open item</th>
+<th>Call</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Does the sourced geometry need multi-ring / holes?</td>
+<td><strong>No — single ring, and the validator rejects anything else loudly.</strong> Authoring rule handles the hard cases; a genuine failure is a named escalation trigger, not a silent flatten.</td>
+<td>§3.4, §8 D3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Does non-overlap validation live in the export script or a separate CI step?</td>
+<td><strong>In the generator, before either artifact is written, non-zero exit.</strong> Plus a second-line assertion in <code>PassengerTests</code> against the shipped bundle.</td>
+<td>§5.2, §8 D2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>How is a Been place re-attributed when a boundary is corrected?</td>
+<td><strong>Not answered here — but made impossible to get wrong silently.</strong> The FK direction is pinned and <code>places.hood_id</code>'s on-delete is corrected to <code>restrict</code> so an orphaning revision fails at apply.</td>
+<td>§4.4, §8 D6</td>
+</tr>
+<tr>
+<td>4</td>
+<td><em>(found by reading the pipeline)</em> Which artifact is the source of truth?</td>
+<td><strong>Neither. A new checked-in source file is.</strong> The existing script reads DB→bundle, which makes the DB the source — and no agent can reach the DB. Direction inverted.</td>
+<td>§2.1, §8 D1</td>
+</tr>
+<tr>
+<td>5</td>
+<td><em>(found by reading migration <code>001</code>)</em> How does the real seed replace the placeholder rows?</td>
+<td><strong>Upsert plus a scoped prune.</strong> <code>on conflict do nothing</code> — what <code>001</code> actually writes, and what this PRD's own description assumes — would leave every placeholder rectangle in place.</td>
+<td>§3.3, §8 D4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three things that are true today and are not obvious:</strong></p>
+<ul>
+<li><strong>The two shipped artifacts already disagree.</strong> <code>Resources/hoods-tel-aviv.json</code> holds 4 Hoods (<code>florentin</code>, <code>kerem-hateimanim</code>, <code>neve-tzedek</code>, <code>lev-hair</code>); migration <code>001</code> seeds 5 (<code>florentin</code>, <code>neve-tzedek</code>, <code>lev-hair</code>, <code>old-north</code>, <code>jaffa</code>). Three ids are common, three are unique to one side, and the shared ids have different polygons. This is not a bug anyone introduced — the bundle was hand-authored for C1 before B3 existed. It is the concrete evidence for PRD req 6.</li>
+<li><strong>The bundle's rings are open, the DB's rings are closed, and the export script requires closed.</strong> <code>hoods-tel-aviv.json</code>'s florentin ring has 4 points with <code>first != last</code>; <code>001</code>'s has 5 with <code>first == last</code>; <code>export_hoods_geojson.py:92</code> raises on <code>ring[0] != ring[-1]</code>. The export script has never run, so nothing has caught this. §4.2 pins one canonical form.</li>
+<li><strong><code>export_hoods_geojson.py</code> has never been executed and cannot be, by anyone on this team.</strong> It requires <code>DATABASE_URL</code>; applying migrations and issuing credentials are both Aviran-gated (<code>database/README.md</code>). A pipeline that only Aviran can run is not a pipeline the build agents can use. §2.1 fixes this, and it is the single most consequential decision in this document.</li>
+</ul>
+<hr />
+<h2 id="2-architecture">2. Architecture</h2>
+<h3 id="21-the-pipeline-inverted">2.1 The pipeline, inverted</h3>
+<p><strong>Today (T-031 B3):</strong></p>
+<pre><code>hand-written SQL seed → [Postgres] → export_hoods_geojson.py → bundle
+                                     ↑ needs DATABASE_URL (Aviran-gated)
+</code></pre>
+<p>The DB is the source of truth, the migration is the authoring surface, and the only path from source to client runs through a live database. Two consequences: the bundle can only be regenerated by someone with credentials, and the migration — the actual authored artifact — is hand-edited SQL with coordinates inline, where a geometry review means reading <code>jsonb</code> literals in a diff.</p>
+<p><strong>This TRD:</strong></p>
+<pre><code>database/data/hoods-tel-aviv.source.json     ← the only authored file, git-tracked
+                 │
+                 ▼
+        build_hoods.py  ── validate (§5.2) ──► fail loudly, write nothing
+                 │
+        ┌────────┴────────┐
+        ▼                 ▼
+migrations/NNN_hoods_    passenger-code/…/Resources/
+tel_aviv_data.sql        hoods-tel-aviv.json
+   (DB seed)                (iOS bundle)
+</code></pre>
+<p>One authored source, one generator run, two generated artifacts, <strong>no database access required</strong>. Both artifacts are committed. <code>ios-developer</code>, <code>developer</code>, <code>data-engineer</code>, <code>qa</code> and <code>ios-code-reviewer</code> can all run the generator and reproduce both files byte-for-byte from the source.</p>
+<p>This is what PRD req 6 actually asks for. The PRD describes it as flowing through "the existing <code>export_hoods_geojson.py</code>" — that script cannot do it, because it runs in the wrong direction and starts from a resource nobody in the pipeline can read.</p>
+<p><strong><code>export_hoods_geojson.py</code> is not deleted and not replaced in place.</strong> It is repurposed as the <strong>drift check</strong> (§5.3): given credentials, it exports the live table and diffs against the committed bundle. A non-empty diff means someone edited the DB out of band. That is a genuinely useful second-line check, it is the one job the DB→bundle direction is right for, and it honours the standing no-<code>rm</code> rule without leaving a misleading tool in <code>scripts/</code>.</p>
+<h3 id="22-boundaries-who-is-allowed-to-know-what">2.2 Boundaries — who is allowed to know what</h3>
+<ul>
+<li><strong><code>database/data/</code> holds authored data and nothing else.</strong> No SQL, no code, no derived values. A human (or an OSM/municipal extraction run by <code>data-engineer</code>) writes it; everything downstream is generated.</li>
+<li><strong><code>database/scripts/validate_dataset.py</code> is the only place polygon math lives in the <em>offline authoring</em> pipeline.</strong> Ring validation, non-overlap, area-weighted centroid, and point-in-polygon resolution. It is called by this task's exporter <strong>and by T-042's build</strong> — see §4.4, which adopts <code>places-dataset/TRD.md</code> §4.1's <code>C-HOOD-1</code> clause 4 and its file name verbatim. Both consumers are stdlib Python running offline over checked-in source files, with no database access by design (§2.1) — which is exactly what makes one shared file possible.</li>
+<li><strong>T-043 is <em>not</em> a third consumer of this file, and an earlier draft of this TRD said it was. Correcting that.</strong> <code>live-events-pipeline</code> needs the same predicate at a fundamentally different seam: a <code>plpgsql</code> <code>hood_for_point()</code> running <strong>live inside Postgres</strong>, against the <code>hoods</code> <strong>table</strong> (not the authored file), attributing externally-sourced events at ingest inside a Deno Edge Function's SQL path. No practical bridge exists in either direction — a cron-triggered ingest path shelling out to a Python subprocess per event is proposed by no TRD and does not belong in a hot path, and pointing this offline validator at a live database reintroduces the exact Aviran-gated <code>DATABASE_URL</code> dependency §2.1 inverted the whole pipeline to escape. <strong>Two implementations of the same even-odd ray cast, both necessary.</strong> What is shared is not code:</li>
+<li><strong>One algorithm spec, stated identically in all three TRDs</strong> — closed single-ring WGS84 <code>[[lng,lat],…]</code>, even-odd ray cast, bbox prefilter, <strong>on-boundary → <code>false</code></strong>.</li>
+<li><strong>One checked-in fixture file</strong> of point→expected-<code>hood_id</code> cases, asserted against <em>both</em> implementations (§9 B1; <code>places-dataset/TRD.md</code> §9 B2a; <code>live-events-pipeline/TRD.md</code> §9 A3), so a boundary-case fix in one language cannot silently stay wrong in the other.</li>
+</ul>
+<p>Resolved at <code>trd-review</code> by <code>data-engineer</code> and <code>code-reviewer</code> across all three tasks. The failure this prevents is specific: a place and a live event at the identical coordinate attributing to different Hoods.
+- <strong><code>database/migrations/</code> is output, for the data migration.</strong> <code>NNN_hoods_tel_aviv_data.sql</code> is generated and must never be hand-edited. The schema migration (§3.1) is hand-written and stable — it is applied once and never regenerated.
+- <strong><code>Hoods/</code> on the client stays as T-031 built it</strong> (<code>map-hoods-heat/TRD.md</code> §2.2): no network, no density. It gains three stored attributes and one precomputed centroid. It gains no behaviour.</p>
+<h3 id="23-third-party-dependencies-none-added">2.3 Third-party dependencies: none added</h3>
+<p><strong>An earlier draft of this TRD specced Shapely for the non-overlap check. <code>places-dataset/TRD.md</code> §6 rejects it by name</strong> — a C/GEOS dependency and a build story on a project whose only existing script is stdlib Python — <strong>and that rejection is adopted here.</strong> One shared validator (§4.4) cannot have two dependency stories, and the reasons for stdlib are the same on both sides.</p>
+<table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shapely / GEOS</strong></td>
+<td><strong>Rejected</strong>, per <code>places-dataset/TRD.md</code> §6. A build-time C dependency for two predicates that are writable in stdlib.</td>
+</tr>
+<tr>
+<td>PostGIS / <code>ST_Overlaps</code></td>
+<td><strong>Rejected.</strong> It puts the invariant behind the credential wall this TRD exists to get out from behind, and T-031 already declined to enable PostGIS (<code>map-hoods-heat/TRD.md</code> §2.3). Nothing here needs a server-side spatial query.</td>
+</tr>
+<tr>
+<td><strong>Stdlib Python geometry</strong></td>
+<td><strong>Adopted.</strong> No new dependency in either repo.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>One correction to <code>C-HOOD-1</code> clause 4's stated rationale, which <code>data-engineer</code> needs before estimating B1.</strong> Clause 4 says the two invariants "are the same ray-cast over the same rings." That is exactly true of T-042's <em>containment</em> check and <strong>not</strong> true of this task's <em>non-overlap</em> check. Overlap between two polygons is not a ray-cast, and the file is shared for the right reason — one owner for all polygon math, one set of ring conventions — not because the two checks are the same code. Clause 4's conclusion holds; its stated reason under-describes the work. Concretely, non-overlap is three stdlib predicates, ~150 lines rather than ~30:</p>
+<ol>
+<li><code>point_strictly_inside(p, ring)</code> — even-odd ray cast, with <strong>on-boundary returning <code>False</code></strong>. Shared with T-042's containment check, which is the part clause 4 is right about.</li>
+<li><code>segments_properly_cross(a1,a2,b1,b2)</code> — a transversal crossing only: strict orientation sign changes on <em>both</em> segments. Collinear overlap and endpoint contact deliberately return <code>False</code>.</li>
+<li><code>polygons_overlap(A, B)</code> = any vertex of <code>A</code> strictly inside <code>B</code>, or any vertex of <code>B</code> strictly inside <code>A</code>, or any edge pair properly crossing.</li>
+</ol>
+<p><strong>That composition is what makes shared boundaries legal.</strong> Adjacent neighbourhoods share edges by construction; a naive segment-intersection test flags every shared edge and the dataset could never pass. Proper-crossing excludes collinear and endpoint contact, and strict-interior excludes on-boundary vertices, so two Hoods sharing a full edge report clean while two overlapping by a sliver report a violation (their edges must cross transversally somewhere). It is also complete for containment: if <code>A ⊂ B</code> with no crossing at all, every vertex of <code>A</code> is strictly inside <code>B</code> and predicate 1 catches it.</p>
+<p><strong>What is genuinely lost with Shapely gone, stated rather than glossed:</strong> an exact overlap <em>area</em>, so V6 has no ε tolerance knob — a violation is a violation. That is the behaviour §9's first risk row argues for anyway (the fix for source imprecision is vertex snapping, not a widened tolerance), so it costs nothing here. And exact union geometry, so V7's coverage-gap check becomes <strong>sampled rather than exact</strong> — see §5.2 V7 and §8 D9. The two are not equivalent risks and are not treated as one: overlap is approximated by nothing, because <code>HoodHitTester</code>'s correctness rests on it; coverage is a legibility judgement where a 50 m sampling grid resolves gaps an order of magnitude below the threshold that matters.</p>
+<p>Area-weighted centroid (§8 D5) needs no library either — the shoelace centroid is ~15 stdlib lines, and self-intersection detection (V3) is predicate 2 applied to a ring against itself.</p>
+<hr />
+<h2 id="3-data-model">3. Data model</h2>
+<h3 id="31-backend-schema-migration-003_hood_attributessql">3.1 Backend — schema, migration <code>003_hood_attributes.sql</code></h3>
+<pre><code class="language-sql">alter table public.hoods add column if not exists blurb                      text;
+alter table public.hoods add column if not exists is_tourist_trap            boolean;
+alter table public.hoods add column if not exists designated_for_progression boolean not null default false;
+</code></pre>
+<p>Three columns, no index, no RLS change. <code>hoods</code> already has <code>enable row level security</code> and one public <code>select</code> policy from <code>001</code> A2; new columns inherit it, and there is still no write policy anywhere — PRD req 5's last bullet is satisfied by <em>not</em> changing anything, which is the correct amount of work.</p>
+<p>Four decisions inside those three lines:</p>
+<ul>
+<li><strong><code>is_tourist_trap</code> is nullable with no default.</strong> Three storage states — <code>null</code> not yet rated, <code>false</code> not flagged, <code>true</code> flagged — because <code>tourist-trap-flag</code> reqs 4 and 7 need all three: the map renders <code>null</code> and <code>false</code> identically, VoiceOver does not. A <code>not null default false</code> here would collapse the distinction at the schema level and make req 7 unimplementable, which is the kind of thing that is free to get right now and a migration plus a data audit to fix later.</li>
+<li><strong><code>designated_for_progression</code> is <code>not null default false</code>.</strong> The opposite call, for the opposite reason: <code>passport</code> req 4 has no "unknown" state — a Hood is either counted toward Local or it is not — and <code>null</code> would be a third state nothing renders. The default makes every existing row correct without a backfill.</li>
+<li><strong><code>blurb</code> is nullable and null means "not curated."</strong> Empty string is not a permitted value; <code>hood-place-detail</code> req 2 forbids placeholder copy, and null is the only representation of its absence. The validator rejects <code>""</code> and whitespace-only at authoring time (§5.2 V8) rather than relying on the client to normalise it — though T-033's client does normalise it too (<code>hood-place-detail/TRD.md</code> §4.3), and both layers doing it is correct.</li>
+<li><strong>Nothing else is added.</strong> No <code>source</code>/provenance column, no <code>centroid</code> column, no <code>area</code>. Provenance lives in the authored source file (§3.2) where it is needed for re-derivation and licence attribution; centroid is derived and lives in the generated bundle (§8 D5). A column exists in this schema only if something reads it over the wire.</li>
+</ul>
+<p><strong>This migration collides with T-033's TRD and the collision is resolved here — see §8 D7.</strong> <code>hood-place-detail/TRD.md</code> §3.1 declares a migration <code>003_places_and_hood_blurb.sql</code> that also adds <code>hoods.blurb</code>. Neither <code>003</code> exists on disk. <code>hoods.blurb</code> is this PRD's req 4, product's sweep assigned it here, and T-040 is first in the dependency chain — so it lands here and T-033's A1 drops it.</p>
+<h3 id="32-the-authored-source-databasedatahoods-tel-avivsourcejson">3.2 The authored source — <code>database/data/hoods-tel-aviv.source.json</code></h3>
+<p>This is the contract the sourced data must satisfy. <strong>It is the deliverable this TRD owes <code>data-engineer</code>; the sourcing method is deliberately not specified</strong> (PRD: OSM / municipal open data / manual authoring all remain open).</p>
+<pre><code class="language-json">{
+  &quot;sourceSchemaVersion&quot;: 1,
+  &quot;city&quot;: &quot;tel-aviv&quot;,
+  &quot;hoods&quot;: [
+    {
+      &quot;id&quot;: &quot;florentin&quot;,
+      &quot;name&quot;: &quot;Florentin&quot;,
+      &quot;polygon&quot;: [[34.7661, 32.0553], [34.7690, 32.0561], &quot;…&quot;, [34.7661, 32.0553]],
+      &quot;blurb&quot;: &quot;…&quot;,
+      &quot;isTouristTrap&quot;: null,
+      &quot;designatedForProgression&quot;: false,
+      &quot;provenance&quot;: { &quot;source&quot;: &quot;osm&quot;, &quot;sourceRef&quot;: &quot;relation/1234567&quot;, &quot;retrievedAt&quot;: &quot;2026-08-02&quot; }
+    }
+  ]
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Lowercase ASCII slug, <code>^[a-z0-9]+(-[a-z0-9]+)*$</code>, unique. <strong>Stable across geometry revisions</strong> (PRD req 3) — correcting a boundary never changes an id.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>Non-empty. The spoken name, not a statistical-area code (PRD req 3). Hebrew or Latin script both permitted; the file is UTF-8 and the generator writes <code>ensure_ascii=False</code>.</td>
+</tr>
+<tr>
+<td><code>polygon</code></td>
+<td><code>[[lng, lat], …]</code></td>
+<td>yes</td>
+<td>Single <strong>closed</strong> ring (§4.2), WGS84, <code>lng</code> first, ≥4 points, no holes, no nesting, not self-intersecting.</td>
+</tr>
+<tr>
+<td><code>blurb</code></td>
+<td>string or <code>null</code></td>
+<td>yes (may be <code>null</code>)</td>
+<td>Human-authored. <code>null</code> is legal and means not curated; <code>""</code> and whitespace-only are rejected.</td>
+</tr>
+<tr>
+<td><code>isTouristTrap</code></td>
+<td><code>true</code>/<code>false</code>/<code>null</code></td>
+<td>yes (may be <code>null</code>)</td>
+<td><code>null</code> = not yet rated. Ships <code>null</code> unless a real value exists — never <code>false</code> as a stand-in (PRD req 5).</td>
+</tr>
+<tr>
+<td><code>designatedForProgression</code></td>
+<td>boolean</td>
+<td>yes</td>
+<td>No <code>null</code>. Undesignated Hoods carry <code>false</code> explicitly.</td>
+</tr>
+<tr>
+<td><code>provenance</code></td>
+<td>object</td>
+<td>yes</td>
+<td><code>source</code> ∈ <code>{osm, municipal, manual}</code>, plus <code>sourceRef</code> and <code>retrievedAt</code>. <strong>Promoted from PRD P1 to required</strong> — see §8 D8; this is a licence-obligation artifact, not a nice-to-have.</td>
+</tr>
+</tbody>
+</table>
+<p><code>lng</code> before <code>lat</code> is the format <code>001</code> and the existing script already committed to, and the single most common way a geospatial dataset ships silently broken. V4 (§5.2) catches a swapped pair by range, which works because Tel Aviv's latitude (~32) is inside longitude's valid range but its longitude (~34.8) is also inside latitude's — so range alone is <em>not</em> sufficient. V5 adds a bounding-box check against Tel Aviv specifically, which is.</p>
+<h3 id="33-generated-artifact-1-the-data-migration">3.3 Generated artifact 1 — the data migration</h3>
+<p><code>build_hoods.py</code> emits <code>migrations/006_hoods_tel_aviv_data.sql</code> (number passed in, see below). Shape:</p>
+<pre><code class="language-sql">-- GENERATED by database/scripts/build_hoods.py from database/data/hoods-tel-aviv.source.json
+-- Do not hand-edit. Re-run the generator instead.
+-- Source digest: sha256:&lt;hex of the source file&gt;
+
+insert into public.hoods (id, name, city, polygon, blurb, is_tourist_trap, designated_for_progression) values
+  ('florentin', 'Florentin', 'tel-aviv', '[[34.7661,32.0553], …]'::jsonb, '…', null, false),
+  …
+on conflict (id) do update set
+  name                       = excluded.name,
+  polygon                    = excluded.polygon,
+  blurb                      = excluded.blurb,
+  is_tourist_trap            = excluded.is_tourist_trap,
+  designated_for_progression = excluded.designated_for_progression,
+  updated_at                 = now();
+
+delete from public.hoods
+ where city = 'tel-aviv'
+   and id &lt;&gt; all (array['florentin', …]);
+</code></pre>
+<p><strong><code>on conflict (id) do update</code>, not <code>do nothing</code>.</strong> This is a correction, not a style preference. Migration <code>001</code> A3 writes <code>on conflict (id) do nothing</code> and its own header comment claims the real export "supersedes these rows by id (upsert-shaped, see below)" — the comment and the SQL disagree, and the SQL wins. Under <code>do nothing</code>, the three ids the real dataset shares with the placeholder set (<code>florentin</code>, <code>neve-tzedek</code>, <code>lev-hair</code>, and possibly <code>old-north</code>/<code>jaffa</code>) would keep their <strong>placeholder rectangle geometry</strong> after the "real" seed applied, and <code>001</code>'s rectangles overlap the real polygons of their neighbours. The swap would ship a dataset that fails the very invariant this task exists to enforce, and it would look like it worked.</p>
+<p><strong>The <code>delete</code> is what removes placeholder ids the real dataset drops.</strong> Scoped to <code>city = 'tel-aviv'</code> so it can never touch a future second city. It cascades into <code>hood_density</code> via <code>001</code>'s <code>on delete cascade</code>, which is correct — the generator (<code>002</code>) rewrites 13 rolling buckets per Hood hourly and regenerates them within the hour. <strong>It must not cascade into <code>places</code></strong> — see §4.4 and §8 D6.</p>
+<p><strong>Migration numbering is an argument, not a guess.</strong> <code>build_hoods.py --migration-number 006</code> writes <code>006_hoods_tel_aviv_data.sql</code>. The generator never scans the directory and picks the next free number: several TRDs are in flight against this same directory and a race there produces two files with the same number and no error. <code>chief-of-staff</code> sequences; the number is passed in.</p>
+<p><strong>This task needs two migration files, and only the first is <code>003</code>.</strong> The settled workspace sequence is <code>003</code> = this task's <strong>schema</strong> migration (§3.1, <code>003_hood_attributes.sql</code>), <code>004</code> = <code>places-dataset</code> (<code>004_places.sql</code>, T-042), <code>005</code> = <code>live-events-pipeline</code> (T-043). This task's <strong>generated data seed</strong> is a separate file and an earlier draft of this section numbered it <code>004</code>, which collides with T-042's already-claimed <code>004_places.sql</code>. <strong>It is renumbered up to <code>006_hoods_tel_aviv_data.sql</code>.</strong> Pure renumber — no design change, and <code>003_hood_attributes.sql</code> is unaffected and stays where it is. Landing the data seed <em>after</em> T-042's <code>places</code> table is also the harmless order: <code>004</code> only needs <code>hoods</code> to exist, which <code>001</code> already provides, and §3.3's <code>delete</code> is <code>city</code>-scoped and blocked from touching <code>places</code> by <code>on delete restrict</code> (§4.4, §8 D6) regardless of which file lands first.</p>
+<p><strong>Re-issue rule, using the machinery that already exists.</strong> <code>database/README.md</code> tracks an <code>Applied?</code> column per migration. While a data migration is <strong>not applied</strong>, correcting the source regenerates that same file in place. Once it <strong>is applied</strong>, <code>database/README.md</code>'s rule holds absolutely — never edited, never renumbered — and the next revision is a new number. Since <code>001</code> and <code>002</code> are both still <code>blocked-on-aviran</code> and unapplied, the practical near-term reality is regenerate-in-place.</p>
+<h3 id="34-polygon-format-single-ring-enforced-prd-open-question-1-resolved">3.4 Polygon format — single ring, enforced (PRD open question 1, resolved)</h3>
+<p><strong>V1 stays single-ring, and the validator rejects multi-ring input loudly rather than flattening it.</strong></p>
+<p>Single-ring is not a preference inherited from <code>001</code>; it is load-bearing in four shipped places: <code>hoods.polygon</code> is a bare <code>jsonb</code> ring (<code>001</code>); <code>HoodCatalog.CatalogFile.Entry.polygon</code> decodes <code>[[Double]]</code>, exactly two levels; <code>HoodHitTester.contains</code> ray-casts one ring with a single wraparound; <code>MapPolygon(coordinates:)</code> takes one coordinate array. Supporting a hole or a detached exclave is a bundle schema bump, a decoder change, a hit-tester change (even-odd across rings), a renderer change (N polygons per Hood), and a DB shape change — for a case that may never arise in Tel Aviv.</p>
+<p><strong>Authoring rule instead of a schema change.</strong> If a real municipal boundary has a hole or a detached part:</p>
+<ol>
+<li>Simplify to the single outer ring at authoring time, if the excluded area is not itself a Hood; or</li>
+<li>split it into two Hoods with distinct slugs, if the parts are genuinely distinct places.</li>
+</ol>
+<p>Both are data decisions with a human in the loop, which is right for a dataset with dozens of rows.</p>
+<p><strong>The escalation trigger is named, so nobody quietly picks option 3.</strong> If <code>data-engineer</code> finds a Tel Aviv Hood that neither rule can honestly represent — a real donut, or an exclave that residents call one place — that comes back to <code>architect</code> as a scope change, not a workaround. The validator makes this unavoidable: V2 rejects a nested array, so the only way past it is to change the spec.</p>
+<h3 id="35-client-bundle-schemaversion-2">3.5 Client — bundle <code>schemaVersion</code> 2</h3>
+<pre><code class="language-json">{ &quot;schemaVersion&quot;: 2, &quot;generatedAt&quot;: &quot;…&quot;, &quot;city&quot;: &quot;tel-aviv&quot;,
+  &quot;hoods&quot;: [ { &quot;id&quot;: &quot;florentin&quot;, &quot;name&quot;: &quot;Florentin&quot;,
+               &quot;polygon&quot;: [[34.7661, 32.0553], …, [34.7661, 32.0553]],
+               &quot;centroid&quot;: [34.7672, 32.0559],
+               &quot;blurb&quot;: &quot;…&quot;, &quot;isTouristTrap&quot;: null, &quot;designatedForProgression&quot;: false } ] }
+</code></pre>
+<p>Changes from v1: rings are closed (§4.2), <code>centroid</code> is precomputed (§8 D5), and the three attributes ride along. <code>city</code>, <code>generatedAt</code> and the top-level shape are unchanged.</p>
+<p><strong>Why the attributes ship in the bundle at all,</strong> given that T-033 fetches <code>blurb</code> live: the same reason T-031 bundled geometry and T-033 added a bundled place seed — no backend has ever been reachable in this pipeline, so a build agent, a reviewer and <code>qa</code> all see a Hood sheet with a real blurb, a Passport with real designated Hoods, and a tourist-trap stroke on a device with no credentials. The bundle is the seed floor; live data supersedes it where a feature fetches.</p>
+<p><strong>One field, one owner.</strong> <code>hoods-tel-aviv.json</code> carries the Hood record — geometry and Hood-level attributes. T-033's <code>places-tel-aviv.json</code> carries places. <code>hood-place-detail/TRD.md</code> §3.4's bundled seed floor currently plans to carry Hood blurbs too; it should not, and that is the second amendment §8 D7 asks of T-033. A field with two bundled homes drifts.</p>
+<p><strong>Build Phase 1 gets this bundle by hand, once, and that is a stated exception</strong> (added 2026-07-31, §8 D10). D2 and §5.3 say the bundle is generator-output and a hand-edited bundle is the unsupported path <code>HoodCatalogTests</code> exists to catch. That still holds for geometry. The one authorized exception: at Build Phase 1, step <strong>C2a</strong> hand-edits the <em>existing shipped</em> <code>passenger-code/Passenger/Resources/hoods-tel-aviv.json</code> to bump <code>schemaVersion</code> to 2 and add a <code>blurb</code> to the four placeholder Hoods — <strong>geometry untouched, no other field added</strong>. <code>centroid</code>, <code>isTouristTrap</code> and <code>designatedForProgression</code> stay absent, which §4.3's decode rules already handle (averaged-centroid fallback, <code>nil</code>, <code>false</code>); a Phase-1 build must not invent values for them. B6 then overwrites the whole file at Build Phase 2 and the generator is sole emitter again from that moment. The reason the exception exists at all is in T-033: <a href="../hood-place-detail/TRD.html"><code>hood-place-detail/TRD.md</code></a> §3.4.1 — with the seed pinned authoritative, its Hood sheet reads <code>blurb</code> from this bundle, so without it a Phase-1 demo can only ever render the no-blurb branch of its own authorizing strategy line.</p>
+<p><strong>No location or personal data is added anywhere in this task.</strong> The source, both artifacts, and all three new columns are static public reference data about places, identical for every user, with no per-user row and no write path. T-031's privacy posture (<code>map-hoods-heat/TRD.md</code> §3.3) is untouched — this task does not give the app anything new to leak.</p>
+<hr />
+<h2 id="4-contracts">4. Contracts</h2>
+<h3 id="41-hoods-the-final-column-contract-the-thing-t-042-and-t-043-are-waiting-on">4.1 <code>hoods</code> — the final column contract (the thing T-042 and T-043 are waiting on)</h3>
+<p><strong>This is stable. Build against it.</strong> After <code>003</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Null</th>
+<th>Default</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>text</code></td>
+<td>no</td>
+<td>—</td>
+<td>PK. Stable lowercase slug. Never changes on a geometry revision.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>text</code></td>
+<td>no</td>
+<td>—</td>
+<td>Display name.</td>
+</tr>
+<tr>
+<td><code>city</code></td>
+<td><code>text</code></td>
+<td>no</td>
+<td><code>'tel-aviv'</code></td>
+<td>Prune scope (§3.3); the second city's seed never touches Tel Aviv's rows.</td>
+</tr>
+<tr>
+<td><code>polygon</code></td>
+<td><code>jsonb</code></td>
+<td>no</td>
+<td>—</td>
+<td>Closed single ring <code>[[lng,lat], …]</code>, WGS84.</td>
+</tr>
+<tr>
+<td><code>blurb</code></td>
+<td><code>text</code></td>
+<td><strong>yes</strong></td>
+<td>—</td>
+<td><code>null</code> = not curated. <code>''</code> never stored.</td>
+</tr>
+<tr>
+<td><code>is_tourist_trap</code></td>
+<td><code>boolean</code></td>
+<td><strong>yes</strong></td>
+<td>—</td>
+<td><code>null</code> = not yet rated. Three states.</td>
+</tr>
+<tr>
+<td><code>designated_for_progression</code></td>
+<td><code>boolean</code></td>
+<td>no</td>
+<td><code>false</code></td>
+<td>Two states, no unknown.</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td><code>timestamptz</code></td>
+<td>no</td>
+<td><code>now()</code></td>
+<td>Set to <code>now()</code> on every upsert, so a geometry revision is traceable.</td>
+</tr>
+</tbody>
+</table>
+<p>RLS: enabled, one <code>select</code> policy <code>to anon, authenticated using (true)</code>, <strong>no write policy</strong> — unchanged from <code>001</code>.</p>
+<p>No further columns are planned for <code>hoods</code> by any V1 PRD. <code>places.is_tourist_trap</code> (<code>places-dataset</code> req 6) is a <em>different</em> column on a <em>different</em> table with the same three-state semantics; it is T-042's, not a shared one.</p>
+<h3 id="42-ring-canonical-form-closed-on-the-wire-open-in-memory">4.2 Ring canonical form — closed on the wire, open in memory</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Form</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source file, <code>hoods.polygon</code>, bundle JSON</td>
+<td><strong>Closed</strong> (<code>ring[0] == ring[-1]</code>)</td>
+<td>One canonical wire form. Matches <code>001</code>'s seed, GeoJSON convention, and what <code>export_hoods_geojson.py:92</code> already enforces. Removes the drift named in §1.</td>
+</tr>
+<tr>
+<td><code>Hood.ring</code> in memory (<code>[MKMapPoint]</code>)</td>
+<td><strong>Open</strong> — <code>HoodCatalog</code> drops the duplicated final point at decode</td>
+<td>This is what today's shipped code already assumes and what the math wants.</td>
+</tr>
+</tbody>
+</table>
+<p>The in-memory choice is not cosmetic. <code>HoodCatalog.centroid(of:)</code> is an average of vertices, so a duplicated closing point silently double-weights one corner; <code>HoodHitTester.distanceToEdge</code> would evaluate a zero-length segment (its <code>lengthSquared &gt; 0</code> guard handles it correctly, but it is work for nothing); <code>MapPolygon</code> closes the ring itself. Dropping the duplicate at the boundary keeps all three correct with one line.</p>
+<p><code>HoodCatalog.load()</code> gains this and the three attributes. It must <strong>accept both</strong> — an open ring (a stale v1 bundle) and a closed one — by dropping a trailing duplicate only when present. This is boundary validation, not defensive programming: the two forms are both in the repo right now.</p>
+<h3 id="43-hoodcatalog-hood-the-ios-side-change">4.3 <code>HoodCatalog</code> / <code>Hood</code> — the iOS-side change</h3>
+<pre><code class="language-swift">struct Hood: Identifiable, Sendable {
+    let id: String
+    let name: String
+    let ring: [MKMapPoint]
+    let boundingRect: MKMapRect
+    let centroid: CLLocationCoordinate2D   // now read from the bundle, not averaged (§8 D5)
+    let blurb: String?                     // nil == not curated, never a placeholder
+    let isTouristTrap: Bool?               // nil == not yet rated (three states)
+    let designatedForProgression: Bool
+}
+</code></pre>
+<p><code>Hashable</code> stays <code>id</code>-only (already the case, and now more necessary — none of the three new fields participate in identity). <code>Hood</code> stays <code>Sendable</code> — three value types, no new conformance question.</p>
+<p><strong>Consumers, so <code>trd-review</code> can check nothing is being pre-built:</strong> T-033 reads <code>blurb</code>, T-035 reads <code>isTouristTrap</code>, T-037 reads <code>designatedForProgression</code>. All three are downstream tasks; this task <strong>only stores and exposes</strong> the fields. It renders nothing, adds no view, and adds no behaviour to <code>Hoods/</code>.</p>
+<p><strong>Decode rules (boundary validation):</strong> <code>centroid</code> optional — fall back to the computed average if absent, so a stale bundle still loads; <code>blurb</code> optional, and <code>""</code>/whitespace normalised to <code>nil</code>; <code>isTouristTrap</code> optional; <code>designatedForProgression</code> defaults <code>false</code> if absent. <code>schemaVersion</code> is read and required to be <code>&gt;= 1</code>; an unknown <em>higher</em> version is not rejected, because a v1 decoder facing a v2 file already ignores unknown keys correctly and a hard version gate would only turn a working case into a crash.</p>
+<h3 id="44-c-hood-1-the-places-hoods-contract">4.4 <code>C-HOOD-1</code> — the <code>places</code> ↔ <code>hoods</code> contract</h3>
+<p><strong>Authored in <a href="../places-dataset/TRD.html"><code>places-dataset/TRD.md</code></a> §4.1 and quoted here verbatim rather than restated, per that section's own instruction that both TRDs must state it in the same terms so they cannot drift.</strong> This TRD adopts all four clauses without amendment:</p>
+<blockquote>
+<ol>
+<li><strong>Referential.</strong> <code>places.hood_id</code> is a foreign key to <code>hoods.id</code>, <code>on delete restrict</code>. Free text is not acceptable (req 1). <code>restrict</code>, not <code>cascade</code> — see §3.2.</li>
+<li><strong>Geometric.</strong> For every place, ray-casting <code>(longitude, latitude)</code> against the single-ring WGS84 <code>[[lng,lat], …]</code> polygons (<code>001</code>'s committed format, ratified by <code>export_hoods_geojson.py</code>) yields <strong>exactly one</strong> containing Hood, and <code>places.hood_id</code> equals that Hood's <code>id</code>. Zero containing Hoods → <strong>fail</strong>, never ship unattributed (req 1). Two or more → <strong>fail</strong>, and the failure is also a live counter-example to <code>hood-dataset</code> req 2's non-overlap invariant, so it is reported against both datasets.</li>
+<li><strong>Enforcement site.</strong> The geometric clause is enforced by <code>validate_dataset.py</code>, <strong>not by Postgres.</strong> There is no PostGIS on this project and <code>hoods.polygon</code> is <code>jsonb</code>, not <code>geometry</code>; a DB-level containment constraint would mean adding a spatial extension for one authoring-time check. The FK gives referential integrity; the validator gives geometric correctness. A place is never written to the DB or the export without the validator passing.</li>
+<li><strong>Single implementation, shared.</strong> <code>database/scripts/validate_dataset.py</code> owns <strong>both</strong> invariants — T-040's non-overlap check and this task's containment check — because they are the same ray-cast over the same rings, and two implementations would disagree eventually. T-040's build calls it; T-042's build calls it. Whoever builds it first writes it; the second task consumes it.</li>
+</ol>
+</blockquote>
+<p><strong>This TRD's obligations under those clauses:</strong></p>
+<ul>
+<li><strong>Clause 1 is satisfied by a correction, not by new work here.</strong> <code>hood-place-detail/TRD.md</code> §3.1 currently declares <code>places.hood_id … on delete cascade</code>. With §3.3's prune, dropping a Hood in a geometry revision would <strong>silently delete the curated places inside it</strong>. T-042's §2.1 already resolves ownership of the <code>places</code> table away from T-033; the on-delete change travels with it. §8 D6.</li>
+<li><strong>Clause 2's "exactly one" is this task's invariant, not T-042's.</strong> Containment yields exactly one Hood <em>because</em> V6 (§5.2) has run and passed. T-042 and T-043 are correct because this task's validator runs, not because they check anything themselves. That is the dependency chain in one sentence.</li>
+<li><strong>Clause 4's file name and ownership are adopted verbatim</strong>; its stated rationale under-describes the non-overlap half, which §2.3 corrects without changing the conclusion. <code>hoodgeom.py</code>, named in an earlier draft of this TRD, does not exist — everything is in <code>validate_dataset.py</code>.</li>
+<li><strong>T-043 (<code>live-events-pipeline</code>) req 3</strong> — "<code>hood_id</code> resolved from the event's coordinates at ingest," "an event in no Hood is not ingested" — is clause 2's same <em>predicate</em>, but <strong>not clause 4's shared file</strong>: T-043 implements it in <code>plpgsql</code> against the live table (§2.2). Held to the same algorithm spec and the same fixture, including <strong>on-boundary → no Hood</strong>, so an event on a shared edge resolves the same way a place on that edge does. Its FK into <code>hoods</code> follows clause 1's <code>restrict</code> rule (§9).</li>
+</ul>
+<p><strong>Surface this task adds to the shared file</strong> (T-042 §9 B2 owns the containment half; whichever build lands first writes the module skeleton):</p>
+<pre><code class="language-python">load_hood_source(path)              -&gt; HoodDataset      # parse + V1…V9 (§5.2)
+validate_hoods(dataset)             -&gt; list[Violation]  # empty == clean
+resolve_hood(dataset, lng, lat)     -&gt; str | None       # clause 2; shared with T-042.
+                                                        # T-043's SQL hood_for_point() is a
+                                                        # separate implementation held to the
+                                                        # same spec + fixture — see §2.2.
+non_overlap_report(dataset)         -&gt; list[OverlapPair] # V6
+coverage_gaps(dataset)              -&gt; list[GapCluster]  # V7, sampled (§8 D9)
+area_centroid(ring)                 -&gt; (lng, lat)        # §8 D5
+</code></pre>
+<h3 id="45-build_hoodspy-cli-contract">4.5 <code>build_hoods.py</code> — CLI contract</h3>
+<pre><code>python3 build_hoods.py
+    [--source   database/data/hoods-tel-aviv.source.json]
+    [--sql-out  database/migrations/NNN_hoods_tel_aviv_data.sql]
+    [--json-out passenger-code/Passenger/Resources/hoods-tel-aviv.json]
+     --migration-number NNN
+    [--check]        # validate only; write nothing; non-zero exit on any violation
+</code></pre>
+<p>Exit <code>0</code> clean, <code>1</code> on any violation with every violation printed (not just the first — a dataset with six overlaps should take one run to find all six, not six runs). <strong>No network, no <code>DATABASE_URL</code>, no credentials.</strong> Deterministic: same source in, byte-identical artifacts out, so a reviewer can regenerate and <code>git diff --exit-code</code> to prove the committed artifacts match the committed source.</p>
+<hr />
+<h2 id="5-flow">5. Flow</h2>
+<h3 id="51-authoring-shipped">5.1 Authoring → shipped</h3>
+<pre><code>data-engineer sources geometry (OSM / municipal / manual — method open)
+   └─► writes/updates database/data/hoods-tel-aviv.source.json   ← the only hand-edited file
+        └─► build_hoods.py --migration-number NNN
+             ├─ V1…V9 validate  ─── any violation ──► print all, exit 1, WRITE NOTHING
+             └─ clean
+                 ├─► migrations/NNN_hoods_tel_aviv_data.sql   (passenger-brain commit)
+                 └─► Resources/hoods-tel-aviv.json            (passenger-code commit)
+                      └─► HoodCatalogTests re-asserts non-overlap on the shipped bundle
+                           └─► migration applied (Aviran-gated) ──► export_hoods_geojson.py --check
+</code></pre>
+<p>Two repos, two commits, one source. The cross-repo write is not new — <code>export_hoods_geojson.py</code>'s <code>DEFAULT_OUT</code> already resolves <code>parents[3] / passenger-code / …</code>.</p>
+<h3 id="52-validation-the-fail-loudly-step-prd-req-2-open-question-2-resolved">5.2 Validation — the fail-loudly step (PRD req 2, open question 2, resolved)</h3>
+<p>Runs inside the generator, <strong>before either artifact is opened for writing</strong>. A dataset that violates any of these does not produce a partial artifact.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Check</th>
+<th>Failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V1</td>
+<td>Slug format, uniqueness, non-empty <code>name</code></td>
+<td>error</td>
+</tr>
+<tr>
+<td>V2</td>
+<td><code>polygon</code> is exactly <code>[[lng, lat], …]</code> — <strong>a third nesting level is an error, not a thing to unwrap</strong> (§3.4)</td>
+<td>error</td>
+</tr>
+<tr>
+<td>V3</td>
+<td>Ring is closed, ≥4 points, ≥3 distinct points, and not self-intersecting (§2.3's proper-crossing predicate applied to the ring against itself)</td>
+<td>error</td>
+</tr>
+<tr>
+<td>V4</td>
+<td>Every coordinate in range, <code>lng</code> first</td>
+<td>error</td>
+</tr>
+<tr>
+<td>V5</td>
+<td>Every coordinate inside a generous Tel Aviv-Yafo bounding box (<strong>≈34.72–34.86 E, 32.01–32.14 N</strong>, deliberately loose)</td>
+<td>error — PRD req 1's "no Hood for any other city", and the only reliable swapped-lat/lng catch (§3.2)</td>
+</tr>
+<tr>
+<td><strong>V6</strong></td>
+<td><strong>Non-overlap: <code>polygons_overlap(a, b)</code> for every pair</strong>, bbox-prefiltered — §2.3's three stdlib predicates. Touching boundaries are <strong>legal</strong>; overlapping interiors are not. No tolerance knob, by design.</td>
+<td><strong>error, and this is the check the whole task exists for</strong></td>
+</tr>
+<tr>
+<td>V7</td>
+<td>Interior coverage gaps, <strong>sampled</strong>: a 50 m grid over the §V5 bounding box, cells whose centre is in no Hood, contiguous uncovered cells clustered; a cluster fully enclosed by covered cells with area &gt; <strong>40,000 m²</strong> is an error, &gt; <strong>5,000 m²</strong> a warning. Clusters touching the sampled region's edge are exterior, not interior — skipped (§8 D9)</td>
+<td>error / warn — PRD req 1's "no unnamed interior hole large enough to read as a rendering bug", made falsifiable</td>
+</tr>
+<tr>
+<td>V8</td>
+<td><code>blurb</code> is <code>null</code> or non-blank; <code>""</code> and whitespace-only rejected</td>
+<td>error</td>
+</tr>
+<tr>
+<td>V9</td>
+<td><code>isTouristTrap</code> ∈ {<code>true</code>,<code>false</code>,<code>null</code>}; <code>designatedForProgression</code> ∈ {<code>true</code>,<code>false</code>}, never <code>null</code>; <code>provenance.source</code> ∈ the enum</td>
+<td>error</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Slug-preservation check (PRD req 3's third bullet), a warning not an error:</strong> the generator compares the source's ids against <code>001</code>'s five seeded slugs and warns for each one that disappears. It is a warning because dropping <code>old-north</code> may be a legitimate authoring decision, and an error would make a correct dataset unshippable. It prints, so nobody drops one by accident.</p>
+<p><strong>V6 is the reason this task exists.</strong> <code>HoodHitTester.hood(at:tolerance:)</code> takes <code>hoods.first(where: { bbox.contains &amp;&amp; contains(ring) })</code> — first match wins, file order decides, and it comments "Hoods don't overlap (PRD req 3), so at most one hit is possible here." That comment is currently an unchecked assumption that happens to hold because the four shipped rectangles are disjoint. The moment real adjacent polygons land it becomes a live correctness claim with nothing behind it. V6 is what makes the comment true.</p>
+<h3 id="53-two-more-places-the-invariant-is-checked">5.3 Two more places the invariant is checked</h3>
+<ul>
+<li><strong><code>HoodCatalogTests</code> (iOS), against the shipped bundle.</strong> A pure-Swift pairwise bbox-overlap prefilter plus segment-intersection and vertex-containment test over the decoded rings, asserting no two Hoods overlap and no vertex of one lies strictly inside another — the same three predicates as §2.3, ported. It is a tripwire against <em>the artifact that actually ships</em>, not a second authority. Its job is to catch a hand-edited bundle, which is the one path around the generator. It also asserts every ring decodes, and that ids are unique.</li>
+<li><strong><code>export_hoods_geojson.py --check</code> (post-apply).</strong> Exports the live table, diffs against the committed bundle, non-zero on drift. The only check that can catch a manual <code>update</code> run against the production database.</li>
+</ul>
+<h3 id="54-what-happens-when-geometry-is-corrected-later">5.4 What happens when geometry is corrected later</h3>
+<ol>
+<li>Edit the source. Ids do not change (PRD req 3).</li>
+<li>Re-run the generator — V1…V9 re-run over the whole dataset, so a correction cannot introduce an overlap somewhere else and go unnoticed.</li>
+<li>If the previous data migration is unapplied, it regenerates in place; if applied, <code>--migration-number</code> gets the next number (§3.3).</li>
+<li><strong>Places and events re-resolve.</strong> T-042's and T-043's validators re-run <code>resolve_hood</code> against the new source; anything that now falls in a different Hood or no Hood is a violation there. The <code>on delete restrict</code> FK (§4.4) is the backstop if step 4 is skipped.</li>
+<li><strong>Been-place re-attribution (PRD open question 3) is genuinely not answered here.</strong> Been state is device-local (T-033 §3.5, T-036), so no backend step can migrate it, and a boundary correction can move a user's Been place into a different Hood and change their Passport progress. Naming it: it is <code>passport</code>'s own open question, it is not solvable by this pipeline, and it becomes real only after launch. Flagged in §10, not designed around.</li>
+</ol>
+<hr />
+<h2 id="6-third-party-dependencies">6. Third-party / dependencies</h2>
+<ul>
+<li><strong>None added</strong> (§2.3). Stdlib Python on the backend side, no SPM package on the client side. <code>map-hoods-heat/TRD.md</code> §2.3's "no third-party packages until a TRD justifies one" is not being invoked, and <code>places-dataset/TRD.md</code> §6's stdlib-only posture is matched exactly — the two tasks share one file and cannot have two dependency stories.</li>
+<li><strong><code>psycopg2</code></strong> — already assumed by <code>export_hoods_geojson.py</code>. Now needed only for the optional post-apply drift check, not for the main path. Nothing in the supported pipeline imports it.</li>
+<li><strong>The geometry source itself is a dependency with a licence, and that is Aviran's call, not this TRD's.</strong> OSM is ODbL (attribution plus share-alike on derived databases); municipal open data carries its own terms. §3.2 makes <code>provenance</code> mandatory so whichever lands, attribution is producible and the derivation is traceable. Already open as <code>PAS-6</code> item 15 — this TRD does not resolve it and <code>data-engineer</code> should not commit sourced geometry before it is resolved.</li>
+<li><strong><code>database/scripts/</code> gains no <code>requirements.txt</code>.</strong> There is nothing to pin.</li>
+</ul>
+<hr />
+<h2 id="7-rollout-migration">7. Rollout &amp; migration</h2>
+<ul>
+<li><strong>No feature flag.</strong> This is a data swap on a screen that already renders. Its off-state is the placeholder rectangles, which is worse than its on-state in every dimension. A flag here would be machinery to preserve a known-wrong dataset.</li>
+<li><strong>Order is strict and both halves are independently shippable.</strong> <code>003</code> (schema) → <code>NNN</code> (data) on the backend; the bundle swap on iOS. The two do <strong>not</strong> have to land together: the iOS build reads the bundle and never the new columns over the wire in this task, so <code>ios-developer</code> can ship real geometry while <code>003</code> sits <code>blocked-on-aviran</code> — the same decoupling that let T-031 ship at all.</li>
+<li><strong>Applying is Aviran-gated.</strong> <code>database/README.md</code>. <code>developer</code> writes and hands off; no agent applies. <code>003</code> is additive and <code>if not exists</code>-guarded, so it is safe to apply before or after <code>001</code>/<code>002</code> — but it depends on <code>hoods</code> existing, so <code>001</code> first.</li>
+<li><strong>Backward compatibility.</strong> <code>003</code> is three <code>add column if not exists</code> — no rewrite of an applied migration, no data loss, and every existing row is valid the moment it applies (<code>blurb</code>/<code>is_tourist_trap</code> null, <code>designated_for_progression</code> false). <code>schemaVersion</code> 2 is decode-compatible in both directions (§4.3).</li>
+<li><strong><code>002</code>'s synthetic generator needs nothing.</strong> It joins <code>hoods</code> by id and is indifferent to the new columns. It does re-key onto whatever Hood set survives the prune, within the hour.</li>
+<li><strong>The placeholder era ends explicitly.</strong> <code>database/README.md</code>'s status table gets a row for <code>003</code> and the data migration, and <code>001</code>'s A3 note stops being the current state of the world. <code>map-hoods-heat</code>'s PRD req 3 — recorded unmet at acceptance — is satisfied by <em>this</em> task's completion, not retroactively by T-031.</li>
+</ul>
+<hr />
+<h2 id="8-decisions">8. Decisions</h2>
+<h3 id="d1-the-authored-source-is-a-file-not-the-database">D1 — The authored source is a file, not the database</h3>
+<p>Stated in §2.1. The deciding argument is not elegance, it is reachability: the current pipeline's only path from authored data to shipped artifact runs through a credential nobody on the team holds, which is why <code>export_hoods_geojson.py</code> has never been run in the eight days it has existed. A source-file pipeline is also reviewable — a boundary correction shows up as a coordinate diff in a JSON file, not as an edited <code>jsonb</code> literal inside SQL — and it is what makes PRD req 6's "verified identical" mechanical rather than aspirational.</p>
+<p><strong>Rejected alternative: keep the DB as source and give the export script a <code>--dry-run</code>.</strong> It does not help — the script still needs a live table to read, and the authoring surface is still hand-written SQL.</p>
+<h3 id="d2-validation-runs-in-the-generator-not-in-ci-prd-open-question-2">D2 — Validation runs in the generator, not in CI (PRD open question 2)</h3>
+<p>CI is the wrong place because there is no CI in this workspace to put it in — and even if there were, a check that runs after the artifacts are written can only tell you that something already-committed is wrong. In the generator, a violation means <strong>no artifact is produced at all</strong>, so an invalid dataset cannot physically reach either repo through the supported path. §5.3's two extra checks cover the unsupported paths (a hand-edited bundle, an out-of-band DB write).</p>
+<h3 id="d3-single-ring-hard-rejected-multi-ring-prd-open-question-1">D3 — Single ring, hard-rejected multi-ring (PRD open question 1)</h3>
+<p>§3.4. The escalation trigger is the important half: a validator that <em>rejects</em> nesting is what stops "just flatten it" from becoming an undocumented data decision made by whoever hits it first.</p>
+<h3 id="d4-upsert-plus-scoped-prune-not-on-conflict-do-nothing">D4 — Upsert plus scoped prune, not <code>on conflict do nothing</code></h3>
+<p>§3.3. This corrects both migration <code>001</code>'s SQL/comment mismatch and the PRD's own description of the swap. The failure mode it prevents is the worst kind available here: a migration that runs clean, reports success, and leaves overlapping placeholder rectangles in the table for <code>HoodHitTester</code> to resolve by file order.</p>
+<h3 id="d5-centroid-is-precomputed-in-the-bundle-prd-p1-promoted-with-a-reason">D5 — Centroid is precomputed in the bundle (PRD P1, promoted, with a reason)</h3>
+<p><code>HoodCatalog.centroid(of:)</code> averages vertices. For the four shipped rectangles that is exactly right. For a real municipal polygon it is wrong in a visible way: a boundary that follows a curved shoreline or a dense street grid on one side carries many more vertices there, and the average is dragged toward the dense side — so the Hood's name label and (per <code>map-rendering-spec.md</code> §3) its tourist-trap marker both render off-centre, possibly outside the shape.</p>
+<p>The fix is the shoelace area-weighted centroid — ~15 stdlib lines (§2.3), computed once at build time and stored. No new dependency, no runtime cost, and it removes a per-launch computation. Also robust to the closing-point duplication §4.2 introduces, which the averaging version is not.</p>
+<p>This promotes a PRD P1 to a build step. Flagged as a deliberate scope call for <code>trd-review</code>: it is small, and the alternative is shipping a label-placement defect that only appears once real geometry lands — i.e. at exactly the moment nobody is looking for it.</p>
+<h3 id="d6-placeshood_id-must-be-on-delete-restrict">D6 — <code>places.hood_id</code> must be <code>on delete restrict</code></h3>
+<p>§4.4, <code>C-HOOD-1</code> clause 1. Applies to a table this task does not own. Recorded here because §3.3's prune is what creates the hazard, and the correct place to state a cross-table invariant is the TRD that introduces the delete. <code>places-dataset/TRD.md</code> states the same clause; the two are deliberately identical.</p>
+<h3 id="d7-migration-003-collision-with-t-033-resolved-on-both-halves">D7 — Migration <code>003</code> collision with T-033, resolved on both halves</h3>
+<p><code>hood-place-detail/TRD.md</code> §3.1 declares a migration <code>003_places_and_hood_blurb.sql</code> that both creates the <code>places</code> table and adds <code>hoods.blurb</code> — duplicating, in one file, work that now belongs to two other tasks. Neither <code>003</code> exists on disk, and T-033 is <strong>held at <code>trd</code></strong> pending Aviran's nav-row answer (<code>BOARD.md</code> T-033 row), so nothing has been built against it.</p>
+<ul>
+<li><strong>The <code>places</code> half is resolved by <code>places-dataset/TRD.md</code> §2.1 (its D1):</strong> <code>places</code> is defined once, in T-042, not T-033.</li>
+<li><strong>The <code>blurb</code> half is resolved here:</strong> <code>hoods.blurb</code> lands in this task's <code>003_hood_attributes.sql</code> (§3.1). It is this PRD's req 4, product's data-requirements sweep assigned it here explicitly, T-040 is first in the dependency chain, and a column specified in two TRDs is a column that eventually gets two different nullability rules.</li>
+</ul>
+<p>Between the two, T-033's migration <code>003</code> has nothing left in it and should be <strong>removed rather than renumbered</strong>. T-033's A1/A2 steps become a dependency on this task's <code>003</code> and T-042's <code>places</code> migration, not work of their own.</p>
+<p><strong>One further amendment T-033's TRD needs, for <code>chief-of-staff</code> to route</strong> (not applied by me — that document is under review by another pair): §3.4's <code>places-tel-aviv.json</code> seed floor drops Hood blurbs; <code>hoods-tel-aviv.json</code> carries them (§3.5). T-033's client reads blurb from <code>HoodCatalog</code>, not from the places bundle.</p>
+<p>None of this changes a line of T-033's iOS behaviour or any contract in its §4.</p>
+<h3 id="d8-provenance-promoted-from-prd-p1-to-required-in-the-source">D8 — <code>provenance</code> promoted from PRD P1 to required in the source</h3>
+<p>PRD P1 lists per-Hood provenance as a nice-to-have "for the next city." It is more than that: if the geometry is derived from OSM, ODbL attribution is a <strong>legal obligation that attaches to the derived database</strong>, and satisfying it after the fact means re-deriving provenance for rows nobody recorded it for. The cost of recording it during authoring is one object per row.</p>
+<p>It stays <strong>out of the DB and out of the bundle</strong> — no column, no field — until someone establishes that attribution must be <em>displayed in-app</em>. That is a licence question sitting with Aviran (<code>PAS-6</code> item 15), not an architecture question. If the answer is yes, adding a column and a bundle field is additive and changes no contract in §4.</p>
+<h3 id="d9-the-coverage-gap-threshold-is-a-real-number-not-a-feeling">D9 — The coverage-gap threshold is a real number, not a feeling</h3>
+<p>PRD req 1 asks for "no unnamed interior hole large enough to read as a rendering bug." Unmeasurable as written, so V7 makes it measurable without needing a municipal boundary polygon as a second input: take the union of every Hood and inspect its <strong>interior</strong> holes.</p>
+<p>Arithmetic behind the numbers, from the shipped constant (<code>MapScreen.telAvivCityWide</code>, <code>latitudeDelta: 0.14</code> ≈ 15.6 km) over a ~700 pt map height: <strong>≈22 m per point</strong> at the cold-open camera. A 200 m square gap is ~9 pt — plainly visible. A 70 m square is ~3 pt — not. Hence <strong>error above 40,000 m² (200 m square)</strong>, <strong>warning above 5,000 m²</strong>. <strong>[ASSUMPTION]</strong> the 700 pt map height; <code>qa</code> can adjust both numbers against a real device without touching anything structural — they are two constants in one file.</p>
+<p>Exterior coverage — "does the dataset reach the edges of the city a user sees" — is deliberately <strong>not</strong> validated. It needs a municipal boundary the dataset does not have, and it is a judgement call ("the area a user opening the app city-wide sees") that a human reviewing the rendered map answers better than a threshold. It stays a <code>qa</code> visual check.</p>
+<h3 id="d10-c1-c2-and-c2a-carve-into-build-phase-1-everything-else-stays-build-phase-2-added-2026-07-31">D10 — C1, C2 and C2a carve into Build Phase 1; everything else stays Build Phase 2 (added 2026-07-31)</h3>
+<p><strong>Decided upstream, not here.</strong> <code>product</code> raised it (<code>PROGRESS.md</code> 2026-07-31, T-033/PAS-13 entry, commit <code>30e002f</code>), <code>chief-of-staff</code> ratified and routed it (commit <code>80f3a36</code>); this amendment records it in the document that owns the steps. <code>BOARD.md</code>'s <code>V1 Build Phases</code> section (<code>b624d2f</code>) holds this task at Build Phase 2 as a whole, and that is unchanged for every step but three.</p>
+<p><strong>Why three steps move.</strong> T-033 ships at Build Phase 1 with its bundled seed pinned authoritative (<a href="../hood-place-detail/TRD.html"><code>hood-place-detail/TRD.md</code></a> §3.4.1, §8 D10). With <code>source == .seed</code>, its Hood sheet reads <code>blurb</code> from <strong>this</strong> task's bundle — and today's shipped bundle is <code>schemaVersion</code> 1 with keys <code>id</code>/<code>name</code>/<code>polygon</code> only, verified by reading the file, no <code>blurb</code> anywhere. Uncaught, a Phase-1 demo could only render T-033 req 2's <em>no-blurb</em> branch, while the blurb is half of that feature's authorizing strategy line (<code>strategy/passenger-strategy.md:37</code>) and all of decision #10's "local read".</p>
+<p><strong>Why exactly these three, and not more.</strong> C1 and C2 are pure client-side decode — a struct gaining optional fields and a decoder gaining boundary rules — with zero backend surface, which is what makes them Phase-1-shaped under the phase split's own no-backend constraint. C2a is one hand-edited fixture under an explicitly stated exception (§3.5). <strong>B1/B2/B4/B6 stay Phase 2 deliberately:</strong> pulling the generated bundle forward would drag B4, the real municipal-geometry sourcing, into Phase 1 — genuinely Phase-2-shaped effort and precisely the long pole the phase split exists to defer. A1 stays Phase 2 because it is a migration, and nothing in Phase 1 reads a column over the wire.</p>
+<p><strong>What this changes and what it does not.</strong> No requirement is added, cut, or rescoped; no contract in §4 moves; the schema, the validator design, the source-file pipeline and D1–D9 are all untouched. The <code>trd-review</code> approvals stand — this is a build-order split of already-approved steps, not new design. Two consequences worth naming: the Phase-1 bundle is briefly hand-edited, which §3.5 states as a bounded exception with C3 as its retirement; and C4's blurb/ring decode assertions ride forward with C2 (<strong>architect's own bounded call</strong> — a decode rule shipped without the test that proves it is a rule nobody checked), while C4's non-overlap tripwire stays with the real geometry it exists to check.</p>
+<hr />
+<h2 id="9-risks-alternatives">9. Risks &amp; alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation / decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Real adjacent boundaries overlap by a metre from source imprecision and V6 rejects a dataset that is materially correct</strong></td>
+<td>The most likely first failure. The fix is a <strong>snapping pass at authoring time</strong> — give neighbours identical shared vertices — not a tolerance. V6 has no tolerance knob to reach for (§2.3), which is deliberate: absorbing real overlap re-opens exactly the ambiguity <code>HoodHitTester</code> cannot resolve. Flagged for <code>data-engineer</code> as the expected first obstacle, not a surprise.</td>
+</tr>
+<tr>
+<td><strong>The dataset ships with every <code>is_tourist_trap</code> as <code>null</code></strong></td>
+<td>Very likely, and named in the PRD. Architecturally correct — <code>tourist-trap-flag</code> req 4 renders <code>null</code> as unflagged — and product-wise it means V1 launches with one of its two signals empty. Not this TRD's to solve; the proposer is <code>data-eng/discovery-engine-spec.md</code> and the escalation is already <code>PAS-6</code> item 14. This task must not invent values to fill it.</td>
+</tr>
+<tr>
+<td><strong>The stdlib non-overlap predicates are subtly wrong</strong></td>
+<td>The real cost of dropping Shapely: correctness now rests on ~150 lines this team wrote, not on GEOS. Mitigated by B1's fixture suite being written <strong>before</strong> the real data exists, and by the two must-pass/must-fail pairs being explicit (two Hoods sharing a full edge must pass; two overlapping by a sliver must fail). A validator first exercised on the real dataset is a validator nobody has watched fail. <code>code-reviewer</code> should read the three predicates as the highest-risk code in this task.</td>
+</tr>
+<tr>
+<td><strong>The generator's two artifacts land in two repos and one commit is forgotten</strong></td>
+<td><code>--check</code> mode plus <code>git diff --exit-code</code> after a regenerate proves both match the source; <code>HoodCatalogTests</code> catches a stale bundle; <code>export_hoods_geojson.py --check</code> catches a stale table. Three independent tripwires because this is the exact failure mode already present in the shipped artifacts (§1).</td>
+</tr>
+<tr>
+<td><strong>Blurb authoring is the actual long pole</strong></td>
+<td>Dozens of hand-written blurbs is editorial work, not engineering, and <code>null</code> is legal for every one of them. The pipeline ships with zero blurbs and stays correct; blurbs land incrementally by re-running the generator. Nothing in the build is blocked on them.</td>
+</tr>
+<tr>
+<td><strong>The delete in §3.3 cascades somewhere unexpected</strong></td>
+<td>Audited: <code>hood_density.hood_id</code> is <code>on delete cascade</code> (correct, regenerates hourly); <code>places.hood_id</code> is currently <code>on delete cascade</code> and <strong>must not be</strong> (D6); <code>events.hood_id</code> (T-043) should follow the same <code>restrict</code> rule. Every current and planned FK into <code>hoods</code> is accounted for.</td>
+</tr>
+<tr>
+<td><strong>Licence terms make the sourced geometry unusable after it is authored</strong></td>
+<td><code>provenance</code> (D8) means the affected rows are identifiable rather than the whole dataset being suspect. The real mitigation is resolving <code>PAS-6</code> item 15 <em>before</em> sourcing, which is why §6 says so plainly.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternatives considered and rejected:</strong> DB-as-source with a dry-run flag (D1); CI-based validation (D2); multi-ring polygons in V1 (D3, §3.4); Shapely/GEOS (§2.3 — a C dependency on a stdlib-only project, and a second dependency story for a file shared with T-042); PostGIS <code>ST_Overlaps</code> server-side validation (§2.3 — puts the invariant behind the credential wall); a <code>not null default false</code> <code>is_tourist_trap</code> (§3.1 — breaks <code>tourist-trap-flag</code> req 7); a provenance column in <code>hoods</code> (D8 — no reader); auto-picking the next migration number (§3.3 — three TRDs racing on one directory); building an attribute <em>update</em> mechanism (PRD is explicit that this ships values once; <code>PAS-6</code> items 12/14 own the pipelines that change them).</p>
+<hr />
+<h2 id="10-left-open-deliberately">10. Left open, deliberately</h2>
+<ul>
+<li><strong>The sourcing method.</strong> OSM / municipal / manual is <code>data-engineer</code>'s call under §3.2's output contract and §6's licence gate. This TRD specifies what the data must satisfy, not where it comes from.</li>
+<li><strong>The values of <code>is_tourist_trap</code>.</strong> No proposer exists. Ships <code>null</code>.</li>
+<li><strong>Which Hoods carry <code>designated_for_progression = true</code>, and the Local threshold.</strong> Aviran's or <code>data-engineer</code>'s (<code>passport</code> PRD, <code>PAS-6</code>). This task ships the field with every row <code>false</code> if no set is provided — which is legal, and makes <code>passport</code> render an empty progress view. Named so it is not discovered at <code>qa</code>.</li>
+<li><strong>Been-place re-attribution after a boundary correction</strong> (§5.4 step 5). Device-local state, post-launch problem, <code>passport</code>'s open question.</li>
+<li><strong>Exterior coverage</strong> (D9). A human looks at the rendered map.</li>
+</ul>
+<hr />
+<h2 id="11-build-breakdown">11. Build breakdown</h2>
+<p>Ordered. The two tracks are independent after B1 — <code>ios-developer</code> needs the generated bundle, nothing else.</p>
+<p><strong>Build-phase split (added 2026-07-31, §8 D10).</strong> This task is held to <strong>Build Phase 2</strong> apart from three iOS steps. <strong>Build Phase 1: C1, C2, C2a</strong> — pure client-side decode plus one hand-edited fixture, zero backend surface, dispatched to <code>ios-developer</code> + <code>ios-code-reviewer</code>. <strong>Build Phase 2: everything else</strong> — A1, B1–B6, C3, C4, C5. B4 (real municipal geometry) is the long pole and is exactly what the phase split exists to keep out of Phase 1; nothing in the Phase-1 three depends on it.</p>
+<p><strong>Data / backend track — all Build Phase 2.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Migration <code>003_hood_attributes.sql</code> — the three <code>add column if not exists</code> per §3.1. No RLS change. Update <code>database/README.md</code>'s status table.</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>B1</td>
+<td><code>database/scripts/validate_dataset.py</code> — the shared file <code>C-HOOD-1</code> clause 4 names (§4.4), stdlib only (§2.3). This task's half: the three overlap predicates, V1–V9, <code>resolve_hood</code>, <code>area_centroid</code>. <strong>Coordinate with T-042's B2, which owns the containment half of the same file</strong> — whichever lands first writes the skeleton. Unit-tested against synthetic fixtures: two disjoint polygons, two sharing a full edge (<strong>must pass</strong>), two sharing a single vertex (<strong>must pass</strong>), two overlapping by a sliver (<strong>must fail</strong>), one fully inside another (<strong>must fail</strong>), a self-intersecting ring, a nested/multi-ring input, a swapped lat/lng pair, a ring outside Tel Aviv, a layout with a 200 m interior hole. <strong>Write these before the real data exists</strong> — see §9's second risk row. <strong><code>resolve_hood</code> additionally asserts against the shared cross-language fixture</strong> <code>database/data/fixtures/hood-containment-cases.json</code> (<code>places-dataset/TRD.md</code> §9 B2a), the same file T-043's SQL <code>hood_for_point()</code> is asserted against — <strong>including on-boundary and shared-edge cases, whose expected result is no Hood</strong> (§2.2, §2.3 predicate 1). Whichever of the three tasks builds first writes that file; neither side adds a case without adding it for both.</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B2</td>
+<td><code>database/scripts/build_hoods.py</code> — §4.5's CLI, calling B1's validator, both emitters per §3.3 and §3.5, <code>--check</code> mode. Deterministic output (sorted by <code>id</code>, stable float formatting). Sibling to T-042's <code>export_places.py</code>; same one-source-two-artifacts shape.</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B3</td>
+<td>Repurpose <code>export_hoods_geojson.py</code> into the post-apply drift check (§5.3) — <code>--check</code> mode, docstring corrected to say it is no longer the primary path. Not deleted, not renamed.</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B4</td>
+<td><strong>Author <code>database/data/hoods-tel-aviv.source.json</code></strong> — geometry, names, provenance, and <code>designated_for_progression</code>. Preserve <code>001</code>'s five slugs where the Hood survives. Method open (§6). This is the long pole.</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B5</td>
+<td>Hand-authored blurbs into the source (may be partial; <code>null</code> is legal for every row). Founders' editorial work per the PRD's own assumption — B5 does not block B6.</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B6</td>
+<td>Run the generator, commit both artifacts. <code>passenger-brain</code>: the data migration. <code>passenger-code</code>: the bundle. Regenerate-and-<code>git diff --exit-code</code> in the build report as the proof (§4.5).</td>
+<td><strong>[Algo/Data]</strong> + <strong>[Backend]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>iOS track — small. C1/C2/C2a build at Build Phase 1 against the existing placeholder bundle; C3–C5 wait for B6's generated bundle at Build Phase 2.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Build phase</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td><code>Hood</code> gains <code>blurb</code>, <code>isTouristTrap</code>, <code>designatedForProgression</code>; <code>centroid</code> becomes stored rather than averaged (§4.3, D5). No behaviour, no view, no consumer in this task. <strong>Carved into Phase 1 whole</strong>, not blurb-only: the other two fields and the stored centroid are optional-with-fallback at decode (§4.3), so carrying them costs nothing and splitting the struct across two phases would cost a second edit of the same file.</td>
+<td><strong>1</strong></td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C2</td>
+<td><code>HoodCatalog.load()</code> — decode the three attributes and <code>centroid</code> with §4.3's boundary rules; drop a trailing duplicate ring point when present (§4.2); keep the averaged-centroid fallback. <strong>Phase-1 scope includes its own decode assertions</strong> — <code>schemaVersion</code> 2 accepted, <code>blurb</code> <code>""</code>/whitespace → <code>nil</code>, absent <code>centroid</code> → averaged fallback. Those three are C4's blurb/ring assertions pulled forward with the code they test; the rest of C4 (the non-overlap tripwire over the <em>real</em> shipped bundle) stays Phase 2 with the geometry it exists to check.</td>
+<td><strong>1</strong></td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C2a</td>
+<td><strong>Hand-edit the existing <code>passenger-code/Passenger/Resources/hoods-tel-aviv.json</code></strong> — <code>schemaVersion</code> 1 → 2, plus a short hand-authored <strong>provisional</strong> <code>blurb</code> on each of the four placeholder Hoods (<code>florentin</code>, <code>kerem-hateimanim</code>, <code>neve-tzedek</code>, <code>lev-hair</code>), one of them deliberately left <code>null</code> so T-033 req 2's no-blurb branch stays observable. <strong>Geometry untouched; no other field added</strong> (§3.5). File declares the blurbs provisional in-line. Overwritten wholesale by B6/C3 at Phase 2.</td>
+<td><strong>1</strong></td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C3</td>
+<td>Swap in B6's <code>Resources/hoods-tel-aviv.json</code>. <strong>This is what retires C2a's hand-edit and restores the generator as sole emitter.</strong></td>
+<td><strong>2</strong></td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C4</td>
+<td><code>HoodCatalogTests</code> — the non-overlap tripwire over the shipped bundle (§5.3), plus unique ids, every ring decodes, both open and closed rings decode identically, and blurb <code>""</code> → <code>nil</code> (the last of these lands early with C2).</td>
+<td><strong>2</strong></td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C5</td>
+<td>Confirm on device that real polygon counts do not regress T-031's cold-open budget (<code>map-hoods-heat/TRD.md</code> §7 allots ≤0.2 s to decode+projection, measured against 4 rectangles). Dozens of real polygons with real vertex counts is a different number; measure it, report it. If it regresses, the fix is a build-time Douglas–Peucker simplification pass in <code>build_hoods.py</code> — <strong>do not</strong> move decoding onto the launch path.</td>
+<td><strong>2</strong></td>
+<td><strong>[iOS]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>trd-review</code> sign-off needed from:</strong></p>
+<ul>
+<li><strong><code>data-engineer</code> + <code>code-reviewer</code></strong> — B1–B6, the bulk. The validator design (§5.2), the stdlib overlap predicates (§2.3), and the source contract (§3.2) are the substance of this TRD. <strong>B1 must be reviewed together with <code>places-dataset/TRD.md</code> §9 B2 — one file, two authors.</strong></li>
+<li><strong><code>developer</code> + <code>code-reviewer</code></strong> — A1, B6's SQL, §3.3's upsert-and-prune correction, and D6's <code>on delete restrict</code> finding.</li>
+<li><strong><code>ios-developer</code> + <code>ios-code-reviewer</code></strong> — C1–C5, §4.2's ring form, and D5's centroid promotion.</li>
+</ul>
+<p><strong>Also put in front of whoever holds T-033's TRD:</strong> D7 (its migration <code>003</code> now has nothing left in it — <code>places</code> went to T-042, <code>blurb</code> came here) and D6's <code>cascade</code>→<code>restrict</code> correction. Neither touches T-033's iOS behaviour or any contract in its §4, but both must land before its A1 is built.</p>
+<p><strong>Reviewed jointly with T-042, not separately, on three points:</strong> <code>C-HOOD-1</code>'s wording (§4.4 — quoted, must stay identical), the stdlib-vs-Shapely call (§2.3 — one file cannot have two answers), and B1/B2 ownership of <code>validate_dataset.py</code>.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Events Ingestion Pipeline — TRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>live-events-pipeline/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="live-events-ingestion-pipeline-trd">Live Events Ingestion Pipeline — TRD</h1>
+<p><strong>Task:</strong> T-043 · <strong>Status:</strong> ready for <code>trd-review</code>
+<strong>Owner:</strong> architect · <strong>Date:</strong> 2026-07-31
+<strong>PRD:</strong> <a href="./live-events-pipeline.html"><code>live-events-pipeline.md</code></a> (Draft v1)
+<strong>No design spec — pure-build/data, no UX surface.</strong> The client half is <a href="../live-events-overlay/live-events-overlay.html"><code>live-events-overlay</code></a> (T-034), a separate task with its own design pass.
+<strong>Upstream:</strong> <a href="../hood-dataset/hood-dataset.html"><code>hood-dataset</code></a> (T-040) · <strong>Soft upstream:</strong> <a href="../places-dataset/places-dataset.html"><code>places-dataset</code></a> (T-042) · <strong>Feasibility:</strong> <a href="../../data-eng/live-events-feasibility.md"><code>data-eng/live-events-feasibility.md</code></a> (<code>PAS-5</code>)</p>
+<hr />
+<h2 id="1-context">1. Context</h2>
+<p>Read the PRD first; nothing here restates it. This document decides the seven things it left open and pins the one contract T-034's client builds against.</p>
+<p><strong>Which source(s) ship is still Aviran's (<code>PAS-6</code> item 10) and this TRD does not pre-decide it.</strong> Every structure below is vendor-neutral by construction: exactly one directory in this design is allowed to know a vendor's name (§2.2), and nothing in the schema, the dedup rule, the expiry rule, the ranker, or the client contract mentions one. Adding, swapping, or dropping a feed is an adapter file plus a row in <code>event_sources</code>.</p>
+<p><strong>Open calls resolved here:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Open item (PRD §Technical design / §Assumptions)</th>
+<th>Call</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Is <code>rank</code> absolute or per-hour?</td>
+<td><strong>Absolute, and time-invariant.</strong> Time fit is a filter, never a rank term — <code>discovery-engine-spec.md</code> R1</td>
+<td>§4.3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Does the ranker run at ingest or at read?</td>
+<td><strong>At ingest</strong>, as a pass after the run's rows land. Read-time ranking is unreproducible and puts unbounded work on the client's cold-open path</td>
+<td>§4.3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Ingest cadence (PRD req 7, <code>[ASSUMPTION]</code>)</td>
+<td><strong>Hourly at <code>:20</code>.</strong> But the requirement is made true by the <em>fetch horizon exceeding the serve horizon</em>, not by the cadence</td>
+<td>§4.4, §5.1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Retention period on expired rows (PRD req 5, <code>[ASSUMPTION]</code>)</td>
+<td><strong>90 days past <code>end_at</code></strong>, then hard-deleted. <code>events</code> holds no user data of any kind, so this is hygiene, not privacy</td>
+<td>§3.5</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Where ingest runs</td>
+<td><strong>Supabase Edge Function on a <code>pg_cron</code> schedule.</strong> Migration <code>002</code>'s own comment pre-authorizes exactly this case</td>
+<td>§2.1, §6</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Event→Hood attribution with no PostGIS</td>
+<td><strong>A SQL <code>hood_for_point()</code>, owned here.</strong> <code>places-dataset</code> needs the same predicate offline in Python and keeps its own — two implementations, held to <strong>one algorithm spec and one shared fixture</strong>, not unified</td>
+<td>§4.1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Whether the client ever sees an unservable row</td>
+<td><strong>No — the served set is a database view, not a client query with filters</strong></td>
+<td>§4.2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three things the PRD does not name that this design has to handle</strong> (detail in §8): an event <strong>cancelled or withdrawn at source</strong> is a staleness case distinct from expiry; <strong><code>end_at</code> is absent from many real feeds</strong>, which turns req 2's strict drop into a silent majority-discard; and req 6's allowed input list includes <strong>"proximity"</strong>, which contradicts its own same-order-for-every-device bullet unless proximity means something static.</p>
+<hr />
+<h2 id="2-architecture">2. Architecture</h2>
+<h3 id="21-where-each-piece-runs">2.1 Where each piece runs</h3>
+<pre><code>Supabase Edge Function  &quot;ingest-events&quot;     ← the only component that talks to the outside world
+  ├─ adapters/&lt;source&gt;.ts   one per feed. The ONLY vendor-aware code in the system.
+  ├─ canonical.ts           CanonicalEvent, required-field validation, dedup key
+  └─ index.ts               orchestrate: fetch → normalize → validate → upsert → reconcile → log
+
+Postgres (migrations, database/)
+  ├─ events, event_source_links, event_sources, event_ingest_runs      §3
+  ├─ hood_for_point() / reattribute_events()                           attribution  §4.1
+  ├─ event_rank_score() / recompute_event_ranks()                      ranking      §4.3
+  ├─ events_public (view)                                              THE contract §4.2
+  └─ pg_cron → pg_net → the Edge Function, hourly                      §4.4
+
+iOS client (T-034, not this TRD)  — reads events_public. Sorts. Truncates. Nothing else.
+</code></pre>
+<p>Three boundaries, and they are the whole design:</p>
+<ul>
+<li><strong>The adapter boundary.</strong> An adapter's only job is <code>raw source payload → CanonicalEvent[]</code>. It knows a vendor's URL, auth header, field names, and pagination. It knows nothing about Hoods, dedup, ranking, or the client. Every requirement downstream of <code>canonical.ts</code> is written against <code>CanonicalEvent</code> and is therefore true for a feed nobody has chosen yet.</li>
+<li><strong>The database boundary.</strong> Attribution, dedup collapse, expiry, withdrawal, ranking, and the served-set filter are all <strong>in Postgres</strong>, not in the Edge Function. The Edge Function is a fetcher and a normalizer. This is what makes a second source cost an adapter rather than a second copy of the business rules — and it is what lets <code>data-engineer</code> retune the ranker in SQL without redeploying anything, the same property migration <code>002</code> bought for density thresholds.</li>
+<li><strong>The <code>events_public</code> boundary.</strong> The client cannot query a row this pipeline has not decided to serve, because the base table denies it. "The client applies no business logic" (PRD §Technical design) is structural here, not a convention T-034 has to honour.</li>
+</ul>
+<h3 id="22-what-is-allowed-to-know-a-vendors-name">2.2 What is allowed to know a vendor's name</h3>
+<p>Exactly two places: <code>functions/ingest-events/adapters/*.ts</code>, and rows in <code>event_sources</code>. Nowhere else — not a column name, not a CHECK constraint, not the view, not the ranker, not a migration comment beyond a factual note. <code>trd-review</code> should treat a vendor name appearing outside those two places as a blocking finding; that is the mechanical form of "written source-agnostically."</p>
+<h3 id="23-repo-placement">2.3 Repo placement</h3>
+<p><code>passenger-brain/database/functions/ingest-events/</code>. <code>database/README.md</code> already declares "scheduled functions" in scope for this directory, and the pipeline's SQL and its fetcher are one deliverable that must version together. <strong><code>database/README.md</code> needs a <code>functions/</code> row in its Layout section</strong> — <code>developer</code>'s to add with A1. Reviewers may overturn the location; nothing else in this TRD depends on it.</p>
+<hr />
+<h2 id="3-data-model">3. Data model</h2>
+<p>Four new tables. No table here holds, derives from, or can be joined to any user — there is no identity in V1 and this pipeline introduces none. <strong>All four <code>create table</code> and every <code>create index</code> below use <code>if not exists</code></strong>, matching migrations <code>001</code>/<code>002</code>'s idempotency convention — a bare <code>create table</code>/<code>create index</code> would fail on re-run and this TRD's earlier drafts omitted the guard. Migration number: <strong><code>005</code></strong>, settled — <code>003</code> = <code>hood-dataset</code> (T-040), <code>004</code> = <code>places-dataset</code> (T-042), <code>005</code> = this task. (Corrected 2026-07-31: this line previously said "do not hardcode, 003 is claimed by T-033" — stale; T-033's TRD amendment struck its own migration entirely and the sequence above is what <code>trd-review</code> actually confirmed across all three sibling TRDs.) <code>developer</code> records the applied filename in <code>database/README.md</code>'s Status table (§9).</p>
+<h3 id="31-event_sources-the-recorded-decision-in-data">3.1 <code>event_sources</code> — the recorded decision, in data</h3>
+<pre><code class="language-sql">create table if not exists public.event_sources (
+  key                      text primary key,          -- 'some-feed'
+  display_name             text not null,
+  enabled                  boolean not null default false,
+  tier                     smallint not null default 2 check (tier &gt; 0),
+  default_duration_minutes int null,                  -- see §8 F2. null = source always supplies end time
+  coverage_note            text not null,             -- what this feed does and does not cover (PRD req 1)
+  terms_verified_at        timestamptz null,
+  terms_note               text null,
+  last_success_at          timestamptz null,
+  created_at               timestamptz not null default now(),
+  constraint enabled_requires_verified_terms
+    check (not enabled or terms_verified_at is not null)
+);
+</code></pre>
+<p>Two of PRD req 1's three bullets are enforced rather than asserted. <strong>A source cannot be pulling data without its terms having been verified</strong> — the CHECK makes "no source is integrated on an unverified access assumption" a constraint, not a promise in a doc. <code>enabled</code> defaults to <code>false</code>, so a source never starts ingesting merely by existing. <code>coverage_note</code> is <code>not null</code>, so req 1's "the coverage each one does and does not give" has a mandatory home; the ticketed-skew disclosure lands there and in the <code>trd-review</code> hand-off, not at launch.</p>
+<h3 id="32-events-one-row-per-real-world-event">3.2 <code>events</code> — one row per real-world event</h3>
+<pre><code class="language-sql">create table if not exists public.events (
+  id                uuid primary key default gen_random_uuid(),
+  dedup_key         text not null unique,                          -- §4.5
+  name              text not null,
+  start_at          timestamptz not null,
+  end_at            timestamptz not null,
+  end_at_estimated  boolean not null default false,                -- §8 F2
+  lat               double precision not null,
+  lng               double precision not null,
+  venue_name        text null,
+  hood_id           text null references public.hoods(id) on delete set null,
+  category          text null,
+  rank              real not null default 0,
+  primary_source    text not null references public.event_sources(key),
+  first_ingested_at timestamptz not null default now(),
+  ingested_at       timestamptz not null default now(),            -- last time a source confirmed this row
+  withdrawn_at      timestamptz null,
+  constraint end_after_start check (end_at &gt; start_at)
+);
+
+create index if not exists events_start_at_idx on public.events (start_at) where withdrawn_at is null;
+create index if not exists events_end_at_idx   on public.events (end_at);
+create index if not exists events_hood_idx     on public.events (hood_id);
+</code></pre>
+<p>Six decisions inside that schema:</p>
+<ul>
+<li><strong><code>hood_id</code> is nullable, and an unattributed event is stored, not dropped.</strong> PRD req 3's second bullet says an event in no Hood "is not ingested." The <em>observable</em> requirement — it never reaches the map — is met by the view (§4.2). Storing it with <code>hood_id = null</code> is what makes req 3's <strong>third</strong> bullet ("attribution is re-resolvable: a Hood boundary correction re-attributes existing events") actually possible; a dropped row cannot be re-attributed by anything. Same reasoning as req 5's own no-hard-delete-on-expiry rule. <strong>Deliberate deviation from the PRD's literal wording, flagged for <code>trd-review</code>.</strong></li>
+<li><strong><code>on delete set null</code>, not <code>restrict</code> — a stated divergence from <code>places.hood_id</code>, not a silent one, and the more correct choice here rather than a defect.</strong> <code>hood-dataset/TRD.md</code> (T-040, §8 risk table) expects <code>events.hood_id</code> to follow <code>places.hood_id</code>'s <code>restrict</code> rule; here it does not, deliberately. <code>places.hood_id</code> must be <code>restrict</code> because a place silently losing its Hood is data loss — curated, hand-authored rows meant to always resolve to exactly one Hood. <code>events</code> rows are the opposite in kind: numerous, machine-ingested, ephemeral (90-day retention, §3.5), and already re-attachable by design — <code>hood_id = null</code> is a normal, expected state from the moment of ingest (the bullet above), not a failure state a constraint should guard. Concretely, <code>restrict</code> here would <strong>break T-040's own build step</strong>: <code>hood-dataset/TRD.md</code> §3.3 prunes stale Hood rows with a scoped <code>delete from public.hoods where city = 'tel-aviv' and id not in (...)</code> whenever the real dataset replaces placeholder rows; any placeholder Hood with attributed events would make that <code>delete</code> fail outright under <code>restrict</code>, wherever <code>hood_density</code> cascades cleanly today. <code>reattribute_events()</code> (§4.1) is the designed repair path regardless of cause — a Hood-row deletion nulls the affected rows exactly as a boundary revision would, and the next pass resolves what it can.</li>
+<li><strong>No <code>place_id</code> column in this migration.</strong> PRD says <code>places-dataset</code> is needed "only if venue matching is wanted; no P0 here requires it." Adding a nullable FK to a table that does not exist yet would make this migration depend on T-042 for no P0 benefit. It is additive later (§4.3's venue-corroboration rank term degrades to zero without it).</li>
+<li><strong><code>id</code> is a uuid, not a slug.</strong> Hoods and places are hand-curated and get stable slugs; events are machine-ingested and numerous. The uuid is stable across runs because the row survives upsert-on-<code>dedup_key</code> — T-034's marker identity does not churn between fetches.</li>
+<li><strong><code>ingested_at</code> means "last confirmed by a source,"</strong> which is what req 7's freshness bound needs; <code>first_ingested_at</code> is kept separately so "how long have we known about this" stays answerable.</li>
+<li><strong><code>primary_source</code> is a FK, not free text.</strong> A row cannot name a source that was never registered and terms-checked.</li>
+</ul>
+<h3 id="33-event_source_links-dedup-and-req-4s-uniqueness">3.3 <code>event_source_links</code> — dedup, and req 4's uniqueness</h3>
+<pre><code class="language-sql">create table if not exists public.event_source_links (
+  source          text not null references public.event_sources(key),
+  source_event_id text not null,
+  event_id        uuid not null references public.events(id) on delete cascade,
+  last_seen_at    timestamptz not null default now(),
+  primary key (source, source_event_id)
+);
+create index if not exists event_source_links_event_idx on public.event_source_links (event_id);
+</code></pre>
+<p>This is the whole of req 4. <code>(source, source_event_id)</code> is the primary key, so re-ingesting a source can never duplicate. Two sources carrying the same real event produce <strong>two link rows pointing at one <code>events</code> row</strong>, so the client sees one marker and provenance is not lost. <code>last_seen_at</code> is what the withdrawal reconcile reads (§5.3).</p>
+<p>No raw source payload is stored. Debugging belongs in the function's logs, not in a table that would then need a retention and PII policy of its own for third-party organiser data we have no reason to hold.</p>
+<h3 id="34-event_ingest_runs-req-8s-second-bullet-and-p1s-health-readout">3.4 <code>event_ingest_runs</code> — req 8's second bullet, and P1's health readout</h3>
+<pre><code class="language-sql">create table if not exists public.event_ingest_runs (
+  id           bigint generated always as identity primary key,
+  source       text not null references public.event_sources(key),
+  started_at   timestamptz not null default now(),
+  finished_at  timestamptz null,
+  outcome      text not null default 'running'
+               check (outcome in ('running','success','partial','failed','skipped')),
+  window_start timestamptz null,
+  window_end   timestamptz null,
+  rows_fetched int not null default 0,
+  rows_written int not null default 0,
+  rows_dropped int not null default 0,
+  drop_reasons jsonb not null default '{}'::jsonb,   -- {&quot;missing_end_at&quot;: 12, &quot;no_hood&quot;: 3, ...}
+  error        text null
+);
+</code></pre>
+<p>This table is <strong>P0, not the PRD's P1</strong>, because req 2 ("dropped at ingest <strong>and counted</strong>") and req 8 ("a source that has returned nothing for a full day is logged, not silently absorbed") are both unsatisfiable without it. The P1 health readout is then a <code>select</code>, not new work. <code>outcome</code> is also the safety interlock for withdrawal (§5.3): only <code>'success'</code> — a complete fetch — may mark anything withdrawn.</p>
+<h3 id="35-retention">3.5 Retention</h3>
+<p>The same scheduled job deletes <code>events</code> rows whose <code>end_at</code> is more than <strong>90 days</strong> past, cascading their links. <code>event_ingest_runs</code> keeps 180 days. <strong>[ASSUMPTION]</strong> — the PRD leaves the period unstated; 90 days keeps the health and dedup-quality window meaningful and is product's to override. Worth stating plainly: nothing in this feature stores a user coordinate, a device id, or anything derived from one, so retention here is cost and hygiene, not the location-minimisation rule that governs the client.</p>
+<hr />
+<h2 id="4-contracts">4. Contracts</h2>
+<p><code>developer</code> and <code>data-engineer</code> build against this section and do not need each other's code. T-034's <code>ios-developer</code> needs <strong>only §4.2</strong>.</p>
+<h3 id="41-hood-attribution-one-algorithm-spec-and-one-fixture-shared-with-places-dataset-two-implementations">4.1 Hood attribution — one algorithm spec and one fixture shared with <code>places-dataset</code>, two implementations</h3>
+<pre><code class="language-sql">-- Even-odd ray casting over hoods.polygon's flattened ring, bbox prefilter.
+-- STABLE (depends on table contents), not IMMUTABLE.
+create function public.hood_for_point(p_lng double precision, p_lat double precision)
+  returns text language plpgsql stable;
+
+-- Re-runs attribution. Called after any Hood geometry revision. Returns rows changed.
+create function public.reattribute_events(p_hood_id text default null) returns int;
+
+revoke execute on function public.hood_for_point(double precision, double precision),
+                          public.reattribute_events(text)
+  from public, anon, authenticated;
+</code></pre>
+<p>The <code>revoke</code> is not optional, same reasoning as §4.3's: Postgres grants EXECUTE to PUBLIC on every new function and Supabase auto-exposes each as a PostgREST RPC — the exact HIGH finding <code>security-auditor</code> raised on migration <code>002</code>. <code>reattribute_events()</code> is the sharper of the two exploits: it performs a bulk <code>update</code> across <code>events</code> and, without this revoke, would be callable as <code>rpc/reattribute_events</code> with the app's public anon key — an unauthenticated write-amplification endpoint. It is currently blunted only <em>implicitly</em>, by <code>events</code>' own RLS (§4.2) denying the row-level write the function would otherwise perform — exactly the kind of accidental protection §4.3 already warns against relying on: if any future migration ever grants <code>authenticated</code> a narrower write on <code>events</code>, this reopens silently with nothing here having changed. <code>hood_for_point()</code> is read-only and lower-risk on its own, but gets the identical treatment for the same reason nothing in §4.3 was left ungated: a reviewer should never have to reason about which of a file's functions "happen to be" safe.</p>
+<p><strong>PostGIS stays disabled.</strong> T-031's TRD §2.3 turned it down and said enabling it later is additive; this is the first server-side spatial need, and it still does not justify it. Ray casting over dozens of single-ring polygons is trivial at this scale, and enabling an extension is an Aviran-gated dashboard action (migration <code>002</code>'s <code>pg_cron</code> note is the precedent for that friction). Rejecting PostGIS also keeps <code>hoods.polygon</code>'s stored shape exactly as migration <code>001</code> committed it.</p>
+<p><strong><code>places-dataset</code> req 1 needs the identical predicate</strong> ("the stored <code>hood_id</code> equals the Hood whose polygon contains the place's coordinates — verified at authoring time"). An earlier draft of this TRD called that "one implementation, two consumers," with whichever task built first owning the function. <strong>That was wrong, and <code>trd-review</code> corrected it</strong> — <code>developer</code>, <code>data-engineer</code> and <code>code-reviewer</code> all reached the same reading independently across T-040's, T-042's and this task's reviews. The resolution:</p>
+<p><strong>Two implementations. Both necessary. Neither unifiable.</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>T-040 / T-042</th>
+<th>T-043 (this task)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where</td>
+<td><code>database/scripts/validate_dataset.py</code></td>
+<td><code>public.hood_for_point()</code></td>
+</tr>
+<tr>
+<td>Language</td>
+<td>stdlib Python</td>
+<td><code>plpgsql</code>, inside Postgres</td>
+</tr>
+<tr>
+<td>When</td>
+<td>offline, authoring time, once per dataset edit</td>
+<td>live, at ingest, per event, hourly</td>
+</tr>
+<tr>
+<td>Reads</td>
+<td>the checked-in authored Hood source file</td>
+<td>the live <code>hoods</code> table</td>
+</tr>
+<tr>
+<td>DB credentials</td>
+<td><strong>none, by design</strong> (<code>hood-dataset/TRD.md</code> §2.1)</td>
+<td>runs inside the database</td>
+</tr>
+</tbody>
+</table>
+<p>No bridge exists in either direction, and none is proposed anywhere: a cron-triggered Deno Edge Function shelling out to a Python subprocess per ingested event does not belong in a hot path, and pointing the offline validator at a live database reintroduces exactly the Aviran-gated <code>DATABASE_URL</code> dependency T-040 inverted its whole pipeline to escape. Forcing one implementation would break one of the two consumers.</p>
+<p><strong>What is actually shared, and is binding on both sides:</strong></p>
+<ol>
+<li><strong>One algorithm spec, stated identically in all three TRDs</strong> — closed single-ring WGS84 <code>[[lng,lat],…]</code> (migration <code>001</code>'s committed format), even-odd ray cast, bbox prefilter, and <strong>on-boundary → no Hood</strong>. <code>hood_for_point()</code> returns <code>null</code> for a point exactly on a ring edge or vertex, matching <code>point_strictly_inside</code>'s <code>False</code> (<code>hood-dataset/TRD.md</code> §2.3 predicate 1). This is pinned as a value, not left to each implementation's rounding: without it, a place and an event at the identical coordinate on a shared Hood edge attribute differently, which is the precise bug this section exists to prevent and the one nobody would find by inspection.</li>
+<li><strong>One checked-in fixture file</strong> — <code>database/data/fixtures/hood-containment-cases.json</code>, point→expected-<code>hood_id</code> cases (strictly inside, outside, on-edge, on-vertex, in-bbox-outside-ring, concave notch, shared edge between two adjacent Hoods, swapped lat/lng), <strong>asserted against both implementations</strong> (§9 A3 here; <code>places-dataset/TRD.md</code> §9 B2a; <code>hood-dataset/TRD.md</code> §9 B1). Whichever task builds first writes the file; neither side adds a case without adding it for both. A boundary-case fix in one language cannot then silently stay wrong in the other.</li>
+</ol>
+<p>Flagged for both <code>trd-review</code>s (§8 F7).</p>
+<p>A third implementation of this predicate already ships — <code>HoodHitTester.swift</code>, client-side, for tap targets. That is a different job (44pt tolerance, screen space), is not a candidate for consolidation, and is <strong>not</strong> held to the fixture above. The database is authoritative for attribution; the client never re-attributes anything.</p>
+<h3 id="42-events_public-the-only-thing-the-client-may-read">4.2 <code>events_public</code> — the only thing the client may read</h3>
+<p><strong><code>with (security_invoker = false)</code> requires Postgres 15+</strong> (the <code>security_invoker</code> view option was added in that release; on an older server this clause is a syntax error, not a silent no-op). <strong>Needs confirming against this project's actual Supabase Postgres version before A2 is built</strong> — Supabase's default tier has shipped 15+ for a while, but no TRD in this project has stated the confirmed version, and this is the first clause anywhere in the schema that depends on one. If the project is on an older version, the fallback is a <code>security definer</code> function wrapping the same <code>select</code> instead of the view option — same access boundary, different syntax — not a redesign.</p>
+<pre><code class="language-sql">create view public.events_public
+with (security_invoker = false) as
+select e.id, e.name, e.start_at, e.end_at, e.lat, e.lng,
+       e.venue_name, e.hood_id, e.category, e.rank,
+       s.display_name as source_name
+from public.events e
+join public.event_sources s on s.key = e.primary_source
+where e.withdrawn_at is null
+  and e.hood_id is not null
+  and e.end_at &gt; now()
+  and e.rank &gt;= public.event_rank_floor();
+
+revoke all on public.events, public.event_source_links,
+               public.event_sources, public.event_ingest_runs
+  from anon, authenticated;
+grant select on public.events_public to anon, authenticated;
+</code></pre>
+<p>RLS is enabled on all four base tables with <strong>no policy of any kind</strong> — denial by absence, the same idiom migration <code>001</code> used for writes. The view is the access-control boundary and is therefore deliberately <code>security_invoker = false</code>. <strong>This inverts <code>001</code>'s public-read-policy pattern and reviewers should expect the Supabase linter to flag <code>security definer view</code>.</strong> It is the right shape here because the filter <em>is</em> the contract: expiry, withdrawal, attribution and the selection floor cannot be forgotten by a caller, and the columns the client has no business seeing (<code>dedup_key</code>, <code>primary_source</code>, <code>ingested_at</code>, <code>end_at_estimated</code>) are not projected. It exposes no user-scoped data because none exists. <code>security-auditor</code> should confirm the base-table revokes independently — migration <code>002</code>'s HIGH finding was exactly a default grant nobody revoked.</p>
+<p><strong>Required build-time check, not just stated intent:</strong> the four tables are <code>events</code>, <code>event_sources</code>, <code>event_source_links</code>, <code>event_ingest_runs</code>. A1/A2's migration must issue <code>alter table ... enable row level security</code> on <strong>all four individually</strong>, and <code>code-review</code>/<code>security-auditor</code> must confirm all four — not three-of-four — by querying <code>pg_class.relrowsecurity</code> (or the Supabase dashboard's RLS column) for each table name explicitly before sign-off. A table that quietly ships without its own <code>enable row level security</code> line is invisible until something queries it directly through PostgREST, the same silent-until-probed failure mode as an unrevoked function.</p>
+<p>Client request (T-034, mirroring T-031 §4.5's shape — one fetch alongside the density load, re-filtered locally per hour):</p>
+<pre><code>GET {supabase_url}/rest/v1/events_public
+    ?select=id,name,start_at,end_at,lat,lng,venue_name,hood_id,category,rank,source_name
+    &amp;start_at=gte.{anchorHour ISO8601 UTC}
+    &amp;start_at=lt.{anchorHour + 13h ISO8601 UTC}
+    &amp;order=rank.desc
+Headers: apikey: &lt;anon&gt;, Authorization: Bearer &lt;anon&gt;
+</code></pre>
+<p>Byte-identical for every device. No parameter carries a location, a device id, or anything user-specific — the same property T-031 §3.3 established, preserved here.</p>
+<p><strong>Three obligations this contract puts on T-034, which it must build and this TRD cannot:</strong>
+1. Re-filter the cached payload on <code>end_at &gt; now()</code> before every render (PRD req 5, second bullet). The view cannot protect a payload the client already holds.
+2. Apply the on-screen marker cap by truncating the <code>rank</code>-sorted list. The cap is T-034's number; this pipeline does not enforce one.
+3. <code>source_name</code> is projected <strong>so attribution is possible without a schema change</strong>. Whether the sheet must display it is a per-source ToS question nobody has answered — see §8 F4.</p>
+<h3 id="43-rank-what-it-is-at-a-level-the-client-can-trust">4.3 <code>rank</code> — what it is, at a level the client can trust</h3>
+<p><strong>Definition, normative:</strong> <code>rank</code> is a <code>real</code> in <code>[0, 1]</code>. Higher means "surface this sooner." It is <strong>comparable across the entire served window and across every Hood</strong> — one scale, no scoping.</p>
+<p>Four guarantees the client may rely on without knowing anything about the algorithm:</p>
+<ul>
+<li><strong>Deterministic.</strong> Same stored inputs, same value. No randomness, no clock term, no per-request computation. Two devices requesting the same hour receive the same order (PRD req 6).</li>
+<li><strong>No per-user input exists.</strong> There is no identity, no profile store, and no request parameter that could carry one. Non-personalization is structural, not a policy the ranker chooses to honour.</li>
+<li><strong>Time-invariant.</strong> <code>rank</code> contains no recency, imminence, or decay term. <em>Time fit is a hard filter, not a weight</em> — <code>discovery-engine-spec.md</code> R1, verbatim. This is what resolves the PRD's absolute-vs-per-hour question: rank is <strong>absolute</strong>, and the per-hour behaviour the overlay wants falls out entirely of the window filter plus the client's hour bucketing. A per-hour ordinal would need a row per (event, hour) for any multi-hour event, for no gain.</li>
+<li><strong>Selection happens before the client sees anything.</strong> <code>event_rank_floor()</code> removes the long tail inside the view. PRD req 6's pass condition — the top set for a busy Friday must not be "everything ingested, in time order" — is a property of the pipeline, and the client truncating to a marker cap is a second, independent bound on top of it.</li>
+</ul>
+<p>The seam, mirroring <code>density_band_for_score()</code> in migration <code>002</code> — weights live in SQL, retunable without an app release or a function redeploy:</p>
+<pre><code class="language-sql">-- Pure. IMMUTABLE. No now(), no random(), no table reads. data-engineer owns the weights.
+create function public.event_rank_score(p_features jsonb) returns real language sql immutable;
+
+-- The pass. Recomputes rank for every non-withdrawn, unexpired row, every cycle,
+-- so a weight change propagates without a backfill migration.
+create function public.recompute_event_ranks() returns int;
+
+-- The selection floor. One value, one place, changed by migration.
+create function public.event_rank_floor() returns real language sql immutable;
+
+revoke execute on function public.event_rank_score(jsonb),
+                          public.recompute_event_ranks(),
+                          public.event_rank_floor()
+  from public, anon, authenticated;
+</code></pre>
+<p>The <code>revoke</code>s are not optional: Postgres grants EXECUTE to PUBLIC on every new function and Supabase auto-exposes each as a PostgREST RPC — the exact HIGH finding <code>security-auditor</code> raised on migration <code>002</code>. A callable <code>recompute_event_ranks()</code> is an unauthenticated write-amplification endpoint.</p>
+<p><strong>Permitted feature inputs to <code>p_features</code> (all generic, all static):</strong> source tier; record completeness (has venue, has category, has description); category weight; source-supplied popularity where the feed carries one, normalized; venue corroboration against curated <code>places</code> once T-042 lands; whether the event's Hood is <code>designated_for_progression</code>. <strong>Never raw mention or ticket volume as a ranking input</strong> — <code>discovery-engine-spec.md</code> R2 ("that rebuilds TripAdvisor and surfaces tourist traps"). The coefficients are <code>data-engineer</code>'s call (B4), exactly as T-031 left band thresholds to B1.</p>
+<p><strong>"Proximity" is not a viewer-relative term.</strong> PRD req 6 lists proximity among allowed inputs and, two bullets later, requires every device to receive the same order. Both cannot hold if proximity means distance-to-viewer. Resolved: proximity may only mean <strong>static</strong> centrality — distance to the Hood centroid, or Hood designation. Flagged as a finding, not decided silently (§8 F3).</p>
+<h3 id="44-the-scheduled-run">4.4 The scheduled run</h3>
+<pre><code>pg_cron  '20 * * * *'   →  pg_net POST  {project}/functions/v1/ingest-events
+                            Authorization: Bearer &lt;service key read from Vault&gt;
+</code></pre>
+<p>At <code>:20</code>, not <code>:05</code> — migration <code>002</code>'s density generator already owns <code>:05</code>, and the two should not contend. Hourly is the <strong>[ASSUMPTION]</strong>; req 7's real guarantee does not depend on it (§5.1).</p>
+<p>The service key is read from <code>supabase_vault</code> at cron-schedule time and <strong>never inlined into the <code>cron.job</code> command</strong>, which is a readable table. <code>pg_net</code> and Vault both need enabling on the project — the same Aviran-gated dashboard step <code>002</code> already flagged for <code>pg_cron</code>, and it must be named in the hand-off, not discovered at apply time.</p>
+<p><strong><code>pg_net</code>'s own internal tables need the identical check as the <code>cron.job</code> table, and this TRD did not previously say so.</strong> <code>pg_net</code> logs every outbound call it makes — request included — into its own schema (<code>net.http_request_queue</code>, <code>net._http_response</code>). The call this section describes carries the service-role Bearer token as a request header; if <code>anon</code> or <code>authenticated</code> ever had <code>select</code> on those tables, the same secret this paragraph protects by routing through Vault would leak straight back out through a different table entirely. <strong>Required build-time check for A4:</strong> confirm neither <code>anon</code> nor <code>authenticated</code> holds any grant on the <code>net</code> schema or its tables. <code>pg_net</code>'s default install does not grant them, but that must be verified against the actual project after enabling — not assumed from the extension's documentation — the same discipline §4.2 requires for the four event tables' RLS.</p>
+<p><strong>Concurrency:</strong> each run takes a per-source advisory lock. An invocation that finds the lock held exits immediately and writes an <code>outcome='skipped'</code> row. A slow feed can therefore never produce two interleaved runs against the same source, which is what would make the withdrawal reconcile unsafe.</p>
+<h3 id="45-canonicalevent-and-the-dedup-key">4.5 <code>CanonicalEvent</code> and the dedup key</h3>
+<pre><code class="language-ts">// canonical.ts — the vendor-neutral core. Every adapter returns this and nothing else.
+type CanonicalEvent = {
+  sourceEventId: string;
+  name: string;
+  startAt: string;          // ISO 8601, absolute, with offset. Never a local hour-of-day.
+  endAt: string | null;     // null → §8 F2's per-source fallback, or drop
+  lat: number; lng: number;
+  venueName?: string;
+  category?: string;
+  popularity?: number;      // normalized 0..1 by the adapter, or omitted
+};
+</code></pre>
+<p>Validation runs <strong>once, in <code>canonical.ts</code></strong>, not per adapter: a record missing <code>name</code>, <code>startAt</code>, resolved <code>endAt</code>, <code>lat</code>, <code>lng</code>, or <code>sourceEventId</code> is dropped, and its reason is incremented in the run's <code>drop_reasons</code>. Never written with a placeholder (PRD req 2).</p>
+<p><strong>Dedup key</strong>, computed at ingest, deterministic and re-derivable:</p>
+<pre><code>dedup_key = sha256(
+    lower(strip_punctuation(collapse_whitespace(name)))
+  + '|' + to_char(start_at rounded to nearest 30 min, 'YYYYMMDDHH24MI')
+  + '|' + geohash(lat, lng, precision 7)        -- ~150m cell, i.e. &quot;same venue&quot;
+)
+</code></pre>
+<p>Upsert is <code>on conflict (dedup_key)</code>. Two sources carrying one event collapse; the second source adds a link row and, if its <code>tier</code> is better, may take over <code>primary_source</code>.</p>
+<p>This catches same-name/same-time/same-venue duplicates and <strong>misses</strong> rewordings — "DJ X @ Club Y" against "Club Y presents DJ X". That is a stated limit, not a hidden one; req 4's pass condition is a human check across two overlapping sources and will find them. The upgrade path is a <code>pg_trgm</code> similarity pass that merges rows, which is purely additive because the link table already models many-sources-to-one-event. Rejected for V1: it needs an extension, a threshold nobody can tune before real Tel Aviv data exists, and a merge that is far harder to undo than a missed merge is to live with.</p>
+<hr />
+<h2 id="5-flow">5. Flow</h2>
+<h3 id="51-the-main-path-one-cycle">5.1 The main path, one cycle</h3>
+<pre><code>pg_cron :20 → pg_net → ingest-events
+  for each event_sources row where enabled:
+    advisory lock (held? → log 'skipped', next source)
+    open event_ingest_runs row (outcome='running', window = [now, now + 7 days])
+    adapter.fetch(window)            → raw payloads, paginated
+    canonical.normalize()            → CanonicalEvent[]
+    validate()                       → drops counted into drop_reasons
+    upsert on dedup_key              → events row + event_source_links row, ingested_at = now()
+    hood_for_point(lng, lat)         → events.hood_id (null is stored, not dropped — §3.2)
+    reconcile withdrawals            → ONLY if the fetch completed (§5.3)
+    close run (outcome, counts); event_sources.last_success_at = now() on success
+  recompute_event_ranks()            → one pass, after every source has landed
+  prune retention (§3.5)
+</code></pre>
+<p><strong>The fetch horizon is <code>now → +7 days</code>; the serve horizon is <code>now → +12h</code>.</strong> That gap is the actual mechanism behind req 7, and it is stronger than any cadence: an event published by a source before its start time is already in the table long before the map's window reaches its hour, so the "present when the map reaches that hour" bullet holds even if a cycle is missed entirely. The hourly cadence only bounds how quickly a <em>newly published</em> or <em>withdrawn</em> event is reflected.</p>
+<p>Ranks are recomputed after <strong>all</strong> sources land, not per source, so cross-source terms (corroboration, source-tier takeover) see the complete picture.</p>
+<h3 id="52-expiry-four-layers-none-of-them-a-scheduled-job">5.2 Expiry — four layers, none of them a scheduled job</h3>
+<p>An expired listing being "worse than an empty shelf" is the failure this feature is most likely to have, so it is defended in depth and never by a job that could fail to run:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Mechanism</th>
+<th>Catches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>end_at</code> is <code>not null</code>, <code>check (end_at &gt; start_at)</code></td>
+<td>An event with no knowable end never enters</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>events_public</code> filters <code>end_at &gt; now()</code></td>
+<td>Everything served, continuously. <strong>Nothing runs; nothing can be forgotten</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Client re-filters its cached payload on <code>end_at</code> (T-034's build)</td>
+<td>A stale cache resurrecting a finished event</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>withdrawn_at</code> set by reconcile (§5.3)</td>
+<td>Cancelled or pulled at source — not an expiry case at all</td>
+</tr>
+</tbody>
+</table>
+<p>Layer 2 is the important one and it is why the served set is a view: expiry is a property of the query, not of a job's last successful run.</p>
+<h3 id="53-withdrawal-the-case-the-prd-does-not-name">5.3 Withdrawal — the case the PRD does not name</h3>
+<p>An event cancelled or removed at source does not expire; its <code>end_at</code> is still in the future. Without handling, the map advertises a cancelled event until its scheduled end.</p>
+<p>After a <strong>complete, successful</strong> fetch for one source over window <code>W</code>, any <code>event_source_links</code> row for that source whose linked event starts inside <code>W</code> and whose <code>last_seen_at</code> predates this run is withdrawn: the link is deleted, and if the event has no links left, <code>events.withdrawn_at = now()</code>.</p>
+<p><strong>The <code>outcome='success'</code> gate is load-bearing.</strong> A partial page, a timeout, or an auth failure returns fewer events and would otherwise withdraw the entire feed in one cycle — turning a transient source outage into a wiped map. <code>'partial'</code> and <code>'failed'</code> runs upsert what they got and reconcile nothing. Nothing is hard-deleted (PRD req 5); a re-appearing event un-withdraws on its next sighting.</p>
+<h3 id="54-degraded-and-empty-paths-every-one-of-them-is-a-valid-empty-set">5.4 Degraded and empty paths — every one of them is a valid empty set</h3>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source unreachable / auth fails</td>
+<td>Run <code>outcome='failed'</code>, error logged, no withdrawal. Existing rows keep serving.</td>
+</tr>
+<tr>
+<td>Source returns zero rows</td>
+<td>Run <code>outcome='success'</code>, <code>rows_fetched=0</code>. Reconcile <em>does</em> run — a genuinely emptied feed is a real withdrawal.</td>
+</tr>
+<tr>
+<td>No source enabled at all</td>
+<td>View returns zero rows. Valid. The state V1 ships in if <code>PAS-6</code> item 10 does not land (PRD req 8, <code>live-events-overlay</code> req 5).</td>
+</tr>
+<tr>
+<td>Every event ranked below the floor</td>
+<td>View returns zero rows. Valid — a ranker that rejects everything is a tuning problem, visible in the review artifact (§9 B5), never an error the client renders.</td>
+</tr>
+<tr>
+<td>Hood geometry is still placeholder</td>
+<td>Nearly every event gets <code>hood_id = null</code> and is not served. <strong>Not a silent failure</strong> — it shows as a <code>no_hood</code> spike in <code>drop_reasons</code>. See §8 R1.</td>
+</tr>
+<tr>
+<td>Source enabled but silent for 24h</td>
+<td><code>last_success_at</code> stale → the health check (§9 B6) raises it. The map does not blank.</td>
+</tr>
+</tbody>
+</table>
+<p>A source outage never blanks the served set. The accepted degradation is that <strong>withdrawals stop being detected</strong> while a source is down, which is why the health check is a P0 build step rather than a nicety.</p>
+<hr />
+<h2 id="6-third-party-dependencies">6. Third-party &amp; dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Supabase Edge Function</strong> vs. pure SQL + <code>pg_net</code></td>
+<td><strong>Edge Function.</strong> Migration <code>002</code>'s own comment already made this call in advance: <em>"Revisit this call if/when the synthetic generator is replaced by a real ingestion pipeline that has to call an external feed... that would justify an Edge Function."</em> This is that case. <code>pg_net</code> is fire-and-forget with responses landing in a table you poll — no retry ergonomics, no pagination, JSON reshaping in plpgsql, and source API keys living in the database. <code>pg_net</code> is still used, but only as cron's outbound trigger.</td>
+</tr>
+<tr>
+<td><strong>Edge Function</strong> vs. GitHub Actions / an external worker</td>
+<td><strong>Edge Function.</strong> No CI-based option is available: neither repo has a git remote (L-015), so there is no runner to schedule anything from. An external worker means a new host, a new account, and a new secret store — all Aviran-gated for no capability gain.</td>
+</tr>
+<tr>
+<td><strong>PostGIS</strong></td>
+<td><strong>Still not enabled</strong> (§4.1).</td>
+</tr>
+<tr>
+<td><strong><code>pg_trgm</code></strong> fuzzy dedup</td>
+<td><strong>Not in V1</strong> (§4.5). Additive later.</td>
+</tr>
+<tr>
+<td>The event feed itself</td>
+<td><strong>Aviran's, not this TRD's</strong> — <code>PAS-6</code> item 10. Any paid tier, account, or credential is Aviran-gated by standing rule.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nothing here adds a vendor.</strong> Edge Functions are part of the existing Supabase project <strong>[ASSUMPTION]</strong> — <code>ios-developer</code>/<code>developer</code> should confirm against the project's plan before A4, since it is the one item that could quietly become a cost.</p>
+<p><strong>Needs enabling on the Supabase project before this applies cleanly</strong> (Aviran-gated, same shape as <code>002</code>'s <code>pg_cron</code> note — name it in the hand-off, do not discover it at apply time): <code>pg_net</code>, <code>supabase_vault</code>, and <code>pg_cron</code> (already required by <code>002</code>). Plus one Edge Function secret per enabled source, set through the Supabase dashboard or CLI — <strong>never committed, never echoed</strong> (<code>CLAUDE.md</code>).</p>
+<p><strong>Task dependencies:</strong> <code>hood-dataset</code> (T-040) is a hard upstream — attribution against <code>001</code>'s five placeholder rectangles drops nearly everything (§5.4). <code>places-dataset</code> (T-042) is soft: only §4.3's venue-corroboration term wants it, and that term degrades to zero. This pipeline <strong>blocks</strong> <code>live-events-overlay</code>'s real-data path; T-034 remains independently buildable against an empty set by its own req 5.</p>
+<hr />
+<h2 id="7-rollout-migration">7. Rollout &amp; migration</h2>
+<ul>
+<li><strong>No feature flag is built, because <code>event_sources.enabled</code> already is one.</strong> Per-source, in data, flipped with an <code>update</code> — no deploy, no release, no migration. The whole-layer off switch is "no source enabled," and its behaviour is the specified empty state.</li>
+<li><strong>Applying the migration is Aviran-gated</strong> (<code>database/README.md</code>). <code>developer</code> writes and hands off, and the hand-off must name the three extensions and the per-source secret.</li>
+<li><strong>Deploying the Edge Function is also Aviran-gated</strong> — it needs the Supabase CLI and project credentials no agent holds. This is a second gate <code>002</code> did not have; do not report the pipeline as running until both have happened (<code>CLAUDE.md</code> Safety 9).</li>
+<li><strong>Ship order:</strong> schema and view first, with zero sources enabled. The view returning an empty set is a correct, servable state, so T-034 can integrate against a real endpoint before any feed exists. First source enabled only after its terms are verified — the CHECK enforces it.</li>
+<li><strong>Backward compatibility:</strong> none required. New tables, new view, nothing existing changes. A second source is additive: one adapter file, one row, no schema change, no client release.</li>
+</ul>
+<hr />
+<h2 id="8-risks-findings-alternatives">8. Risks, findings &amp; alternatives</h2>
+<p><strong>Findings — things the PRD does not resolve, surfaced rather than decided around:</strong></p>
+<ul>
+<li><strong>F1 — Storing unattributed events deviates from req 3's literal wording.</strong> §3.2. The observable requirement (never served) holds; the deviation is what makes req 3's own re-attribution bullet achievable. Needs <code>trd-review</code> ratification.</li>
+<li><strong>F2 — Req 2's strict drop on a missing end time may silently discard most of a real feed.</strong> Many listing feeds publish a start and no end. As written, every such record is dropped and counted, and a source could ingest near-zero rows while every requirement passes. The schema carries the fix — <code>event_sources.default_duration_minutes</code> plus <code>events.end_at_estimated</code>, so a derived end is never mistaken for source truth — but <strong>whether to use it is product's call, not architecture's.</strong> This TRD builds strict-drop as specified and leaves the columns in place. Escalating rather than quietly relaxing a P0.</li>
+<li><strong>F3 — Req 6's "proximity" contradicts its own same-order-for-every-device bullet.</strong> Resolved as static centrality only (§4.3). If Aviran meant viewer-relative, that is the personalization question <code>live-events-overlay</code> already escalated, not a ranking tweak.</li>
+<li><strong>F4 — Source attribution may be a ToS obligation with no surface.</strong> Some feeds require visible "powered by" credit. T-034's sheet renders name, time, location, route — no source line. <code>source_name</code> is projected so the client <em>can</em> comply without a schema change, but whether it must is unanswered and depends on which source lands. <strong>Product's, alongside <code>PAS-6</code> item 10.</strong></li>
+<li><strong>F5 — A long-running event only ever renders in its start hour.</strong> <code>live-events-overlay</code> req 1 buckets on start time, so a six-hour festival vanishes from the map an hour after it begins while still running. That is T-034's specified behaviour and not this TRD's to change; the data supports either reading (<code>start_at</code> and <code>end_at</code> are both served). Worth product's read.</li>
+<li><strong>F6 — Migration numbering is contended.</strong> Four TRDs (T-033, T-040, T-042, this one) are in flight and each needs a migration. <code>003</code> is claimed by T-033. Numbers are assigned at write time and recorded in <code>database/README.md</code>; <strong>for <code>chief-of-staff</code>'s board, not mine to sequence.</strong></li>
+<li><strong>F7 — <code>hood_for_point()</code> is needed identically by <code>places-dataset</code>, and it is <em>not</em> the same implementation. Resolved at <code>trd-review</code>, correcting this TRD's own earlier claim.</strong> This document originally said "one implementation, two consumers — whichever builds first owns it." <code>developer</code>, <code>data-engineer</code> and <code>code-reviewer</code> independently found that unbuildable: T-040/T-042's check is stdlib Python running offline over authored files with no DB credentials by design, and this task's is <code>plpgsql</code> running live inside Postgres against the <code>hoods</code> table. <strong>Both are kept.</strong> What is shared is one algorithm spec (including <strong>on-boundary → no Hood</strong>) and one checked-in point→expected-<code>hood_id</code> fixture asserted against both implementations — see §4.1. <code>hood-dataset/TRD.md</code> §2.2 carried the mirror-image error ("<code>validate_dataset.py</code> is called by T-043's build") and is corrected in step. <strong>No longer open; A3 builds against §4.1's two-implementation wording.</strong></li>
+</ul>
+<p><strong>Risks:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation / decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R1</strong> — Placeholder Hood geometry makes this pipeline unverifiable end to end</td>
+<td>Hard dependency on T-040, stated in the PRD and here. Visible as a <code>no_hood</code> spike in <code>drop_reasons</code>, not a silent zero. Do not read a green ingest run against <code>001</code>'s five rectangles as validation.</td>
+</tr>
+<tr>
+<td><strong>R2</strong> — Commercial/ticketed skew if only a ticketing feed lands</td>
+<td>Not an engineering problem and not fixable here (<code>PAS-5</code>: a data-access gap, not a build-hours gap). <code>coverage_note</code> is <code>not null</code> so the skew is recorded per source; disclosure to Aviran is <code>PAS-6</code> item 10 and precedes build.</td>
+</tr>
+<tr>
+<td><strong>R3</strong> — The dedup key misses reworded titles</td>
+<td>Stated limit (§4.5). Req 4's human pass condition is the detector. <code>pg_trgm</code> upgrade is additive.</td>
+</tr>
+<tr>
+<td><strong>R4</strong> — A source outage silently stops withdrawal detection</td>
+<td>Accepted, and the reason the 24h health check (B6) is P0 rather than P1. The map degrades to slightly-stale, never to blank.</td>
+</tr>
+<tr>
+<td><strong>R5</strong> — <code>security definer</code> view will be flagged by the Supabase linter and looks like <code>002</code>'s HIGH finding</td>
+<td>Deliberate and documented (§4.2): the view <em>is</em> the access boundary, base tables are revoked, no user data exists in any of them. <code>security-auditor</code> verifies the revokes independently rather than trusting the view.</td>
+</tr>
+<tr>
+<td><strong>R6</strong> — A ranker tuned before real data degrades to "show everything"</td>
+<td>Req 6's pass condition is a build step with an artifact (B5), not a review opinion. The floor is one value in one function, changeable by migration.</td>
+</tr>
+<tr>
+<td><strong>R7</strong> — The Python validator and this SQL function drift apart on boundary cases, so a place and an event at the same coordinate attribute to different Hoods</td>
+<td>Two implementations is now the ratified design (F7, §4.1), so the risk is <strong>divergence, not duplication</strong>. Mitigated by the two binding shared artifacts: one algorithm spec with <strong>on-boundary → no Hood</strong> pinned as a value, and one checked-in fixture asserted against both. A case added to one side must be added to both — that rule is the actual control; the fixture is only its evidence.</td>
+</tr>
+<tr>
+<td><strong>R8</strong> — Source ToS or access turns out not to permit the use</td>
+<td>The <code>enabled_requires_verified_terms</code> CHECK makes this fail closed rather than at launch.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternatives considered and rejected:</strong> pure SQL + <code>pg_net</code> ingestion (§6 — no retry, no pagination, secrets in the DB); GitHub Actions or an external worker (§6 — no git remote exists, new account, new secret store); PostGIS for attribution (§4.1 — an Aviran-gated extension for a predicate that is 30 lines at this scale); <code>pg_trgm</code> fuzzy dedup in V1 (§4.5 — untunable before real data, and a bad merge is harder to undo than a missed one); a <code>duplicate_of</code> self-FK instead of a link table (§3.3 — leaves duplicate rows visible to any query that forgets the join); per-hour rank ordinals (§4.3 — a row per event-hour for no gain once time is a filter); RLS-policy-as-filter on <code>events</code> instead of a view (splits one contract across a policy and a column grant — harder for a reviewer to verify as a single rule); dropping unattributed events outright (§3.2 — makes req 3's own re-attribution bullet impossible).</p>
+<hr />
+<h2 id="9-build-breakdown">9. Build breakdown</h2>
+<p>Ordered. <strong>No <code>[iOS]</code> step exists in this TRD, and that was confirmed rather than assumed</strong> — the PRD's Description fences the client surface out ("markers, detail sheet, and toggle"), <code>live-events-overlay</code> owns all of it as T-034, and the only client-side obligations this pipeline creates (§4.2's three items) are T-034's build steps against a contract that is now pinned. The work splits <strong>[Backend]</strong> (schema, RLS, view, scheduling — <code>developer</code>) and <strong>[Algo/Data]</strong> (adapters, normalization, dedup, ranking — <code>data-engineer</code>), which is the honest tagging; it is not backend-only.</p>
+<p><strong>Track A — schema and access. Independent of Track B after A1.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Migration: <code>event_sources</code>, <code>events</code>, <code>event_source_links</code>, <code>event_ingest_runs</code>, all CHECKs, FKs and indexes (§3). Take the next unclaimed number (F6); add a <code>functions/</code> row to <code>database/README.md</code>'s Layout (§2.3)</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A2</td>
+<td>RLS enabled on all four (<code>events</code>, <code>event_sources</code>, <code>event_source_links</code>, <code>event_ingest_runs</code>) — <strong>verify each individually via <code>pg_class.relrowsecurity</code>, not three-of-four</strong>; <strong>no policy on any</strong>; <code>events_public</code> view; <code>revoke all</code> on base tables; <code>grant select</code> on the view (§4.2)</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A3</td>
+<td><code>hood_for_point()</code> + <code>reattribute_events()</code>, both with <code>revoke execute</code> (§4.1) — same non-optional treatment B4 gives the ranking functions — <strong>This is a second, deliberate implementation of the containment predicate — build it (§4.1, F7); do not try to call T-042's offline Python validator, and do not treat it as a duplicate to be removed.</strong> Assert it against the <strong>shared</strong> fixture <code>database/data/fixtures/hood-containment-cases.json</code> (<code>places-dataset/TRD.md</code> §9 B2a) rather than a private case list: strictly inside, outside, in-bbox-outside-ring, concave notch, <strong>on-edge and on-vertex (expected <code>null</code> — no Hood)</strong>, <strong>a shared edge between two adjacent Hoods (expected <code>null</code>, not either Hood)</strong>, swapped lat/lng. Whichever of the three tasks builds first writes the fixture; a case added here is added on the Python side too</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A4</td>
+<td><code>pg_cron</code> → <code>pg_net</code> → Edge Function, service key from Vault, <code>'20 * * * *'</code>; retention prune (§3.5). Hand-off names <code>pg_net</code> + Vault + per-source secret as Aviran-gated (§7). <strong>Verify <code>anon</code>/<code>authenticated</code> hold no grant on the <code>net</code> schema's request/response log tables</strong> (§4.4) — those tables carry the outbound Bearer token in stored request headers</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Track B — the pipeline itself.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td><code>canonical.ts</code>: <code>CanonicalEvent</code>, required-field validation with counted drop reasons, <code>dedup_key</code> (§4.5). <strong>Vendor-neutral — buildable and testable before a source is chosen</strong>, against a fixture</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B2</td>
+<td><code>index.ts</code> orchestrator: advisory lock, run row, upsert-on-<code>dedup_key</code> + link row, <code>hood_for_point</code> attribution, run close (§5.1)</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B3</td>
+<td>Withdrawal reconcile, gated on <code>outcome='success'</code> (§5.3). Test the outage case explicitly: a <code>failed</code> run must withdraw nothing</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B4</td>
+<td><code>event_rank_score()</code> weights, <code>recompute_event_ranks()</code>, <code>event_rank_floor()</code>, all with <code>revoke execute</code> (§4.3). Weights and floor are <code>data-engineer</code>'s call, the way B1 band thresholds were in T-031</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B5</td>
+<td><code>database/scripts/rank_review.sql</code> — top-N for a given hour with score components, for the <strong>human review pass req 6's pass condition requires</strong>. Without an artifact that check is an opinion</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B6</td>
+<td>Health check: a source with <code>last_success_at</code> older than 24h, or zero rows written for a full day, surfaces to the team (req 8). P0, not P1 — it is what makes R4 survivable</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B7</td>
+<td>The first source adapter + its <code>event_sources</code> row with <code>coverage_note</code> and <code>terms_verified_at</code>. <strong>Blocked on <code>PAS-6</code> item 10</strong> — everything above ships and is testable without it</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>trd-review</code> sign-off needed from:</strong> <code>developer</code> + <code>code-reviewer</code> (A1–A4) and <code>data-engineer</code> + <code>code-reviewer</code> (B1–B7). <strong><code>security-auditor</code> is worth adding</strong> (<code>chief-of-staff</code>'s dispatch call, not mine): the <code>security definer</code> view, the base-table revokes, the function-grant surface <code>002</code> already failed once, and an outbound service key in cron all land in one change.</p>
+</div>
+</body>
+</html>

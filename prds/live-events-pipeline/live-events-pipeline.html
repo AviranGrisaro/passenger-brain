@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Events Ingestion Pipeline — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>live-events-pipeline/live-events-pipeline.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="live-events-ingestion-pipeline-prd">Live Events Ingestion Pipeline — PRD</h1>
+<p><strong>Status:</strong> Draft v1
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Launch-blocking.</strong> Strategy makes the pipeline, not the overlay, the thing V1 waits on. <code>live-events-overlay</code> specs the client and explicitly fences the pipeline out; <code>PAS-5</code> delivered a <strong>feasibility read</strong> (<code>data-eng/live-events-feasibility.md</code>), not a spec. This PRD is the spec that was missing between them.
+<strong>Source set is deliberately open</strong> — which feed(s) ship is <code>PAS-6</code> item 10, Aviran's call. Every requirement below is written to hold regardless of which source lands.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>The backend job that gets real Tel Aviv events into the <code>events</code> table the overlay reads, and decides which ones surface.</li>
+<li>Two halves, different risk profiles: <strong>ingestion</strong> (get structured events in at all) and <strong>ranking</strong> (decide which are "likely-interesting").</li>
+<li>Ingest from structured feeds; do not mine social content — Aviran's own framing in <code>data-eng/discovery-engine-spec.md</code>.</li>
+<li><code>rank</code> is the contract boundary: this pipeline writes it, the client only sorts and truncates by it.</li>
+<li><strong>Not in scope:</strong> the client surface, markers, detail sheet, and toggle (<code>live-events-overlay</code>); ticketing, booking, or promoter placement (strategy fences B2B outright); user-submitted events; personalization of any kind; choosing the source set (<code>PAS-6</code> item 10).</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: <em>"it's launch-blocking: V1 does not ship until data-engineer has a working live-events ingestion pipeline (scoping ticket PAS-5)."</em></li>
+<li>Strategy, verbatim: <em>"surfaced on the map, algorithmically selected as likely-interesting to the user (not just a raw feed of every event)."</em></li>
+<li><code>data-eng/discovery-engine-spec.md</code> names the failure mode this spec exists to prevent: an expired listing is <em>"worse than an empty shelf."</em></li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>The source set is a recorded decision, not an inference.</strong>
+   - ☐ Which feed(s) V1 ingests is written down, with the coverage each one does and does not give (<code>data-eng/live-events-feasibility.md</code> §1).
+   - ☐ If the shipped set is ticketed-only (Eventbrite/Ticketmaster class), that skew is stated in the ticket and to Aviran before build, not discovered at launch — it is the exact reason <code>PAS-6</code> item 10 is open.
+   - ☐ Every source's terms permit the use. No source is integrated on an unverified access assumption.</p>
+</li>
+<li>
+<p><strong>An event enters the table only if it carries every field the client contract requires.</strong>
+   - ☐ Required: name, start time, end time, coordinates, source, source event id.
+   - ☐ A record missing any required field is dropped at ingest and counted, never written with a placeholder — <code>live-events-overlay</code> req 4 omits absent optional fields but cannot render an event with no time or no location.
+   - ☐ Times are stored as absolute timestamps, not local hour-of-day — the slider's now → +12h window crosses midnight (<code>time-slider</code> Open questions).</p>
+</li>
+<li>
+<p><strong>Every event is attributed to exactly one Hood.</strong>
+   - ☐ <code>hood_id</code> is resolved from the event's coordinates against <code>hoods</code> (<code>prds/hood-dataset/</code>), at ingest.
+   - ☐ An event whose coordinates fall in no Tel Aviv Hood is not ingested — the map has nowhere to draw it.
+   - ☐ Attribution is re-resolvable: a Hood boundary correction re-attributes existing events rather than leaving them on a stale Hood.</p>
+</li>
+<li>
+<p><strong>The same real event appears once, however many sources carry it.</strong>
+   - ☐ Records matching on venue, start time, and name across sources collapse to one row.
+   - ☐ <code>(source, source_event_id)</code> is unique, so re-ingesting a source never duplicates.
+   - ☐ Pass condition: ingesting two overlapping sources produces no two rows a person would call the same event.</p>
+</li>
+<li>
+<p><strong>Expired events never render, and this is checked, not assumed.</strong>
+   - ☐ An event whose end time has passed is excluded from what the client can fetch — <code>live-events-overlay</code> req 5 states the rule; this pipeline is what makes it true.
+   - ☐ An event whose end time passes while the client holds a cached payload is filtered client-side too, so a stale cache cannot resurrect it.
+   - ☐ Nothing is hard-deleted on expiry; expired rows are excluded from the served set. <strong>[ASSUMPTION]</strong> — retention period unstated.</p>
+</li>
+<li>
+<p><strong>The pipeline writes <code>rank</code>, and rank uses no per-user signal.</strong>
+   - ☐ Every served event carries a <code>rank</code> the client sorts and truncates by, re-deriving nothing (<code>live-events-overlay</code> req 3).
+   - ☐ Ranking inputs are generic — quality, popularity, recency, proximity, category. <strong>No per-user profile, preference store, or interest history</strong>: V1 has no identity, and strategy puts personalization in Phase 3 (<code>live-events-overlay</code> Open questions).
+   - ☐ Two devices requesting the same hour receive the same order.
+   - ☐ Pass condition: the ranked top set for a busy Friday hour is reviewed by a person and is not simply "everything ingested, in time order" — the strategy line requires selection, and a ranker that selects nothing fails it.</p>
+</li>
+<li>
+<p><strong>Freshness is bounded and stated.</strong>
+   - ☐ Ingest runs on a fixed schedule, and the served set is never older than one full cycle.
+   - ☐ An event published by a source at least one full cycle before its start time is present when the map reaches that hour.
+   - ☐ <strong>[ASSUMPTION]</strong> Cadence unstated upstream. Events are known in advance (<code>live-events-overlay</code>'s own assumption), so a periodic job suffices and Realtime is not required.</p>
+</li>
+<li>
+<p><strong>An empty result is a valid output, not a failure.</strong>
+   - ☐ A source outage, an empty window, or a rejected-everything ranking pass all yield an empty set the client renders as absence (<code>live-events-overlay</code> req 5), never an error state.
+   - ☐ Failures are visible to the team — a source that has returned nothing for a full day is logged, not silently absorbed.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>A per-source ingest health readout — rows in, rows dropped, drop reason.</li>
+<li>Event category normalized across sources, so <code>live-events-overlay</code>'s P1 glyphs become possible.</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> new <code>public.events</code> — <code>id</code>, <code>source</code>, <code>source_event_id</code>, <code>name</code>, <code>start_at</code>, <code>end_at</code>, <code>lat</code>, <code>lng</code>, <code>venue_name</code>, <code>hood_id</code> (FK → <code>hoods.id</code>), <code>category</code>, <code>rank</code>, <code>ingested_at</code>. Unique on <code>(source, source_event_id)</code>. Public-read, no user-scoped rows. Extends <code>live-events-overlay</code>'s sketch with the ingest-side fields it omitted (source identity, dedup key, ingest time).</li>
+<li><strong>APIs / contract:</strong> the client fetches the whole now → +12h window alongside the density load and re-filters locally per hour. The served set is already deduped, expired-filtered, attributed and ranked — the client applies no business logic.</li>
+<li><strong>Architecture notes:</strong> ingest runs server-side on a schedule; <code>pg_cron</code> is already the pattern migration <code>002</code> set for synthetic density. Source credentials are env/config only, never committed (<code>CLAUDE.md</code>).</li>
+<li><strong>Dependencies:</strong> <strong><code>hood-dataset</code> first</strong> — req 3's attribution is impossible against placeholder rectangles, and <code>data-eng/live-events-feasibility.md</code> §2 already sequences this after the Hoods schema. <code>places-dataset</code> only if venue matching is wanted; no P0 here requires it. Blocks <code>live-events-overlay</code>'s real-data path.</li>
+<li><strong>Open technical questions:</strong> whether <code>rank</code> is absolute or per-hour (<code>live-events-overlay</code>'s question, unresolved); the on-screen marker cap, unknowable until real Tel Aviv event volume is measured; whether the ranker runs at ingest or at read.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> Events are known in advance, so periodic ingest is sufficient and Realtime is not needed. Inherited from <code>live-events-overlay</code>. If the useful events turn out to be same-hour and unpredictable, req 7's cadence and the whole contract change.</li>
+<li><strong>[ASSUMPTION]</strong> "Likely-interesting" means generically interesting, ranked identically for every viewer. <code>live-events-overlay</code> flagged this for Aviran and it is still unconfirmed. A per-user reading is a Phase 3 identity dependency, not a ranking tweak.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong><code>PAS-6</code> item 10 is open and this PRD does not close it.</strong> <code>data-engineer</code>'s call was <strong>conditional</strong>: thin ticketed-only is buildable in Phase 1; the version that makes "something's happening near you right now" feel true is a <strong>data-access gap, not an engineering-hours gap</strong>. Whether thin meets the bar that made this launch-blocking is Aviran's, and the date depends on it.</li>
+<li><strong>The informal-events layer has no reachable source.</strong> Facebook Events likely dead as a feed; local Israeli platforms' API access unverified; an aggregator is a procurement conversation; manual/crowd curation repeats decisions #22 and #24's tradeoffs. All four are outside <code>data-engineer</code>'s unilateral reach.</li>
+<li><strong>Cost:</strong> ~3–5 weeks for a thin single-feed v1 with basic ranking, after the Hoods schema, before any iOS work. Each additional source ~1–2 weeks.</li>
+<li>Three launch-blocking feasibility questions stack — events, Scenic Walk, TikTok. Any one can slip the date.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>Standing rule, founder-direct 2026-07-30. The pipeline is launch-blocking, had a feasibility read (<code>PAS-5</code>, closed) and a client PRD that explicitly fences it out — no spec existed in between</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Written source-agnostic, with the source set as req 1 rather than a choice made here</td>
+<td><code>PAS-6</code> item 10 is Aviran's open call; specifying one feed would pre-decide it. Schema, dedup, expiry, attribution and rank contract hold whichever source lands</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Ingest-side fields added to the <code>events</code> sketch in <code>live-events-overlay</code> (source, source event id, ingested_at)</td>
+<td>Reqs 4 and 7 are unfalsifiable without a dedup key and an ingest timestamp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

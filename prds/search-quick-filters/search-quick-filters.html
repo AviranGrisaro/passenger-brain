@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search &amp; Quick Filters — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>search-quick-filters/search-quick-filters.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="search-quick-filters-prd">Search &amp; Quick Filters — PRD</h1>
+<p><strong>Status:</strong> Draft v1
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Placement settled:</strong> decision #41 — quick filters stay sheet-internal, #25 unreversed. <strong>Layout is not settled</strong> (<code>ux-flows.md</code> §9 Q15, Aviran's); every requirement below holds either way.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>One sheet over the map, opened by the search icon — one of three nav buttons in map chrome.</li>
+<li>A single text field matching three things: place names, keywords, Hood names.</li>
+<li>Two chips — <strong>"Eat &amp; Drink"</strong> and <strong>"Things to do"</strong> (#33) — the "quick filters", and the only place either lives.</li>
+<li>A place or keyword result opens the place modal; a Hood result pans the map and opens the Hood sheet.</li>
+<li><strong>Not in scope:</strong> the sheet's layout (<code>ux-flows.md</code> §9 Q15, open); the destination sheets' contents (<code>hood-place-detail</code>); heat and flag rendering (<code>map-hoods-heat</code>, <code>tourist-trap-flag</code>); search history across launches (§9 Q6, open); any third filter axis — no tourist-trap filter, no open-now, no distance; voice search; TikTok or Google Maps import as a result source.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: <em>"</em><em>Search + quick filters</em><em>, reached from an icon in the map chrome, opening as a sheet. Covers place names, keywords ("hummus", "rooftop bar"), and Hoods… Results carry the same heat and tag signals as the map and honor the slider hour; search filters the map, it doesn't bypass it."</em></li>
+<li>Strategy, verbatim, on the chips: <em>"surfaced as </em><em>quick filters</em><em> inside the search sheet, unchanged from decision #25."</em></li>
+<li>Strategy caps its ambition: <em>"you never leave the map screen to reach it."</em> Positioning adds the watch-item — if people reach for search first, the map isn't working.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>One door, one sheet, never a destination.</strong>
+   - ☐ The search icon opens the sheet over the map; the map stays visible behind it throughout.
+   - ☐ No path through search pushes a full-screen view or leaves the map screen.
+   - ☐ Dismissing returns to the map with camera and selected hour unchanged.
+   - ☐ Opening search closes whichever of {heat modal, Places list, Profile} is open (<code>ux-flows.md</code> §2.1).</p>
+</li>
+<li>
+<p><strong>One field matches three kinds of things.</strong>
+   - ☐ It matches place names ("Port Said"), keywords ("hummus", "rooftop bar"), and Hood names ("Florentin").
+   - ☐ Every row states which of the three it is, in a word — a Hood is never mistakable for a place.
+   - ☐ Matches update as the user types, rendering under 400ms of a keystroke pause (<code>design-principles.md</code> §2).
+   - ☐ The field carries a visible label; a placeholder never stands in as the only label (§3).</p>
+</li>
+<li>
+<p><strong>Two chips, quick filters and nothing more.</strong>
+   - ☐ Exactly two chips exist, and neither renders anywhere outside this sheet (#25, #41).
+   - ☐ A chip with an empty field produces a category-scoped result set — the same mechanic a typed query produces (<code>ux-flows.md</code> §6).
+   - ☐ A chip narrows a typed query rather than replacing it.
+   - ☐ Both categories are active on every fresh open.
+   - ☐ Selected state reads without colour alone (<code>design-principles.md</code> §3).
+   - ☐ No third chip and no other filter axis ships — a "hide tourist-heavy spots" filter is a fresh decision (<code>ux-flows.md</code> §6).</p>
+</li>
+<li>
+<p><strong>Search filters the map at the selected hour; it never builds a second view of the data.</strong>
+   - ☐ While results show, the map dims everything except matching pins and Hoods, and keeps heat and the flag on what remains (§6).
+   - ☐ Dimming clears the instant a result is selected or the sheet is dismissed.
+   - ☐ Search reads the same cached place and Hood data the map reads — no search-only dataset, no search-only ranking.
+   - ☐ Opening a result shows heat and the flag exactly as tapping that pin or Hood would, at the current hour.
+   - ☐ Search re-reads against the current hour on every open, never an hour cached from a past session.
+   - ☐ A result with no density for that hour gets the standard no-live-data treatment, not an error (<code>ux-flows.md</code> Journey 5).
+   - ☐ A row carries name, category and Hood — <strong>not</strong> a tourist-trap line: the flag has one home, the place modal (<code>tourist-trap-flag</code> req 6). <strong>[ASSUMPTION]</strong></p>
+</li>
+<li>
+<p><strong>A result goes where the map would have gone.</strong>
+   - ☐ A place or keyword result opens that place's detail modal — the sheet a pin tap opens (<code>hood-place-detail</code> req 3).
+   - ☐ A Hood result pans there and opens the Hood sheet — the sheet a polygon tap opens (<code>ux-flows.md</code> §5).
+   - ☐ Depth never exceeds map (0) → search (1) → destination sheet (2).
+   - ☐ Search creates no exit of its own; routing still hands off from the place modal (<code>hood-place-detail</code> req 5).</p>
+</li>
+<li>
+<p><strong>Every state is specified, none is a dead end.</strong>
+   - ☐ Empty field: two chips, no result list, no default suggestions.
+   - ☐ No match: one line naming the query, field stays open and editable — never a blank view or a modal error.
+   - ☐ Offline: matching runs on cached data only, and anything opened carries the standard staleness label.
+   - ☐ Hood result with no blurb: the Hood sheet's own empty state, unchanged (<code>hood-place-detail</code> req 2).
+   - ☐ Location denied changes nothing — search is not location-scoped (<code>ux-flows.md</code> Journey 6).</p>
+</li>
+<li>
+<p><strong>In-progress state survives an interruption, not a completion.</strong>
+   - ☐ Tapping another nav button preserves the typed query and chip selection; reopening restores both (§2.1).
+   - ☐ Tapping a result, or manually dismissing, clears query and chip selection.
+   - ☐ Nothing persists across launches — no search history, matching the slider's reset convention. <strong>[ASSUMPTION]</strong></p>
+</li>
+<li>
+<p><strong>Reach and accessibility.</strong>
+   - ☐ Search icon, every chip, and every row has a ≥44pt touch target (<code>design-principles.md</code> §2).
+   - ☐ Every row announces type and name in VoiceOver — "Florentin, Hood" / "Port Said, place, Eat &amp; Drink".
+   - ☐ The sheet stays usable at the largest Dynamic Type size; rows grow rather than truncate.
+   - ☐ Search-result pins differ from Places-list pins by shape or icon, never colour alone (§2.1).</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>Session-only recent searches, cleared on relaunch (<code>ux-flows.md</code> §9 Q6's middle ground).</li>
+<li>Result list sectioned by type — places, then Hoods.</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> no new tables. Reads <code>places</code> (name, category, hood_id) and <code>hoods</code> (name), both public-read and already cached by the map PRD.</li>
+<li><strong>Data sourcing (added 2026-07-30, standing rule).</strong> <del>Keyword matching needs a searchable text field on <code>places</code> that no PRD specifies.</del> <strong>Now spec'd:</strong> <a href="../places-dataset/places-dataset.html"><code>places-dataset</code></a> req 4 — an authored keyword set per place, at least one per row, validated against a documented probe list that includes strategy's own "hummus" and "rooftop bar". Req 2's three match types map to three fields: <code>places.name</code>, <code>places.keywords</code>, <code>hoods.name</code>. Neither table exists yet, so all of req 2 is unfalsifiable until <a href="../hood-dataset/hood-dataset.html"><code>hood-dataset</code></a> and <code>places-dataset</code> land. A zero-result probe is a <strong>dataset</strong> defect, not a search defect — worth stating before QA judges this feature on data quality it does not own.</li>
+<li><strong>APIs / contract:</strong> matching runs client-side against the cached place and Hood payloads. No per-keystroke round trip — that is what makes both the 400ms budget and the offline requirement achievable.</li>
+<li><strong>Architecture notes:</strong> the sheet reads the single <code>selectedHour</code> source of truth the slider owns (<code>time-slider</code>), never its own copy. Native sheet presentation (<code>ux-flows.md</code> §2.1), subject to the open layout call. <code>SALVAGE.md</code> marks <code>Services/PlaceSearchService.swift</code> REUSE — start there.</li>
+<li><strong>Dependencies:</strong> <code>map-hoods-heat</code> (place/Hood data, dim behaviour), <code>hood-place-detail</code> (both destinations), <code>time-slider</code> (selected hour). <code>tourist-trap-flag</code> supplies the modal's flag line but does not block this.</li>
+<li><strong>Open technical questions:</strong> what field keyword matching runs against and who curates it; prefix vs. substring vs. fuzzy matching; whether Hoods and places share one ranked list.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> A row carries no tourist-trap line (req 4). Strategy says results carry "the same heat and tag signals as the map" — and a pin carries no flag at any zoom (<code>map-rendering-spec.md</code> §4), so the destination sheet is the honest reading. If Aviran means a per-row line, req 4 changes and <code>tourist-trap-flag</code> req 6 reopens.</li>
+<li><strong>[ASSUMPTION]</strong> No search history across launches (req 7). <code>ux-flows.md</code> §9 Q6 recommends it; unconfirmed.</li>
+<li><strong>[ASSUMPTION]</strong> Matching runs client-side on cached data. Nothing states it; the offline requirement implies it.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>The sheet's layout is unresolved and it is Aviran's call.</strong> His ask was a literal 50/50 top/bottom map-over-list split; design review recommended native <code>.medium</code>/<code>.large</code> detents (<code>ux-flows.md</code> §2, §9 Q15). Nothing here resolves it; <code>ios-developer</code> must not build against either reading first.</li>
+<li><del><strong>Keyword search has no data behind it.</strong></del> <strong>Field spec'd 2026-07-30</strong> (<code>places-dataset</code> req 4). What is still open is the <strong>authoring load</strong>: keywords are hand-written per place, on top of per-Hood blurbs, and nobody has said who writes them or how many places V1 ships with. Same staffing shape decision #22 exited for localness. Escalation, not a build detail.</li>
+<li><strong>Decision #23 makes search a watch-item</strong> — reaching for search before reading the map means the map failed — and nothing in V1 measures that. No analytics pipeline exists.</li>
+<li><strong>Req 7's interrupted-vs-completed rule is <code>designer</code>'s reconciliation</strong> of two decisions made in different sessions, flagged at <code>ux-flows.md</code> §9 Q17 as needing Aviran's confirmation.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>Decision #41 settled sheet-internal placement — the last thing holding it (<code>prds/INDEX.md</code>)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Sheet layout left open rather than assumed</td>
+<td>§9 Q15 — Aviran's literal-split ask vs. design's detent recommendation is unresolved</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Rows carry no tourist-trap line, labelled <strong>[ASSUMPTION]</strong></td>
+<td><code>tourist-trap-flag</code> req 6 gives the flag one home; a per-row line would reopen that PRD</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Keyword field given an owning PRD (<code>places-dataset</code> req 4); the residual open item narrowed to authoring load</td>
+<td>Standing rule, founder-direct 2026-07-30. The gap was correctly flagged but had no deliverable behind it — a flagged gap with no owner is how it reaches <code>build</code> unbuilt</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

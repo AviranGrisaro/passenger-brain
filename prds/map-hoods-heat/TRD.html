@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map — Hoods &amp; Heat Area — TRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>map-hoods-heat/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="map-hoods-heat-area-trd">Map — Hoods &amp; Heat Area — TRD</h1>
+<p><strong>Task:</strong> T-031 · <strong>Linear:</strong> <code>PAS-12</code> · <strong>Status:</strong> <code>trd-review</code> cleared — 5/5 verdicts PASS/APPROVE, in <code>build</code>
+<strong>Owner:</strong> architect · <strong>Date:</strong> 2026-07-30 · <strong>Amended:</strong> 2026-07-30 post-<code>trd-review</code> (§1 band-count lock, §8 D1 mockup-deviation ratification)
+<strong>PRD:</strong> <a href="./map-hoods-heat.html"><code>map-hoods-heat.md</code></a> (Draft v2) · <strong>Design spec:</strong> <a href="../../design/phase-1/map-hoods-heat-design.md"><code>design/phase-1/map-hoods-heat-design.md</code></a> (Draft v2, <code>design-approval</code> PASS, <code>design-review</code> cleared on Aviran's approval)
+<strong>Mockup:</strong> https://claude.ai/code/artifact/967ade63-ea5b-46c9-89a8-d606ed11a819 — reference only. Where this TRD and the mockup disagree, this TRD wins (see §8 D1, D2).</p>
+<hr />
+<h2 id="1-context">1. Context</h2>
+<p>Read the PRD and the design spec first; nothing here restates them. This document decides the six things they left open, and pins the contracts the build agents work against.</p>
+<p><strong>What this feature is, architecturally:</strong> the app's first and only screen, built from an empty <code>ContentView</code>. <code>passenger-code/</code> has no app code — this TRD establishes the module layout every later PRD extends. <code>passenger-brain/database/migrations/</code> is empty — this TRD writes <code>001</code>.</p>
+<p><strong>Six open calls resolved here</strong> (design spec §8 items 1–5, plus the two carry-forwards <code>product</code> handed to <code>chief-of-staff</code> at the <code>design-approval</code> PASS):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Open item</th>
+<th>Call</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Hood tap hit-testing</td>
+<td><code>MapReader</code> + projected-plane ray casting behind a pure, testable seam. No <code>UIViewRepresentable</code> fallback.</td>
+<td>§4.3</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>selectedHour</code> seam for T-032</td>
+<td>Offset index <code>0...12</code> on <code>DensityStore</code>; storage keys on <strong>absolute UTC hour</strong>, not offset</td>
+<td>§4.4, §3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Bundled vs. fetched Hood polygons (drives &lt;3s cold open)</td>
+<td><strong>Bundled.</strong> Supabase is the authoring source; the client never fetches geometry at launch</td>
+<td>§2.2, §8 D3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Permission-prompt delay</td>
+<td>Event-driven off the title's fade completion + 200ms (≈3.4s under standard motion), never a raw launch timer</td>
+<td>§5.2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Dark-mode Settings-hint link contrast</td>
+<td>Semantic asset-catalog color set + underline + a contrast unit test. No mockup hex.</td>
+<td>§8 D1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Near-me in the "not asked" state</td>
+<td>Marker is bound to authorization status, never to a tap. The mockup's unconditional marker is a mockup bug.</td>
+<td>§8 D2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Band count and names are locked here; only the numeric thresholds stay a <code>data-engineer</code> call.</strong> <em>(Amended 2026-07-30 after <code>trd-review</code> — <code>code-reviewer</code>, <code>developer</code>, and <code>data-engineer</code> each independently flagged that §3.1's CHECK and §4.1's <code>HeatBand</code> enum already hardcode 3 bands while this section still called the count open. They were right; this narrows the open item to what is genuinely open.)</em></p>
+<ul>
+<li><strong>Locked: three bands, named <code>quiet</code> / <code>moderate</code> / <code>busy</code>.</strong> Not just a count — the <em>names</em> are already load-bearing outside this TRD: <code>design/map-rendering-spec.md</code> L42 keys the tourist-trap flag's warning stroke on heat crossing "the busy threshold," so a sibling PRD (<code>prds/tourist-trap-flag/</code>) is coupled to a specifically-named third band. Changing the count later is not a schema tweak; it is a migration <em>plus</em> an iOS release (a <code>CaseIterable</code> enum gains a case) <em>plus</em> a rendering-rule change in a shipped sibling feature. That is worth locking now rather than discovering at integration.</li>
+<li><strong>Open, and genuinely <code>data-engineer</code>'s (B1): the numeric score-to-band cutoffs.</strong> The client is indifferent to these by construction — it reads an integer band and never computes a threshold, so cutoffs can be retuned server-side with no app release (§3.1).</li>
+<li><strong>The schema does not restate the lock.</strong> Migration <code>001</code> writes <code>check (band &gt; 0)</code>, not <code>check (band between 1 and 3)</code> — <code>developer</code>'s call at <code>trd-review</code>, adopted here. The lock lives in this document and in <code>HeatBand</code>; a forward-compatible constraint costs nothing and means a hypothetical future band count never requires reissuing an applied migration. Strictly safer than a hardcoded upper bound, and it does not weaken the lock — the client rejects an unknown band integer at the boundary (§4.5) regardless of what the CHECK permits.</li>
+</ul>
+<hr />
+<h2 id="2-architecture">2. Architecture</h2>
+<h3 id="21-module-layout-new-passenger-codepassenger">2.1 Module layout (new, <code>passenger-code/Passenger/</code>)</h3>
+<pre><code>Passenger/
+  PassengerApp.swift          entry point — hosts MapScreen
+  Map/
+    MapScreen.swift           the single screen; owns camera + composition
+    HoodLayer.swift           MapPolygon content builder (fill + name label)
+    ColdOpenTitle.swift       &quot;Tel Aviv, right now&quot; state machine
+    NearMeButton.swift        recenter control + disabled state
+    SettingsHint.swift        denied-state inline copy
+    CachedDataIndicator.swift offline pill
+  Hoods/
+    Hood.swift                value type — slug, name, projected ring, bbox, centroid
+    HoodCatalog.swift         bundled-resource load + id lookup
+    HoodHitTester.swift       pure geometry: point → Hood?, with 44pt tolerance
+  Density/
+    HeatBand.swift            enum quiet/moderate/busy — no &quot;none&quot; case
+    DensitySnapshot.swift     immutable [hoodID: [absoluteHour: HeatBand]]
+    DensityStore.swift        @MainActor @Observable — the selectedHour seam
+    DensityAPI.swift          URLSession + PostgREST, no SDK
+    DensityCache.swift        last-good snapshot on disk
+  Location/
+    LocationStore.swift       authorization status only — no coordinates
+    PermissionPrompt.swift    scheduling + non-overlap constraint
+  Support/
+    HeatPalette.swift         band → opacity. One table, no zoom parameter.
+    ContrastRatio.swift       salvaged (SALVAGE.md REUSE)
+    AppConfig.swift           SupabaseConfig.plist reader
+Resources/
+  hoods-tel-aviv.json         build-time export of the hoods table
+</code></pre>
+<p>Xcode synchronized file groups are on — adding a file to the folder is enough, no <code>project.pbxproj</code> edit (<code>passenger-code/README.md</code>).</p>
+<h3 id="22-boundaries-who-is-allowed-to-know-what">2.2 Boundaries — who is allowed to know what</h3>
+<ul>
+<li><strong><code>Hoods/</code> knows no network and no density.</strong> It loads a bundled file and answers "which Hood is at this point." Pure enough to unit-test without a map, a simulator, or a server.</li>
+<li><strong><code>Density/</code> knows no geometry.</strong> It maps a Hood <em>id</em> to a band for an hour. It never sees a polygon, a coordinate, or a camera.</li>
+<li><strong><code>Map/</code> is the only layer that knows both</strong>, and it is the only layer that knows SwiftUI. It composes: <code>HoodCatalog.hoods</code> × <code>DensityStore.band(for:hour:)</code> → <code>MapPolygon</code> + <code>foregroundStyle</code>.</li>
+<li><strong><code>Location/</code> knows only an authorization enum.</strong> It never handles a <code>CLLocation</code>. See §3.3 — this is a privacy decision, not an accident.</li>
+</ul>
+<p>The cross product of those four boxes is the whole feature. Nothing in this feature writes to the backend, so there is no write path, no identity, and no auth to design.</p>
+<h3 id="23-third-party-dependencies-none-added">2.3 Third-party dependencies: none added</h3>
+<table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MapKit</strong> vs. Mapbox / MapLibre</td>
+<td><strong>MapKit.</strong> It is the strategy's stack, it is free, it needs no account, and <code>MapPolygon</code> + a fixed <code>foregroundStyle</code> is precisely the "stepped bands, never a gradient" primitive decision #17 requires. Mapbox buys vector-style control this feature does not need and costs money + an account — Aviran-gated, and rejected before it gets there.</td>
+</tr>
+<tr>
+<td><strong><code>supabase-swift</code> SPM package</strong> vs. <code>URLSession</code></td>
+<td><strong><code>URLSession</code>.</strong> V1 needs one unauthenticated GET against a public-read table. No auth, no Realtime (PRD: "No Realtime in V1"), no Storage. A ~60-line PostgREST client is smaller than the SDK's transitive graph and keeps Swift 6 strict concurrency trivially clean. Revisit when auth or Realtime lands — both are parked.</td>
+</tr>
+<tr>
+<td>PostGIS</td>
+<td><strong>Not enabled.</strong> No server-side spatial query exists in V1; hit-testing is client-side. Geometry stores as <code>jsonb</code>. Enabling PostGIS later is additive.</td>
+</tr>
+</tbody>
+</table>
+<p>This satisfies <code>passenger-code/README.md</code>'s "no third-party packages until a TRD justifies one" — this TRD justifies none.</p>
+<hr />
+<h2 id="3-data-model">3. Data model</h2>
+<h3 id="31-backend-migration-001">3.1 Backend — migration <code>001</code></h3>
+<pre><code class="language-sql">create table public.hoods (
+  id          text primary key,             -- stable slug, e.g. 'florentin'
+  name        text not null,
+  city        text not null default 'tel-aviv',
+  polygon     jsonb not null,               -- GeoJSON Polygon, WGS84, single ring
+  updated_at  timestamptz not null default now()
+);
+
+create table public.hood_density (
+  hood_id     text        not null references public.hoods(id) on delete cascade,
+  hour_bucket timestamptz not null check (hour_bucket = date_trunc('hour', hour_bucket)),
+  band        smallint    not null check (band &gt; 0),   -- see §1: forward-compatible, not a loosened lock
+  primary key (hood_id, hour_bucket)
+);
+create index hood_density_hour_idx on public.hood_density (hour_bucket);
+</code></pre>
+<p>RLS: enabled on both. One <code>select</code> policy each, <code>to anon, authenticated using (true)</code>. <strong>No insert/update/delete policy is written at all</strong> — absence of a policy is the denial, and there is no client write path to authorize. The synthetic generator writes with the service role, out of band.</p>
+<p>Three decisions inside that schema:</p>
+<ul>
+<li><strong><code>hour_bucket</code> is an absolute UTC timestamp, not an offset and not an hour-of-day.</strong> This resolves the PRD's open key-shape question and T-032 §8 item 4. Offsets rot the moment the clock crosses an hour; hour-of-day cannot express "tomorrow 01:00," which the +12h window reaches every evening. Absolute keying is also what makes the offline path in §3.4 correct rather than approximately correct.</li>
+<li><strong>No <code>band = 0</code>.</strong> "No data" is the <em>absence of a row</em>, not a band value. The client type is <code>HeatBand?</code>, so the compiler carries the distinction the map has to render silently (PRD req 7).</li>
+<li><strong>Band is stored, not computed client-side.</strong> Thresholds stay entirely server-side, so <code>data-engineer</code> can retune them without an app release. If a raw score is later wanted for the pipeline's own use, it is an additive column that does not touch the client contract.</li>
+<li><strong>The CHECK is <code>band &gt; 0</code>, not <code>between 1 and 3</code>, deliberately</strong> — §1 locks the count at 3 named bands in this document and in <code>HeatBand</code>; the constraint stays forward-compatible so an applied migration never has to be reissued. Bands 1/2/3 are the only values the generator writes and the only values the client accepts.</li>
+</ul>
+<h3 id="32-client-bundled-hood-geometry">3.2 Client — bundled Hood geometry</h3>
+<p><code>Resources/hoods-tel-aviv.json</code> is a <strong>build-time export of the <code>hoods</code> table</strong>, committed to <code>passenger-code/</code>:</p>
+<pre><code class="language-json">{ &quot;schemaVersion&quot;: 1, &quot;generatedAt&quot;: &quot;2026-07-30T00:00:00Z&quot;, &quot;city&quot;: &quot;tel-aviv&quot;,
+  &quot;hoods&quot;: [ { &quot;id&quot;: &quot;florentin&quot;, &quot;name&quot;: &quot;Florentin&quot;,
+               &quot;polygon&quot;: [[34.7661, 32.0553], [34.7690, 32.0561], ...] } ] }
+</code></pre>
+<p>At load, each ring is projected once into <code>[MKMapPoint]</code> and a bounding <code>MKMapRect</code> is precomputed. <code>Hood</code> is a <code>Sendable</code> value type; the catalog is immutable after load.</p>
+<p>Dozens of polygons for one city (decision #12's bound), changing rarely (the PRD's own labelled assumption). Decoding a bundled file is bounded, offline-safe, and unaffected by a cold cellular connection — which is why this is the call that makes §7's cold-open budget achievable. The <code>hoods</code> table still ships in <code>001</code>: it is the authoring surface the export comes from and the FK target <code>hood_density</code> needs. <strong>[ASSUMPTION]</strong> curation is not continuous; if it becomes so, a refresh path is additive (fetch, compare <code>schemaVersion</code>, replace the catalog) and does not change any contract below.</p>
+<h3 id="33-location-data-minimized-by-construction">3.3 Location data — minimized by construction</h3>
+<p>The app never holds a user coordinate:</p>
+<ul>
+<li>Recenter uses <code>MapCameraPosition.userLocation(fallback: .region(telAvivCityWide))</code> — MapKit reads the location, the app does not.</li>
+<li>The "you are here" marker is <code>UserAnnotation()</code> — again MapKit's, not ours.</li>
+<li><code>LocationStore</code> wraps <code>CLLocationManager</code> for <strong><code>authorizationStatus</code> and <code>requestWhenInUseAuthorization()</code> only</strong>. No <code>startUpdatingLocation</code>, no <code>didUpdateLocations</code> handling, no stored <code>CLLocation</code>, nothing persisted.</li>
+<li><strong>The density request carries no location, no device id, and no user id</strong> — it is byte-identical for every user of the app (§4.5). Location cannot leak through a query that never had a place to put it.</li>
+</ul>
+<p>Nothing to log means nothing to leak (<code>passenger-code/CLAUDE.md</code>, Safety). <code>NSLocationWhenInUseUsageDescription</code> states exactly this and nothing more, per the design spec's F8 fix: <em>"Passenger uses your location to center the map on you and show a 'you are here' marker."</em></p>
+<h3 id="34-cached-density">3.4 Cached density</h3>
+<p>Last successful snapshot is written to Application Support as JSON (a payload, not a preference — not <code>UserDefaults</code>). It contains Hood-level synthetic bands and no personal data. Because rows key on absolute hour, a cache read at a later clock time stays correct: rows still inside <code>[now, now+12h]</code> render; rows that fell out of the window are simply absent, and an absent row is already the silent no-data state. No staleness heuristic is needed — the key does the work.</p>
+<hr />
+<h2 id="4-contracts">4. Contracts</h2>
+<p>Both build surfaces work against this section. <code>ios-developer</code> and <code>developer</code> do not need each other's code, only §4.5 and §3.1.</p>
+<h3 id="41-heat-band-and-palette">4.1 Heat band and palette</h3>
+<pre><code class="language-swift">enum HeatBand: Int, Sendable, CaseIterable, Codable {
+    case quiet = 1, moderate = 2, busy = 3
+}
+
+enum HeatPalette {
+    /// The single band→opacity table. There is no zoom parameter, by design (PRD req 4).
+    static func opacity(for band: HeatBand) -&gt; Double
+    /// One hue, light/dark asset variants. Steps differ by opacity, never by hue.
+    static var hue: Color { Color(&quot;HeatFill&quot;) }
+}
+</code></pre>
+<p><code>opacity(for:)</code> takes one argument and returns from a <code>switch</code>. Any future signature carrying a zoom, camera, or altitude term is a PRD req-4 violation — <code>ios-code-reviewer</code> should treat an added parameter as a blocking finding. No <code>blur</code>, <code>.shadow</code>, <code>saturation</code>, or material is applied to the fill anywhere. Illustrative defaults from the approved mockup: quiet 0.16, moderate 0.38, busy 0.62.</p>
+<h3 id="42-hood-catalog">4.2 Hood catalog</h3>
+<pre><code class="language-swift">struct Hood: Identifiable, Sendable, Hashable {
+    let id: String                     // stable slug
+    let name: String
+    let ring: [MKMapPoint]             // projected once at decode
+    let boundingRect: MKMapRect
+    let centroid: CLLocationCoordinate2D
+    var coordinates: [CLLocationCoordinate2D] { get }   // for MapPolygon
+}
+
+enum HoodCatalog {
+    static func load() throws -&gt; [Hood]   // bundled resource; throws on malformed input
+}
+</code></pre>
+<p><code>load()</code> throws rather than returning <code>[]</code> — a corrupt bundled resource is a build defect, not a runtime empty state (<code>passenger-code/CLAUDE.md</code>, fail fast). Called off the main actor; the map renders before it resolves.</p>
+<h3 id="43-hit-testing-design-spec-8-item-1-resolved">4.3 Hit-testing — design spec §8 item 1, resolved</h3>
+<pre><code class="language-swift">struct HoodHitTester: Sendable {
+    init(hoods: [Hood])
+    /// - Parameter tolerance: map-point distance equivalent to 22pt at the current camera.
+    func hood(at point: MKMapPoint, tolerance: Double) -&gt; Hood?
+}
+</code></pre>
+<p>Two-pass, in a projected plane (<code>MKMapPoint</code>), never in raw degrees — ray casting on lat/long degrees distorts with longitude and would misresolve thin north–south Hoods:</p>
+<ol>
+<li>Bounding-rect prefilter, then even-odd ray casting against the containing candidates. Polygons do not overlap (PRD req 3), so at most one hit.</li>
+<li>On a miss, the nearest Hood whose edge lies within <code>tolerance</code> wins. This is how the 44pt minimum (design §4) is met without dilating the drawn shape — the <em>hit area</em> extends past the boundary, the <em>fill</em> does not.</li>
+</ol>
+<p><code>MapReader</code> supplies the screen→coordinate conversion; the geometry above is pure and takes no MapKit view type. If MapKit's SwiftUI conversion proves imprecise on device, the fix is swapping the host in <code>MapScreen.swift</code> — <code>HoodHitTester</code> is untouched. That is why this TRD does not pre-build an <code>MKPolygonRenderer</code>/<code>UIViewRepresentable</code> fallback: the risk is isolated behind one seam, and building the fallback speculatively costs a <code>UIViewRepresentable</code> in the app's first screen for a problem that may not exist. Unit tests must cover a point inside, a point outside, a point in the bbox but outside the ring, a concave notch, and a within-tolerance near-miss.</p>
+<h3 id="44-density-store-the-t-032-seam">4.4 Density store — the T-032 seam</h3>
+<pre><code class="language-swift">@MainActor @Observable
+final class DensityStore {
+    /// UTC hour floor captured when the current snapshot was fetched.
+    private(set) var anchorHour: Date
+    /// 0...12 offset from anchorHour. T-032's slider is the only writer. Never persisted.
+    var selectedHour: Int
+    private(set) var source: Source        // .live, .cache, .unavailable
+
+    func band(for hoodID: String, hour: Int) -&gt; HeatBand?   // nil == no data
+    func load() async
+    func refreshIfHourRolled() async       // called on scenePhase → .active
+}
+</code></pre>
+<ul>
+<li><code>selectedHour</code> is a plain <code>Int</code> on an <code>@Observable</code> class — T-032 §8 item 2 asked for the binding shape confirmed before either side builds. <strong>Confirmed: a plain observable <code>Int</code>, no wrapper type, no publisher.</strong> <code>Slider(value:in:step:)</code> binds to it through a <code>Double</code> bridge in T-032's own view.</li>
+<li><code>band(for:hour:)</code> is a dictionary read against already-fetched data. <strong>No code path fetches on an hour change</strong> — that is what makes T-032's 400ms repaint budget real, and it is a contract, not an optimization.</li>
+<li>The store is session-scoped and in-memory. <code>selectedHour</code> is never written to <code>UserDefaults</code>/<code>AppStorage</code> (T-032's cold-launch requirement).</li>
+<li><code>refreshIfHourRolled()</code>: on foreground, if <code>date_trunc('hour', now)</code> no longer equals <code>anchorHour</code>, re-fetch and remap <code>selectedHour</code> so the <em>absolute</em> hour the user chose is preserved where it is still inside <code>[now, now+12]</code>, clamped to <code>0</code> otherwise. This closes the foreground-across-an-hour-boundary gap T-032 flagged. Cold launch always starts at <code>selectedHour == 0</code>.</li>
+</ul>
+<h3 id="45-density-api">4.5 Density API</h3>
+<pre><code>GET {supabase_url}/rest/v1/hood_density
+    ?select=hood_id,hour_bucket,band
+    &amp;hour_bucket=gte.{anchorHour ISO8601 UTC}
+    &amp;hour_bucket=lte.{anchorHour + 12h ISO8601 UTC}
+Headers: apikey: &lt;anon&gt;, Authorization: Bearer &lt;anon&gt;, Accept: application/json
+</code></pre>
+<p>Once per session. No pagination (dozens of Hoods × 13 buckets). No query parameter carries anything user-specific — §3.3. Response rows are validated at the boundary: an unknown <code>band</code> integer or an unparseable timestamp drops that row, it does not fail the whole snapshot and it does not crash (<code>passenger-code/CLAUDE.md</code>, boundary validation).</p>
+<p>Config from <code>SupabaseConfig.plist</code> (gitignored, per <code>passenger-code/CLAUDE.md</code>). <strong>A missing plist is a valid state</strong>: <code>DensityAPI</code> reports unavailable, the map renders with no fill, and the app builds and runs for a developer with no credentials.</p>
+<h3 id="46-location">4.6 Location</h3>
+<pre><code class="language-swift">@MainActor @Observable
+final class LocationStore {
+    private(set) var authorizationStatus: CLAuthorizationStatus
+    func requestWhenInUseIfNeeded()   // no-op unless .notDetermined
+}
+</code></pre>
+<p><code>requestWhenInUseIfNeeded()</code> is idempotent and guarded on <code>.notDetermined</code>, so a denied user is never re-prompted in the install (PRD req 6) and a double call cannot double-prompt.</p>
+<hr />
+<h2 id="5-flow">5. Flow</h2>
+<h3 id="51-cold-open">5.1 Cold open</h3>
+<pre><code>launch → PassengerApp → MapScreen.body
+  ├─ Map(position: .region(telAvivCityWide))            renders immediately, interactive
+  ├─ .task  HoodCatalog.load() off-main → hoods         polygons appear, unfilled
+  ├─ .task  DensityStore.load()                         fill paints when it resolves
+  └─ ColdOpenTitle: .hidden → .visible(120ms) → .fadingOut(2200ms) → .done(~3200ms)
+                                                        └→ PermissionPrompt after +200ms
+</code></pre>
+<p>Nothing on that path <code>await</code>s before the first frame. The map is pannable, zoomable, and tappable from frame one, before geometry, before density, before permission — PRD req 1.</p>
+<p><strong>Hood tap:</strong> <code>MapReader</code> → coordinate → <code>MKMapPoint</code> → <code>HoodHitTester.hood(at:tolerance:)</code> → open sheet with that <code>Hood</code>. One tap, no preview step (PRD req 3). T-031 ships the stub destination; T-033 owns its contents.</p>
+<p><strong>Hour change (T-032, wired but unexercised here):</strong> <code>selectedHour</code> write → <code>@Observable</code> invalidation → <code>HoodLayer</code> recomputes <code>foregroundStyle</code> per polygon. Camera, geometry, sheet state, and the polygon identities are all untouched — only the style closure re-evaluates.</p>
+<h3 id="52-permission-prompt-design-spec-8-item-4-resolved">5.2 Permission prompt — design spec §8 item 4, resolved</h3>
+<p><strong>The trigger is an event, not a timer from launch.</strong> <code>ColdOpenTitle</code> publishes a <code>.done</code> transition when its fade-out completes; <code>PermissionPrompt</code> fires 200ms after that, and only while <code>scenePhase == .active</code>.</p>
+<ul>
+<li>Under standard motion this lands at <strong>≈3.4s after the map's first frame</strong> (title opaque ~1.12s, fully invisible ~3.2s, +200ms) — the number the approved mockup demonstrates.</li>
+<li>Under Reduce Motion the fade is near-instant, so <code>.done</code> arrives earlier and the prompt follows it. The non-overlap constraint — the locked half of §8 item 4 — holds automatically, because the constraint is expressed in the control flow rather than re-asserted in a second hardcoded constant that can drift from the first. The mockup needed the same number in three call sites and once had them out of sync; this shape makes that class of bug unrepresentable.</li>
+<li>If the app is backgrounded during the window, the prompt is deferred to the next <code>.active</code>, never fired at a user who cannot see it.</li>
+<li>Tapping near-me while <code>.notDetermined</code> <strong>cancels the pending scheduled prompt and requests immediately</strong> — one prompt, ever, from either path.</li>
+</ul>
+<h3 id="53-states">5.3 States</h3>
+<p>Per design spec §3, with the mechanism named for each:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Loading</td>
+<td>No spinner, no gate. Fill is simply absent until <code>DensityStore.load()</code> resolves.</td>
+</tr>
+<tr>
+<td>Empty (Hood has no row)</td>
+<td><code>band(for:hour:) == nil</code> → no <code>foregroundStyle</code> fill applied. No text anywhere on the map (PRD req 7).</td>
+</tr>
+<tr>
+<td>Error / feed unreachable</td>
+<td>Identical rendering to Empty. <code>source == .unavailable</code>. No banner, no retry control.</td>
+</tr>
+<tr>
+<td>Offline with cache</td>
+<td><code>source == .cache</code> → <code>CachedDataIndicator</code> in the top corner, non-blocking, subordinate to the map.</td>
+</tr>
+<tr>
+<td>Permission denied</td>
+<td>Near-me disabled; on tap, <code>SettingsHint</code> (§8 D1). Zero effect on Hoods or heat — neither ever depended on location.</td>
+</tr>
+<tr>
+<td>Outside Tel Aviv</td>
+<td>No mechanism. No Hood polygons exist outside the city, so nothing renders and nothing is checked. <code>MunicipalBoundary.swift</code> is <strong>not</strong> salvaged — a boundary test would be code whose only job is to produce the behaviour that already happens.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-salvage">6. Salvage</h2>
+<p>Per <code>SALVAGE.md</code>, read line by line and adapted to Swift 6 before landing — leaf code only:</p>
+<ul>
+<li><code>Support/ContrastRatio.swift</code> (REUSE) — becomes the test harness for §8 D1's contrast assertion.</li>
+<li><code>Models/DensityContract.swift</code> (REUSE, "the single best file in the old codebase") — read for the never-one-blended-score type discipline; <code>HeatBand</code> is that idea, reduced.</li>
+<li><code>Features/Map/DensityMark.swift</code>, <code>DensityPlaceMark.swift</code> (REUSE) — mark rendering, adapted to <code>MapPolygon</code>.</li>
+<li><code>Features/Map/MapScreen.swift</code> (REFERENCE, 940 lines) — mine camera handling only. <strong>Do not copy its structure.</strong></li>
+<li><code>06-database/gen_heat.py</code> + <code>tel-aviv-places-heat.json</code> — the synthetic generator, for step B3.</li>
+</ul>
+<hr />
+<h2 id="7-cold-open-performance-design-spec-8-item-5-resolved">7. Cold-open performance — design spec §8 item 5, resolved</h2>
+<p>Oldest device supporting the app's iOS 26 minimum: <strong>iPhone 11 / iPhone SE (2nd gen), A13</strong> <strong>[ASSUMPTION]</strong> — <code>ios-developer</code> verifies against Apple's iOS 26 device list before measuring.</p>
+<p>"Interactive map" = first frame in which <code>Map</code> accepts a pan gesture. Budget against the PRD's 3s:</p>
+<table>
+<thead>
+<tr>
+<th>Segment</th>
+<th>Budget</th>
+<th>How it is held</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process launch → first SwiftUI frame</td>
+<td>≤1.5s</td>
+<td>No third-party packages (§2.3). No network client constructed before first frame.</td>
+</tr>
+<tr>
+<td><code>Map</code> first render</td>
+<td>≤0.5s</td>
+<td>Static <code>MapCameraPosition.region</code>, no async seed.</td>
+</tr>
+<tr>
+<td>Hood decode + projection</td>
+<td>≤0.2s, <strong>off the interactivity path</strong></td>
+<td>Bundled file (§3.2), decoded off-main; polygons attach after.</td>
+</tr>
+<tr>
+<td>Density fetch</td>
+<td>unbounded, <strong>off the interactivity path</strong></td>
+<td>Async, never awaited before first frame.</td>
+</tr>
+</tbody>
+</table>
+<p>Total to interactive: ≤2.0s, with the two unbounded items structurally excluded. <strong>The bundled-geometry decision is what buys the margin</strong> — a launch-time network fetch for polygons would put an unbounded cellular round trip inside the 3s, which is the specific failure the design flagged and could not resolve.</p>
+<p>Verification is required, not assumed: an <code>XCTApplicationLaunchMetric</code> performance test on a physical A13 device, cold, airplane mode on and off. Numbers go in the build report. <code>qa</code> re-runs it before acceptance.</p>
+<hr />
+<h2 id="8-decisions-carried-in-from-the-design-approval-pass">8. Decisions carried in from the <code>design-approval</code> PASS</h2>
+<h3 id="d1-settings-hint-link-contrast-products-carry-forward-1">D1 — Settings-hint link contrast (<code>product</code>'s carry-forward 1)</h3>
+<p>The mockup's <code>--focus</code> <code>#1E66E0</code> measures 5.21:1 on the light surface and <strong>3.28:1 on dark <code>#1A1C1F</code></strong> — a real WCAG AA failure against the 4.5:1 bar the design spec's own §4 and §7 claim for this element. <strong>The mockup hex binds nothing here.</strong> Build:</p>
+<ul>
+<li>A semantic asset-catalog color set <strong><code>LinkOnSurface</code></strong> with light and dark variants — the pattern <code>design-principles.md</code> §5 already prescribes ("each with light+dark variants"), not a literal from a mockup. Light <code>#1E66E0</code> (5.21:1, verified by <code>product</code>). Dark <strong><code>#6EA8FF</code></strong> — computed 7.08:1 against <code>#1A1C1F</code> by WCAG relative luminance; <code>ios-developer</code> recomputes against the app's actual dark surface token rather than inheriting this number on trust.</li>
+<li><strong>The "Settings" run is underlined as well as coloured</strong>, so the affordance survives never-color-alone (<code>design-principles.md</code> §3) and does not depend on the token being right.</li>
+<li><strong>The hint renders on an opaque surface-token background, not directly over the map.</strong> A contrast ratio against a map is not a number anyone can verify — this applies equally to <code>ColdOpenTitle</code>, whose §4 claim of "4.5:1 against the map background" is otherwise unmeasurable. Not <code>.ultraThinMaterial</code>: its effective luminance varies with whatever the map draws underneath, which reintroduces the same unverifiability.</li>
+<li><strong>This is a deliberate, engineering-necessary deviation from the approved mockup's literal rendering — not an oversight, and not unflagged drift.</strong> <code>ios-code-reviewer</code> verified at <code>trd-review</code> that the mockup renders <code>ColdOpenTitle</code> ("Tel Aviv, right now") as bare text floating over the live map, legible only via a CSS <code>text-shadow</code> glow, with no background chip; the Settings hint, by contrast, already sits on an opaque card there, so only the title changes. The glow trick has no measurable contrast ratio against an unpredictable live map, so the design spec's own 4.5:1 requirement for this element is unsatisfiable as drawn — an opaque backdrop is the only way to make the approved <em>requirement</em> true, and where the two conflict this TRD wins (header note). <strong>Ratified at the TRD level by <code>chief-of-staff</code> (2026-07-30), same handling as this feature's dark-mode contrast carry-forward: engineering-justified and proportionate to record here rather than re-run a full design-approval cycle.</strong> <code>designer</code> was not looped back in. The visual weight of the backdrop is still design's call — build it as the quietest treatment that clears 4.5:1 (surface token, no border, fading with the title), and if <code>designer</code> later wants a different treatment that keeps a measurable ratio, that is a swap inside C4, not a re-architecture.</li>
+<li><strong>A unit test asserts ≥4.5:1 in both appearances</strong>, using the salvaged <code>ContrastRatio.swift</code>. A contrast claim that is not executable is a claim that regresses silently — this is the second time this exact defect has appeared in this feature's artifacts.</li>
+<li>Tapping the run opens <code>UIApplication.openSettingsURLString</code> (design §4 calls it a deep link). It never re-invokes the system dialog, which iOS would ignore anyway.</li>
+</ul>
+<h3 id="d2-near-me-in-the-not-asked-state-products-carry-forward-2">D2 — Near-me in the "not asked" state (<code>product</code>'s carry-forward 2)</h3>
+<p>The mockup adds the you-are-here marker unconditionally on a near-me tap while <code>.notDetermined</code> (mockup L530-532). The real app cannot do that. Build it as:</p>
+<pre><code>near-me tapped:
+  .notDetermined            → cancel pending scheduled prompt; requestWhenInUseIfNeeded()
+                              → recenter and show the marker only after the callback returns authorized
+  .authorizedWhenInUse/.always → recenter
+  .denied / .restricted     → present SettingsHint. Never request.
+</code></pre>
+<p><code>UserAnnotation()</code> is included in the map content <strong>only</strong> when <code>LocationStore.authorizationStatus</code> is authorized — its presence is bound to the status, never to a tap. This also closes <code>product</code>'s first-verdict minor about near-me having undefined behaviour in the not-asked state.</p>
+<p><strong>Amended 2026-07-30, post-<code>qa</code> Major finding.</strong> The pseudocode above only covers the tap-initiated grant path. The auto-scheduled cold-open system prompt (§8's permission timing) can <em>also</em> transition <code>.notDetermined → authorized</code> with no near-me tap in the loop at all — <code>qa</code> caught this in a live repro (camera never recentered after granting via the system prompt directly) and it shipped as a real gap in the first build. The correct handling, now built and verified (<code>ios-developer</code> commit <code>f31816c</code>, <code>ios-code-reviewer</code>-approved <code>555597a</code>, <code>qa</code>-reconfirmed <code>f466e36</code>): a <code>.onChange(of: locationStore.authorizationStatus)</code> observer, gated by a pure predicate (<code>isNewGrant(from:to:)</code>) that fires the same recenter <strong>only</strong> on a genuine not-authorized→authorized transition — never on the lateral <code>authorizedWhenInUse</code>↔<code>authorizedAlways</code> move, never on a same-status re-render. This is a second, independent trigger for the same recenter action D2 already specifies, not a new requirement — both paths converge on the same <code>camera = .userLocation(fallback:)</code> assignment.</p>
+<h3 id="d3-bundled-geometry-supabase-authored">D3 — Bundled geometry, Supabase-authored</h3>
+<p><code>Resources/hoods-tel-aviv.json</code> is generated from the <code>hoods</code> table and committed. The two must not drift: whoever changes <code>hoods</code> re-exports in the same change. <code>schemaVersion</code> exists so a future fetch-and-refresh path can be added without a contract change. The client does not verify against the server in V1 — a version check needs a network call on the launch path, which is the thing §7 exists to prevent.</p>
+<h3 id="d4-not-relitigated">D4 — Not relitigated</h3>
+<p>Stepped bands, no gradients, uniform opacity at every zoom, no on-map "no data" text, and the <code>selectedHour</code> seam are normative in the PRD and design spec, and T-032/T-033 already build against them. This TRD implements them (§4.1, §4.4, §5.3) and does not reopen them.</p>
+<hr />
+<h2 id="9-rollout-migration">9. Rollout &amp; migration</h2>
+<ul>
+<li><strong>No feature flag.</strong> This is the app's only screen; there is no prior version to gate against and no A/B surface. A flag here would be a toggle whose off-state is a blank window.</li>
+<li><strong>Migration <code>001</code> applying is Aviran-gated</strong> (he holds the credentials — <code>database/README.md</code>, <code>BOARD.md</code>). <code>developer</code> writes it and hands it off; it is not applied by any agent.</li>
+<li><strong>The client ships independently of the backend.</strong> Bundled geometry plus a silent-empty density state means the iOS build is testable and demoable before <code>001</code> is applied or a single density row exists. This is the deliberate benefit of the §4.5 contract: the two build tracks do not block each other.</li>
+<li><strong>Backward compatibility:</strong> none required. First release, empty schema, empty app.</li>
+</ul>
+<hr />
+<h2 id="10-risks-alternatives">10. Risks &amp; alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation / decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MapReader</code>'s screen→coordinate conversion is imprecise on small or thin Hoods</td>
+<td>The 22pt tolerance pass (§4.3) absorbs ordinary imprecision. If it does not, the geometry seam is pure and the host swaps in one file. Measured on device before <code>qa</code>, not assumed.</td>
+</tr>
+<tr>
+<td>SwiftUI <code>Map</code> re-renders every polygon on an hour change, blowing the 400ms budget</td>
+<td>Polygons are keyed by stable <code>Hood.id</code>; only <code>foregroundStyle</code> re-evaluates. Dozens of shapes, not thousands (decision #12's bound). If it misses, the fallback is caching resolved <code>ShapeStyle</code>s per band — a local change, not an architectural one.</td>
+</tr>
+<tr>
+<td>Bundled geometry drifts from the <code>hoods</code> table</td>
+<td>D3's same-change re-export rule, plus <code>schemaVersion</code>. Accepted cost of the §7 margin; the alternative fails the 3s target outright.</td>
+</tr>
+<tr>
+<td>Density thresholds unresolved (<code>data-engineer</code>'s call)</td>
+<td>Client is indifferent by construction — it reads an integer band. Thresholds can change server-side after ship with no client release.</td>
+</tr>
+<tr>
+<td>Synthetic feed makes "right now" simulated</td>
+<td>Named in the PRD and strategy; out of this TRD's scope. The contract is identical when a live source replaces the generator — same table, same key, same band.</td>
+</tr>
+<tr>
+<td>App Store review on <code>NSLocationWhenInUseUsageDescription</code></td>
+<td>The purpose string is accurate to what V1 does and no more (§3.3). Normalise its straight/curly quotes when the copy is locked (<code>product</code>'s nit 3).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternatives considered and rejected:</strong> Mapbox/MapLibre (§2.3 — cost, account, capability not needed); <code>supabase-swift</code> (§2.3 — dependency weight for one GET); PostGIS + server-side point-in-polygon (network round trip per tap, defeats the whole interaction); a <code>UIViewRepresentable</code> + <code>MKPolygonRenderer</code> map built up front (§4.3 — pre-paying for a risk that is already isolated); persisting <code>selectedHour</code> across launches (contradicts T-032's cold-launch requirement); a boundary-polygon check for the outside-Tel-Aviv state (§5.3 — code to cause behaviour that already happens).</p>
+<hr />
+<h2 id="11-build-breakdown">11. Build breakdown</h2>
+<p>Ordered. Tags name the agent(s) each step dispatches to.</p>
+<p><strong>Backend track — independent of the iOS track after step A0.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Migration <code>001</code>: <code>hoods</code> + <code>hood_density</code> per §3.1, with both check constraints (<code>band &gt; 0</code>, not a hardcoded upper bound — §1) and the FK</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A2</td>
+<td>RLS: enable on both, one public <code>select</code> policy each, no write policy</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A3</td>
+<td>Seed <code>hoods</code> with the Tel Aviv polygon set (salvage <code>022_create_neighborhoods</code> / <code>024a_seed_neighborhoods_placeholder</code> as reference)</td>
+<td><strong>[Backend]</strong> + <strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B1</td>
+<td>Band <strong>thresholds only</strong> — the numeric score-to-band cutoffs. Count and names are locked at 3 (<code>quiet</code>/<code>moderate</code>/<code>busy</code>, §1); B1 does not decide them. Does not block the client.</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B2</td>
+<td>Synthetic density generator writing 13 rolling absolute-hour buckets per Hood (salvage <code>gen_heat.py</code>)</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B3</td>
+<td>Export <code>hoods-tel-aviv.json</code> from the seeded table, hand to the iOS track (D3)</td>
+<td><strong>[Algo/Data]</strong> + <strong>[iOS]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>iOS track.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td><code>Hood</code>, <code>HoodCatalog</code>, <code>HoodHitTester</code> + geometry unit tests (§4.2, §4.3). Buildable before any backend exists — use a hand-authored fixture until B3 lands.</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C2</td>
+<td><code>HeatBand</code>, <code>HeatPalette</code>, <code>DensitySnapshot</code> (§4.1)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C3</td>
+<td><code>MapScreen</code> + <code>HoodLayer</code>: city-wide camera, polygons, band fill, zoom-gated name label, tap → stub sheet (§5.1)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C4</td>
+<td><code>ColdOpenTitle</code> state machine on a surface-token background (§5.1, D1)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C5</td>
+<td><code>LocationStore</code> + <code>PermissionPrompt</code> event-driven scheduling (§4.6, §5.2)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C6</td>
+<td><code>NearMeButton</code> with the full authorization switch, <code>UserAnnotation</code> bound to status (D2)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C7</td>
+<td><code>SettingsHint</code> + <code>LinkOnSurface</code> asset color set + the contrast unit test (D1)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C8</td>
+<td><code>AppConfig</code> + <code>DensityAPI</code> + <code>DensityStore</code> against the §4.5 contract, boundary-validated</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C9</td>
+<td><code>DensityCache</code> + <code>CachedDataIndicator</code>; <code>refreshIfHourRolled()</code> on <code>scenePhase</code> (§3.4, §4.4)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C10</td>
+<td>VoiceOver labels per Hood, always stating density in speech including "no data right now" (design §4)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C11</td>
+<td>Launch performance test on a physical A13 device; numbers in the build report (§7)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>trd-review</code> sign-off needed from:</strong> <code>ios-developer</code> + <code>ios-code-reviewer</code> (C1–C11, the bulk), <code>developer</code> + <code>code-reviewer</code> (A1–A3), <code>data-engineer</code> + <code>code-reviewer</code> (B1–B3).</p>
+</div>
+</body>
+</html>

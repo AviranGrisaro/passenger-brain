@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Places — Been &amp; Saved — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>places-been-saved/places-been-saved.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="places-been-saved-prd">Places — Been &amp; Saved — PRD</h1>
+<p><strong>Status:</strong> Draft v1
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Closed-place case resolved:</strong> decision #38 — a permanently-closed place can still be saved and carries a distinct badge, unrelated to the tourist-trap flag. That was the item holding this PRD at PAS-10.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>One list, named <strong>Places</strong>, opened from a persistent icon in map chrome (decision #26, <code>design/ux-flows.md</code> §2).</li>
+<li>Three ways in: manual <strong>Saved</strong>, dwell-triggered <strong>Been</strong> (20+ verified minutes), plain geofence <strong>Visited</strong>.</li>
+<li>Each row carries one provenance word, so a deliberate choice never reads identically to one that saved itself (#30).</li>
+<li>A place Apple Maps marks permanently closed <strong>can still be saved</strong>, with a distinct "permanently closed" badge on its row (#38).</li>
+<li>Places in the list also render as a ring accent on the existing pin, close zoom only (<code>design/map-rendering-spec.md</code> §6).</li>
+<li><strong>Not in scope:</strong> Passport stickers and per-Hood status (own PRD, consuming the Been signal from here); the local-QA toast (tourist-trap PRD, same detector); the place modal's own contents (<code>hood-place-detail</code>); TikTok import as a fourth entry path (PAS-6 item 9); the badge's exact visual and copy (designer's, per #38); any share or export affordance.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: <em>"</em><em>"Been" and "Saved" places, visually/functionally distinct</em><em> (decision #26, extended 2026-07-30)."</em></li>
+<li>Strategy, verbatim: <em>"a place Apple Maps marks permanently closed can still be saved — the UI shows a distinct "permanently closed" badge, unrelated to and not folded into the tourist-trap flag."</em></li>
+<li>It is the only V1 surface that survives a session — the return path for someone who already chose (<code>ux-flows.md</code> Journey 3).</li>
+<li>Business model names it inside the permanently-free core.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>One list, three provenance states, one word per row.</strong>
+   - ☐ The list is titled <strong>Places</strong> (<code>ux-flows.md</code> §9 Q11).
+   - ☐ Every row shows exactly one of <strong>Saved / Been / Visited</strong> — never two, never none.
+   - ☐ Precedence when several apply: Saved beats Been beats Visited.
+   - ☐ One place produces exactly one row, however many paths touched it.
+   - ☐ Saved and Been are distinguishable by word, not colour alone (#30, <code>design-principles.md</code> §3).</p>
+</li>
+<li>
+<p><strong>Manual save responds instantly and persists.</strong>
+   - ☐ Saving from the place modal adds a Saved row and shows the saved state in under 400ms, before any network round trip (<code>design-principles.md</code> §2).
+   - ☐ Reopening the place shows it as saved.
+   - ☐ Un-saving drops the Saved label; if Been or Visited also applies, the row remains with the next word down. <strong>[ASSUMPTION]</strong></p>
+</li>
+<li>
+<p><strong>Been requires a verified 20-minute dwell at a place Passenger already knows.</strong>
+   - ☐ Auto-save fires only for places already in Passenger's places table — a home, office, or friend's flat never enters the list at any dwell length (#26's load-bearing guard).
+   - ☐ The threshold is 20 minutes; verified presence below it logs <strong>Visited</strong>.
+   - ☐ A Been row appears without the user acting, and never asks for confirmation.
+   - ☐ Revisiting a Been place adds no row and changes no label.</p>
+</li>
+<li>
+<p><strong>Permanently-closed places save, and say so on the row.</strong>
+   - ☐ Saving a permanently-closed place succeeds — no block, no dialog that prevents it (#38).
+   - ☐ Its row renders a distinct "permanently closed" badge, readable from the list without opening the place.
+   - ☐ The badge is visually distinct from the tourist-heavy line and never substitutes for it — the two are independent (#38).
+   - ☐ A place that closes <em>after</em> being saved shows the badge next time the list renders, not only at save time.
+   - ☐ The badge never removes the row and never disables the route action.</p>
+</li>
+<li>
+<p><strong>Degraded permission degrades this feature, never breaks it.</strong>
+   - ☐ With Location Always denied, manual Saved works fully; Been and Visited never populate, with no error copy.
+   - ☐ With location denied entirely, the list still opens and shows saved rows.
+   - ☐ No path here re-asks a permission already denied (<code>ux-flows.md</code> §3).</p>
+</li>
+<li>
+<p><strong>Empty and offline states are plain, not errors.</strong>
+   - ☐ An empty list shows a plain empty state naming what would fill it (<code>design-principles.md</code> §4).
+   - ☐ Offline: existing rows render from device, and an offline save appears immediately and syncs later.
+   - ☐ A row whose place has no current-hour density still opens; the heat readout says so rather than blocking (Journey 3).</p>
+</li>
+<li>
+<p><strong>The map accent is binary</strong> — rendering per <code>map-rendering-spec.md</code> §6.
+   - ☐ A listed place gets a ring accent on its pin at close zoom only, and the accent never encodes which provenance — that is list-only.
+   - ☐ It pairs with a shape or icon difference, so it isn't colour-only (<code>ux-flows.md</code> §2.1).
+   - ☐ The pin's touch target stays ≥44pt with the ring applied; cluster markers never indicate a personal place is inside (§5).</p>
+</li>
+<li>
+<p><strong>A row is a shortcut straight to the place.</strong>
+   - ☐ Tapping a row opens that place's detail modal, skipping the Hood sheet (Journey 3).
+   - ☐ Places is one of the mutually exclusive nav modals — search, heat, or Passport closes it, and vice versa (§2.1).
+   - ☐ Dismissing returns to the map with camera and selected hour unchanged.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>Filtering or sectioning by provenance; a per-city section once a second city exists.</li>
+<li>Opening hours on the row where the curated dataset carries them.</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> one row per (place, provenance), precedence applied at read time rather than by overwriting — so a manual save never destroys the record that a dwell happened. Fields: place_id, provenance enum {saved, been, visited}, created_at.</li>
+<li><strong>Data model:</strong> closed state belongs to the place, not the entry — <code>places.permanently_closed</code>, refreshed from Apple Maps, so no two surfaces disagree.</li>
+<li><strong>Data sourcing (added 2026-07-30, standing rule).</strong> The <code>places</code> table does not exist and this PRD does not author it — rows, coordinates, categories and <code>permanently_closed</code> are <a href="../places-dataset/places-dataset.html"><code>prds/places-dataset/</code></a>'s deliverable (its req 5 carries the closed-state field, its source, a <code>closed_checked_at</code> staleness stamp, and the refresh cadence). <strong>Req 4's fourth bullet needs that refresh to exist:</strong> a place that closes <em>after</em> being saved cannot show the badge on next render if closed state is only read once at authoring time. That refresh currently has no owner and no cadence — raised below.</li>
+<li><strong>Storage — the load-bearing call.</strong> V1 adds no accounts (strategy: <em>"no accounts/login added"</em>), so the list is <strong>device-local</strong> (SwiftData/Core Data): no per-user server table, no RLS surface. Consequence, stated rather than hidden: <strong>it does not survive reinstall or a new device.</strong></li>
+<li><strong>APIs / contract:</strong> reads the shared static <code>places</code> payload for name, category, coordinates, closed state. Writes nothing server-side in V1.</li>
+<li><strong>Architecture notes:</strong> <code>SALVAGE.md</code> marks <code>Models/VisitedPlace.swift</code>, <code>Services/SavedPlacesStore.swift</code>, <code>Features/Places/SavedPlacesSheet.swift</code>, <code>PlaceDetailCard.swift</code> REUSE; <code>VisitedPlacesStore.swift</code>, <code>VisitDetectionService.swift</code>, <code>CityGeofenceMonitor.swift</code> REFERENCE only — entangled with logic the old repo scoped to Phase 3. <code>AuthService.swift</code> is BURN: <em>"spec it fresh — anonymous-first."</em></li>
+<li><strong>Dependencies:</strong> <code>map-hoods-heat</code> (pins, ring channel) and <code>hood-place-detail</code> (the save affordance) first. <strong>One dwell/geofence detector serves three consumers</strong> — this list, the local-QA ask, Passport's stickers. <code>data-engineer</code> owns it; it must not be built three times.</li>
+<li><strong>Open technical questions:</strong> where Apple Maps closed state is read (client <code>MKMapItem</code> lookup vs. a refreshed column) and how stale it may be; whether provenance rows need a server copy for the localness pipeline; what happens to a listed place later dropped from the dataset.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> Device-local storage with no anonymous server identity, so the list is lost on reinstall. This follows from "no accounts," but nobody confirmed the loss is acceptable.</li>
+<li><strong>[ASSUMPTION]</strong> Closed state is cached from Apple Maps, so a newly-closed place may show the badge late.</li>
+<li><strong>[ASSUMPTION]</strong> Un-save behaviour (req 2) — chosen for consistency with precedence, not specified upstream.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>Reinstall loses everything collected.</strong> Places and Passport both vanish on device change. The alternative is anonymous server identity, which strategy parks until Phase 3 — Aviran's call, not a build decision.</li>
+<li><strong>Background Location Always reliability</strong> is load-bearing for Been and Visited both (<code>ux-flows.md</code> §9 Q4); needs the architect's read.</li>
+<li><strong>Permission sequence is a proposal, not a decision</strong> (§9 Q10) — three system permissions for a product whose #8 rules out a permission gate.</li>
+<li><strong>Row density risk:</strong> a row can carry a provenance word, a closed badge, and a tourist-heavy line at once, where <code>design-principles.md</code> §2 allows one special element. Designer's, at <code>design-review</code>.</li>
+<li><strong>The closed-state refresh has no owner and no cadence.</strong> Req 4 requires a place that closes after being saved to badge on next render; nothing schedules the check that would make that true. Spec'd as a field in <code>places-dataset</code> req 5, but the job that runs it is unassigned. <code>data-engineer</code>'s or <code>developer</code>'s — needs assigning before this feature's req 4 can be QA'd honestly.</li>
+<li><strong>Visited is the weakest of the three</strong> — a row the user never chose, for somewhere they walked past. No upstream decision addresses pruning it.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>Decision #38 resolved the closed-place case held at PAS-10 (PAS-6 item 2)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Closed state spec'd on the place, not the saved entry</td>
+<td>#38: "a factual state about the place, not a judgment about its character"</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Badge visual and copy deliberately unspecified</td>
+<td>#38 assigns both to <code>designer</code></td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Device-local storage spec'd, reinstall consequence raised as an open question</td>
+<td>Strategy locks "no accounts/login added"; the data loss is Aviran's to accept or reject</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Data-sourcing bullet added; closed-state refresh promoted from an open <em>technical</em> question to a named ownerless job</td>
+<td>Standing rule, founder-direct 2026-07-30. "Refreshed from Apple Maps" was stated as a property of the column, with nothing scheduled to do the refreshing — req 4's fourth bullet silently depended on it</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

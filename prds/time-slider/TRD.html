@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time Slider — now → +12h — TRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>time-slider/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="time-slider-now-12h-trd">Time Slider — now → +12h — TRD</h1>
+<p><strong>Task:</strong> T-032 · <strong>Linear:</strong> <code>PAS-15</code> · <strong>Status:</strong> ready for <code>trd-review</code>
+<strong>Owner:</strong> architect · <strong>Date:</strong> 2026-07-30 · <strong>Amended:</strong> 2026-07-31 — nav icons render as separate side-by-side buttons, not a joined bar (§2.3, §8 D6). Visual only; no behaviour changed.
+<strong>PRD:</strong> <a href="./time-slider.html"><code>time-slider.md</code></a> (Draft v1) · <strong>Design spec:</strong> <a href="../../design/phase-1/time-slider-design.md"><code>design/phase-1/time-slider-design.md</code></a> (<code>design-approval</code> PASS after one REJECT/fix cycle; <code>design-review</code> cleared on Aviran's approval, 2026-07-30)
+<strong>Mockup:</strong> https://claude.ai/code/artifact/a31d3b48-5500-4eab-b962-f0e12d9f0eea — reference only. Where this TRD and the mockup disagree, this TRD wins (§8 D1–D6).
+<strong>Builds on:</strong> <a href="../map-hoods-heat/TRD.html"><code>prds/map-hoods-heat/TRD.md</code></a> (T-031, shipped and accepted). This TRD extends that module layout; it does not restate it.</p>
+<hr />
+<h2 id="1-context">1. Context</h2>
+<p>Read the PRD and the design spec first — nothing here restates them. This document decides what they left open and pins the contracts <code>ios-developer</code> builds against.</p>
+<p><strong>Surface: iOS-only. Confirmed, not assumed.</strong> Checked against the design spec §0/§2 and the PRD's Technical design: no new table, no new column, no new endpoint, no change to any existing one. T-031's <code>DensityAPI</code> already fetches the full <code>[anchorHour, anchorHour + 12h]</code> window in one request (<code>DensityAPI.fetchDensity(from:)</code>, <code>hour_bucket=gte./lte.</code>), and <code>hood_density</code> already keys on absolute UTC hour. Everything this feature needs from the backend is already in the shipped contract. <strong>No <code>[Backend]</code> and no <code>[Algo/Data]</code> step exists in §11.</strong></p>
+<p><strong>What this feature is, architecturally:</strong> the app's first piece of <em>chrome above the map</em>. T-031 built one screen with four floating overlays and one system sheet. T-032 introduces the persistent nav row, the modal layer that hangs off it, and the layering rule that decides what covers what. That layering — not the slider — is the part with real consequences, because T-034/T-036/T-037/T-038 all land in the same bottom band.</p>
+<p><strong>Open items resolved here:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Open item</th>
+<th>Source</th>
+<th>Call</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Heat modal construction — not a <code>.sheet()</code></td>
+<td>design §8.1</td>
+<td><code>ZStack</code> overlay inside <code>MapScreen</code>, below the nav row's layer, above the map and its scrim</td>
+<td>§2.3, §4.2, D2</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>selectedHour</code> write-path / binding shape</td>
+<td>design §8.2</td>
+<td>Already settled by T-031 §4.4 — plain <code>var selectedHour: Int</code> on <code>@Observable DensityStore</code>. Confirmed against the shipped file; <strong>not redesigned.</strong> A <code>Double</code> bridge lives in <code>HourSlider</code>, not in the store</td>
+<td>§4.3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>"Now" re-resolving while foregrounded across an hour boundary</td>
+<td>PRD Open technical questions; design §8.3</td>
+<td>Re-anchor on modal <strong>open</strong> (in addition to T-031's existing <code>scenePhase → .active</code> hook). No timer</td>
+<td>§4.5, D3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Day-boundary bucket keying</td>
+<td>PRD risks; design §8.4</td>
+<td><strong>Already resolved by T-031 §3.1</strong> — <code>hour_bucket</code> is an absolute UTC timestamp, and <code>DensityStore</code> keys on epoch-hour. Closed, not re-flagged. The "next day" pill is display-only on top of it</td>
+<td>§3.2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Native <code>Slider</code> vs. fully custom control</td>
+<td>design §8.5</td>
+<td><strong>Native <code>Slider(value:in:step:)</code>.</strong> The custom overlay is decorative and non-interactive</td>
+<td>§4.4, §8 D5</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Which nav-row buttons exist in this build</td>
+<td>not raised by any doc — found by reading the shipped code</td>
+<td>The nav row does not exist yet. T-032 builds the container plus <strong>the heat button only</strong></td>
+<td>§2.3, D1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Verifying "repaints on hour change" and "&lt;400ms"</td>
+<td><code>product</code>'s T-031 acceptance carry-forward</td>
+<td>Both get an executable hook built in this task, named in §9</td>
+<td>§4.7, §9</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-architecture">2. Architecture</h2>
+<h3 id="21-module-layout-additions-to-t-031s-tree">2.1 Module layout — additions to T-031's tree</h3>
+<pre><code>Passenger/
+  Map/
+    MapScreen.swift            MODIFIED — hosts the chrome ZStack; near-me moves (D1)
+    MapChromeState.swift       new — NavSurface + the one-modal-at-a-time rule
+    MapNavRow.swift            new — persistent nav row; heat button only in this task
+  HeatModal/
+    HeatModalCard.swift        new — the overlay card: scrim, transitions, dismissals
+    HourSlider.swift           new — native Slider + decorative tick overlay + a11y
+    HourReadout.swift          new — numeral + &quot;next day&quot; pill
+    HourFormat.swift           new — pure offset → (numeral, clock time, isNextDay)
+  Density/
+    DensityStore.swift         MODIFIED — one narrow guard in refreshIfHourRolled() (§4.5)
+    HeatComposition.swift      new — pure hoods × hour → [HoodFill] (§4.7)
+  Support/
+    HeatRepaintSignpost.swift  new — the HourRepaint interval (§4.7)
+Assets.xcassets/
+  MutedOnSurface.colorset      new · PillSurface.colorset new · SliderFill.colorset new · NowTick.colorset new
+</code></pre>
+<p>Xcode synchronized file groups are on — dropping files in the folder is enough, no <code>project.pbxproj</code> edit.</p>
+<h3 id="22-boundaries-who-is-allowed-to-know-what">2.2 Boundaries — who is allowed to know what</h3>
+<ul>
+<li><strong><code>HeatModal/</code> knows no map, no geometry, no network.</strong> It reads and writes one <code>Int</code> and formats a date. <code>HourFormat</code> is pure and takes its calendar and its clock as parameters, so every label string is unit-testable with no simulator and no fixed timezone.</li>
+<li><strong><code>MapChromeState</code> knows no view.</strong> It holds "which nav surface is presented" and nothing else. It does not own <code>selectedHour</code> — that is the whole point of PRD req 4 (§4.1).</li>
+<li><strong><code>Density/</code> still knows no geometry.</strong> <code>HeatComposition</code> is the one new type that pairs a Hood with a band, and it lives on the composition seam T-031 already put in <code>Map/</code> — it takes a lookup closure, never a <code>DensityStore</code>, so it is testable without one.</li>
+<li><strong><code>Map/</code> remains the only layer that knows both</strong> and the only layer that knows the z-order.</li>
+</ul>
+<h3 id="23-the-chrome-layering-rule-the-real-content-of-this-trd">2.3 The chrome layering rule (the real content of this TRD)</h3>
+<p><code>MapScreen</code>'s body becomes an explicit <code>ZStack</code>, top of list = furthest back:</p>
+<table>
+<thead>
+<tr>
+<th>z</th>
+<th>Layer</th>
+<th>Behaviour when a nav surface is presented</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>Map</code> + <code>HoodLayer</code> + <code>UserAnnotation</code>, <code>ColdOpenTitle</code>, <code>CachedDataIndicator</code></td>
+<td>Unchanged. Title/indicator sit at the top of the screen, outside the modal's footprint.</td>
+</tr>
+<tr>
+<td>1</td>
+<td><strong>Scrim</strong> — <code>Color.black.opacity(…)</code>, <code>.contentShape(Rectangle())</code>, tap → dismiss</td>
+<td>Present only while a surface is presented. This is what makes tap-outside work and what prevents a map tap from opening a Hood sheet underneath an open modal.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Bucket-2 chrome</strong> — the near-me cluster (<code>NearMeButton</code> + <code>SettingsHint</code>)</td>
+<td><code>.opacity(0)</code> + <code>.allowsHitTesting(false)</code> while presented, per <code>ux-flows.md</code> §2.1's stacking rule, bucket (2). Reduce Motion honoured.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Modal card</strong> — <code>HeatModalCard</code>, <code>.transition(.move(edge: .bottom).combined(with: .opacity))</code></td>
+<td>The presented surface's content. Anchored a fixed distance above the nav row, sized to content — never <code>bottom: 0</code>.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong><code>MapNavRow</code></strong></td>
+<td>Always visible, always hit-testable, never covered. This is what makes direct nav-switching work without a dismiss-first step (<code>ux-flows.md</code> §2.1, bucket (1)).</td>
+</tr>
+</tbody>
+</table>
+<p>Two consequences worth stating rather than discovering:</p>
+<ul>
+<li><strong><code>.presentationBackgroundInteraction</code> is not involved here and must not be reached for.</strong> That modifier is T-033's mechanism for system sheets. This is a custom overlay in the app's own hierarchy; the scrim at z1 is the equivalent mechanism, and the map is deliberately <em>not</em> interactive while the modal is open (design §1 makes tap-outside an exit path, which requires the scrim to receive the tap).</li>
+<li><strong>The heat modal and a system <code>.sheet</code> are never co-presented</strong> — see D4. A <code>.sheet</code> presents above the entire hierarchy including z4, so a Hood sheet covers the nav row and the heat button while it is up; and while the modal is up, the scrim blocks the map taps that would open a sheet. Mutually exclusive by construction, in both directions.</li>
+</ul>
+<p><strong><code>MapNavRow</code> is a layout container, not a visual one</strong> (added 2026-07-31, founder-direct — §8 D6). The nav icons render as <strong>separate, independent buttons sitting side by side</strong>, each its own tap target with its own background — <strong>not</strong> fused into one joined bar, pill, or segmented control. <code>MapNavRow</code> groups them for layout and hit-testing only and draws no shared background, border, or capsule of its own. Nothing in the table above changes: the z4 layer, its never-covered/always-hit-testable guarantee, and the switching behaviour it exists to enable (§4.1) are exactly as specified. This is a visual-grouping call only.</p>
+<p><strong>The near-me cluster moves.</strong> T-031 anchors it at <code>.bottom</code> with 32pt padding — the band the nav row now occupies. It moves above the nav row, per the mockup's own arrangement. This is a change to accepted, shipped T-031 layout; it is named here rather than left as an implementation surprise (D1).</p>
+<hr />
+<h2 id="3-data-model">3. Data model</h2>
+<h3 id="31-no-new-persisted-state-on-either-side">3.1 No new persisted state, on either side</h3>
+<p>The slider owns nothing. <code>selectedHour</code> is a plain <code>Int</code> on <code>DensityStore</code>, in memory, session-scoped, <strong>never written to <code>UserDefaults</code>/<code>AppStorage</code>/disk</strong> — PRD req 3's cold-launch reset is a property of where the value lives, not of a reset routine that could be forgotten. <code>DensityCache</code> persists density rows only; it has never held an hour selection and must not gain one. <code>MapChromeState</code> is likewise in-memory and resets on launch.</p>
+<p>No migration, no schema change, no new query parameter. Nothing in this feature carries a location, a device id, or a user id — the request surface is untouched, so T-031 §3.3's "location cannot leak through a query that never had a place to put it" holds unchanged.</p>
+<h3 id="32-time-how-an-offset-becomes-a-label">3.2 Time — how an offset becomes a label</h3>
+<p><code>anchorHour</code> (UTC hour floor, T-031) + <code>offset × 3600s</code> = the selected absolute instant. Everything the user reads is derived from that instant in the <strong>current</strong> calendar and timezone:</p>
+<ul>
+<li>numeral: <code>"Now"</code> for offset 0, <code>"+\(offset)h"</code> otherwise — offset is the primary channel, never a bare clock time</li>
+<li>clock time (<code>"21:00"</code>, PRD P1): <code>DateFormatter</code>/<code>Date.FormatStyle</code> in <code>.current</code> timezone</li>
+<li><code>isNextDay</code>: <code>!Calendar.current.isDate(selectedInstant, inSameDayAs: now)</code>, compared against the real clock, not against <code>anchorHour</code></li>
+</ul>
+<p><strong>[ASSUMPTION]</strong> every supported timezone is a whole-hour offset from UTC, so a UTC hour floor lands on a local hour boundary and "+3h" reads as a clean o'clock. True for Tel Aviv (UTC+2/+3) and for V1's only city; false in e.g. India (+5:30). The failure mode is cosmetic — the P1 clock label would read <code>20:30</code> — and it does not affect bucket lookup, which never leaves epoch-hour arithmetic. Recorded in §10 rather than engineered around for a city V1 does not ship in.</p>
+<hr />
+<h2 id="4-contracts">4. Contracts</h2>
+<p>All of §4 is <code>[iOS]</code>. There is no second build surface to hand a contract to.</p>
+<h3 id="41-nav-surface-state">4.1 Nav-surface state</h3>
+<pre><code class="language-swift">enum NavSurface: String, CaseIterable, Sendable, Identifiable {
+    case search, heat, places, profile
+    var id: String { rawValue }
+}
+
+@MainActor @Observable
+final class MapChromeState {
+    private(set) var presented: NavSurface?
+    var isPresenting: Bool { presented != nil }
+
+    /// Exclusivity (`ux-flows.md` §2.1): presenting a surface replaces whatever
+    /// was open — it never stacks. Presenting the already-open surface closes it.
+    func toggle(_ surface: NavSurface)
+    func dismiss()
+}
+</code></pre>
+<p>Four cases, one view. That is deliberate and it is the narrowest thing that makes PRD req 4 testable: "switching to a different nav modal and back does not reset the hour" cannot be exercised at this task's own <code>qa</code> if the type can only express one surface. The four-member set is not invented here — <code>ux-flows.md</code> §2.1 locks it ("only one of {search sheet, heat modal, Places list, Profile tab} is ever open"). A case with no view costs nothing, ships nothing, and stops T-036/T-037/T-038 from each inventing a private boolean and quietly breaking exclusivity. <strong>This is a state type mirroring a locked spec, not a hook for an unbuilt feature</strong> — <code>ios-code-reviewer</code> should read it as such, and should reject any <em>view</em> work for the other three cases in this task's diff.</p>
+<p><code>toggle</code> closing the already-open surface is an architect call filling a gap: the design spec lists three exits (swipe-down, tap-outside, nav-switch) and does not say what a second tap on the lit heat button does. Doing nothing there reads as broken. Flagged for <code>designer</code> to overturn cheaply if wrong — it is one method.</p>
+<h3 id="42-the-modal-card">4.2 The modal card</h3>
+<pre><code class="language-swift">struct HeatModalCard: View {
+    let onDismiss: () -&gt; Void
+    // content: section header + HourReadout + HourSlider. Nothing else in V1 (D4).
+}
+</code></pre>
+<ul>
+<li>Background: opaque <code>Color("Surface")</code> (T-031's existing token), rounded, sized to content. <strong>Not <code>.ultraThinMaterial</code></strong> — the same reasoning T-031 §8 D1 settled: a contrast ratio against a translucent layer over a live map is not a number anyone can verify, and PRD req 6 demands a verifiable one.</li>
+<li>Dismissals: (a) drag handle + <code>DragGesture</code>, dismiss past a threshold with a velocity/distance rule; (b) scrim tap; (c) <code>MapNavRow</code> tapping another surface. All three route to <code>MapChromeState</code>, none to a private <code>@State</code> bool.</li>
+<li>Transition <code>.move(edge: .bottom).combined(with: .opacity)</code>; under <code>\.accessibilityReduceMotion</code> it cross-fades with no movement.</li>
+<li><strong><code>HeatModalCard</code> composes rows, not a bare slider.</strong> T-034's live-events toggle lands as a second row. That is a layout fact about the card, not a hook: no toggle, no placeholder, and no "always on" stub row ships in this task (D4).</li>
+</ul>
+<h3 id="43-the-binding-t-031s-seam-unchanged">4.3 The binding — T-031's seam, unchanged</h3>
+<pre><code class="language-swift">// In HourSlider, not in the store:
+Slider(
+    value: Binding(
+        get: { Double(selectedHour) },
+        set: { selectedHour = Int($0.rounded()) }
+    ),
+    in: 0...12,
+    step: 1
+)
+</code></pre>
+<p><code>selectedHour</code> stays <code>var selectedHour: Int</code> on <code>@Observable DensityStore</code> — verified against the shipped <code>Density/DensityStore.swift</code>, exactly as T-031 §4.4 promised T-032 it would be. <strong>No wrapper type, no publisher, no <code>@Binding</code> chain through three views:</strong> <code>MapScreen</code> passes <code>Binding(get:set:)</code> onto the store's property, one hop. The <code>Double</code> bridge is an artifact of <code>Slider</code>'s API and is confined to the one file that owns the control.</p>
+<p>Range clamping and hour snapping are structural — <code>in: 0...12, step: 1</code> makes an off-hour or out-of-range value unrepresentable, satisfying PRD req 1's three bullets without a rounding pass anywhere else. <code>ios-code-reviewer</code> should treat a hand-rolled clamp/round outside this binding as a finding: it means the invariant moved out of the type and into a routine someone can forget.</p>
+<h3 id="44-the-slider-view">4.4 The slider view</h3>
+<pre><code class="language-swift">struct HourSlider: View {
+    @Binding var selectedHour: Int    // 0...12
+    let readout: HourFormat.Readout
+}
+</code></pre>
+<ul>
+<li><code>.frame(minHeight: 44)</code> on the control itself, regardless of how slim the drawn track is (design §2, §4; Fitts's Law). The visible thumb may render smaller.</li>
+<li>The tick/hairline overlay is drawn in a <code>GeometryReader</code> <strong>with <code>.allowsHitTesting(false)</code></strong> — it must never intercept the drag, or the native gesture and the VoiceOver adjustable action both degrade.</li>
+<li><code>.tint(Color("SliderFill"))</code>, <code>.accessibilityLabel("Map hour")</code>, <code>.accessibilityValue(HourFormat.voiceOverValue(readout))</code>, <code>.accessibilityIdentifier("hourSlider")</code>. The identifier is not cosmetic — §9's UI test drives the control through <code>XCUIElement.adjust(toNormalizedSliderPosition:)</code> and needs it.</li>
+<li>VoiceOver's discrete stepping comes from <code>step: 1</code> on a real <code>Slider</code> and is not reimplemented (design §2, §7).</li>
+</ul>
+<pre><code class="language-swift">enum HourFormat {
+    struct Readout: Equatable, Sendable {
+        let offsetLabel: String    // &quot;Now&quot;, &quot;+1h&quot; … &quot;+12h&quot;
+        let clockLabel: String     // &quot;21:00&quot; — P1 surface, always computed
+        let isNextDay: Bool
+    }
+    static func readout(offset: Int, anchorHour: Date, now: Date, calendar: Calendar) -&gt; Readout
+    static func voiceOverValue(_ readout: Readout) -&gt; String   // &quot;+3 hours, 21:00, next day&quot;
+}
+</code></pre>
+<p>Pure, injectable clock and calendar. Its unit tests must include a midnight crossing and an offset of 0 and 12.</p>
+<h3 id="45-the-one-change-to-t-031s-store">4.5 The one change to T-031's store</h3>
+<p>Two lines, both in <code>DensityStore.refreshIfHourRolled()</code>, plus one new call site:</p>
+<ol>
+<li><strong>New call site:</strong> <code>MapScreen</code> calls <code>refreshIfHourRolled()</code> when the heat modal opens, in addition to T-031's existing <code>scenePhase → .active</code> hook. This is the resolution of the PRD's own open technical question (D3). The method already early-returns when the hour has not rolled, so the common case costs a comparison.</li>
+<li><strong>New guard:</strong> the method reads <code>selectedHour</code> before an <code>await</code> and writes a remapped value after it. If the user moved the slider during that await, the write clobbers their input. Capture <code>selectedHour</code> before the await and apply the remap <strong>only if it is unchanged</strong>; otherwise leave the user's value alone.</li>
+</ol>
+<p>This touches code that already passed <code>code-review</code>, <code>qa</code> and <code>acceptance</code> under T-031. It is named here rather than slipped in, it is scoped to one method, and <code>ios-code-reviewer</code> should confirm T-031's existing <code>DensityStoreTests</code> still pass unmodified alongside the new case.</p>
+<h3 id="46-colour-tokens-and-the-contrast-rule">4.6 Colour tokens and the contrast rule</h3>
+<p>PRD req 6 says "<strong>every</strong> text label rendered inside the heat modal… There is no enumeration exception." A test cannot enumerate labels that do not exist yet. So the invariant is moved into the construction:</p>
+<blockquote>
+<p><strong>Every text label inside the heat modal renders with exactly one foreground token, <code>MutedOnSurface</code>, on exactly one of two backgrounds: <code>Surface</code> or <code>PillSurface</code>.</strong> Hierarchy inside the card comes from type size and weight, never from a second colour.</p>
+</blockquote>
+<p>That turns an unenumerable claim into four executable assertions ({token} × {2 backgrounds} × {light, dark} ≥ 4.5:1), and any future label added to this card is covered the day it is written. <code>ios-code-reviewer</code> treats a second foreground colour inside <code>HeatModal/</code> as a blocking finding.</p>
+<ul>
+<li><strong><code>PillSurface</code> is an opaque colour set, not the mockup's <code>color-mix(--heat 14%, transparent)</code>.</strong> Same reasoning as T-031 §8 D1: a translucent background has no verifiable ratio. The token is the pre-flattened equivalent (D3 in the design spec's own numbers: ~5.09:1 light / ~6.01:1 dark).</li>
+<li><strong>Non-text (3:1):</strong> assert <code>NowTick</code> vs <code>Surface</code> and <code>SliderFill</code> vs <code>Surface</code>. Both are drawn by this app.</li>
+<li><strong>Explicitly not asserted:</strong> the native <code>Slider</code>'s thumb and its inactive rail. The PRD already exempts the rail; the thumb is the same category — an unmodified platform-drawn part, which is where WCAG 1.4.11's author-modification boundary falls. Going custom to control those pixels would cost the discrete VoiceOver adjustable action that PRD req 6 depends on (design §8.5). <strong>The test must not be "helpfully" extended to those two pairs</strong> — it would fail against a control the PRD requires.</li>
+<li>Tokens are new colour sets, not literals lifted from the mockup, and <code>SliderFill</code> is deliberately <strong>not</strong> <code>HeatFill</code>: reusing the heat hue would couple the slider's contrast tuning to the heat palette T-031 req 4 locks.</li>
+</ul>
+<p>Test lives beside T-031's, reusing <code>Support/ContrastRatio.swift</code> and the same resolve-against-the-real-catalog pattern (<code>UIColor(named:in:compatibleWith:)</code> under both <code>UIUserInterfaceStyle</code>s) — never hardcoded hex.</p>
+<h3 id="47-repaint-composition-and-its-measurement">4.7 Repaint composition and its measurement</h3>
+<pre><code class="language-swift">struct HoodFill: Equatable, Sendable { let hood: Hood; let band: HeatBand? }
+
+enum HeatComposition {
+    /// Pure. Takes a lookup closure, not a store — testable with no DensityStore,
+    /// no network, no simulator.
+    static func fills(hoods: [Hood], hour: Int, band: (String, Int) -&gt; HeatBand?) -&gt; [HoodFill]
+}
+</code></pre>
+<p><code>MapScreen</code>'s body resolves fills <strong>once per pass</strong> through this function and iterates the result, instead of calling <code>densityStore.band(...)</code> inline per Hood. Two reasons, both load-bearing: it gives the repaint a single, nameable completion point, and it gives §9 a pure function to measure.</p>
+<pre><code class="language-swift">enum HeatRepaintSignpost {   // mirrors Support/ColdOpenSignpost.swift exactly
+    // interval name &quot;HourRepaint&quot;, category &quot;HeatRepaint&quot;
+    @MainActor static func begin()        // from the slider binding's setter, only on a real change
+    @MainActor static func endIfPending() // immediately after HeatComposition.fills(...) returns
+}
+</code></pre>
+<p><strong>Honest scope of the measurement, stated the way T-031 stated its cold-open one:</strong> <code>HourRepaint</code> brackets <em>"<code>selectedHour</code> written → every Hood's band resolved for the new hour."</em> It excludes MapKit's own frame commit, which app code cannot observe. The &lt;400ms budget is held structurally first — T-031 §4.4's contract that <strong>no code path fetches on an hour change</strong> is what makes it real — and measured second. <code>qa</code> additionally confirms perceptually that dragging produces no lag, no spinner, and no intermediate state.</p>
+<hr />
+<h2 id="5-flow">5. Flow</h2>
+<pre><code>Heat button tap
+  → MapChromeState.toggle(.heat)
+      → refreshIfHourRolled()            re-anchor if the wall clock rolled (§4.5)
+      → scrim fades in; near-me cluster fades out; nav row stays lit and hit-testable
+      → HeatModalCard slides in above the nav row, showing this session's hour
+  → drag / tap track / VoiceOver swipe / arrow key
+      → Slider(step: 1) writes selectedHour  ── the only writer
+          → HeatRepaintSignpost.begin()
+          → @Observable invalidation → MapScreen body
+              → HeatComposition.fills(hoods:hour:band:) → HeatRepaintSignpost.endIfPending()
+              → HoodLayer re-evaluates foregroundStyle per polygon
+          → HourReadout numeral + &quot;next day&quot; pill update from the same value
+      camera, zoom, geometry, polygon identity: untouched. No fetch. No sheet involved (D4).
+  → exit: swipe down · scrim tap · another nav button
+      → MapChromeState mutates; selectedHour untouched (PRD req 4)
+</code></pre>
+<p>Cold launch: <code>DensityStore()</code> initialises <code>selectedHour = 0</code> and <code>anchorHour</code> from the real clock. Nothing is read from disk, so "now" cannot be stale (PRD req 3).</p>
+<p>Empty / offline hours are a non-event for the slider: <code>band(for:hour:)</code> returns <code>nil</code>, <code>HoodLayer</code> applies no fill, and no banner or modal appears anywhere. That is T-031's rendering rule, inherited, not re-implemented (design §3).</p>
+<hr />
+<h2 id="6-third-party-dependencies">6. Third-party / dependencies</h2>
+<p><strong>None added.</strong> No package, no account, no cost, nothing Aviran-gated. <code>Slider</code>, <code>GeometryReader</code>, <code>os_signpost</code>, and <code>Calendar</code> are all platform. This keeps <code>passenger-code/README.md</code>'s "no third-party packages until a TRD justifies one" intact.</p>
+<p><strong>Salvage:</strong> <code>SALVAGE.md</code> marks <code>Models/HeatTimeWindow.swift</code> REUSE and <code>Features/Map/HeatmapControlsSheet.swift</code> REFERENCE (1,069 lines — "extract the model, not the view"). The archive is <strong>not reachable from this workspace</strong> (<code>~/APE Studio/locali</code> is absent here; same access gap T-031 hit for <code>ContrastRatio.swift</code>). It is also largely moot: the hour-windowing model REUSE points at is already re-derived and shipped in <code>DensityStore</code> (<code>anchorHour</code> + <code>0...12</code> offset over absolute UTC hours), which is a stricter design than an hour-of-day window. <code>ios-developer</code> should not block on salvage access; whoever can reach the archive may diff <code>HeatTimeWindow</code> against §3.2 afterwards.</p>
+<hr />
+<h2 id="7-rollout-migration">7. Rollout &amp; migration</h2>
+<ul>
+<li><strong>No feature flag.</strong> The control is reachable only from a button this same task adds; the off-state of a flag would be a nav row with nothing in it.</li>
+<li><strong>No migration, no backend deploy, no Aviran-gated apply step.</strong> Nothing in §11 touches <code>database/</code>.</li>
+<li><strong>No backward compatibility surface.</strong> No persisted state exists to read forward or backward, by design (§3.1).</li>
+<li><strong>Ships independently of the backend, like T-031.</strong> With no <code>SupabaseConfig.plist</code> and no density rows, the modal still opens, the slider still moves, and every hour renders empty — which is exactly PRD req 2's silent-empty state. The feature is demoable and testable before migration <code>001</code> is ever applied.</li>
+<li><strong>Dependency direction:</strong> T-034 (live events) reads <code>selectedHour</code> and adds a row to <code>HeatModalCard</code>. T-036/T-037/T-038 add their own <code>NavSurface</code> views and their own buttons to <code>MapNavRow</code>. None of them need to change anything this task writes.</li>
+</ul>
+<hr />
+<h2 id="8-decisions-and-ratified-deviations-from-the-approved-mockup">8. Decisions and ratified deviations from the approved mockup</h2>
+<p>T-031 set the precedent for this section: a deviation from an approved mockup is recorded and justified here, not silently built (T-031 §8 D1, the <code>ColdOpenTitle</code> opaque backdrop). Six apply.</p>
+<h3 id="d1-the-nav-row-ships-with-one-button-not-three">D1 — The nav row ships with one button, not three</h3>
+<p>The mockup and <code>ux-flows.md</code> §2 both show three side-by-side nav buttons (search, heat, profile) plus a fourth Places icon. <strong>None of them exist in the shipped app</strong>, and neither search (T-038) nor Profile (T-037) nor Places (T-036) has a TRD, let alone a screen. This task builds <code>MapNavRow</code> as the container plus <strong>the heat button only</strong>.</p>
+<p>A rendered button that opens nothing is a broken control — it fails at the Functional tier before it can be judged on anything else (<code>design-principles.md</code> §1) — and a disabled-looking button in shipped chrome invites exactly the "is the app broken?" read this map cannot afford. The row is laid out so the remaining buttons slot in without re-layout, and each is added by the task that owns its destination. If Aviran or <code>designer</code> wants three visible buttons before those screens exist, that is a product call, not an engineering one, and it is a small change here.</p>
+<p><strong>Consequence, also a deviation:</strong> the near-me cluster moves up out of the band the nav row now occupies (§2.3). The Places icon that <code>ux-flows.md</code> §2.1 names as the other bucket-2 control does not exist yet; T-036 attaches it to the same <code>isPresenting</code>-driven fade rather than re-deriving the rule.</p>
+<h3 id="d2-custom-zstack-overlay-not-sheet-construction-pinned">D2 — Custom <code>ZStack</code> overlay, not <code>.sheet()</code> — construction pinned</h3>
+<p>The design spec flagged this (§8.1) and this TRD settles the shape: a plain SwiftUI layer inside <code>MapScreen</code>'s <code>ZStack</code> at z3, below <code>MapNavRow</code> at z4, with an explicit scrim at z1 (§2.3). Not <code>.sheet</code>, not <code>.fullScreenCover</code>, not a <code>UIViewControllerRepresentable</code>, and not <code>.presentationBackgroundInteraction</code> (which cannot apply — there is no presentation). The nav row must remain hit-testable at all times or <code>ux-flows.md</code> §2.1's direct nav-switch requirement fails, and that is the entire reason this deviation exists.</p>
+<h3 id="d3-now-re-resolves-on-modal-open-not-on-a-timer">D3 — "Now" re-resolves on modal open, not on a timer</h3>
+<p>The PRD left open what happens when the app sits foregrounded across an hour boundary. Call: re-anchor on <strong>modal open</strong>, reusing T-031's existing <code>refreshIfHourRolled()</code> (§4.5), with no repeating timer anywhere.</p>
+<p>The staleness only becomes visible when the user looks at the slider, and the only way to look at it is to open the modal — so the check placed exactly there is both sufficient and free. A wall-clock timer would burn a scheduled wake to correct a label nobody is reading, and would risk moving the thumb under a live finger. Combined with T-031's <code>scenePhase → .active</code> hook, the two triggers cover every path by which a user can observe the value.</p>
+<h3 id="d4-the-shipped-modal-contains-the-slider-only">D4 — The shipped modal contains the slider only</h3>
+<p>The mockup renders stub toggle rows (a "baseline / always on, no toggle in V1" heat row, a T-034 live-events row) and a repaint-timing pill. The design spec labels all of them as mockup instrumentation. Making that explicit for the build: <strong>none of them ship.</strong> The heat layer has no on/off toggle in V1 at all, so a row saying so is chrome that explains an absent feature; the live-events toggle is T-034's to add to this card; the timing pill becomes the <code>HourRepaint</code> signpost (§4.7), which has no UI.</p>
+<h3 id="d5-native-slider-and-the-contrast-bar-drawn-around-it">D5 — Native <code>Slider</code>, and the contrast bar drawn around it</h3>
+<p>Native <code>Slider(step:)</code> plus a non-interactive overlay (§4.4). The consequence is recorded in §4.6 and matters: the thumb and the inactive rail are platform-drawn and are outside this app's authored contrast surface. Going custom to control them would trade a P0 (discrete VoiceOver stepping, req 6) for a bar the PRD itself already exempts the rail from. This TRD does not leave that as a preference — it is the reason the contrast test asserts the pairs it asserts and no others.</p>
+<h3 id="d6-separate-side-by-side-icons-not-a-joined-nav-bar-added-2026-07-31-founder-direct">D6 — Separate side-by-side icons, not a joined nav bar (added 2026-07-31, founder-direct)</h3>
+<p><strong>The call:</strong> each nav icon is its own independent button, placed side by side with the others. No shared container chrome — no capsule, no bar background, no dividers, no segmented control. <code>MapNavRow</code> stays as the layout/hit-testing grouping (§2.3); what it does <em>not</em> do is draw a visual container around the icons.</p>
+<p><strong>Provenance:</strong> Aviran, verbatim — <em>"yes, separate icons, same switching behavior."</em> Live chat, <strong>relayed</strong> to this agent via <code>chief-of-staff</code> (<code>PROGRESS.md</code>, 2026-07-31 FOUNDER-DIRECT STUB); not heard first-hand here. It reconfirms his earlier <em>"I don't want a nav row. I want separate icons side by side"</em> (<code>BOARD.md</code>, T-032 row), which had gone unanswered.</p>
+<p><strong>Two relays of this answer exist and are deliberately not merged into one quote</strong> (<code>PROGRESS.md</code>, 2026-07-31 CONCURRENCY FLAG): a second <code>chief-of-staff</code> session was relayed <em>"separate icons side by side, not nav row."</em> Same gist — no grouped bar, icons rendered separately — different sentence. This TRD quotes only the relay its own dispatch carried, labelled as relayed, and states the agreement rather than inventing a combined "authoritative" wording (L-013). The decision above is the part both relays support; nothing here rests on the difference between them.</p>
+<p><strong>Scope — visual only; no behaviour is touched.</strong> Modal exclusivity and the <code>NavSurface</code> state type (§4.1), the z-order table and the z4 never-covered guarantee (§2.3), the three dismissal paths (§4.2), and D2's modal-vs-<code>.sheet</code> exclusion all stand unchanged. Tapping one icon still closes whatever surface is open and switches straight to it. <code>ux-flows.md</code> §2.1's interaction model is not amended by this and was not edited.</p>
+<p><strong>What this decision does <em>not</em> settle:</strong> the per-icon visual treatment — glyph size, background shape, material, spacing. No design doc pins it in text; <code>ux-flows.md</code> §2 and <code>time-slider-design.md</code> §2/§5 both say "3 side-by-side nav buttons" without saying whether they share a container, and the interactive mockup is the only artifact that renders an answer either way (reference only — this TRD wins on this point, per the header). <strong>[ASSUMPTION]</strong> <code>ios-developer</code> builds each icon to the existing <code>NearMeButton</code> floating-chrome idiom — same materials, same bottom band — because it is the only bottom-chrome idiom the shipped app has. Same shape as T-033's D6: an engineering default standing in for a design call, flagged rather than presented as designed, and cheap for <code>designer</code> to overturn — with one button shipping in this task (D1), it is a one-file change.</p>
+<hr />
+<h2 id="9-verification-hooks-including-t-031s-carry-forward">9. Verification hooks — including T-031's carry-forward</h2>
+<p><strong>Why this section exists.</strong> <code>product</code>'s T-031 acceptance pass found that PRD req 5's bullets 2–3 (<em>repaints on hour change</em>, <em>repaint completes in &lt;400ms</em>) had <strong>zero traced test cases</strong> — correctly, since nothing in T-031 changes the selected hour — and assigned them to T-032's own <code>qa</code>/<code>acceptance</code> (T-031 PRD, <code>BOARD.md</code> T-032 row, <code>PROGRESS.md</code> 2026-07-30). The same two behaviours are this PRD's req 2 bullets 1 and 3. They are the same two behaviours; this task is the only one that can exercise them; and a testability gap is much cheaper to close in a TRD than at acceptance. Each hook below is a build step in §11, not a suggestion to <code>qa</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Behaviour to verify</th>
+<th>Hook built in this task</th>
+<th>Step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Map repaints on hour change</td>
+<td><code>HeatComposition.fills(hoods:hour:band:)</code> is pure — a unit test asserts that a fixture snapshot yields <strong>different</strong> <code>[HoodFill]</code> for two different hours, and identical output for the same hour. No simulator needed.</td>
+<td>C6</td>
+</tr>
+<tr>
+<td>Repaint completes &lt;400ms</td>
+<td><code>XCTOSSignpostMetric</code> over the <code>HourRepaint</code> interval in a UI test that drives <code>app.sliders["hourSlider"].adjust(toNormalizedSliderPosition:)</code>, plus a <code>measure</code> unit test over <code>HeatComposition.fills</code> at catalog scale. Same instrument pattern as <code>ColdOpenPerformanceTests</code>.</td>
+<td>C7</td>
+</tr>
+<tr>
+<td>Hour change leaves camera/zoom untouched</td>
+<td>Nothing in the hour path writes <code>camera</code> — assert by construction in review, and by observation at <code>qa</code> (drag across the full range, camera unmoved).</td>
+<td>review + qa</td>
+</tr>
+<tr>
+<td>Session persistence across a nav switch (req 4)</td>
+<td><code>MapChromeState</code> unit test: <code>toggle(.heat)</code> → <code>toggle(.search)</code> → <code>toggle(.heat)</code> leaves <code>selectedHour</code> untouched. This is why <code>NavSurface</code> has four cases (§4.1).</td>
+<td>C2</td>
+</tr>
+<tr>
+<td>Cold-launch reset (req 3)</td>
+<td><code>DensityStore</code> unit test — a fresh instance with an injected clock starts at <code>0</code>; extends T-031's existing <code>DensityStoreTests</code>.</td>
+<td>C8</td>
+</tr>
+<tr>
+<td>Hour-snapping and clamping (req 1)</td>
+<td>Structural via <code>in: 0...12, step: 1</code>; asserted at the binding's <code>set</code> in a unit test (fractional input rounds to a whole hour; out-of-range cannot be produced).</td>
+<td>C4</td>
+</tr>
+<tr>
+<td>Contrast, every modal label (req 6)</td>
+<td>The token-level test in §4.6 — four assertions that cover labels not yet written.</td>
+<td>C9</td>
+</tr>
+<tr>
+<td>VoiceOver value strings, incl. midnight crossing (req 5, 6)</td>
+<td><code>HourFormat</code> unit tests with an injected clock and calendar.</td>
+<td>C3</td>
+</tr>
+</tbody>
+</table>
+<p><code>qa</code> writes <code>prds/time-slider/TEST-PLAN.md</code> with a traced case per P0 bullet — and the two carried-forward bullets above must appear in the trace column with a real case behind them, not a "PASS by construction" note. That distinction is precisely what <code>product</code> caught at T-031's acceptance.</p>
+<hr />
+<h2 id="10-risks-and-alternatives">10. Risks and alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation / decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SwiftUI re-renders every polygon on an hour change and misses 400ms</td>
+<td>Polygons keep stable <code>Hood.id</code> identity; only <code>foregroundStyle</code> re-evaluates, over dozens of shapes. Measured, not assumed (§9). If it misses, the fallback is caching resolved <code>ShapeStyle</code> per band — local, not architectural (T-031 §10 already names this).</td>
+</tr>
+<tr>
+<td>The <code>HourRepaint</code> signpost measures resolution, not pixels</td>
+<td>Stated plainly in §4.7 rather than claimed as end-to-end. Backed by the structural guarantee (no fetch on hour change) and by a perceptual check at <code>qa</code>. Same honesty posture T-031 took on <code>XCTApplicationLaunchMetric</code>.</td>
+</tr>
+<tr>
+<td>Custom overlay reimplements sheet behaviours (drag-to-dismiss, transitions) badly</td>
+<td>The behaviours are small and enumerated (§4.2), and the alternative is unusable: <code>.sheet</code> covers the nav row and breaks §2.1's nav-switch rule. This is the one place a platform primitive is deliberately declined, and D2 records why.</td>
+</tr>
+<tr>
+<td>The nav row ships with one button and reads as unfinished</td>
+<td>D1 — deliberate, reversible, and preferable to a dead control. Named for <code>product</code>/<code>designer</code> at <code>trd-review</code>.</td>
+</tr>
+<tr>
+<td>PRD req 2's "any open sheet is unchanged by an hour change" is unexercisable</td>
+<td>Because the two can never be co-presented (D4/§2.3), the bullet is satisfied structurally rather than behaviourally. <strong>Flagged rather than quietly passed</strong>: if <code>product</code> intended the slider and a Hood sheet to coexist, that is a product/design change, not something this TRD should invent. Cross-check against T-033's TRD at <code>trd-review</code>.</td>
+</tr>
+<tr>
+<td>Non-whole-hour timezones render a <code>:30</code> clock label</td>
+<td>Cosmetic, P1 surface only, and out of V1's single city. §3.2 <code>[ASSUMPTION]</code>.</td>
+</tr>
+<tr>
+<td>Touching accepted T-031 code (<code>DensityStore</code>)</td>
+<td>One method, two lines, named in §4.5 with the reason. T-031's existing tests must pass unmodified.</td>
+</tr>
+<tr>
+<td>Synthetic density makes every future hour a simulation, not a forecast</td>
+<td>Named in the PRD and strategy; unchanged by this TRD. Nothing here should be read as making the control more truthful than the data behind it.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternatives considered and rejected:</strong> <code>.sheet(isPresented:)</code> for the modal (covers the nav row — D2); a fully custom slider (loses free discrete VoiceOver stepping, a P0 — D5); a repeating timer to re-resolve "now" (D3); persisting <code>selectedHour</code> across launches (contradicts req 3, and T-031 §10 already rejected it); a per-hour network fetch (would make the 400ms budget unachievable — T-031 §4.4 made no-fetch-on-hour-change a contract precisely to prevent it); rendering three nav buttons with two inert (D1); asserting contrast on the platform-drawn thumb and rail (§4.6 — would fail against the control the PRD requires).</p>
+<hr />
+<h2 id="11-build-breakdown">11. Build breakdown</h2>
+<p>Ordered. <strong>Every step is <code>[iOS]</code>.</strong> No <code>[Backend]</code>, no <code>[Algo/Data]</code> — see §1.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td><code>MapChromeState</code> + <code>NavSurface</code> (§4.1)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C2</td>
+<td><code>MapNavRow</code> with the heat button only (D1), icons as separate side-by-side buttons with no shared container chrome (D6); wire into <code>MapScreen</code>'s <code>ZStack</code> at z4; move the near-me cluster above it; bucket-2 fade driven by <code>isPresenting</code> (§2.3). Exclusivity unit test incl. the selected-hour-survives-a-switch case (§9)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C3</td>
+<td><code>HourFormat</code> + tests — numeral, clock label, <code>isNextDay</code>, VoiceOver string; injected clock/calendar; midnight-crossing and 0/12 cases</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C4</td>
+<td><code>HourSlider</code> — native <code>Slider(in:step:)</code>, the <code>Double</code> bridge, ≥44pt frame, non-hit-testing tick overlay, a11y label/value/identifier (§4.3, §4.4)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C5</td>
+<td><code>HeatModalCard</code> + scrim + three dismissal paths + Reduce-Motion-aware transition (§4.2); <code>HourReadout</code> (numeral + "next day" pill)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C6</td>
+<td><code>HeatComposition.fills</code> + switch <code>MapScreen</code> to one resolution per pass; the differs-across-hours unit test (§9)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C7</td>
+<td><code>HeatRepaintSignpost</code> + the <code>XCTOSSignpostMetric</code> UI test and the <code>measure</code> unit test against the 400ms budget (§4.7, §9)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C8</td>
+<td><code>DensityStore</code>: modal-open <code>refreshIfHourRolled()</code> call site + the mid-await guard (§4.5); cold-launch-reset test</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+<tr>
+<td>C9</td>
+<td>The four colour sets + the token-level contrast test, light and dark (§4.6)</td>
+<td><strong>[iOS]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>trd-review</code> sign-off needed from: <code>ios-developer</code> + <code>ios-code-reviewer</code> only.</strong> <code>developer</code>, <code>code-reviewer</code> and <code>data-engineer</code> have no step to review — this TRD writes no SQL, no RLS, no pipeline, and no algorithm. Worth one explicit cross-check at review, though: <strong>T-033's TRD</strong> should be read against §2.3/D4 (chrome layering and the modal-vs-sheet exclusion), since both tasks are in <code>trd</code> at the same time and both put something in the bottom of the screen.</p>
+</div>
+</body>
+</html>

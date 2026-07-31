@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hood Dataset — Tel Aviv Geometry &amp; Attributes — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>hood-dataset/hood-dataset.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="hood-dataset-tel-aviv-geometry-attributes-prd">Hood Dataset — Tel Aviv Geometry &amp; Attributes — PRD</h1>
+<p><strong>Status:</strong> Draft v1
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Why this is a PRD and not a line item:</strong> standing rule, founder-direct 2026-07-30 (<code>agent-os/PROGRESS.md</code>, FOUNDER-DIRECT STUB) — a data need substantial enough to be its own deliverable gets its own PRD. This one is the board's existing T-040 / Linear <code>PAS-17</code>, which had a row and no spec.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>The real Tel Aviv Hood dataset: polygons, names, hand-curated blurbs, and the three attribute fields other V1 features read off a Hood.</li>
+<li>Replaces the placeholder T-031 shipped — 4 hand-authored rectangles in <code>passenger-code/Passenger/Resources/hoods-tel-aviv.json</code>, 5 rough rows in migration <code>001</code>'s seed.</li>
+<li>One authored source produces both artifacts (DB seed + bundled iOS fixture) through the existing <code>export_hoods_geojson.py</code>, same <code>id</code> slugs, so the two can never disagree.</li>
+<li>Sourcing method is open (OSM / municipal open data / manual authoring) — this states what the output must satisfy, not how to get it.</li>
+<li>Ships attribute <strong>values</strong>; the pipelines that later <em>change</em> them are not this PRD's.</li>
+<li><strong>Not in scope:</strong> <code>hood_density</code> and the synthetic generator (built, <code>map-hoods-heat</code> + migrations <code>001</code>/<code>002</code>); the tourist-trap algorithm that proposes a flag value (<code>data-eng/discovery-engine-spec.md</code>); the curated places that sit inside Hoods (<code>prds/places-dataset/</code>); any city other than Tel Aviv; map rendering of any kind.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: <em>"the map is organized into </em><em>Hoods</em><em> — this is now the standing product-facing term for what earlier docs called "zone"/"neighborhood"."</em></li>
+<li>Strategy, verbatim: <em>"Tap a Hood → hand-curated blurb + tagged spots."</em></li>
+<li><code>map-hoods-heat</code> req 3 ("dozens of Hoods, not thousands") was recorded <strong>unmet at acceptance</strong> — the shipped data is placeholder. That bullet is satisfied here, not there.</li>
+<li>Four V1 PRDs read Hood fields that do not exist in migration <code>001</code>: blurb, tourist-trap flag, progression designation.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>Coverage and granularity.</strong>
+   - ☐ The dataset holds <strong>dozens of Hoods, not thousands</strong> (decision #12's bound; <code>map-hoods-heat</code> req 3).
+   - ☐ Hoods cover the Tel Aviv-Yafo area a user opening the app city-wide sees, with no unnamed interior hole large enough to read as a rendering bug.
+   - ☐ No Hood exists for any city other than Tel Aviv (<code>map-hoods-heat</code> req 2).</p>
+</li>
+<li>
+<p><strong>Non-overlap is validated before the data ships, and a violation fails loudly.</strong>
+   - ☐ No coordinate in Tel Aviv falls inside two Hood polygons.
+   - ☐ A validation step runs over the authored source <strong>before</strong> export and <strong>fails the build</strong> on any overlap — it never silently resolves to file order the way <code>HoodHitTester.swift</code> does today (<code>map-hoods-heat</code> req 3, pass condition added at acceptance).
+   - ☐ Loading the shipped dataset, no coordinate opens two different Hood sheets on repeat taps, and no Hood's fill paints over a neighbour's.</p>
+</li>
+<li>
+<p><strong>Every Hood carries a stable slug and a display name.</strong>
+   - ☐ <code>id</code> is a stable lowercase slug that survives a geometry revision — a Hood's boundary may be corrected without changing its id.
+   - ☐ <code>name</code> is the name a Tel Aviv resident would use out loud, not a municipal statistical-area code.
+   - ☐ Slugs already seeded (<code>florentin</code>, <code>neve-tzedek</code>, <code>lev-hair</code>, <code>old-north</code>, <code>jaffa</code>) are preserved where the same Hood survives, so the swap is additive rather than a rename sweep.</p>
+</li>
+<li>
+<p><strong>Hand-curated blurb, authored per Hood.</strong>
+   - ☐ Each Hood carries a <code>blurb</code> text field — the "local read" decision #10 makes load-bearing.
+   - ☐ A blurb is written by a person, not generated from place names or density.
+   - ☐ Blurb may be <code>null</code>; <code>hood-place-detail</code> req 2 already renders that case with no placeholder copy. Shipping nulls is allowed, shipping a placeholder string is not.
+   - ☐ <strong>[ASSUMPTION]</strong> No length bound is specified upstream; the sheet is a native detent, so a blurb must read fully within one <code>.medium</code> detent without scrolling. Designer's to confirm at <code>design-review</code>.</p>
+</li>
+<li>
+<p><strong>The three attribute fields other PRDs depend on exist and ship populated.</strong>
+   - ☐ <code>is_tourist_trap</code> — <strong>nullable</strong> boolean. <code>null</code> = not yet rated, <code>false</code> = not flagged, <code>true</code> = flagged (<code>tourist-trap-flag</code> technical design; reqs 4 and 7 need all three states stored).
+   - ☐ A Hood whose value is not yet known ships <code>null</code>, never <code>false</code> — the two render identically but VoiceOver announces them differently (<code>tourist-trap-flag</code> req 7).
+   - ☐ <code>designated_for_progression</code> — boolean, marking the Hoods Passport counts toward Local status (<code>passport</code> req 4). Undesignated Hoods carry <code>false</code>.
+   - ☐ <code>blurb</code> — nullable text (req 4).
+   - ☐ Every field is public-read with no per-user rows, matching the existing <code>hoods</code> RLS.</p>
+</li>
+<li>
+<p><strong>One authored source, two artifacts, verified identical.</strong>
+   - ☐ The DB seed and the bundled iOS fixture are generated from the same source file in one export run.
+   - ☐ Every <code>id</code> present in one artifact is present in the other, with the same polygon.
+   - ☐ The export is re-runnable: correcting geometry means editing the source and re-exporting, never hand-editing either artifact.</p>
+</li>
+<li>
+<p><strong>Places resolve cleanly against it.</strong>
+   - ☐ Every place in <code>prds/places-dataset/</code> resolves to exactly one Hood by coordinate, and its stored <code>hood_id</code> matches that resolution.
+   - ☐ A geometry revision that orphans a place fails validation rather than shipping a place with a dangling <code>hood_id</code>.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>A precomputed centroid per Hood, so the label channel does not recompute one per frame.</li>
+<li>Provenance recorded per Hood (which source the boundary came from), for the next city.</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> extends <code>public.hoods</code> (migration <code>001</code>) with <code>blurb text null</code>, <code>is_tourist_trap boolean null</code>, <code>designated_for_progression boolean not null default false</code>. New migration — <code>001</code> is reviewed and pending Aviran's apply.</li>
+<li><strong>Polygon format:</strong> unchanged from <code>001</code> — single-ring WGS84 <code>[[lng,lat], …]</code> in <code>jsonb</code>. <strong>Open:</strong> a real municipal boundary may need multi-ring or a hole, which is a schema decision, not a data detail.</li>
+<li><strong>APIs / contract:</strong> unchanged — static reference data, fetched once per session and cached. Three columns add no round trip.</li>
+<li><strong>Architecture notes:</strong> <code>export_hoods_geojson.py</code> (T-031's B3) is the export path and has never run against a real dataset. Req 2's non-overlap validator does not exist and is new work.</li>
+<li><strong>Dependencies:</strong> nothing upstream. <strong>Blocks</strong> <code>places-dataset</code> (<code>hood_id</code> resolution), <code>passport</code> (designation + attribution), <code>tourist-trap-flag</code> (the stroke's source value), <code>live-events-pipeline</code> (event→Hood mapping), and the real-geometry half of <code>map-hoods-heat</code> req 3.</li>
+<li><strong>Open technical questions:</strong> whether the sourced geometry needs multi-ring/hole support; whether the non-overlap validator runs in the export script or as a separate CI step; how a Been place is re-attributed when a Hood boundary is corrected (<code>passport</code>'s own open question).</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> Hood boundaries change rarely once authored, which is what makes session-long client caching safe (<code>map-hoods-heat</code>'s own assumption, inherited here).</li>
+<li><strong>[ASSUMPTION]</strong> Blurbs are authored by the founders, not contracted out — decision #22 exited the staffing model for localness, and nothing states blurbs followed it. Blurb authoring is V1's remaining editorial load.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>Two numbers Passport needs are not here and are not inventable:</strong> the Local threshold, and which Hoods are designated. This PRD provides the <em>field</em>; the values are Aviran's or <code>data-engineer</code>'s.</li>
+<li><strong>Seeding <code>is_tourist_trap</code> needs a proposing algorithm that does not exist yet</strong> (<code>data-eng/discovery-engine-spec.md</code>). If it never lands, every Hood ships <code>null</code> — renders correctly per <code>tourist-trap-flag</code> req 4, but the product's second signal is empty at launch. Escalation, not a build detail.</li>
+<li><strong>The sourcing options differ in licence, not just effort.</strong> OSM carries ODbL attribution obligations; municipal open data carries its own terms. Check before deriving from either.</li>
+<li>Blurb authoring scales per city — Tel Aviv is tractable, the second city repeats it.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created for T-040 / <code>PAS-17</code>, which had a board row and no spec</td>
+<td>Standing rule, founder-direct 2026-07-30: a substantial data need is its own deliverable with its own PRD</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Kept separate from <code>places-dataset</code> rather than merged into one "reference data" PRD</td>
+<td>Different sourcing jobs, different tooling, different failure modes — a geospatial boundary extraction with an overlap invariant vs. per-place attribute authoring. They share one schema contract (<code>places.hood_id</code> → <code>hoods.id</code>), stated in both</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Three attribute columns spec'd here rather than inside each consuming PRD</td>
+<td>Four PRDs read Hood fields migration <code>001</code> does not have; specifying them once stops three PRDs each inventing a column</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

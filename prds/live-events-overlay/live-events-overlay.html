@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Events Overlay — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>live-events-overlay/live-events-overlay.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="live-events-overlay-prd">Live Events Overlay — PRD</h1>
+<p><strong>Status:</strong> Draft v2
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Build phase:</strong> 1 — client ships with fake/empty data, no backend (<code>agent-os/BOARD.md</code> § V1 Build Phases)
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-31
+<strong>Launch-blocking — what it attaches to.</strong> Strategy, unchanged: "V1 does not ship until data-engineer has a working live-events ingestion pipeline." That gate is real, and it attaches to <strong>the pipeline</strong> — <code>T-043</code> / <a href="../live-events-pipeline/live-events-pipeline.html"><code>live-events-pipeline</code></a>, Build Phase 3. <strong>It does not block the work this PRD specs.</strong> The client layer here is Build Phase 1: it renders whatever set it is handed, including none (req 5), so it can be built, demoed, and QA'd against a bundled fake event set while the pipeline is still Phase-3 work. Only <em>real</em> event data waits on the pipeline. Phase 1 therefore needs that fixture, not merely an empty feed — reqs 1–4 and 6 have nothing to exercise otherwise.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>A third map layer alongside heat and tag: events happening in Tel Aviv, drawn on the same map.</li>
+<li>Events are bound to the selected hour — the slider carries both "how packed" and "what's happening".</li>
+<li>The layer is a <strong>selected</strong> set, not a raw feed: something decides which events are worth surfacing.</li>
+<li>Tapping an event marker opens its detail.</li>
+<li><strong>Not in scope:</strong> ticketing, booking, promoter placement, or any business-facing monetization (Phase 2 at the earliest, and strategy fences B2B outright); user-submitted events; any list or feed view off the map; push notifications; the pipeline's sourcing and freshness design, which is PAS-5's deliverable.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy: "Live Events overlay ships in V1 as a third map layer alongside heat + tag."</li>
+<li>Heat says a Hood is packed; events say <em>why</em> — the one signal that explains what density can only report.</li>
+<li>Strategy, on the slider: "the time slider carries both kinds of information again, how packed and what's happening."</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>Events render on the map, in the current hour.</strong>
+   - ☐ An event with a start time inside the selected hour renders as a marker at its location.
+   - ☐ Changing the selected hour changes which events render, inside the 400ms budget (<code>design/design-principles.md</code> §2).
+   - ☐ An event outside the now → +12h window never renders.
+   - ☐ Event markers are distinguishable from place pins by shape or glyph, not colour alone (<code>design/design-principles.md</code> §3).</p>
+</li>
+<li>
+<p><strong>The layer never competes with heat.</strong>
+   - ☐ Event markers do not use the heat bands' fill treatment or occupy the area channel — heat owns fill, always (<code>design/map-rendering-spec.md</code> §2).
+   - ☐ Event markers cluster by the same screen-distance rule as place pins, and clusters stay neutral-coloured (<code>design/map-rendering-spec.md</code> §5).</p>
+</li>
+<li>
+<p><strong>The set is selected, not exhaustive.</strong>
+   - ☐ The layer shows a ranked subset, not every event the pipeline ingested — strategy: "algorithmically selected as likely-interesting to the user (not just a raw feed of every event)."
+   - ☐ The client renders the order and inclusion the backend gives it; ranking is not re-derived on device.
+   - ☐ The number of markers on screen at once is bounded, so a busy Friday night does not bury the heat layer underneath event pins.
+   - ☐ Selection uses no per-user profile, preference store, or interest history — V1 has no identity (see Open questions).</p>
+</li>
+<li>
+<p><strong>Event detail.</strong>
+   - ☐ Tapping a marker opens a sheet with name, time, and location, one tap, map still visible behind it.
+   - ☐ The sheet offers the same route hand-off contract as a place — native Maps/Waze, walking, no in-app navigation.
+   - ☐ Any field the pipeline did not supply is omitted, not shown as a blank row or placeholder.</p>
+</li>
+<li>
+<p><strong>The layer degrades to absent, never to broken.</strong>
+   - ☐ If the events feed is unreachable or empty, the map renders heat and places normally with no error banner over the map surface.
+   - ☐ Stale events — end time already past — never render.
+   - ☐ The app is fully usable with the events layer permanently empty. This is the state it ships in if PAS-5 slips.</p>
+</li>
+<li>
+<p><strong>The layer can be switched off.</strong>
+   - ☐ An events toggle sits with the other layer toggles in the heat modal (<code>design/ux-flows.md</code> §2, locked 2026-07-29).
+   - ☐ Toggling it off leaves heat and place pins untouched.
+   - ☐ The toggle state persists across a modal close and reopen within the session.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>A count on a Hood showing how many surfaced events fall inside it for the selected hour.</li>
+<li>Event category glyphs, if the pipeline supplies a category worth trusting.</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> new <code>events</code> table — id, name, start/end time, coordinates, hood_id, source, plus a rank column the pipeline writes. Public-read, no user-scoped rows. That rank column is the contract boundary: <code>data-engineer</code> owns how it is computed, the client only sorts and truncates by it.</li>
+<li><strong>Data sourcing (added 2026-07-30, standing rule).</strong> The pipeline that fills this table now has a PRD: <a href="../live-events-pipeline/live-events-pipeline.html"><code>prds/live-events-pipeline/</code></a>. It carries the ingest-side fields this sketch omits (<code>source_event_id</code> for dedup, <code>ingested_at</code> for freshness), the required-field drop rule, event→Hood attribution, expiry, and the non-personalized rank contract. <strong><code>PAS-5</code> delivered a feasibility read, not a spec</strong> — that gap is what the pipeline PRD closes. Which feed(s) ship is still Aviran's (<code>PAS-6</code> item 10); the pipeline PRD is written source-agnostically so it does not pre-decide it.</li>
+<li><strong>APIs / client-server contract:</strong> one fetch for the whole now → +12h window alongside the map's density load, re-filtered locally per hour rather than re-fetched per slider step. Realtime is not required — periodic refresh is enough for events known in advance.</li>
+<li><strong>Architecture notes:</strong> <code>SALVAGE.md</code> marks <code>Models/LiveEvent.swift</code>, <code>EventMarker.swift</code>, <code>EventDetailCard.swift</code>, <code>Services/EventsService.swift</code> REUSE. <strong>Check before reusing:</strong> <code>prds/INDEX.md</code> warns the Locali overlay shipped as an unflagged raw feed; the ranked-subset requirement is new and the salvaged service has no notion of it.</li>
+<li><strong>Dependencies:</strong> the map and time-slider PRDs land first. Hard upstream dependency on <a href="../live-events-pipeline/live-events-pipeline.html"><code>live-events-pipeline</code></a> for any <strong>real</strong> data, which in turn needs <a href="../hood-dataset/hood-dataset.html"><code>hood-dataset</code></a> — event→Hood attribution is impossible against placeholder rectangles. <strong>Build Phase 1 needs no backend at all:</strong> a bundled fake event set, carrying the same fields as the <code>events</code> table above, drives reqs 1–4 and 6; the empty case (req 5) is a state to verify, not the only Phase-1 state. Authoring that fixture is a named Phase-1 data need — small enough to live here rather than in its own PRD, but it does not exist yet and nobody owns it.</li>
+<li><strong>Open technical questions:</strong> refresh cadence; whether rank is absolute or per-hour; the on-screen marker cap, once real Tel Aviv event volume is known.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> Events are known in advance, so the layer needs periodic refresh rather than Realtime. If PAS-5 finds the useful events are same-hour and unpredictable, the contract changes.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>The pipeline is launch-blocking; this client is not.</strong> Strategy: "V1 does not ship until data-engineer has a working live-events ingestion pipeline." Requirement 5 exists so the client is shippable with an empty layer, but that does not clear the launch gate — it only means the client is not what blocks it. The gate is <code>T-043</code>'s to clear in Build Phase 3. Do not read this PRD as evidence the pipeline will be ready, and do not read the correction above as the gate being softened — it is unchanged, just correctly attributed. <strong>Update 2026-07-30:</strong> <code>PAS-5</code> closed with a feasibility verdict of <strong>conditional</strong> — a thin ticketed-only feed is buildable in Phase 1, the version that makes the promise feel true is a data-access gap. The pipeline now has a spec (<code>live-events-pipeline</code>); it does not have a chosen source or a confirmed answer to whether thin is acceptable (<code>PAS-6</code> item 10).</li>
+<li><strong>"Likely-interesting to the user" cannot mean personalized in V1, and that needs Aviran's confirmation.</strong> V1 has no accounts, no preference tracking, and no interest history — strategy puts personalization in Phase 3 precisely because it "needs identity and preference tracking neither V1 nor Phase 2 requires." This PRD therefore reads the phrase as <em>generically</em> interesting — ranked by quality, popularity, and locality signals, the same for every viewer. If Aviran meant per-user, that is a scope change with an identity dependency behind it, not a ranking tweak.</li>
+<li>Three launch-blocking feasibility questions now stack — events (PAS-5), Scenic Walk routing and TikTok import (PAS-7). Strategy's own Key risks flag this: any one can slip the launch date.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>First PRD pass over the 2026-07-30 V1 lock (PAS-10); events confirmed V1 scope 2026-07-29 and again at the founders meeting</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>"Likely-interesting" spec'd as non-personalized ranking, flagged for Aviran</td>
+<td>V1 has no identity or preference tracking; a per-user reading would be a Phase 3 dependency</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Ingestion pipeline given its own PRD rather than staying fenced out with no spec behind the fence</td>
+<td>Standing rule, founder-direct 2026-07-30. Fencing it out was right; leaving the launch-blocking half with only a feasibility note and no requirements was not</td>
+</tr>
+<tr>
+<td>2026-07-31</td>
+<td>Launch-blocking header re-attributed to the pipeline (<code>T-043</code>, Build Phase 3); this client marked Build Phase 1, unblocked. Strategy's gate itself untouched</td>
+<td>The header conflated two things and read as if the client were blocked. Per <code>BOARD.md</code> § V1 Build Phases (Aviran, 2026-07-31), the client renders fake/empty data and needs no backend to ship, demo, or QA. The strategy line is Aviran-gated and was not edited, softened, or dropped — only correctly attributed</td>
+</tr>
+<tr>
+<td>2026-07-31</td>
+<td>Phase-1 fake event fixture named as a real, unowned data need</td>
+<td>Consequence of the above, surfaced by this fix: with an empty feed only, reqs 1–4 and 6 have nothing to test against, so "unblocked for Phase 1" is only true if the fixture exists</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

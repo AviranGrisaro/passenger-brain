@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Places Dataset — Tel Aviv Curated Places — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>places-dataset/places-dataset.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="places-dataset-tel-aviv-curated-places-prd">Places Dataset — Tel Aviv Curated Places — PRD</h1>
+<p><strong>Status:</strong> Draft v1
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Why this is a PRD and not a line item:</strong> standing rule, founder-direct 2026-07-30 (<code>agent-os/PROGRESS.md</code>, FOUNDER-DIRECT STUB). Six V1 PRDs read the <code>places</code> table; three of them name a field on it that does not exist. Nobody owns authoring it.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>The curated Tel Aviv places dataset — the rows every other V1 feature reads, plus the fields three of them need and <code>places</code> does not have.</li>
+<li>One authored dataset, one schema, public-read. Not a user-generated surface.</li>
+<li>Adds the two fields currently specified as gaps in the PRDs that need them: <code>place_type</code> (Passport's sticker shapes) and a searchable keyword field (search's "hummus" / "rooftop bar").</li>
+<li>Ships attribute <strong>values</strong>; the pipelines that later change them are not this PRD's.</li>
+<li><strong>Not in scope:</strong> the Hood polygons places are attributed to (<code>prds/hood-dataset/</code>); the device-local Saved/Been/Visited store (<code>places-been-saved</code> — that is per-install state, not dataset); the tourist-trap proposing algorithm (<code>data-eng/discovery-engine-spec.md</code>); TikTok-extracted places (held, <code>PAS-6</code> item 9); any place outside Tel Aviv; any UI.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: <em>"Tap a place → detail modal (name, category, save, routing)."</em></li>
+<li>Strategy, verbatim: <em>"each gets a sticker in your </em><em>Passport</em><em> shaped to match the place type (coffee cup for a café, etc.)"</em> — the field this requires does not exist.</li>
+<li>Strategy, verbatim: <em>"Covers place names, keywords ("hummus", "rooftop bar"), and Hoods"</em> — the field this requires does not exist.</li>
+<li>The schema is empty. <code>database/migrations/</code> holds <code>001</code> (hoods, density) and <code>002</code> (synthetic generator). There is no <code>places</code> table at all yet.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>Every place resolves to exactly one Hood, and the stored value matches.</strong>
+   - ☐ <code>hood_id</code> is a foreign key to <code>hoods.id</code> (<code>prds/hood-dataset/</code>), not free text.
+   - ☐ The stored <code>hood_id</code> equals the Hood whose polygon contains the place's coordinates — verified at authoring time, not assumed.
+   - ☐ A place whose coordinates fall in no Hood fails validation rather than shipping unattributed.</p>
+</li>
+<li>
+<p><strong>Exactly two user-facing categories, with the locked names.</strong>
+   - ☐ <code>category</code> is constrained to exactly <strong>"Things to do"</strong> and <strong>"Eat &amp; Drink"</strong> (decision #33).
+   - ☐ Every row carries one — <strong>no third value, no null, no "other"</strong> (<code>hood-place-detail</code> req 6).
+   - ☐ The constraint is enforced in Postgres, not only client-side, so the dataset cannot drift.
+   - ☐ No string reading "Food &amp; drinks" survives anywhere in the data (<code>hood-place-detail</code> req 6).</p>
+</li>
+<li>
+<p><strong><code>place_type</code> is a separate, finer, internal field — it does not touch the two-category split.</strong>
+   - ☐ <code>place_type</code> is a closed enumerated value (café, bar, restaurant, museum, park, …), stored per place, distinct from <code>category</code>.
+   - ☐ It is <strong>internal</strong>: no user-facing surface renders it as a third category, and it never appears in the search chips or any filter (<code>search-quick-filters</code> req 3 caps the sheet at two chips).
+   - ☐ Every enumerated value maps to exactly one sticker shape, and every place therefore yields a sticker (<code>passport</code> req 3; decision #29).
+   - ☐ Adding a <code>place_type</code> value without a sticker shape fails validation — a place must never earn a shapeless sticker.
+   - ☐ Every row carries a non-null <code>place_type</code>. Without this field V1 ships two sticker shapes and decision #29 is not met (<code>passport</code> Open questions).</p>
+</li>
+<li>
+<p><strong>Keyword search has a field behind it.</strong>
+   - ☐ Each place carries a searchable keyword/tag set beyond its name — the field <code>search-quick-filters</code> req 2 matches against ("hummus", "rooftop bar").
+   - ☐ Every row carries at least one keyword; a place with none fails validation.
+   - ☐ Pass condition: a documented probe list, including strategy's own two examples, each returns at least one correct Tel Aviv place. A probe returning zero is a dataset defect, not a search defect.
+   - ☐ Keywords are authored, not derived from the place name — matching the name is already covered by name matching.</p>
+</li>
+<li>
+<p><strong>Permanently-closed state lives on the place and has a stated source.</strong>
+   - ☐ <code>permanently_closed</code> is a boolean on the place, not on any saved entry (<code>places-been-saved</code> technical design, decision #38).
+   - ☐ The value's source is Apple Maps, and the dataset records <strong>when</strong> it was last checked, so staleness is visible rather than assumed.
+   - ☐ A refresh path exists and runs on a stated cadence — <code>places-been-saved</code> req 4 requires a place that closes <em>after</em> being saved to show the badge next render, which a one-time author-time read cannot deliver.
+   - ☐ <strong>[ASSUMPTION]</strong> Cadence is unspecified upstream. Until stated, a place may show the badge late; <code>places-been-saved</code> already carries this as an assumption.</p>
+</li>
+<li>
+<p><strong>Tourist-trap flag ships as a nullable boolean, seeded per place.</strong>
+   - ☐ <code>is_tourist_trap</code> — <code>null</code> not yet rated, <code>false</code> not flagged, <code>true</code> flagged (<code>tourist-trap-flag</code> technical design).
+   - ☐ A place whose value is unknown ships <code>null</code>, never <code>false</code>.
+   - ☐ It is independent of <code>permanently_closed</code>: a place may carry both, either, or neither (<code>tourist-trap-flag</code> req 6).</p>
+</li>
+<li>
+<p><strong>Volume is sufficient for the surfaces that consume it.</strong>
+   - ☐ No Hood ships with zero curated places unless it appears on a written, accepted exception list — an empty Hood sheet is a specified state (<code>hood-place-detail</code> req 2), not a default.
+   - ☐ Every Hood marked <code>designated_for_progression</code> contains <strong>at least the Local threshold count</strong> of places. Below that, Local status is mathematically unreachable in that Hood and <code>passport</code> req 4 can never pass. Blocked on the threshold number (<code>passport</code> Open questions).</p>
+</li>
+<li>
+<p><strong>The dataset is public reference data with no identity surface.</strong>
+   - ☐ Public-read RLS, no per-user rows, no writes from the client — matching <code>hoods</code> (migration <code>001</code>).
+   - ☐ No field on a place identifies, or is derived from, any individual user.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>Opening hours, where the source carries them (<code>hood-place-detail</code> P1, <code>places-been-saved</code> P1).</li>
+<li>One photo per place (<code>hood-place-detail</code> P1).</li>
+<li>Provenance per row — which source each place came from — for the second city.</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> new <code>public.places</code> — <code>id</code> (stable slug), <code>name</code>, <code>category</code> (enum/CHECK, exactly two values), <code>place_type</code> (enum), <code>keywords</code> (text[] or tsvector), <code>lat</code>, <code>lng</code>, <code>hood_id</code> (FK → <code>hoods.id</code>), <code>permanently_closed</code> (boolean, default false), <code>closed_checked_at</code> (timestamptz), <code>is_tourist_trap</code> (boolean null). New migration; does not edit <code>001</code>/<code>002</code>.</li>
+<li><strong>APIs / contract:</strong> one static payload fetched with the map's initial load and cached, same pattern as <code>hoods</code>. <code>search-quick-filters</code> matches client-side against that cache — which is what makes its 400ms and offline requirements achievable, and only holds while the whole payload fits. <strong>Open:</strong> at what row count it stops fitting.</li>
+<li><strong>Architecture notes:</strong> <code>SALVAGE.md</code> marks <code>Models/Place.swift</code> REUSE — check it against <code>place_type</code> and <code>keywords</code>, neither of which Locali had.</li>
+<li><strong>Dependencies:</strong> <code>hood-dataset</code> first (req 1's FK and containment check). <strong>Blocks</strong> <code>hood-place-detail</code>, <code>places-been-saved</code>, <code>passport</code>, <code>search-quick-filters</code>, and <code>tourist-trap-flag</code>'s place-level half.</li>
+<li><strong>Open technical questions:</strong> whether keyword matching is <code>text[]</code> + client filter or Postgres full-text; whether <code>place_type</code> is a Postgres enum or a lookup table (a lookup table makes req 3's "every value has a shape" checkable in SQL); where the closed-state refresh runs (client <code>MKMapItem</code> lookup vs. a scheduled server job — <code>places-been-saved</code>'s own open question).</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> <code>place_type</code> is internal-only and does not reopen decision #33's two-category lock. This is the reading <code>passport</code> proposed; it has not been confirmed by Aviran. If he wants place type user-facing, <code>hood-place-detail</code> req 6 and <code>search-quick-filters</code> req 3 both change.</li>
+<li><strong>[ASSUMPTION]</strong> Keywords are hand-authored. No source states who writes them, and nothing upstream authorizes deriving them from third-party review text.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>Nobody has said how many places V1 ships with, or who authors them.</strong> Every requirement here is about shape and validity. This is the largest unspecified input in V1 — six PRDs read this table and none creates a row in it. Aviran's.</li>
+<li><strong><code>place_type</code> and <code>keywords</code> each trace to a verbatim strategy line, so the scope gate clears — but neither has a decision record fixing its enumerated values.</strong> Both value sets are open.</li>
+<li><strong>Keyword authoring is per-place editorial load on top of per-Hood blurbs</strong> — the staffing shape decision #22 exited for localness. Worth Aviran's read before the dataset is sized.</li>
+<li><strong>Closed-state refresh has no owner.</strong> <code>places-been-saved</code> req 4 requires it; nothing schedules it.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>Standing rule, founder-direct 2026-07-30. Six PRDs read <code>places</code>; three name a missing field; no PRD authored the dataset</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td><code>place_type</code> spec'd here rather than inside <code>passport</code></td>
+<td>It is a dataset field with its own enumeration and validation, not a Passport rendering detail — <code>passport</code>'s own Open questions call it "a dependency on the dataset, not a rendering detail"</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Kept separate from <code>hood-dataset</code></td>
+<td>Different sourcing job and different failure modes; they share one FK contract, stated in both</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Req 7's designated-Hood/threshold cross-check written even though the threshold number is unknown</td>
+<td>The check is falsifiable the moment the number lands, and without it a Hood can ship where <code>passport</code> req 4 is unreachable by construction</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

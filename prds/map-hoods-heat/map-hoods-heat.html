@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map — Hoods &amp; Heat Area — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>map-hoods-heat/map-hoods-heat.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="map-hoods-heat-area-prd">Map — Hoods &amp; Heat Area — PRD</h1>
+<p><strong>Status:</strong> Accepted (T-031, 2026-07-30) — two named data gaps carried past acceptance, see the Decisions log
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Scope note (rewritten at <code>design-approval</code>, 2026-07-30):</strong> the tourist-trap layer is still <strong>excluded</strong> from this PRD, but <strong>not because it is blocked</strong> — decision #37 resolved PAS-6 item 1 the same day this PRD was first written, and the layer now has its own PRD (<code>prds/tourist-trap-flag/tourist-trap-flag.md</code>). The split is by rendering channel, per <code>design/map-rendering-spec.md</code> §2: <strong>heat owns the Hood's area fill, the flag owns the Hood's outline stroke, and they never share a channel at any zoom.</strong> This PRD specs the base map, Hoods, and the fill.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>The single map screen the whole product lives on. Tel Aviv only.</li>
+<li>Base MapKit layer, opening city-wide, straight from the app icon.</li>
+<li>The city is divided into <strong>Hoods</strong> — the product-facing name for zone/neighborhood granularity (decision #27, granularity itself unchanged from decision #12).</li>
+<li>Each Hood carries a <strong>heat area</strong>: crowd density for the currently selected hour, drawn as stepped bands, never a gradient (decision #17).</li>
+<li>Density is a synthetic feed in V1, time-bound to the selected hour.</li>
+<li>Location permission is asked lazily and never blocks the map.</li>
+<li><strong>Not in scope:</strong> the tourist-trap layer and its rendering — a sibling PRD, <code>prds/tourist-trap-flag/tourist-trap-flag.md</code>, which owns the Hood outline stroke and the centroid word label; the time slider and heat modal; Hood and place detail sheets; search and quick filters; the live-events layer; Places, Passport, routing, TikTok import; any city other than Tel Aviv.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>The map <em>is</em> the product — <a href="../../strategy/passenger-strategy.md">strategy</a>: "V1 is a single map, and the whole product lives on it."</li>
+<li>Nothing else in V1 can be built or tested until the base map, Hood geometry, and the density contract exist.</li>
+<li>Phase 1's question — does a stranger reopen within a week — is asked of this screen, not of any feature layered on it.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>Cold open goes straight to the map.</strong> Strategy: "No onboarding. Straight to the map + location permission."
+   - ☐ First frame after the app icon is the map. No splash, no carousel, no sign-in, no permission gate.
+   - ☐ The map is pannable, zoomable and tappable before any permission is answered.
+   - ☐ A "Tel Aviv, right now" title fades in and out within ~2s and leaves no persistent chrome (decision #8).
+   - ☐ Cold launch to an interactive map completes under 3s on the oldest supported device.</p>
+</li>
+<li>
+<p><strong>Tel Aviv only.</strong>
+   - ☐ Default camera is a city-wide Tel Aviv view.
+   - ☐ No city picker exists in the UI and no second city exists in the shipped data.
+   - ☐ Panning outside Tel Aviv shows plain base map with no Hoods and no heat — no error, no crash, no empty-state takeover.</p>
+</li>
+<li>
+<p><strong>Hoods.</strong>
+   - ☐ Each Hood is a named polygon; Tel Aviv ships dozens of them, not thousands (decision #12's bound).</p>
+<ul>
+<li><strong>Unmet at <code>acceptance</code> 2026-07-30 — carried, not waived.</strong> The shipped artifact holds 4 hand-authored rectangles in the client bundle (<code>Resources/hoods-tel-aviv.json</code>) and 5 rough placeholders in migration <code>001</code>'s seed. That is not "dozens." No gate failed it because every gate correctly read it as placeholder data pending B3, and B3 shipped an export <em>script</em> with no real dataset to export. <strong>Real Tel Aviv Hood geometry needs its own board row and its own review; this bullet is satisfied there, not by T-031.</strong></li>
+<li><strong>Now spec'd: <a href="../hood-dataset/hood-dataset.html"><code>prds/hood-dataset/hood-dataset.md</code></a></strong> (T-040 / <code>PAS-17</code>), written 2026-07-30 under the standing data/schema rule. That PRD carries this bullet, the non-overlap validator the bullet below asks for, and the three Hood columns migration <code>001</code> lacks (<code>blurb</code>, <code>is_tourist_trap</code>, <code>designated_for_progression</code>).</li>
+<li>☐ Hood polygons do not overlap: any coordinate resolves to at most one Hood.</li>
+<li><strong>Pass condition (added at <code>acceptance</code> 2026-07-30 — the bullet had none, so no gate could fail it).</strong> With the shipped geometry loaded, no coordinate in Tel Aviv opens two different Hood sheets on repeat taps, and no Hood's fill paints over a neighbour's. <strong>Nothing enforces this today</strong> — <code>HoodHitTester</code> documents non-overlap as a premise it relies on and resolves any overlap silently to file order (<code>hoods.first(where:)</code>), and no test asserts the invariant. The geometry must therefore be overlap-validated <em>before</em> it is bundled, and a violation must fail that validation loudly rather than render. Latent while the fixture is 4 disjoint rectangles; live the moment real municipal boundaries land.</li>
+<li>☐ One tap inside a Hood opens that Hood's sheet — never a two-step "tap to preview, tap again to open".</li>
+</ul>
+</li>
+<li>
+<p><strong>Heat area rendering.</strong>
+   - ☐ Heat renders as a stepped-band fill over the Hood area. Zero gradients anywhere in the layer (decision #17).
+   - ☐ <strong>No blur, feather, or soft edge is applied to the fill at any zoom.</strong> Band boundaries follow Hood boundaries exactly. <code>map-rendering-spec.md</code> §2 calls city-wide heat "neighborhood-scale blobs, stepped bands" — "blob" is the coarseness of the <em>shape</em>, never a softened edge; a blurred band is a gradient and fails decision #17. <em>(Added at <code>design-approval</code> 2026-07-30 — the original bullet was read as permitting a city-wide blur.)</em>
+   - ☐ Heat is visible at 0 taps on cold open; no control gates it.
+   - ☐ The same band always means the same density value, at every zoom. <strong>The band→appearance mapping is one fixed table: no zoom-dependent opacity clamp, no per-zoom recolouring, no compression of the gap between adjacent bands.</strong> <em>(Second sentence added at <code>design-approval</code> 2026-07-30.)</em>
+   - ☐ Heat encodes crowd density and nothing else — no blended "is it good" score is ever computed or drawn (<code>SALVAGE.md</code>: <code>DensityContract.swift</code>).</p>
+</li>
+<li>
+<p><strong>Heat is bound to one hour at a time.</strong>
+   - ☐ The map reads "now" until something changes the selected hour.
+   - ☐ Changing the selected hour repaints heat for that hour and leaves every other layer untouched.
+   - ☐ Repaint completes inside the Doherty budget — under 400ms (<code>design/design-principles.md</code> §2).
+   - <strong>Verification split (added at <code>acceptance</code> 2026-07-30).</strong> Only bullet 1 is exercisable inside this PRD's scope — nothing here changes the selected hour (the slider is T-032), so <code>qa</code> traced no behavioral case to this requirement at all and no gate had anything to fail. Bullet 1 is met by <code>DensityStoreTests</code> (<code>selectedHour</code> starts at the current hour; <code>band(for:hour:)</code> never triggers a fetch, so an hour change is a pure repaint). <strong>Bullets 2 and 3 transfer to T-032's acceptance</strong> and must be verified there against a real slider drag with real density data. They are not satisfied by T-031.</p>
+</li>
+<li>
+<p><strong>Lazy location permission.</strong>
+   - ☐ The When-In-Use system prompt appears only after the map is on screen.
+   - ☐ Granted: the map recenters on the user and shows a "you are here" marker.
+   - ☐ Denied: the map stays city-wide, stays fully usable, and is never re-prompted in the same install.</p>
+</li>
+<li>
+<p><strong>Degraded data is silent, not broken.</strong>
+   - ☐ A Hood with no density value for the selected hour renders with no fill and no error copy.
+   - ☐ <strong>No on-map text of any kind announces the gap</strong> — not "no data", not "not rated", at any zoom. On the map surface a gapped Hood is indistinguishable from a not-yet-curated one; the sentence lives in the Hood sheet (T-033), which is reached by tapping. Same convention as <code>map-rendering-spec.md</code> §3: the map never pre-announces absence. <em>(Added at <code>design-approval</code> 2026-07-30 — "no error copy" was read as permitting a neutral "no data yet" label.)</em>
+   - ☐ If the density feed is unreachable, the base map and Hood geometry still render and remain interactive.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>Near-me recenter button (<code>design/ux-flows.md</code> §2 lists it as Primary chrome).</li>
+<li>Hood name label at neighborhood zoom. <strong>The name and nothing else</strong> — heat may not put a word at a Hood centroid. That channel is reserved: <code>map-rendering-spec.md</code> §2/§3 assign the centroid word label to the tourist-trap flag ("Tourist-heavy spot" / "busy and tourist-heavy"), and <code>prds/tourist-trap-flag/</code> req 3 builds it there. A density word beside the name would put two word labels on one centroid — the stacked-signal density Aviran rejected verbatim (<code>map-rendering-spec.md</code> §1). Density's non-visual channel is the VoiceOver label, per §7 of that doc. <em>(Added at <code>design-approval</code> 2026-07-30.)</em></li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> new <code>hoods</code> (id, name, city, polygon) and <code>hood_density</code> (hood_id, hour_bucket, band) tables. Public-read, no per-user rows, so RLS is read-only-for-all; this feature adds no identity and no writes.</li>
+<li><strong>Data sourcing (added 2026-07-30, standing rule).</strong> This PRD defines the density contract and the <em>shape</em> of <code>hoods</code>; it does not source the geometry. Real polygons, names, blurbs and the three attribute columns are <a href="../hood-dataset/hood-dataset.html"><code>prds/hood-dataset/</code></a>'s deliverable. <code>hood_density</code> values are synthetic and already generated (migration <code>002</code>); a live popular-times source is out of V1 (strategy).</li>
+<li><strong>APIs / client-server contract:</strong> Hood polygons fetch once per session and cache — static reference data. Density fetches as 13 hour buckets (now → +12h) so the slider never round-trips per drag. No Realtime in V1; the feed is synthetic (decision #4).</li>
+<li><strong>Architecture notes:</strong> MapKit overlays per the master strategy's stack. <code>SALVAGE.md</code> marks <code>DensityMark.swift</code>, <code>DensityPlaceMark.swift</code>, <code>DensityContract.swift</code>, <code>HeatPlace</code>/<code>HeatState</code> REUSE; <code>MapScreen.swift</code> is REFERENCE only — mine its clustering and camera handling, discard the 940-line view.</li>
+<li><strong>Dependencies:</strong> none upstream. Blocks the time-slider, Hood/place-detail, and live-events PRDs.</li>
+<li><strong>Open technical questions — all resolved in <a href="./TRD.html"><code>TRD.md</code></a> (2026-07-30):</strong> Hood polygons ship <strong>bundled</strong> (§2.2, §8 D3); hour-bucket keys on an <strong>absolute UTC timestamp</strong> (§3.1). <strong>Band count and names are locked at three — <code>quiet</code> / <code>moderate</code> / <code>busy</code></strong> (TRD §1); only the numeric thresholds remain a <code>data-engineer</code> call.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> Hood polygons are authored once and change rarely, so caching them for the session is safe. If curation turns out to be continuous, this needs a refresh path.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>The second layer is no longer blocked, only separate — and that changes the risk's shape.</strong> Decision #37 (2026-07-30) resolved PAS-6 item 1: the tourist-trap boolean fully replaces decision #18's Local/Mix/Tourist tag. The layer is now specced in <code>prds/tourist-trap-flag/tourist-trap-flag.md</code>, whose Dependencies put this PRD first (it needs Hood geometry and the stroke channel). The residual risk is <strong>sequencing, not scope</strong>: <code>map-rendering-spec.md</code> §1 is explicit that heat alone is the half of this product anyone already gets from Google Maps, so shipping this feature is not shipping a product. Nothing built here may consume the outline stroke or the centroid word label (reqs 4, 7, P1) — those are the flag's channels, and a design that borrows them forces a redesign when the flag lands.</li>
+<li><strong>This feature was accepted without anyone ever seeing heat render.</strong> No backend was reachable at any point in the pipeline — migrations <code>001</code>/<code>002</code> are unapplied, so every observation from <code>build</code> through <code>qa</code> was of the permanent no-data state. Every heat bullet (req 4, req 5, req 7's first bullet) passed <em>by construction</em> — code read, unit test, single-argument palette signature — not by observation. Three of the five acknowledged gaps (live RPC 401/403, offline-with-cache indicator, toy geometry) are one root cause wearing three hats. <strong>The first time the map is seen painted will be after Aviran applies the migrations and enables <code>pg_cron</code>; treat that as a real verification event, not a formality.</strong> <em>(Added at <code>acceptance</code> 2026-07-30.)</em></li>
+<li>Density is synthetic at launch, so "right now" is simulated until a live popular-times source lands (strategy, Key risks).</li>
+<li><del><code>agent-os/BOARD.md</code>'s scope-gate section still says Live Events and Scenic View are out of V1 (2026-07-27).</del> <strong>Resolved 2026-07-30</strong> — the board's scope-gate section now carries the reversal struck-through and explicitly says not to read it as a prohibition. No longer a live risk.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created, covering base map + Hoods + heat only</td>
+<td>First PRD pass over the 2026-07-30 founders-meeting V1 lock (PAS-10)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Localness / tourist-trap layer excluded rather than spec'd with a guess</td>
+<td>Decision #28 flagged unconfirmed; scope gate forbids specing against an unconfirmed line (PAS-6 item 1)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Draft v2. Exclusion of the tourist-trap layer <strong>kept</strong>, reasoning replaced: no longer "blocked on PAS-6 item 1" (decision #37 resolved it hours after v1 was written) but "owned by a sibling PRD, split by rendering channel — fill here, stroke there"</td>
+<td>Called at <code>design-approval</code> on T-031. Reopening this PRD's scope would duplicate <code>prds/tourist-trap-flag/</code> and stall the three PRDs that depend on this one; the channel split is already locked in <code>map-rendering-spec.md</code> §2</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Three requirement bullets tightened and one P1 constrained (reqs 4, 7, P1 — blur/feather, per-zoom band mapping, on-map gap text, centroid word label)</td>
+<td>T-031's design read each original bullet the permissive way. The bullets were falsifiable enough to reject the design; they were not specific enough to have prevented it (L-009 shape, applied at design rather than acceptance)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td><strong>ACCEPTED at <code>acceptance</code>.</strong> Status flipped to Accepted (L-006). Two P0 bullets carried past acceptance as named gaps rather than waived: req 3's "dozens of Hoods" (shipped data is 4+5 placeholders — needs its own board row) and every heat-rendering bullet (verified by construction only, never observed with data)</td>
+<td><code>qa</code>'s 24 traced cases cover every P0 that this task's scope can exercise; the two carried gaps are data-availability, not build defects, and no rejection loop to <code>build</code> or <code>design</code> could close either — both need Aviran (migrations, <code>pg_cron</code>) or a separate geometry deliverable</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Two missing pass/fail criteria written in at <code>acceptance</code> (L-009): req 3's non-overlap bullet gained a rendered-consequence pass condition + the note that nothing enforces it; req 5 gained a verification split assigning bullets 2-3 to T-032</td>
+<td>Neither bullet was falsifiable against anything this task produces — <code>qa</code> traced zero cases to req 5 and no case to the non-overlap invariant, so no gate could have failed either. <code>HoodHitTester</code> relies on non-overlap as an unchecked premise, which becomes a live defect the moment real municipal boundaries replace the 4 disjoint fixture rectangles</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Data-sourcing bullet added to Technical design; req 3's carried gap now points at its own PRD</td>
+<td>Standing rule, founder-direct 2026-07-30 (<code>agent-os/PROGRESS.md</code>): a data need substantial enough to be its own deliverable gets its own PRD. <code>hood-dataset</code> written the same day; this PRD's own scope and requirements are unchanged</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Open-technical-questions line rewritten: all three resolved in the TRD. <strong>Band count and names locked at three (<code>quiet</code>/<code>moderate</code>/<code>busy</code>); the open <code>data-engineer</code> call narrows to thresholds only</strong></td>
+<td><code>trd-review</code> — <code>code-reviewer</code>, <code>developer</code>, and <code>data-engineer</code> each independently caught that the TRD's schema and <code>HeatBand</code> enum already hardcoded 3 bands while this line still called the count open. <code>data-engineer</code> added the decisive reason: <code>map-rendering-spec.md</code> L42 already keys the tourist-trap flag's warning stroke to a band named "busy," so a sibling PRD couples the count and naming regardless (TRD §1)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

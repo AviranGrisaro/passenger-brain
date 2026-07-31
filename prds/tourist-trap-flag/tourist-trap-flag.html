@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tourist-Trap Flag &amp; Local QA — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>tourist-trap-flag/tourist-trap-flag.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="tourist-trap-flag-local-qa-prd">Tourist-Trap Flag &amp; Local QA — PRD</h1>
+<p><strong>Status:</strong> Draft v1
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-30
+<strong>Mechanic confirmed:</strong> decision #37 (boolean replaces the Local · Mix · Tourist tag) and #42 (public copy: "tourist-heavy spot"). Fills the hole <code>map-hoods-heat</code> left open.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>Every Hood and every place carries <strong>one boolean tourist-trap flag</strong> and nothing else on this axis.</li>
+<li>Public copy is always <strong>"tourist-heavy spot"</strong> (decision #42); "tourist trap" is internal vocabulary only.</li>
+<li>Rendering is already specified and <strong>not re-derived here</strong> — <code>design/map-rendering-spec.md</code> §§2–3, §4, §7; <code>design/ux-flows.md</code> §6.</li>
+<li>A geofence-verified visit fires a local notification, which drops a binary Yes/No toast that corrects the flag (decision #24, made binary by #37).</li>
+<li><strong>Not in scope:</strong> the algorithm that proposes a flag value (<code>data-eng/discovery-engine-spec.md</code>, <code>data-engineer</code>'s); heat; the Hood and place sheets; the Places list; Passport; any reward for answering; a "hide tourist-heavy spots" filter (<code>ux-flows.md</code> §6 makes that a fresh decision).</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: <em>"</em><em>Tourist-trap flag, boolean (1/0), no local tags</em><em> — replaces the three-way </em><em>Local · Mix · Tourist</em><em> vibe tag (decision #18) entirely."</em></li>
+<li>Strategy, verbatim: <em>"The algorithm proposes; real users, asked in-app whether a spot is actually local, verify and correct it."</em></li>
+<li>Without this layer the map is heat alone — <em>"the half of this product anyone already gets from Google Maps."</em></li>
+<li>Positioning rests on it: <em>"nobody treats packed-vs-local as two separate signals on one map."</em></li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>One boolean per Hood, one per place; no graduated value survives.</strong>
+   - ☐ The only rendered states are flagged and not-flagged — no score, no percentage, no third value.
+   - ☐ No "Local", "Mix", "Tourist", "super local", "very local", or "touristy" survives as a tag value in app or data (#37 supersedes #18 and #6).
+   - ☐ No user-facing string reads "tourist trap" (decision #42).
+   - ☐ A Hood's flag is its own value, never aggregated from its places (<code>map-rendering-spec.md</code> §3).</p>
+</li>
+<li>
+<p><strong>The flag never shares a visual channel with heat.</strong>
+   - ☐ Heat is always the area fill; the flag is always the Hood's outline stroke (§2).
+   - ☐ Flagged state reads without colour — weight and/or dash, not hue alone (<code>design-principles.md</code> §3).
+   - ☐ Moving the time slider repaints heat and changes no stroke: the flag is not time-variant.</p>
+</li>
+<li>
+<p><strong>Progressive disclosure by zoom matches <code>map-rendering-spec.md</code> §2's table, row for row.</strong>
+   - ☐ City-wide shows no stroke and no label on any Hood; neighborhood adds both on flagged Hoods only; close keeps the stroke and drops the label.
+   - ☐ No pin carries a flag encoding at any zoom — not a badge, fill, or shape variant (§4).</p>
+</li>
+<li>
+<p><strong>Not-flagged and not-yet-rated both render blank.</strong>
+   - ☐ A not-flagged Hood renders no stroke and no label, at every zoom.
+   - ☐ A not-yet-rated Hood renders identically to not-flagged, resolved on tap by the Hood sheet.
+   - ☐ Storage still distinguishes the two, because req 7 depends on it.</p>
+</li>
+<li>
+<p><strong>Busy + flagged replaces the plain treatment; it never stacks.</strong>
+   - ☐ A flagged Hood above the busy threshold for the selected hour renders exactly <strong>one</strong> stroke treatment, distinct from the plain flagged stroke.
+   - ☐ Its label reads the combined form ("busy and tourist-heavy"), not two labels.
+   - ☐ A busy but not-flagged Hood renders no warning treatment.</p>
+</li>
+<li>
+<p><strong>A place's flag is one line in its detail modal, and nowhere else.</strong>
+   - ☐ A flagged place shows one text line reading "tourist-heavy spot", never a colour chip alone.
+   - ☐ A not-flagged place shows no line — silence, matching the map. <strong>[ASSUMPTION]</strong>
+   - ☐ It is independent of the "permanently closed" badge (#38): a place may carry both, either, or neither.</p>
+</li>
+<li>
+<p><strong>VoiceOver states the flag even when nothing renders</strong> — labels per <code>map-rendering-spec.md</code> §7.
+   - ☐ A Hood's label always states its status in speech, in both states, and a not-yet-rated Hood says so distinctly ("no local rating yet").
+   - ☐ Busy+flagged gets its own label, not two announcements to combine (<code>ux-flows.md</code> §9 Q5).
+   - ☐ Pins never announce the flag, matching the visual rule.</p>
+</li>
+<li>
+<p><strong>The local-QA ask is binary, post-visit, and asked once.</strong>
+   - ☐ A geofence-verified visit fires at most one local notification; tapping it drops a top-anchored, non-blocking toast (#24).
+   - ☐ The toast asks one question with exactly two targets, <strong>Yes / No</strong> (#37).
+   - ☐ Ignoring it auto-dismisses, with no reminder for that visit.
+   - ☐ A place already answered by this install never fires again.
+   - ☐ Offline: the toast still renders; the answer queues on device and syncs later.
+   - ☐ Notification permission denied: no toast ever fires, and <strong>no fallback ask appears in any sheet</strong> — #24 replaces the embedded ask, never supplements it.
+   - ☐ Cadence caps at one local-QA notification per day per install. <strong>[ASSUMPTION]</strong> — <code>ux-flows.md</code> §9 Q1 recommends it; unconfirmed.</p>
+</li>
+<li>
+<p><strong>One answer is a signal, not a write to what everyone sees.</strong>
+   - ☐ Answering once never changes the flag any other viewer sees.
+   - ☐ The rendered flag changes only through the pipeline that owns it, never directly from a toast answer.
+   - ☐ An answer is recorded even when it agrees with the current flag.</p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>The Hood sheet's place list marking which places are flagged.</li>
+<li>A foreground arrival dropping the toast directly, skipping the notification (<code>ux-flows.md</code> §4).</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> <code>hoods.is_tourist_trap</code> and <code>places.is_tourist_trap</code> as <strong>nullable booleans</strong> — <code>null</code> not yet rated, <code>false</code> not flagged, <code>true</code> flagged. Three storage states, two rendered states, which is what reqs 4 and 7 need. Public-read.</li>
+<li><strong>Data model:</strong> <code>local_qa_answers</code> (place_id, answer, install_id, answered_at). Insert-only, never client-readable; unique on (place_id, install_id) enforces ask-once.</li>
+<li><strong>Data sourcing — the flag ships with a value, and this PRD does not produce it (added 2026-07-30, standing rule).</strong> Neither column exists yet: <code>hoods.is_tourist_trap</code> is <a href="../hood-dataset/hood-dataset.html"><code>prds/hood-dataset/</code></a> req 5, <code>places.is_tourist_trap</code> is <a href="../places-dataset/places-dataset.html"><code>prds/places-dataset/</code></a> req 6, both nullable so req 4's three storage states hold. The <strong>values</strong> come from the proposing algorithm (<code>data-eng/discovery-engine-spec.md</code>), which does not exist. If it does not land, every row ships <code>null</code> and this feature renders blank everywhere — legal per req 4, but it means V1 launches with only half its signal. Named as a risk below, not assumed away.</li>
+<li><strong>APIs / contract:</strong> the flag ships inside the existing Hood and place payloads and caches with them — static reference data, no Realtime, not hour-bound. An answer is one insert, queued offline.</li>
+<li><strong>Architecture notes:</strong> no accounts in V1 (strategy: <em>"no accounts/login added"</em>), so an answer carries an anonymous install id — <code>SALVAGE.md</code> marks <code>Services/AuthService.swift</code> BURN, <em>"spec it fresh — anonymous-first."</em> <code>Models/DensityContract.swift</code> REUSE and load-bearing: it encodes the never-one-blended-score rule. <strong><code>Features/Map/LocalnessBadge.swift</code> is marked REUSE but must not be</strong> — it renders the five superseded vibe tags.</li>
+<li><strong>Dependencies:</strong> <code>map-hoods-heat</code> (Hood geometry, stroke channel) and <code>hood-place-detail</code> (the modal line) first. The dwell/geofence detector is shared with Places and Passport — one detector, three consumers, <code>data-engineer</code>'s.</li>
+<li><strong>Open technical questions:</strong> how many answers move a flag, and whether that runs on schedule or on write; whether the flag rides the cached Hood payload or its own endpoint; what happens when a place's flag disagrees with its Hood's.</li>
+</ul>
+<h2 id="assumptions">Assumptions</h2>
+<ul>
+<li><strong>[ASSUMPTION]</strong> A single answer never flips the displayed flag (req 9). If Aviran wants immediate flipping, req 9 is wrong and abuse becomes a live question.</li>
+<li><strong>[ASSUMPTION]</strong> A not-flagged place shows no line in its modal (req 6). A sheet has room for one, unlike the map, so the opposite call is defensible — designer's.</li>
+<li><strong>[ASSUMPTION]</strong> One notification per day per install (req 8) — <code>ux-flows.md</code> §9 Q1's recommendation, not a decision.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<ul>
+<li><strong>Cold start:</strong> a new city has no users to ask, so the flag starts entirely algorithm-proposed with nothing verifying it (strategy, Key risks).</li>
+<li><strong>Worse than cold start: the proposer may not exist at launch.</strong> Every requirement here is about rendering and correcting a value; nothing in V1 is scheduled to <em>produce</em> the first one. A dataset of all-<code>null</code> flags passes every bullet in this PRD and ships a product strategy itself calls <em>"the half anyone already gets from Google Maps."</em> Aviran's, and it should be answered before this feature reaches <code>build</code>.</li>
+<li><strong>Nothing rewards answering.</strong> Strategy's stamp write-up folds in <em>"rewards for answering local-QA questions"</em>, but #29 ties stickers to Been places and #40 retired the ladder carrying the rest. Aviran's call.</li>
+<li><strong>Notification-denied is a named coverage gap</strong> (§9 Q8): that user is never asked about any visit.</li>
+<li><strong>Copy-fit at Hood level:</strong> §3 renders "Tourist-heavy spot" at a Hood centroid, but a Hood is a polygon. <code>designer</code>'s (PAS-8 residual).</li>
+<li>Background Location Always reliability gates the visit detection this loop needs (§9 Q4).</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>Decision #37 unblocked the item held at PAS-10 (PAS-6 item 1)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Written against the boolean model only, no graduated read retained</td>
+<td>#37 is a clean supersession of #18 — the graduated tag is gone</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Rendering referenced, not restated</td>
+<td><code>map-rendering-spec.md</code> §§2–3 were already rewritten against #37 by <code>designer</code> (PAS-8)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Nullable boolean over a separate <code>is_rated</code> column</td>
+<td>Accessibility (req 7) needs three states stored while the map renders two</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Data-sourcing bullet added; the "nothing produces the first flag value" gap promoted from implicit to a named risk</td>
+<td>Standing rule, founder-direct 2026-07-30. The PRD scoped the proposing algorithm out — correctly — but never said the feature ships blank if it never lands</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time Slider — now → +12h — PRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>time-slider/time-slider.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="time-slider-now-12h-prd">Time Slider — now → +12h — PRD</h1>
+<p><strong>Status:</strong> Draft v5
+<strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
+<strong>Owner:</strong> Aviran Grisaro
+<strong>Last updated:</strong> 2026-07-31
+<strong>Scope note:</strong> the feature is unchanged by the 2026-07-30 founders-meeting lock — the one V1 item strategy marks "Unchanged." <strong>v2 and v3 change how the control is reached and moved, not what it does</strong> (founder-direct, 2026-07-31; verbatim quotes in the two FOUNDER-DIRECT STUBs of that date in <code>agent-os/PROGRESS.md</code>). v3 corrects v2's gesture model and closes two of its four open calls; the delivered design spec and <a href="./TRD.html"><code>TRD.md</code></a> (<code>2f955fe</code>) turn out <strong>less superseded than v2 assumed</strong>. <strong>v4 records what the <code>designer</code> pass resolved</strong> — Q5 (button/modal axis) closed, Q2 (per-idiom edge availability) given concrete numbers, Q6 formally adopted with the design's own reasoning added — against the new spec at <a href="../../design/phase-1/time-slider-design.md"><code>design/phase-1/time-slider-design.md</code></a> (v2 of that doc) and its extended mockup. No requirement text changes at v4 — only the Open questions/Decisions log below. <strong>v5 records the <code>design-approval</code> REJECT of that pass</strong> (<code>product</code>, 2026-07-31): one blocking contrast defect in the new edge track (no PRD change needed — req 6 already stated the bar it missed), plus req 6's touch-target bullet split per path because it had no objective pass condition for the edge zone, and a new Q7 routing that departure to Aviran at <code>design-review</code>.</p>
+<h2 id="description">Description</h2>
+<ul>
+<li>A single control that moves the whole map forward in time, from now to +12 hours.</li>
+<li>Snaps to whole hours; there is no sub-hour position.</li>
+<li><strong>Two ways to reach it, not one.</strong> The heat button opens it, exactly as the delivered design has it. Alongside that, a finger touching down on either screen edge and sliding up or down moves the hour directly — one continuous motion, no separate reveal step (founder-direct, 2026-07-31). The edge control is not permanent chrome; it comes with the slide and goes again.</li>
+<li>Every hour-bound layer on the map repaints for the selected hour; the map otherwise stays exactly where it is.</li>
+<li>Resets to "now" on every app launch.</li>
+<li><strong>Not in scope:</strong> the heat layer's own rendering rules (see the map PRD); the layer toggles sharing that surface — each belongs to the layer it toggles; the rest of the nav row and its other buttons; anything past +12h or before now; scheduling, reminders, or notifications tied to a future hour.</li>
+</ul>
+<h2 id="motivation">Motivation</h2>
+<ul>
+<li>Strategy, verbatim: "Time slider, now → +12 hours. A place's relevance changes by the hour; the map knows that. Unchanged." A map fixed to "now" answers where to go this second, not where to go after dinner.</li>
+<li><strong>Re-checked at v2 and v3:</strong> that line names the control and its range, not how a finger reaches it, so it still authorizes the feature after a gesture change. No strategy edit needed, and none was made.</li>
+<li>It is the only V1 control that makes the map a planning tool as well as a live read — <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1</a> needs both the tourist who just landed and the resident planning tonight.</li>
+<li>The behaviour is already worked out in the old codebase (<code>SALVAGE.md</code>: <code>HeatmapControlsSheet.swift</code>, REFERENCE) — this PRD exists to pin the contract, not to invent it.</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<h3 id="must-have-p0">Must-have (P0)</h3>
+<ol>
+<li>
+<p><strong>Range is now → +12 hours, hour-snapped.</strong>
+   - ☐ Exactly 13 selectable positions: now, +1h … +12h.
+   - ☐ The control cannot be moved past "now" at one end or "+12h" at the other — no wrap, no elastic overshoot past the ends.
+   - ☐ Releasing a drag lands on a whole hour, never between two.
+   - ☐ All 13 positions are reachable in one continuous edge slide, at the largest supported Dynamic Type size and <strong>wherever on the edge the finger lands</strong> — a slide starting near the bottom or the top of the edge still reaches every stop without lifting. <em>(Added at v2; widened at v3, since the slide now starts at an arbitrary touch-down point and an hour mapped to absolute screen position would put some out of reach.)</em></p>
+</li>
+<li>
+<p><strong>The map repaints for the selected hour.</strong>
+   - ☐ Changing the hour repaints every hour-bound layer for that hour.
+   - ☐ Camera position, zoom, and any open sheet are unchanged by an hour change.
+   - ☐ Repaint completes under 400ms (<code>design/design-principles.md</code> §2, Doherty Threshold).
+   - ☐ With no data for the selected hour, affected areas render empty — no error banner, no modal.</p>
+</li>
+<li>
+<p><strong>"Now" is the default, every launch.</strong>
+   - ☐ On every cold launch the selected hour is "now", regardless of where it was left last session.
+   - ☐ "Now" re-resolves against the actual clock at launch, not against a cached value from the previous session.
+   - ☐ The first invocation of the control in a session shows it at "now".</p>
+</li>
+<li>
+<p><strong>Session persistence across dismissals.</strong>
+   - ☐ Dismissing the control and reaching it again within one session restores the hour the user left it at — by either edge, and by the heat button.
+   - ☐ Opening and closing any other nav surface in between does not reset the hour (<code>design/ux-flows.md</code> §2.1, exclusivity rule).
+   - ☐ The hour survives every dismissal path the design defines, not only the primary one.</p>
+</li>
+<li>
+<p><strong>The selected hour is readable as a number, not only as a position.</strong>
+   - ☐ A visible numeral or label states the selected hour at all times while the control is on screen.
+   - ☐ An explicit "now" mark is drawn on the track as a fixed anchor, at the range end the control treats as "now".
+   - ☐ Meaning is never carried by colour alone (<code>design/design-principles.md</code> §3).</p>
+</li>
+<li>
+<p><strong>Accessibility.</strong>
+   - ☐ VoiceOver exposes a discrete, announceable step — each step announces the hour it lands on; the control is not continuous-drag-only.
+   - ☐ <strong>With VoiceOver or Switch Control on, all 13 hours are selectable without performing the edge slide.</strong> VoiceOver claims the screen's swipe gestures and Switch Control users may not be able to produce an edge drag at all. <em>(Added at v2; simplified at v3 — the heat-button path is confirmed permanent and satisfies this, so removing that path is what would put the bullet back at risk.)</em>
+   - ☐ <strong>Button/modal path:</strong> the slider control's own frame is ≥44pt on the drag axis, however small the visible thumb and track are drawn (<code>design/design-principles.md</code> §2, Fitts's Law).
+   - ☐ <strong>Edge path:</strong> the capture zone is ≥44pt on its acquisition axis (its width), <strong>or</strong> the design spec states the departure explicitly, with its reasoning, and Aviran ratifies it at <code>design-review</code>. Citing Fitts's Law does not satisfy a number below 44pt — that principle is where the 44pt floor comes from. <em>(Split per path at <code>design-approval</code> 2026-07-31, L-009: the single bullet this replaces was written when there was one control, and was never re-scoped when v2/v3 added a second, structurally different one — so no gate had an objective pass condition for the edge zone. Open, see Q7.)</em>
+   - ☐ The control remains usable and legible at the largest supported Dynamic Type size.
+   - ☐ <strong>Every</strong> text label rendered on the surface housing this control meets 4.5:1 against the background it sits on, in <strong>both</strong> light and dark — the numeral, the "now" mark's label, the end-of-track labels, the "next day" flag, and that surface's own section headers included. There is no enumeration exception: a label no design pass happened to list is still covered.
+   - ☐ The non-text parts that carry the control's state — the thumb, the boundary between filled and unfilled track, and the "now" mark — meet 3:1 against their adjacent colours in both themes. The inactive track rail is <strong>not</strong> held to 3:1 <em>while the control is a platform-drawn one rendering it low-contrast by default</em>; a custom-drawn control loses that exemption and the rail is back inside the bar (<code>design/design-principles.md</code> §5, WCAG AA). <strong>The new design spec must state which case applies to each path</strong> — the two paths may not draw the same control (Q5).
+   - <em>Both contrast bullets were added and then corrected at <code>design-approval</code> 2026-07-30 — req 6 originally had no contrast criterion at all, so no gate could fail a design that asserted the bar and missed it (L-009). Full history in the Decisions log.</em></p>
+</li>
+<li>
+<p><strong>Reached from either screen edge by one continuous vertical slide.</strong> <em>(New at v2, gesture model corrected at v3 — founder-direct, 2026-07-31. The "one continuous motion, no reveal step" reading of that correction is inference, not the founder's words — see Open questions, Q4.)</em>
+   - ☐ A finger touching down on a screen edge and sliding up or down changes the hour, and does so from the start of the slide. There is no separate reveal step and no second gesture — one finger down, one slide, the hour tracking it throughout.
+   - ☐ The control is on screen for the length of the slide, showing the hour it is currently on (req 5).
+   - ☐ Only vertical movement changes the hour; horizontal movement during the slide does not.
+   - ☐ One direction consistently means later and the other earlier, identically from both edges. <em>(Which direction is "later" is the design's call to make and state — it is not in the founder's instruction.)</em>
+   - ☐ The hour under the finger when it lifts is the selected hour, and it holds for the session (req 4). No further gesture is needed to commit it or to clear the control off the map.
+   - ☐ Both edges drive one value — the same hour, not one per edge. <strong>[ASSUMPTION]</strong>, see Q3.
+   - ☐ The edge slide and the heat button drive that one value too: change the hour by one path, then reach it by the other, and it shows the new hour.
+   - ☐ The slide does not fire during ordinary map use — a pan or pinch starting away from the edge never brings the control up.
+   - ☐ While any sheet is presented, the edge slide is unavailable and the heat button is how the hour changes. An edge drag over a presented sheet moves the sheet, as it does today. <em>(Product call made at v3 — see Q6.)</em>
+   - ☐ Which edges are live is stated per device idiom rather than as one global rule: both edges on iPhone; on iPad the right edge is OS-reserved (Slide Over), so the design says what happens there instead of assuming both. <em>(Replaces the conditional left-edge bullet v2 carried — see Q2.)</em></p>
+</li>
+</ol>
+<h3 id="nice-to-have-p1">Nice-to-have (P1)</h3>
+<ul>
+<li>Haptic tick on each hour crossing.</li>
+<li>Absolute clock time alongside the relative offset ("+3h · 21:00").</li>
+</ul>
+<h2 id="technical-design">Technical design</h2>
+<ul>
+<li><strong>Data model:</strong> none new, and neither gesture change adds one — no new table, column, endpoint, or query parameter, and nothing to source or author. The control reads the <code>hood_density</code> hour buckets already shipped by <code>prds/map-hoods-heat/</code> and owns no persisted state; its position is in-memory session state only.</li>
+<li><strong>APIs / client-server contract:</strong> all 13 hour buckets are fetched with the map's initial density load, so dragging the slider is a local re-read, not a network round trip. This is what makes the 400ms budget achievable; a per-hour fetch would not.</li>
+<li><strong>Architecture notes:</strong> the selected hour is a single source of truth held above the map view and read by every hour-bound layer, so a layer added later (live events) subscribes to it rather than owning its own copy. <code>SALVAGE.md</code> marks <code>HeatmapControlsSheet.swift</code> REFERENCE — extract the hour-windowing model, discard the 1,069-line view; <code>Models/HeatTimeWindow.swift</code> is REUSE.</li>
+<li><strong>Dependencies:</strong> the map PRD (heat area, density contract) must land first. The live-events PRD depends on this control existing.</li>
+<li><strong>How much of the TRD is superseded — narrowed at v3:</strong> <a href="./TRD.html"><code>TRD.md</code></a> (<code>2f955fe</code>) builds a <code>ZStack</code> card opened by a nav-row heat button around a horizontal <code>Slider(in: 0...12, step: 1)</code>. With "supplement" confirmed, that card and its invocation are <strong>no longer superseded</strong> — they are the primary path, and the new TRD adds the edge slide beside them. Two parts still need re-examining, both of which assumed the modal was the only way to change the hour: §2.3's chrome layering, and D4's "the heat modal and a system <code>.sheet</code> are never co-presented". D4 is what made req 2's "any open sheet is unchanged" satisfied structurally rather than behaviourally; the Q6 call (no edge slide while a sheet is up) keeps that guarantee deliberately rather than by luck, and if Q6 is ever overturned the bullet becomes a behaviour QA has to exercise. Unchanged throughout: no new data, no fetch on an hour change (what makes 400ms real), <code>selectedHour</code> as a plain <code>Int</code> on <code>DensityStore</code>, the hour-format and contrast work.</li>
+<li><strong>Open technical questions:</strong> (a) whether "now" re-resolves while the app sits foregrounded across an hour boundary, or only on launch and invocation; (b) the edge strip's map-surface cost has a design-pass number now (24pt wide, 64pt/40pt top/bottom insets — Q2, v4) but the exact iOS gesture-recognizer construction and a real-device confirmation of those inset values are still <code>architect</code>'s at the TRD.</li>
+</ul>
+<h2 id="open-questions-risks">Open questions &amp; risks</h2>
+<p><em>Q-numbers are carried over from v2 so <code>BOARD.md</code>'s T-032 row and Linear <code>PAS-15</code> still resolve against them.</em></p>
+<p><strong>Resolved at v3.</strong> Q1 and Q4 are founder-direct, 2026-07-31 — both quotes verbatim from the FOUNDER-DIRECT STUB of that date in <code>agent-os/PROGRESS.md</code>, with anything inferred from them marked as inferred. Q6 is a product call and says so.</p>
+<ul>
+<li><strong>Q1 — replace or supplement the heat-button invocation? — SUPPLEMENT.</strong> Verbatim: <strong>"Supplement (recommended)"</strong> — Aviran accepting the recommendation v2 made. The heat-button/modal path stays exactly as designed; the edge slide is a second way to the same value. Still not the same question as the separately-open "separate icons side by side" nav-row ask on <code>BOARD.md</code> T-032 — don't fold them together.</li>
+<li><strong>Q4 — one continuous gesture, or a reveal then a drag? — one continuous motion.</strong> Verbatim: <strong>"both edges. its not swipe from left to right..you slide the you finder from up to down on one of the edges"</strong>. <strong>The "single continuous motion, no separate reveal step" reading is inference, not his words</strong> — he did not say "one motion" or "no reveal step"; it is read by contrast with the two-step model v2 was written against, and is recorded that way in the stub. Req 7 is written to that reading; if the reading is wrong, req 7's first and fifth bullets are what change.</li>
+<li><strong>Q6 (new at v3) — is the edge slide available while a sheet is presented? No.</strong> Not a founder answer — a <strong>product call, made here</strong>. <code>architect</code>'s read (<code>f2920fe</code>) found this is the real gesture collision, not the back-gesture one, and asked <code>product</code> for the call rather than invent a workaround: an edge drag over a presented sheet (<code>HoodStubSheet</code> ships today, T-033/T-038 add more) drags the sheet. <strong>Call: the gesture is simply unavailable while a sheet is up, and the heat button covers that state.</strong> Because Q1's "supplement" guarantees a working fallback in exactly that state; because a gesture that beat the sheet's own drag would make every edge drag near a sheet ambiguous; and because it keeps the TRD's D4 guarantee behind req 2 intact rather than reopening it. One behaviour, not an architecture — cheap for <code>designer</code> or Aviran to overturn. <strong>Adopted at v4</strong> by <code>designer</code>'s own design pass (<code>design/phase-1/time-slider-design.md</code> §5b) rather than re-derived: the same three reasons re-confirmed, plus a flagged-but-rejected alternative (partial edge availability scoped to the sheet's own footprint) recorded and declined as adding a second per-sheet rule for a benefit the button already covers. Still stated as <code>product</code>'s call, still cheap to overturn — <code>designer</code> adopting it isn't a second, independent ratification, it's the same call carried forward on record.</li>
+</ul>
+<p><strong>Resolved at v4 (<code>designer</code>'s design pass, <code>design/phase-1/time-slider-design.md</code> v2).</strong></p>
+<ul>
+<li><strong>Q5 — which axis does the button/modal control use? — STAYS HORIZONTAL, unchanged.</strong> Designer's call, per this PRD's own assignment. Full reasoning in the design spec §5a; summary: the founder's gesture correction was about the edge control, not the modal (both verbatim quotes name the edge only); the compact card's form factor fits a horizontal control, not a vertical one, without either ballooning the card or starving the track; the edge gesture and the button/modal are different physical interaction moments with no PRD line requiring them to share an axis; and changing the axis would force the modal off its native <code>Slider</code> onto a custom control, losing req 6's platform-drawn rail exemption for no requirement-driven reason. <strong>Consequence:</strong> req 1's widened reachability bullet (all 13 stops in one continuous slide, from any touch-down point) binds the <strong>edge path only</strong> — the button/modal's horizontal track was already verified reachable in the v1 design-approval pass and isn't re-litigated. Req 6's inactive-rail 3:1 exemption <strong>stays in force on the button path</strong> (still platform-drawn) and <strong>does not extend to the new edge track</strong> (custom-drawn — held to the full 3:1 bar instead, per the design spec §4/§7).</li>
+<li><strong>Q2 — which edges are actually available: designer's per-idiom answer given; the map-band cost is priced at the design pass, not deferred whole to the TRD.</strong> The left-edge/back-gesture question this was opened for stays closed (<code>architect</code>, v3). What v3 surfaced instead is now answered concretely: <strong>both edges live on iPhone; iPad claims the left edge only</strong> (right edge is system Slide Over, permanently excluded, with a neutral "OS-reserved" mark in the mockup rather than a silent dead zone). The vertical squeeze from Notification/Control Center and the home indicator is resolved with named insets — <strong>64pt top / 40pt bottom</strong> — leaving a 708pt usable band on an 812pt-tall reference device, which spaces 13 stops roughly 59pt apart (comfortably past the 44pt Fitts minimum) even before considering Dynamic Type doesn't reflow this control's geometry. The MapKit-pan-arbitration band each live edge permanently claims is sized at <strong>24pt wide</strong> (half the 44pt touch-target minimum), justified against beating MapKit's own pan recognizer while claiming the smallest band that still does that reliably — visualized directly in the extended mockup via a toggleable reviewer overlay, not just asserted as a number. <strong>What's still <code>architect</code>'s at the TRD, not resolved here:</strong> the exact iOS-side gesture-recognizer construction (<code>UIGestureRecognizer</code> vs. <code>DragGesture</code> composition) and confirming the 64pt/40pt insets against real iOS 26 device geometry rather than this design pass's own estimate — both flagged explicitly in the design spec's Open items (§8, items 6–7).</li>
+</ul>
+<p><strong>Opened at v5 (<code>product</code>, <code>design-approval</code> 2026-07-31).</strong></p>
+<ul>
+<li><strong>Q7 — is a sub-44pt edge capture zone an accepted departure from req 6's touch-target floor?</strong> The design spec sizes the zone at <strong>24pt</strong> wide and cites Fitts's Law for it (<code>design/phase-1/time-slider-design.md</code> §2, §7) — but §2 of <code>design/design-principles.md</code> states that same law as "≥44pt touch targets" flat, with no screen-edge exception, and the spec never names the conflict. The 24pt number is justified there against <em>MapKit pan arbitration and claimed map surface</em> — real constraints, but architectural ones, not accessibility ones. <strong>Not resolved here, and deliberately not waved through:</strong> lowering an accessibility floor is a scope call, not <code>product</code>'s to make alone. Two things have to happen — <code>designer</code> states the departure and the actual argument for it (an edge-anchored target cannot be overshot past the bezel, and the ~688–708pt gesture axis is far above the floor), and Aviran ratifies it at <code>design-review</code>. What makes the departure arguable at all: req 6's own bullet guarantees all 13 hours stay selectable <strong>without</strong> the edge slide, so a user who can't reliably acquire a 24pt band keeps a fully conforming path. <strong>[ASSUMPTION]</strong> that this is ratifiable rather than a hard fail — the design-principles doc states no edge exception today, so if Aviran reads 44pt as absolute, the zone widens.</li>
+</ul>
+<p><strong>Still open — v4 does not answer this. Aviran's call, not designer's or product's.</strong></p>
+<ul>
+<li><strong>Q3 — does "either screen edge" mean one value from both sides, or two sliders?</strong> "12h slider(s)" is ambiguous on its face, and this was <strong>not</strong> re-confirmed either way when Aviran answered the other two, nor at v4. Nothing contradicts one shared hour with a redundant entry per side, which is why it stays an <strong>[ASSUMPTION]</strong> rather than a confirmation — carried forward unchanged, and demonstrated (not just asserted) as one shared value in the extended mockup: changing the hour by edge, then reading it back via the heat button, shows the same value. <strong>Aviran's call</strong>, still open.</li>
+</ul>
+<p>Also open, smaller:</p>
+<ul>
+<li>The design spec and mockup (<code>design/phase-1/time-slider-design.md</code>, v2 of that doc) are <strong>additive over the approved v1</strong>, not a re-do: the modal architecture and exit paths stand unchanged; the edge gesture, the Q5 axis decision, and the Q6 adoption are new. Queued for <code>design-approval</code> → <code>design-review</code> next.</li>
+<li>Synthetic density means every future hour is a simulation, not a forecast (strategy, Key risks). The control will feel precise before the data behind it is. Nothing in V1 tells the user that; worth an explicit call before launch.</li>
+<li>Hour buckets past midnight cross a day boundary — confirm the data model keys on absolute time, not hour-of-day, or +12h from 8pm silently reads the wrong day.</li>
+</ul>
+<h2 id="decisions-log">Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Decision / change</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-30</td>
+<td>PRD created</td>
+<td>First PRD pass over the 2026-07-30 V1 lock (PAS-10); slider is the one item strategy marks unchanged</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>Req 6 gains an explicit contrast bullet (4.5:1 text / 3:1 non-text, both themes)</td>
+<td><code>design-approval</code> found the design spec asserting that bar and the mockup missing it at 3.22:1 light / 3.61:1 dark on the end-of-track and "now"-tick labels. The PRD had no contrast bullet at all, so no gate — QA included — had anything objective to fail it on. Adds a testable criterion; does not change scope (L-009, applied at design-approval rather than acceptance)</td>
+</tr>
+<tr>
+<td>2026-07-30</td>
+<td>That bullet split in two and corrected at the second <code>design-approval</code> pass</td>
+<td>Two defects in my own criterion, found by re-checking the fixed artifact against it. (1) It enumerated three labels, so <code>.sheet-eyebrow</code> — the modal's own "Time" header, 10.5px on <code>--fg-faint</code>, 3.22:1 light / 3.61:1 dark — sat outside a bar it plainly belongs inside. Now stated as "every text label in the modal," no enumeration. (2) It held "the track line" to 3:1; the inactive rail computes to 1.29:1 light / 1.28:1 dark and cannot clear 3:1 on the native <code>Slider</code> req 6's VoiceOver bullet depends on. WCAG's non-text bar applies to what identifies the component and its state — thumb (3.93:1 / 6.62:1), filled-vs-unfilled boundary (3.05:1 / 5.16:1) and the "now" tick (17.99:1 / 14.57:1), all of which clear it. Rejecting a design against an infeasible criterion would have been rejecting against a stale spec</td>
+</tr>
+<tr>
+<td>2026-07-31</td>
+<td><strong>v2 — swipe in from either screen edge, vertical drag.</strong> Description and reqs 1/3/4/5/6 rewritten off the heat-button/modal + horizontal-drag model; new req 7 (edge invocation, vertical axis, dismissal); new req 1 bullet (13 stops fit one vertical drag at max Dynamic Type); new req 6 bullet (operable without the edge gesture, for VoiceOver/Switch Control); req 6's contrast bullets made surface-neutral, rail exemption re-conditioned on a platform-drawn control</td>
+<td>Founder-direct, live <code>chief-of-staff</code> chat, 2026-07-31 — verbatim quote in <code>agent-os/PROGRESS.md</code>'s FOUNDER-DIRECT STUB that date. The feature, range, 400ms budget and data contract are unchanged; only how a finger reaches and moves it. Strategy's authorizing line re-checked and still covers it — it names the control, not the gesture. Three calls deliberately left open, not answered here (replace-vs-supplement, the iOS left-edge collision, one-slider-vs-two). Supersedes the design spec and <code>TRD.md</code> (<code>2f955fe</code>) on invocation and manipulation only</td>
+</tr>
+<tr>
+<td>2026-07-31</td>
+<td><strong>v3 — gesture model corrected, 2 of the 4 open calls closed.</strong> Req 7 rewritten to one continuous motion (touch down on either edge, slide up/down, the hour moving from the start — no reveal step, no second gesture); req 1's reachability bullet widened to any touch-down point on the edge; req 4 and req 7 gained two-entry-path consistency bullets; req 6's VoiceOver bullet simplified now the button path is permanent; Technical design narrowed what the TRD supersedes; two new questions surfaced, one answered — <strong>Q5</strong> (which axis the button/modal control uses, designer's) and <strong>Q6</strong> (no edge slide while a sheet is presented, product's own call, made here at <code>architect</code>'s request)</td>
+<td>Founder-direct, live chat, 2026-07-31. "Supplement (recommended)" resolves replace-vs-supplement, so the heat-button path is permanent and v2's premise that the whole design spec was dead is wrong. "both edges. its not swipe from left to right..you slide the you finder from up to down on one of the edges" corrects the two-step gesture v2 was written against. <strong>The "one continuous motion" reading of that quote is <code>chief-of-staff</code>'s inference, labelled as such in Open questions rather than presented as his words.</strong> Q3 (one value vs two) stays open and stays <strong>[ASSUMPTION]</strong>, not confirmed — Aviran did not re-confirm it when asked. Q2 was narrowed rather than closed: <code>architect</code>'s read (<code>f2920fe</code>) landed mid-pass and retired the left-edge/back-gesture worry outright, leaving the iPad right edge, the top/bottom inset squeeze and MapKit's gesture-swallowing bug in its place</td>
+</tr>
+<tr>
+<td>2026-07-31</td>
+<td><strong>v5 — <code>design-approval</code> REJECT (<code>product</code>). Req 6's touch-target bullet split per path; new Q7.</strong> No other requirement text changed. The single "≥44pt" bullet had never been re-scoped after v2/v3 added the edge control, so nothing objective existed to pass or fail the 24pt capture zone on — the same gap shape L-009 was written for, caught here rather than at acceptance</td>
+<td>The design spec ships a 24pt edge capture zone citing Fitts's Law, while <code>design-principles.md</code> §2 states that law <em>as</em> the 44pt floor. Rather than lower the floor myself (an escalation, not a <code>product</code> call) or wave the number through, the bullet now states a testable per-path condition and routes the departure to Aviran's own <code>design-review</code> gate as Q7. The blocking finding that actually sent this back to <code>design</code> is separate and needs no PRD change — req 6's rail bullet already stated the bar the edge track missed, which is the bullet working as designed</td>
+</tr>
+<tr>
+<td>2026-07-31</td>
+<td><strong>v4 — designer's additive design pass. Q5 closed (stays horizontal); Q2 given concrete numbers; Q6 adopted with added reasoning.</strong> No requirement text changed — only Open questions &amp; risks and this log. Q5: the button/modal keeps the native horizontal <code>Slider</code>, unchanged; req 1's widened reachability bullet is confirmed to bind the edge path only, req 6's rail exemption confirmed to survive on the button path and not extend to the new (custom-drawn) edge track. Q2: both edges live on iPhone, left-only on iPad (right is system Slide Over); usable vertical band insets stated as 64pt top / 40pt bottom (708pt usable on an 812pt reference device, ~59pt per stop); the MapKit-pan-arbitration capture band priced at 24pt wide per live edge, visualized in the extended mockup via a toggleable reviewer overlay rather than only asserted. Q6: <code>product</code>'s existing call (edge gesture unavailable while any sheet is presented) adopted as the design's own working assumption, with one flagged-and-rejected alternative (partial edge availability scoped to a sheet's own footprint) recorded rather than silently considered. Q3 explicitly re-confirmed as still open and still <strong>[ASSUMPTION]</strong> — not resolved by this pass, demonstrated as one shared value in the mockup pending Aviran's actual answer</td>
+<td><code>designer</code>'s additive design pass over the v3 PRD, per <code>architect</code>'s feasibility read and the two open designer-owned questions (Q2's per-idiom half, Q5) it named. Full reasoning in <code>design/phase-1/time-slider-design.md</code> v2, §5a (Q5) and §5b (Q6); mockup extended in place at the same artifact URL, verified functionally in a live browser session (edge drag writes the same <code>selectedHour</code> the button reads, sheet-open correctly suppresses the gesture, iPad idiom correctly disables the right edge) rather than only reasoned about. Queued for <code>design-approval</code> → <code>design-review</code> next</td>
+</tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

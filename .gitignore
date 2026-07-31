@@ -6,6 +6,28 @@
 !strategy/passenger-north-star.html
 !design/ux-flows.html
 
+# PRD/TRD reading copies (Aviran, live hilos request 2026-07-31) — generated
+# from their .md twin by passenger-brain/prds/md2html.py, committed anyway so
+# they're reachable via a GitHub blob link from Linear. Regenerate, don't
+# hand-edit; re-run the script after editing the source .md.
+!prds/hood-dataset/hood-dataset.html
+!prds/hood-dataset/TRD.html
+!prds/hood-place-detail/hood-place-detail.html
+!prds/hood-place-detail/TRD.html
+!prds/live-events-overlay/live-events-overlay.html
+!prds/live-events-pipeline/live-events-pipeline.html
+!prds/live-events-pipeline/TRD.html
+!prds/map-hoods-heat/map-hoods-heat.html
+!prds/map-hoods-heat/TRD.html
+!prds/passport/passport.html
+!prds/places-been-saved/places-been-saved.html
+!prds/places-dataset/places-dataset.html
+!prds/places-dataset/TRD.html
+!prds/search-quick-filters/search-quick-filters.html
+!prds/time-slider/time-slider.html
+!prds/time-slider/TRD.html
+!prds/tourist-trap-flag/tourist-trap-flag.html
+
 # Generated exports
 *.pdf
 

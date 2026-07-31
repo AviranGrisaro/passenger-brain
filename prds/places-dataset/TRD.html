@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Places Dataset — Tel Aviv Curated Places — TRD</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1b1f23;
+  --muted: #57606a;
+  --border: #d0d7de;
+  --code-bg: #f6f8fa;
+  --link: #0969da;
+  --accent: #f6f8fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --border: #30363d;
+    --code-bg: #161b22;
+    --link: #4493f8;
+    --accent: #161b22;
+  }
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  padding: 2.5rem 1.25rem 5rem;
+}
+.doc {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.source-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+.source-note code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+h1, h2, h3, h4 { line-height: 1.3; }
+h1 { font-size: 1.85rem; margin-top: 0; }
+h2 {
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  margin-top: 2.2rem;
+}
+h3 { font-size: 1.15rem; margin-top: 1.6rem; }
+h4 { font-size: 1rem; margin-top: 1.2rem; }
+p, ul, ol, table { margin-top: 0.6rem; margin-bottom: 0.9rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: 0.25rem 0; }
+li > ul, li > ol { margin: 0.25rem 0; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+blockquote {
+  margin: 0.9rem 0;
+  padding: 0.2rem 1rem;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+del { color: var(--muted); }
+strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="doc">
+<div class="source-note">Rendered from <code>places-dataset/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
+<h1 id="places-dataset-tel-aviv-curated-places-trd">Places Dataset — Tel Aviv Curated Places — TRD</h1>
+<p><strong>Task:</strong> T-042
+<strong>PRD:</strong> <a href="./places-dataset.html"><code>places-dataset.md</code></a> (Draft v1)
+<strong>Design spec:</strong> none — pure data/schema deliverable, no UX surface. Routed <code>spec → trd</code>, skipping <code>design</code>.
+<strong>Author:</strong> <code>architect</code>, 2026-07-31
+<strong>Status:</strong> ready for <code>trd-review</code></p>
+<hr />
+<h2 id="1-context">1. Context</h2>
+<p>This is the schema spec for a table that six V1 PRDs already read and no migration has ever created. <code>database/migrations/</code> holds <code>001</code> (<code>hoods</code>, <code>hood_density</code>) and <code>002</code> (synthetic density generator). There is no <code>places</code> table.</p>
+<p>Read alongside, not restated here:</p>
+<ul>
+<li><a href="./places-dataset.html"><code>places-dataset.md</code></a> — the requirements this document builds against. Req numbers below refer to it.</li>
+<li><a href="../hood-dataset/hood-dataset.html"><code>hood-dataset.md</code></a> — T-040, the Hood geometry this dataset is attributed against. The one shared contract is <a href="#41-c-hood-1--the-places--hoods-contract">§4.1</a>.</li>
+<li><a href="../map-hoods-heat/TRD.html"><code>map-hoods-heat/TRD.md</code></a> — the established idioms this extends: migration shape, RLS shape, static-reference-data caching, <code>[ASSUMPTION]</code> labelling.</li>
+<li><a href="../hood-place-detail/TRD.html"><code>hood-place-detail/TRD.md</code></a> §3.1 — <strong>already specifies a <code>places</code> table</strong>, in a migration <code>003</code> that does not exist as a file yet. Reconciled in <a href="#21-migration-ownership--the-t-033-collision">§2.1</a>. That reconciliation is the single most important thing for <code>trd-review</code> to ratify.</li>
+</ul>
+<p><strong>One-line summary of the shape:</strong> one public-read table plus one small lookup table, no write path, no user identity, populated by an offline authoring pipeline whose validator — not Postgres — enforces the geometric and editorial invariants Postgres cannot express.</p>
+<hr />
+<h2 id="2-architecture">2. Architecture</h2>
+<p>Nothing new is introduced on the client by this task. The whole deliverable is:</p>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Where</th>
+<th>New?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public.places</code></td>
+<td><code>database/migrations/004_places.sql</code></td>
+<td>new</td>
+</tr>
+<tr>
+<td><code>public.place_types</code></td>
+<td>same migration</td>
+<td>new</td>
+</tr>
+<tr>
+<td>Dataset validator</td>
+<td><code>database/scripts/validate_dataset.py</code></td>
+<td>new, <strong>shared with T-040</strong></td>
+</tr>
+<tr>
+<td>Places export</td>
+<td><code>database/scripts/export_places.py</code></td>
+<td>new</td>
+</tr>
+<tr>
+<td>Authored source</td>
+<td><code>database/data/places-tel-aviv.source.json</code></td>
+<td>new</td>
+</tr>
+</tbody>
+</table>
+<p><code>database/README.md</code>'s <code>scripts/</code> convention (run by hand, connection string from the environment, never hardcoded) is followed unchanged. Migrations remain <code>developer</code>'s turf; <code>scripts/</code> and the authored source are <code>data-engineer</code>'s.</p>
+<h3 id="21-migration-ownership-the-t-033-collision">2.1 Migration ownership — the T-033 collision</h3>
+<p>Three unbuilt tasks each claim DDL that overlaps:</p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Claims</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-033 (<code>hood-place-detail</code>)</td>
+<td><code>003_places_and_hood_blurb.sql</code> — <code>hoods.blurb</code> <strong>and a minimal <code>places</code> table</strong></td>
+<td>TRD written, <strong>held at <code>trd</code></strong>, not built, file does not exist</td>
+</tr>
+<tr>
+<td>T-040 (<code>hood-dataset</code>)</td>
+<td><code>hoods.blurb</code>, <code>hoods.is_tourist_trap</code>, <code>hoods.designated_for_progression</code></td>
+<td>TRD in flight in parallel</td>
+</tr>
+<tr>
+<td>T-042 (this)</td>
+<td><code>places</code>, <code>place_types</code></td>
+<td>this document</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decision D1 — <code>places</code> is defined once, here.</strong> T-033's <code>places</code> block is deleted from its migration; its A1/A2 backend steps are struck and replaced by a dependency on this task's migration. T-033's <code>hoods.blurb</code> line moves to T-040, which already claims that column plus two more.</p>
+<p>Why this way round rather than letting T-033 create a minimal table and this task alter it:</p>
+<ul>
+<li>T-033's own TRD deliberately excluded <code>permanently_closed</code> and a keyword column on the grounds that "adding them speculatively would put two unowned fields in a shipped schema." Both fields now have an owner — this PRD — so the reason for the split has expired.</li>
+<li>A minimal-then-alter split makes <code>place_type</code> and <code>keywords</code> (both <code>not null</code>, no sensible default) arrive <em>after</em> rows exist, which forces the nullable→backfill→<code>set not null</code> dance in <a href="#72-migration-safety">§7.2</a> for no benefit.</li>
+<li>T-033's iOS track is <strong>not</strong> blocked by this. Its own §3.4 bundled seed floor means the client builds and demos with no backend at all; only its two backend steps move.</li>
+</ul>
+<p><strong>Migration number: <code>004_places.sql</code>. Settled, not contingent.</strong> Numbering across the four in-flight TRDs is resolved workspace-wide — <code>003</code> = <code>hood-dataset</code> (T-040), <strong><code>004</code> = this task</strong>, <code>005</code> = <code>live-events-pipeline</code> (T-043); T-033's planned <code>003</code> has nothing left in it (its <code>places</code> block moves here, its <code>hoods.blurb</code> line to T-040) and is removed rather than renumbered. Ratified independently by <code>developer</code>, <code>code-reviewer</code>, and T-043's own numbering resolution. Write <code>004_places.sql</code>; do not take "the next free number."</p>
+<p>Nothing in this migration's SQL references <code>003</code>'s contents — it needs only <code>public.hoods</code> from <code>001</code> — and the file stays written order-independently regardless (<a href="#72-migration-safety">§7.2</a>), so a build-order accident cannot silently ship a half-defined table. That is belt-and-braces now, not the numbering policy.</p>
+<h3 id="22-not-built-here">2.2 Not built here</h3>
+<p>Named explicitly so they do not fall through the floor between tasks. Each is an amendment another task's build must absorb, flagged for that task's <code>trd-review</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Amendment</th>
+<th>Owning task</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>places-tel-aviv.json</code> bundled fixture gains <code>place_type</code>, <code>keywords</code>, <code>permanently_closed</code>, <code>is_tourist_trap</code> — <strong>emitted by this task's <code>export_places.py</code> (<a href="#9-build-breakdown">§9</a> B3)</strong>, see D4 below</td>
+<td><strong>T-042 (this task), B3</strong></td>
+</tr>
+<tr>
+<td>Drift check only: assert T-033's bundled copy still matches what B3 last emitted</td>
+<td>T-033</td>
+</tr>
+<tr>
+<td><code>Place</code> Swift model gains <strong>one field per reading task, not all four at once</strong> — <code>is_tourist_trap</code>→T-035, <code>permanently_closed</code>→T-036, <code>place_type</code>→T-037, <code>keywords</code>→T-038. <code>PlaceCategory</code> unchanged</td>
+<td>T-035 / T-036 / T-037 / T-038, see D5 below</td>
+</tr>
+<tr>
+<td>Sticker-shape totality test — every <code>sticker_shape</code> in the shipped export resolves to a real asset</td>
+<td>T-037 (Passport)</td>
+</tr>
+<tr>
+<td>Client-side keyword matching per <a href="#43-keyword-matching-is-client-side">§4.3</a></td>
+<td>T-038 (Search)</td>
+</tr>
+<tr>
+<td>Closed-state <strong>refresh</strong> pipeline (cadence, owner, mechanism)</td>
+<td><strong>nobody — escalated and unmet, see <a href="#8-risks--alternatives">§8</a></strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decision D4 — <code>export_places.py</code> (<a href="#9-build-breakdown">§9</a> B3) is the sole emitter of <code>places-tel-aviv.json</code>. T-033 never produces it.</strong> An earlier draft of this table left the export with T-033's step B2 while <a href="#5-flow">§5</a> step 3 and <a href="#9-build-breakdown">§9</a> B3 both had <code>export_places.py</code> writing the same file — two claimed emitters of one artifact inside one document, which is either a conflicting second exporter or, worse, each task assuming the other ships one and neither doing it. B3 owns it because B3 already holds the validated source, which is the entire reason it exists. T-033's step is reduced to a <strong>drift check</strong> — assert its bundled copy round-trips against B3's output — the same relationship <code>export_hoods_geojson.py</code> has to the Hood bundle it does not author (<code>hood-dataset/TRD.md</code> §2.1). A second emitter is a second chance to drift.</p>
+<p><strong>Decision D5 — the fixture carries all four new fields; the Swift model gains them one task at a time.</strong> These are separable and were previously bundled onto T-033 as one amendment. The <strong>fixture</strong> must carry all four regardless: <code>place_type</code> and <code>keywords</code> are <code>not null</code> at the source and B3 round-trips the validated row, so there is no version of the export that omits them. The <strong><code>Place</code> Swift model</strong> is different — none of the four has a reader inside T-033's own scope, and building all four in now is exactly what T-033's own D2 rule ("don't build for a feature that isn't specced yet," the rule that keeps <code>created_at</code> out of its model) forbids. <code>Decodable</code> ignores unknown JSON keys, so a fixture wider than the model is an already-supported, costless state, and each field lands in the task that first reads it. Adopted from T-033's own recommendation, confirmed independently by <code>developer</code> and <code>code-reviewer</code> at <code>trd-review</code>.</p>
+<hr />
+<h2 id="3-data-model">3. Data model</h2>
+<h3 id="31-publicplace_types-the-sticker-shape-registry">3.1 <code>public.place_types</code> — the sticker-shape registry</h3>
+<pre><code class="language-sql">create table if not exists public.place_types (
+  id            text primary key,   -- stable slug: 'cafe', 'bar', 'restaurant', 'museum', 'park', ...
+  sticker_shape text not null       -- stable key the client maps to an asset, e.g. 'coffee-cup'
+);
+</code></pre>
+<p><strong>Decision D2 — a lookup table, not a Postgres <code>enum</code> and not a bare <code>CHECK</code>.</strong> This is the PRD's own open technical question, resolved in favour of the option it flagged as making req 3 checkable in SQL:</p>
+<ul>
+<li><code>places.place_type</code> is a FK into it, so a place cannot carry an unregistered type. Req 3's closed enumeration is structural.</li>
+<li><code>sticker_shape not null</code> means a registered type without a shape <strong>cannot exist as a row</strong>. Req 3's "adding a <code>place_type</code> value without a sticker shape fails validation" stops being a script that someone has to remember to run.</li>
+<li>No <code>ALTER TYPE</code> to add a value — matching <code>001</code>'s preference for <code>CHECK</code>-over-native-enum on <code>category</code>, for the same reason (a native enum would need a migration per new place type).</li>
+<li><code>place_types</code> is not user-facing (req 3: internal, never a third category, never a chip). It carries no display string on purpose — a display string is the thing that would tempt a surface into rendering it.</li>
+</ul>
+<p>The DB cannot verify that a <code>sticker_shape</code> key corresponds to a real iOS asset. That half of the guarantee is the client-side totality test in <a href="#42-c-sticker-1--place_type--sticker-shape">§4.2</a>.</p>
+<h3 id="32-publicplaces">3.2 <code>public.places</code></h3>
+<pre><code class="language-sql">create table if not exists public.places (
+  id                 text primary key
+                     check (id ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),      -- stable kebab slug, as hoods.id
+  name               text not null check (length(btrim(name)) &gt; 0),
+  category           text not null
+                     check (category in ('eat-drink', 'things-to-do')),
+  place_type         text not null references public.place_types(id) on delete restrict,
+  hood_id            text not null references public.hoods(id)      on delete restrict,
+  latitude           double precision not null check (latitude  between -90  and 90),
+  longitude          double precision not null check (longitude between -180 and 180),
+  keywords           text[] not null check (cardinality(keywords) &gt; 0),
+  permanently_closed boolean not null default false,
+  closed_checked_at  timestamptz,
+  is_tourist_trap    boolean,                                       -- tri-state, NO default
+  updated_at         timestamptz not null default now(),
+  constraint places_closed_has_source
+    check (not permanently_closed or closed_checked_at is not null)
+);
+
+create index if not exists places_hood_idx on public.places (hood_id);
+</code></pre>
+<p>Six decisions inside that schema:</p>
+<ul>
+<li><strong><code>category</code> is inherited from T-033's TRD §3.1 verbatim, not re-derived</strong> — a <code>CHECK</code> on <code>text</code> with stable keys <code>eat-drink</code> / <code>things-to-do</code>, display strings client-only in <code>PlaceCategory.displayName</code>. That resolution already satisfies req 2 (Postgres-enforced, exactly two values, no <code>null</code>, no third value) and PRD req 2's "no string reading 'Food &amp; drinks' survives anywhere in the data." Decision #33 and #41 are not reopened. <strong>No third category is introduced anywhere in this document</strong> — <code>place_type</code> is a separate axis (<a href="#44-place_type-does-not-touch-the-two-category-split">§4.4</a>).</li>
+<li><strong><code>is_tourist_trap</code> has no default and is nullable.</strong> Req 6 requires unknown to ship as <code>null</code>, never <code>false</code>. A <code>default false</code> would make "not yet rated" unrepresentable on insert, which is precisely the state <code>tourist-trap-flag</code> req 4/7 need stored and VoiceOver announces differently. This is the one column where the absence of a default is the requirement.</li>
+<li><strong><code>permanently_closed</code> is <code>not null default false</code>, and <code>places_closed_has_source</code> makes a closed flag prove it was checked.</strong> Req 5 asks that staleness be visible rather than assumed. <code>closed_checked_at</code> stays nullable for rows never checked (honest: unknown, not "checked and open").</li>
+<li><strong><code>keywords</code> is <code>text[]</code> with <code>cardinality &gt; 0</code></strong>, satisfying req 4's "every row carries at least one keyword" in Postgres. Shape rationale in <a href="#43-keyword-matching-is-client-side">§4.3</a>.</li>
+<li><strong>Both FKs are <code>on delete restrict</code>, not <code>cascade</code>.</strong> This is a deliberate deviation from T-033's TRD §3.1, which wrote <code>hood_id ... on delete cascade</code>. Cascade means a Hood geometry revision that drops a Hood row silently deletes its curated places — the most expensive data in the project, gone without an error. <code>restrict</code> makes exactly that operation fail loudly, which is what <code>hood-dataset</code> req 7 asks for ("a geometry revision that orphans a place fails validation rather than shipping a place with a dangling <code>hood_id</code>"). Flagged for T-033's reviewers.</li>
+<li><strong>The <code>id</code> regex is cheap and worth it.</strong> Slugs are the join key between the DB, the bundled fixture, and the device-local saved-places file. A slug with a space or capital in it is a bug that surfaces three layers away.</li>
+</ul>
+<h3 id="33-rls-the-established-public-read-shape-not-a-new-one">3.3 RLS — the established public-read shape, not a new one</h3>
+<pre><code class="language-sql">alter table public.places      enable row level security;
+alter table public.place_types enable row level security;
+
+drop policy if exists places_public_read on public.places;
+create policy places_public_read
+  on public.places for select to anon, authenticated using (true);
+
+drop policy if exists place_types_public_read on public.place_types;
+create policy place_types_public_read
+  on public.place_types for select to anon, authenticated using (true);
+</code></pre>
+<p>Identical in shape to <code>001</code>'s <code>hoods_public_read</code> / <code>hood_density_public_read</code>. <strong>No insert/update/delete policy is written at all</strong> — absence of a policy is the denial, and there is no client write path to authorize. Whoever authors or updates the dataset writes with the service role, out of band, which bypasses RLS by construction.</p>
+<p>This satisfies req 8 and is not a new pattern: <code>002</code>'s generator writes the same way. Nothing here needs an identity, an auth surface, or a write rule to reason about.</p>
+<h3 id="34-location-privacy">3.4 Location &amp; privacy</h3>
+<p>Places are <strong>public reference data about businesses, not about people</strong>. Nothing in this table is derived from, or identifies, any individual (req 8):</p>
+<ul>
+<li>The only coordinates stored are a curated place's own published location. No user coordinate, no visit, no dwell, no timestamp of anybody's presence, ever enters this table.</li>
+<li><code>keywords</code> are hand-authored editorial (req 4, PRD Assumptions), not mined from user behaviour or third-party review text.</li>
+<li>The containment validator (<a href="#41-c-hood-1--the-places--hoods-contract">§4.1</a>) runs <strong>offline over authored files</strong>. It never sees a user location.</li>
+<li>The fetch is byte-identical for every user — no query parameter carries anything user-specific, the property T-031 §3.3 establishes and for the same reason.</li>
+</ul>
+<p>The one artifact in the wider feature set that could leak where somebody goes is the device-local saved-places file, and that is T-033/T-036's, deliberately holding slugs only. This task adds nothing to it.</p>
+<hr />
+<h2 id="4-contracts">4. Contracts</h2>
+<h3 id="41-c-hood-1-the-places-hoods-contract">4.1 C-HOOD-1 — the <code>places</code> ↔ <code>hoods</code> contract</h3>
+<p><strong>This is the only contract this dataset and <code>hood-dataset</code> (T-040) share. Both TRDs must state it in these terms so they cannot drift.</strong> Stated as four clauses, each independently falsifiable:</p>
+<ol>
+<li><strong>Referential.</strong> <code>places.hood_id</code> is a foreign key to <code>hoods.id</code>, <code>on delete restrict</code>. Free text is not acceptable (req 1). <code>restrict</code>, not <code>cascade</code> — see <a href="#32-publicplaces">§3.2</a>.</li>
+<li><strong>Geometric.</strong> For every place, ray-casting <code>(longitude, latitude)</code> against the single-ring WGS84 <code>[[lng,lat], …]</code> polygons (<code>001</code>'s committed format, ratified by <code>export_hoods_geojson.py</code>) yields <strong>exactly one</strong> containing Hood, and <code>places.hood_id</code> equals that Hood's <code>id</code>. Zero containing Hoods → <strong>fail</strong>, never ship unattributed (req 1). Two or more → <strong>fail</strong>, and the failure is also a live counter-example to <code>hood-dataset</code> req 2's non-overlap invariant, so it is reported against both datasets.</li>
+<li><strong>Enforcement site.</strong> The geometric clause is enforced by <code>validate_dataset.py</code>, <strong>not by Postgres.</strong> There is no PostGIS on this project and <code>hoods.polygon</code> is <code>jsonb</code>, not <code>geometry</code>; a DB-level containment constraint would mean adding a spatial extension for one authoring-time check. The FK gives referential integrity; the validator gives geometric correctness. A place is never written to the DB or the export without the validator passing.</li>
+<li><strong>Single implementation, shared.</strong> <code>database/scripts/validate_dataset.py</code> owns <strong>both</strong> invariants — T-040's non-overlap check and this task's containment check — because they are the same ray-cast over the same rings, and two implementations would disagree eventually. T-040's build calls it; T-042's build calls it. Whoever builds it first writes it; the second task consumes it.</li>
+</ol>
+<p><strong>Ordering consequence:</strong> the validator reads the <strong>authored Hood source</strong>, not the database, so this task's <em>schema</em> has no dependency on T-040. Only this task's <em>data</em> does — real places cannot be validated until real Hood geometry exists. Build sequencing in <a href="#9-build-breakdown">§9</a> reflects that split.</p>
+<p><strong>Boundary case, pinned to a value, not just to "deterministic":</strong> <code>point_strictly_inside</code> returns <strong><code>false</code> for a point exactly on a ring edge or vertex</strong> (<code>hood-dataset/TRD.md</code> §2.3 predicate 1). So a place sitting exactly on a shared Hood edge is contained by <strong>neither</strong> adjacent Hood, clause 2's "exactly one" fails, and the dataset is rejected until the author moves the coordinate or the boundary — never resolved by file order (the failure mode <code>HoodHitTester.swift</code> has today) and never silently assigned to whichever Hood was parsed first. Because clause 2 also fails on two containing Hoods and <code>hood-dataset</code> req 2 forbids overlap, no coordinate can ever be claimed twice either.</p>
+<p><strong>Cross-language conformance — clause 4 covers the two Python consumers only, and a third implementation exists.</strong> Clause 4's single shared file is correct for T-040's non-overlap check and this task's containment check: both are offline stdlib Python over authored files. <code>live-events-pipeline</code> (T-043) needs the <em>same predicate</em> at a different seam entirely — a <code>plpgsql</code> <code>hood_for_point()</code> running live inside Postgres against the <code>hoods</code> table, attributing externally-sourced events at ingest. <strong>That is a second, genuinely necessary implementation and clause 4 does not absorb it</strong> — see <code>live-events-pipeline/TRD.md</code> §4.1 for why no bridge exists in either direction. What the two share instead is stated in <a href="#9-build-breakdown">§9</a> B2: an identical <strong>algorithm spec</strong> (closed single-ring WGS84 <code>[[lng,lat],…]</code>, even-odd ray cast, bbox prefilter, on-boundary → <code>false</code>) and <strong>one checked-in fixture file</strong> of point→expected-<code>hood_id</code> cases asserted against both. If the SQL function and this validator disagree on an edge case, a place and an event at the identical coordinate land in different Hoods — a bug nobody would find by inspection.</p>
+<h3 id="42-c-sticker-1-place_type-sticker-shape">4.2 C-STICKER-1 — <code>place_type</code> → sticker shape</h3>
+<p>Two halves, one on each side of the wire, together satisfying req 3's "every place yields a sticker, no place earns a shapeless sticker":</p>
+<ul>
+<li><strong>Server half (built here):</strong> <code>place_types.sticker_shape</code> is <code>not null</code>, and <code>places.place_type</code> FKs into it. A type without a shape cannot exist; a place with an unregistered type cannot exist.</li>
+<li><strong>Client half (built by T-037, named in <a href="#22-not-built-here">§2.2</a>):</strong> a <code>StickerShape</code> Swift enum over the known shape keys, plus a test asserting <strong>every</strong> <code>sticker_shape</code> present in the shipped <code>place-types.json</code> export resolves to a real asset. The test is the falsifiable pass condition; the enum alone is not, because the key arrives from the server as a <code>String</code>.</li>
+<li><strong>Runtime fallback, defence-in-depth not contract:</strong> an unknown shape key renders a generic shape rather than nothing. This exists so a data/app version skew degrades instead of blanking a sticker; the export validator failing the build is what makes it unreachable in a shipped pair.</li>
+</ul>
+<h3 id="43-keyword-matching-is-client-side">4.3 Keyword matching is client-side</h3>
+<p><strong>Decision D3 — <code>text[]</code> shipped in the payload and matched on device. No Postgres full-text, no <code>tsvector</code>, no GIN index.</strong> This resolves the PRD's open technical question. It is forced, not preferred:</p>
+<ul>
+<li><code>search-quick-filters</code> req 4: <em>"Search reads the same cached place and Hood data the map reads — no search-only dataset."</em> A server-side FTS query is a second dataset by definition.</li>
+<li>Same PRD req 6: <em>"Offline: matching runs on cached data only."</em> A server-side match cannot run offline.</li>
+<li>Same PRD req 2: <em>"Matches update as the user types, rendering under 400ms of a keystroke pause."</em> A per-keystroke round trip does not make that budget on cellular.</li>
+</ul>
+<p>No index is added, because no server-side query filters on <code>keywords</code>. An index nothing queries is cost with no reader.</p>
+<p>The matching rules the client must implement (T-038's build, contract stated here so it is not re-derived):</p>
+<ul>
+<li>Case- and diacritic-insensitive, via <code>String.folding(options: [.caseInsensitive, .diacriticInsensitive])</code>. Tel Aviv keywords may be Hebrew or English; both fold.</li>
+<li>Match is <strong>substring-of-keyword</strong>, not token equality, so <code>"roof"</code> hits <code>"rooftop bar"</code> mid-type. Req 4's probe list is written against this behaviour.</li>
+<li>Authoring rules the validator enforces, not the client: keywords are lowercased, trimmed, de-duplicated within a row, and <strong>at least one keyword per row is not a substring of the place's own name</strong> (req 4's "authored, not derived from the place name" — name matching is already covered separately by <code>search-quick-filters</code> req 2).</li>
+</ul>
+<h3 id="44-place_type-does-not-touch-the-two-category-split">4.4 <code>place_type</code> does not touch the two-category split</h3>
+<p>Stated as a contract because three PRDs depend on it holding (req 3, <code>hood-place-detail</code> req 6, <code>search-quick-filters</code> req 3):</p>
+<ul>
+<li><code>category</code> and <code>place_type</code> are independent columns. Neither derives from the other, and no code path infers one from the other.</li>
+<li>No user-facing surface renders <code>place_type</code> as a category, a chip, or a filter axis. <code>search-quick-filters</code> req 3 caps the sheet at exactly two chips; this task ships nothing that could become a third.</li>
+<li>The only user-visible consequence of <code>place_type</code> in V1 is a sticker's <strong>shape</strong> in Passport.</li>
+<li><strong>[ASSUMPTION]</strong> carried unchanged from the PRD: that <code>place_type</code> is internal-only is <code>passport</code>'s proposed reading and Aviran has not confirmed it. If he wants it user-facing, this contract breaks and <code>hood-place-detail</code> req 6 + <code>search-quick-filters</code> req 3 both reopen. Nothing in this schema blocks that later — it would be a client change, not a migration.</li>
+</ul>
+<h3 id="45-fetch-contract">4.5 Fetch contract</h3>
+<p>Unchanged from T-033's TRD §4 — this task adds columns to an existing embedded select, not a new endpoint:</p>
+<pre><code>GET /rest/v1/hoods?select=id,blurb,places(id,name,category,place_type,latitude,longitude,keywords,permanently_closed,is_tourist_trap)
+GET /rest/v1/place_types?select=id,sticker_shape
+</code></pre>
+<p>One extra small GET for <code>place_types</code> (dozens of rows), fetched once per session alongside the places load. No pagination. No query parameter carries anything user-specific.</p>
+<p><strong>Payload ceiling — answering the PRD's open "at what row count does the whole-payload cache stop fitting."</strong> <strong>[ASSUMPTION]</strong> at ~400–450 bytes of uncompressed JSON per row (measured against the column set above with ~6 keywords), the design is comfortable to <strong>~2,000 places</strong> (≈850KB raw, ≈200KB gzipped) and should be re-examined past <strong>~5,000</strong> (≈2MB raw). V1 Tel Aviv curation is expected in the low hundreds, so this is headroom, not a live constraint. The number is falsifiable the moment a real row count exists — measure the export, do not re-estimate. Past the ceiling, the escape is Hood-scoped fetching, which changes <code>PlaceCatalog</code>'s loading strategy but no contract in this section.</p>
+<hr />
+<h2 id="5-flow">5. Flow</h2>
+<p><strong>Authoring → ship (the only flow this task has):</strong></p>
+<ol>
+<li>A person authors/edits <code>database/data/places-tel-aviv.source.json</code> — one object per place, all columns of <a href="#32-publicplaces">§3.2</a> plus nothing else.</li>
+<li><code>validate_dataset.py</code> runs against that file <strong>and</strong> T-040's authored Hood source. It fails, loudly and per-row, on: a place in zero Hoods or two Hoods (C-HOOD-1 clause 2); a <code>hood_id</code> that disagrees with the ray-cast; a <code>place_type</code> not in <code>place_types</code>; a <code>place_type</code> whose <code>sticker_shape</code> is empty; zero keywords; a keyword set entirely derivable from the name; a <code>category</code> outside the two; <code>is_tourist_trap = false</code> where the author meant unknown (see <a href="#9-build-breakdown">§9</a> B2's explicit-<code>null</code> rule); <code>permanently_closed = true</code> with no <code>closed_checked_at</code>; a slug failing the <code>id</code> regex; a Hood with zero places not on the accepted exception list (req 7); a <code>designated_for_progression</code> Hood below the Local threshold (req 7, <strong>skips loudly</strong> while the threshold is unknown — see <a href="#8-risks--alternatives">§8</a>).</li>
+<li><code>export_places.py</code> writes two artifacts from the same validated source in one run: the DB seed statements and <code>passenger-code/Passenger/Resources/places-tel-aviv.json</code> (T-033's bundled seed floor, extended per <a href="#22-not-built-here">§2.2</a>). Same one-source-two-artifacts rule <code>hood-dataset</code> req 6 sets for Hoods; the two can never disagree because neither is hand-edited.</li>
+<li>The seed is applied by whoever holds credentials — <strong>Aviran-gated</strong>, like every migration in this repo.</li>
+</ol>
+<p><strong>Runtime flow is entirely T-033's</strong> and unchanged by this task: one session-scoped fetch → <code>PlaceCatalog</code> → <code>places(in:)</code> / <code>place(id:)</code> dictionary reads, live → cache → bundled seed → empty. This task adds fields to that payload and changes no step of it.</p>
+<p><strong>Edge/error paths, all pre-existing and deliberately untouched:</strong> a <code>hood_id</code> absent from the bundled Hood catalog keeps the place (T-033's §3.1 call — it renders as a pin and appears in no Hood sheet); a Hood with no places renders <code>hood-place-detail</code> req 2's specified empty state, which is a state, not a failure; <code>is_tourist_trap = null</code> renders exactly as <code>false</code> and announces differently in VoiceOver (<code>tourist-trap-flag</code> req 4/7).</p>
+<hr />
+<h2 id="6-third-party-dependencies">6. Third-party / dependencies</h2>
+<p><strong>None added.</strong> No new SDK, no new service, no account, nothing that costs money.</p>
+<p>The validator's point-in-polygon is ~30 lines of ray-casting over a list of <code>[lng, lat]</code> pairs. Alternatives rejected: <strong>Shapely/GEOS</strong> (a C dependency and a build story for one function, on a project whose only existing script is stdlib Python); <strong>PostGIS</strong> (a database extension, an Aviran-gated project change, and a per-tap round trip if it ever leaked into runtime — T-031 §10 rejected server-side point-in-polygon for exactly that reason); <strong>Apple Maps / Google Places as a live source</strong> (this PRD ships authored values, not an ingestion pipeline, and a live source is a licence and cost decision that is Aviran's, not an implementation detail).</p>
+<hr />
+<h2 id="7-rollout-migration">7. Rollout &amp; migration</h2>
+<h3 id="71-no-feature-flag">7.1 No feature flag</h3>
+<p>This is reference data behind features that are themselves unshipped. There is no prior version to gate against and no A/B surface. Backward compatibility required: none — the schema is empty, <code>001</code> is not applied, and no client has ever read this table.</p>
+<h3 id="72-migration-safety">7.2 Migration safety</h3>
+<p>The migration is written to be <strong>correct under either build order</strong>, because <a href="#21-migration-ownership--the-t-033-collision">§2.1</a>'s reallocation may or may not have landed in T-033 by the time someone writes SQL:</p>
+<ul>
+<li><code>create table if not exists public.places (…)</code> with the <strong>full</strong> column set from <a href="#32-publicplaces">§3.2</a>, <strong>followed by explicit <code>alter table ... add column if not exists</code> for every column beyond the minimal set T-033 specified</strong> (<code>place_type</code>, <code>keywords</code>, <code>permanently_closed</code>, <code>closed_checked_at</code>, <code>is_tourist_trap</code>). This matters: <code>create table if not exists</code> against an already-existing minimal table is a silent no-op that would ship a <code>places</code> table with no <code>place_type</code> and no <code>keywords</code> — exactly the drift this whole task exists to end. The <code>alter</code> block is the belt to the <code>create</code>'s braces.</li>
+<li>Adding <code>place_type</code> / <code>keywords</code> as <code>not null</code> fails if placeholder rows already exist, so both are added <strong>nullable, backfilled, then <code>set not null</code></strong> in the same migration. The backfill uses the placeholder values in step A4 below.</li>
+<li><code>CHECK</code> constraints have no <code>if not exists</code> in Postgres; each is added inside a <code>do $$ … $$</code> guard testing <code>pg_constraint</code>, so re-running is safe.</li>
+<li>Idempotent overall, per <code>database/README.md</code>'s convention and <code>001</code>'s precedent. Never edited once applied.</li>
+</ul>
+<h3 id="73-apply-gate">7.3 Apply gate</h3>
+<p>Applying is <strong>Aviran-gated</strong> — he holds the credentials, and <code>001</code> and <code>002</code> are both still unapplied. This migration joins that queue; write it and hand it off, do not apply it. The real curated seed is separately gated on Aviran deciding who authors it and how many rows (Linear <code>PAS-6</code> item 11) — see <a href="#8-risks--alternatives">§8</a>.</p>
+<hr />
+<h2 id="8-risks-alternatives">8. Risks &amp; alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation / decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Nobody has decided who authors the dataset or how many rows.</strong> Linear <code>PAS-6</code> item 11. Every requirement in the PRD is about shape and validity; none produces a row.</td>
+<td>Not solvable here — Aviran's. The schema, validator, and export are all buildable and testable now against a placeholder seed (<a href="#9-build-breakdown">§9</a> A4), exactly as <code>001</code> did for Hoods. <strong>This is the largest unspecified input in V1 and this TRD does not close it.</strong></td>
+</tr>
+<tr>
+<td><strong>The Local threshold is unknown, so req 7's designated-Hood check cannot run.</strong></td>
+<td>The validator implements the check and <strong>reports <code>SKIPPED — threshold unset</code> loudly</strong>, never a silent pass. Threshold is read from a config file; the check becomes live the day the number lands. A silent pass here would let a Hood ship where <code>passport</code> req 4 is unreachable by construction.</td>
+</tr>
+<tr>
+<td><strong><code>place_type</code> and <code>keywords</code> value sets have no decision record.</strong> Both trace to verbatim strategy lines, so the scope gate clears, but neither enumeration is fixed.</td>
+<td><code>place_types</code> being a table rather than an enum means adding a value is an insert, not a migration. The initial set is <code>data-engineer</code>'s proposal at B1, ratified by Aviran, not invented by whoever writes the SQL.</td>
+</tr>
+<tr>
+<td><strong>Closed-state refresh has no owner and no cadence.</strong> <code>places-been-saved</code> req 4 needs a place that closes <em>after</em> being saved to show the badge next render; a one-time author-time read cannot deliver that.</td>
+<td><strong>Escalated, unowned, and unmet — not fenced out.</strong> Stated precisely because an earlier draft of this row got it wrong: <code>places-dataset.md</code> req 5's third bullet ("a refresh path exists and runs on a stated cadence") is a <strong>live P0 acceptance criterion</strong>, sitting in the PRD's Open questions &amp; risks, <em>not</em> in its <code>Not in scope</code> list. This TRD does not build the pipeline — nothing in V1 specs one and no task owns one — but that is an unmet requirement with an escalation attached, not a requirement the PRD released us from. <code>closed_checked_at</code> is the mitigation that ships: staleness becomes <strong>visible</strong> instead of assumed, which is not the same as refreshed. Ownership gap tracked as <strong>T-044 / Linear <code>PAS-22</code></strong>; <code>product</code> still needs to either move req 5's bullet to Not-in-scope or land a follow-on PRD, or req 5 sits permanently unmet against its own document. Flagged for <code>chief-of-staff</code> in <a href="#10-left-for-the-board">§10</a>.</td>
+</tr>
+<tr>
+<td>Payload outgrows the whole-dataset client cache</td>
+<td>Ceiling estimated in <a href="#45-fetch-contract">§4.5</a> with the escape named (Hood-scoped fetch). Measure the real export rather than re-estimating.</td>
+</tr>
+<tr>
+<td>T-033 ships its own <code>places</code> table before D1 is ratified, and the two diverge</td>
+<td><a href="#72-migration-safety">§7.2</a>'s <code>create</code>-then-<code>alter</code> makes the divergence self-healing rather than silent. Ratifying D1 at <code>trd-review</code> is the actual fix.</td>
+</tr>
+<tr>
+<td>A Hood boundary correction orphans curated places</td>
+<td><code>on delete restrict</code> makes it fail loudly; <code>validate_dataset.py</code> catches it before anything reaches the DB. <code>hood-dataset</code> req 7's own requirement, enforced here.</td>
+</tr>
+<tr>
+<td>Keyword authoring is per-place editorial load on top of per-Hood blurbs</td>
+<td>Named in the PRD as Aviran's read before sizing. Not an architecture problem — flagging it as one would be pretending it is solvable here.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternatives considered and rejected:</strong> Postgres <code>enum</code> for <code>place_type</code> (needs <code>ALTER TYPE</code> per value, and cannot express "every value has a shape" — <a href="#31-publicplace_types">§3.1</a>); a bare <code>CHECK</code> list for <code>place_type</code> (same, minus the FK guarantee); Postgres full-text / <code>tsvector</code> for keywords (<a href="#43-keyword-matching-is-client-side">§4.3</a> — breaks offline and the no-second-dataset rule); PostGIS containment constraint (<a href="#41-c-hood-1--the-places--hoods-contract">§4.1</a> clause 3); <code>on delete cascade</code> on <code>hood_id</code> (<a href="#32-publicplaces">§3.2</a>); merging this into <code>hood-dataset</code> as one "reference data" migration (the PRD's own decisions log rejects it — different sourcing jobs, different failure modes, one shared contract); a <code>place_type</code> display-name column (<a href="#31-publicplace_types">§3.1</a> — a display string invites a surface to render it, reopening decision #33).</p>
+<hr />
+<h2 id="9-build-breakdown">9. Build breakdown</h2>
+<p>Ordered. Tags name the agent(s) each step dispatches to. <strong>No <code>[iOS]</code> step exists in this task</strong> — every client-side consequence is another task's amendment, listed in <a href="#22-not-built-here">§2.2</a>.</p>
+<p><strong>Schema track — buildable now, no dependency on T-040 or on the data existing.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>Migration: <code>place_types</code> per <a href="#31-publicplace_types">§3.1</a>, with <code>sticker_shape not null</code></td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A2</td>
+<td>Same migration: <code>places</code> per <a href="#32-publicplaces">§3.2</a> — all constraints, both FKs <code>on delete restrict</code>, the <code>places_closed_has_source</code> check, the <code>places_hood_idx</code> index. Written per <a href="#72-migration-safety">§7.2</a>'s <code>create</code>-then-<code>alter</code>-then-<code>set not null</code> shape</td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A3</td>
+<td>Same migration: RLS per <a href="#33-rls--the-established-public-read-shape-not-a-new-one">§3.3</a> — enable on both, one public <code>select</code> each, <strong>no write policy</strong></td>
+<td><strong>[Backend]</strong></td>
+</tr>
+<tr>
+<td>A4</td>
+<td>Same migration: an <strong>explicitly-labelled placeholder</strong> seed — the initial <code>place_types</code> rows plus a handful of real Tel Aviv places inside <code>001</code>'s five placeholder Hoods, so RLS and the client contract are verifiable before real curation exists. <code>on conflict do nothing</code>, so the real seed supersedes it by id without reissuing the migration. Follows <code>001</code>'s A3 precedent exactly, including saying so in the file header</td>
+<td><strong>[Backend]</strong> + <strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>A5</td>
+<td>Delete the <code>places</code> block from T-033's planned migration <code>003</code>; move its <code>hoods.blurb</code> line to T-040's. <strong>Blocked on D1's ratification at <code>trd-review</code></strong></td>
+<td><strong>[Backend]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Data track — A4 unblocks everything below it that does not need real geometry.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Step</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td>Propose the initial <code>place_type</code> enumeration and its <code>sticker_shape</code> mapping, for Aviran's ratification. Not invented by whoever writes A1</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B2</td>
+<td><code>validate_dataset.py</code> — ray-cast point-in-polygon, plus every rule in <a href="#5-flow">§5</a> step 2. Owns <strong>both</strong> C-HOOD-1 invariants, shared with T-040 (clause 4). Includes the req-7 threshold check that reports <code>SKIPPED</code> loudly. <strong>Authoring rule this step encodes: unknown tourist-trap ships explicit <code>null</code>, never <code>false</code></strong> (req 6)</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B2a</td>
+<td><strong><code>database/data/fixtures/hood-containment-cases.json</code></strong> — the shared cross-language conformance fixture (<a href="#41-c-hood-1--the-places--hoods-contract">§4.1</a>). Point→expected-<code>hood_id</code> cases covering: strictly inside; outside; <strong>on a ring edge and on a vertex (expected: no Hood — <code>false</code>/<code>null</code>, matching <code>hood-dataset</code> §2.3 predicate 1)</strong>; inside the bbox but outside the ring; inside a concave notch; on an edge shared by two adjacent Hoods (expected: <strong>neither</strong>); a swapped lat/lng pair. <strong>Asserted against both implementations</strong> — this validator, and T-043's SQL <code>hood_for_point()</code> (<code>live-events-pipeline/TRD.md</code> §9 A3). Whichever task builds first writes the file; the other adds its assertion against the same cases and adds none of its own without adding them for both</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B3</td>
+<td><code>export_places.py</code> — one validated source → DB seed + <code>places-tel-aviv.json</code>, in one run. Fails the export on any validator failure</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B4</td>
+<td>The keyword probe list (req 4's pass condition), including strategy's own <code>"hummus"</code> and <code>"rooftop bar"</code>, committed alongside the source. A probe returning zero is a <strong>dataset</strong> defect, not a search defect</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+<tr>
+<td>B5</td>
+<td><strong>The real curated Tel Aviv dataset.</strong> <strong>Blocked on T-040's real Hood geometry</strong> (C-HOOD-1 clause 2 cannot run without it) <strong>and on Aviran</strong> (who authors, how many rows — <code>PAS-6</code> item 11)</td>
+<td><strong>[Algo/Data]</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>trd-review</code> sign-off needed from:</strong> <code>developer</code> + <code>code-reviewer</code> (A1–A5), <code>data-engineer</code> + <code>code-reviewer</code> (B1–B5). <strong>No iOS pair</strong> — this task builds no client code.</p>
+<p><strong>Cross-task review, needed before A5 is actionable:</strong> T-033's reviewers must ratify D1 (<a href="#21-migration-ownership--the-t-033-collision">§2.1</a>) and the <code>cascade</code>→<code>restrict</code> change; T-040's TRD must state C-HOOD-1 (<a href="#41-c-hood-1--the-places--hoods-contract">§4.1</a>) in these terms and claim B2's validator on the same side of the seam.</p>
+<hr />
+<h2 id="10-left-for-the-board">10. Left for the board</h2>
+<p>Not mine to write to <code>BOARD.md</code> or Linear; surfaced for <code>chief-of-staff</code>:</p>
+<ol>
+<li><strong>D1 is a change to an already-written TRD</strong> (T-033's migration <code>003</code>) and to T-040's TRD, which is being written in parallel right now. Both need to see it before either builds SQL.</li>
+<li><strong>Closed-state refresh remains unowned, and it is an unmet P0 — not out of scope.</strong> <code>places-dataset</code> req 5's refresh-path bullet lives in the PRD's Open questions &amp; risks, not its <code>Not in scope</code> list, so nothing has released this requirement; this TRD simply does not build it, and <code>places-been-saved</code> req 4 depends on it. Flagged by <code>product</code>, by T-036's PRD, and by this TRD before it acquired an owner — now tracked as <strong>T-044 / Linear <code>PAS-22</code></strong>. <code>product</code> still owes the disposition: move the bullet to Not-in-scope, or open the follow-on PRD.</li>
+<li><strong>B5 is blocked on Aviran</strong> (<code>PAS-6</code> item 11), and it is the step that produces the actual dataset. Everything above it is scaffolding for rows nobody has been asked to write.</li>
+<li><strong>The Local threshold</strong> gates req 7's validation, not just Passport's UI. B2 ships the check disabled-and-loud until the number exists.</li>
+</ol>
+</div>
+</body>
+</html>
