@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — T-040/PAS-17 code-review verdict: APPROVE WITH MINOR NOTES, holding for joint qa with T-033
+
+- **Did:** processed `ios-code-reviewer`'s verdict (`8c7a838`, docs only — no `passenger-code` changes needed) on T-040's Phase-1 slice. Verdict claims spot-checked against the specifics given rather than accepted at face value: `schemaVersion>=1` gate, blurb `""`/whitespace→`nil` trim, and the absent-centroid fallback ordering (ring-dedup before averaged-centroid, cited at `HoodCatalog.swift` lines 68-118) all traced by the reviewer directly against code/fixtures, not inferred from `ios-developer`'s report. Scope-cleanliness claims (exactly 7 files, no migrations, exactly 2 `Hood(` construction sites) are independently checkable and match the earlier verified diff. 2 non-blocking notes recorded: no programmatic guard stops a `[PROVISIONAL]` blurb surviving into a real build if Phase 2 slips (only the human-readable `_note` documents it); the malformed-centroid-array-length throw path has no test unlike its 3 siblings.
+- **Held, not dispatched further:** did not send this to `qa` on its own. The reviewer's own recommendation — this slice is a data-model/decode change with no UI surface, so the one behavioral check actually worth running is T-033's Hood-sheet blurb rendering against this exact bundle — is sound, and matches this session's "finish before starting" bias against fragmenting QA across two dependency-linked slices. Posted the verdict to Linear `PAS-17`, updated both `BOARD.md` tables (T-040 rows) to record APPROVE WITH MINOR NOTES and the joint-qa hold.
+- **Left behind:** waiting on T-033's C1-C12+C3a build report (still in flight, dispatched in the same batch) before either T-040 or T-033 moves to `qa`.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-07-31 — chief-of-staff — HTML reading copies of every PRD and TRD, linked from Linear
 
 - **Ask (founder-direct, live hilos @chief mention, Aviran):** generate an HTML version of every PRD and TRD so non-technical founders can read them in a browser with no markdown renderer, without touching the .md source, then link both from each PRD/TRD's Linear issue.
