@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — PAS-24 filed: Phase 2 place metadata/tagging candidate
+
+- **Did:** filed `PAS-24` ("Phase 2 candidate: place metadata/tagging attributes (discovery engine)") in Linear, team Passenger, project Passenger V1 — the founder-direct ask recorded in the stub immediately below. Checked existing convention first: no `type:data-request`/`type:feature` labels are actually configured in this Linear workspace (only `Feature`/`Bug`/`Improvement`, plus `owner:*`/`gate:*`/`aviran-blocker`) — used `Feature`, the closest real label, rather than inventing a new one. Followed `PAS-11`'s precedent exactly (same "Phase 2 candidate" title pattern, Backlog status, traceability-only framing) since it's the only prior ticket in this exact category. Did **not** apply `aviran-blocker`: unlike PAS-11, there's no open tension here needing Aviran's decision before it can sit in Backlog — it's parked only because Phase 2 itself is parked, same as every other Phase 2 item, and no owner label since nothing is being dispatched.
+- **PRD check:** confirmed no PRD exists for a "discovery engine" feature anywhere in `passenger-brain/prds/` (checked `prds/INDEX.md` and the directory listing) — noted in the ticket per the dispatch brief. The closest artifacts are `data-eng/discovery-engine-spec.md` (Yeari's algorithm/pipeline spec, no place-attribute model) and `prds/places-dataset/places-dataset.md` (T-042/PAS-19, owns the curated `places` schema today — `place_type`/`keywords`/category/closed-state, no amenity/vibe tags). Linked both in the ticket description as reconciliation context for whoever scopes this later; did not touch either document.
+- **Did not:** create a PRD, dispatch `product` or any other agent, or move this into the active pipeline — the request was explicitly to capture intent only, and Phase 2 work is standing-prohibited from active dispatch per `BOARD.md`'s scope gate. Did not add a `BOARD.md` row with a `T-` task ID, since this isn't in the fine-grained lifecycle (same treatment PAS-11, PAS-16, PAS-21, PAS-22 got) — added a line to `BOARD.md`'s Phase 2 parked-items note instead, pointing at the Linear ticket as the source of truth.
+- **Left behind:** when Phase 2 actually starts, `product` should scope a real PRD reconciling this against `places-dataset` (extend that schema vs. new table) and against `discovery-engine-spec.md`'s pipeline (hand-curated attributes vs. inferred from mined content).
+
+---
+
 ### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB: Phase 2 place-metadata/tagging task, live `/cos` chat
 
 **Verbatim request:** "add metadata attributes for each place — romantic, seating outside, allow smoking, and similar tags (etc implies more attributes of this kind, use judgment for a reasonable starter list e.g. romantic, seat_outside, allow_smoking, kid_friendly, wifi, pet_friendly — but don't over-scope, just capture intent as a discovery-engine metadata/tagging task)." Requested filed in Linear, team Passenger, project Passenger V1, "under Phase 2 (Discovery engine) scope."
