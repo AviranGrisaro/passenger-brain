@@ -1,7 +1,7 @@
 # Hood & Place Detail — TRD
 
-**Task:** T-033 · **Linear:** `PAS-13` · **Status:** **`trd-review` complete — 6/6 unanimous approve, zero blocking findings, all findings folded in** (2026-07-31, §8 D9). One *separate* question, not a review finding and not addressed by that pass: `BOARD.md`'s 2026-07-31 build-phase replan asks whether this feature's live Supabase fetch belongs in Build Phase 1 at all — see §8 D9's closing note.
-**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-31 — §3.1 schema ownership handed to T-042 / T-040 (§3.1, §8 D7, §11); nav-row grouping answered, no text in this TRD changed by it (§8 D8); **`trd-review` consolidation pass — five non-blocking findings folded in, §8 D9 lists all five and what they touched**
+**Task:** T-033 · **Linear:** `PAS-13` · **Status:** **`trd-review` complete — 6/6 unanimous approve, zero blocking findings, all findings folded in** (2026-07-31, §8 D9). ~~One *separate* question, not a review finding and not addressed by that pass: `BOARD.md`'s 2026-07-31 build-phase replan asks whether this feature's live Supabase fetch belongs in Build Phase 1 at all — see §8 D9's closing note.~~ **Resolved 2026-07-31 — §8 D10.** Build Phase 1 pins the bundled seed as authoritative and keeps the live fetch built but inert; §3.4, §4.3, §7 and step C3 carry it.
+**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-31 — §3.1 schema ownership handed to T-042 / T-040 (§3.1, §8 D7, §11); nav-row grouping answered, no text in this TRD changed by it (§8 D8); **`trd-review` consolidation pass — five non-blocking findings folded in, §8 D9 lists all five and what they touched**; **Build-Phase-1 source pin + determinism test + two-file fixture spec, §8 D10 (§3.4, §4.3, §7, §11 C3/C3a/B2)**
 **PRD:** [`hood-place-detail.md`](./hood-place-detail.md) (Draft v1) · **Design spec:** [`design/phase-1/hood-place-detail-design.md`](../../design/phase-1/hood-place-detail-design.md) (revised post-REJECT, `design-approval` PASS, `design-review` cleared on Aviran's approval)
 **Mockup:** https://claude.ai/code/artifact/06f8a49b-7de4-430f-a701-96279db74611 — reference only. Where this TRD and the mockup disagree, this TRD wins.
 **Builds on:** [`map-hoods-heat/TRD.md`](../map-hoods-heat/TRD.md) (T-031, built and accepted). Every module boundary, naming convention, and concurrency rule there applies here unchanged; this document extends that layout, it does not restate it.
@@ -161,7 +161,7 @@ One request, once per session, at the same lifecycle point as the density load.
 
 ### 3.4 The bundled seed floor — `Resources/places-tel-aviv.json`
 
-Precedence when the catalog loads: **live fetch → last-good disk cache → bundled seed → empty.**
+Precedence when the catalog loads: **live fetch → last-good disk cache → bundled seed → empty.** **In Build Phase 1 this precedence is not exercised — the seed is pinned as the authoritative source, see §3.4.1.**
 
 The seed is a build-time export of the `places` table, committed to `passenger-code/`, same drift rule as `hoods-tel-aviv.json` (whoever changes the data re-exports in the same change). It exists for two reasons, one of them non-obvious:
 
@@ -169,6 +169,53 @@ The seed is a build-time export of the `places` table, committed to `passenger-c
 2. **It closes the root-cause gap `product` named at T-031's acceptance** — "no backend has ever been reachable in this whole pipeline, so nobody has actually *seen* heat render." Every visual bullet in this feature would inherit that same fate: unobservable until Aviran applies a migration. With a seed floor, `ios-developer`, `ios-code-reviewer`, and `qa` all see the real Hood sheet with real rows, on a device with no credentials and no network, and the acceptance gate reads observed behaviour rather than construction.
 
 The seed is a **floor, never a cache**: a successful fetch always wins, and the seed is never written to, refreshed, or merged. `PlaceCatalog.Source` gains a `.seed` case so `qa` and the code reviewers can tell which path produced what they are looking at.
+
+### 3.4.1 Build Phase 1 — the seed is authoritative, deterministically (added 2026-07-31)
+
+Product's call, `hood-place-detail.md` Decisions log 2026-07-31 (`30e002f`), against `BOARD.md`'s `V1 Build Phases` section (`b624d2f`): **Build Phase 1 ships client-only, so the bundled seed is the authoritative source and the live fetch is built but inert.** The fetch is **not deleted** — deleting it would make the Phase-2 wiring a re-architecture instead of a source flip, which is the entire reason for building it now.
+
+**The pin is a constant, not an absence.**
+
+```swift
+enum BuildPhase {
+    /// `BOARD.md` § V1 Build Phases. `true` ⇒ `PlaceCatalog` loads the bundled seed
+    /// and attempts no fetch. Flipping this to `false` is the whole Phase-2 wiring
+    /// change for this feature — no other line moves.
+    static let seedIsAuthoritative = true
+}
+```
+
+`PlaceCatalog.load()` becomes:
+
+```
+if BuildPhase.seedIsAuthoritative  → load bundled seed; source = .seed; return   // no fetch attempted
+else                               → live → last-good cache → seed → empty       // §3.4, unchanged
+```
+
+- **A runtime constant, not `#if`.** Both branches compile in both states, so `PlacesAPI`, `PlacesCache` and §4.3's decoder stay type-checked, reviewable and greppable through Phase 1 instead of rotting behind a compilation flag. This is also why the flip is cheap: one boolean, one file.
+- **Determinism is the requirement; a missing plist is not it.** Falling through to `.seed` because no `SupabaseConfig.plist` exists (§4.3) is *machine-dependent* — it holds on a machine that has never had credentials and silently stops holding on one that has. The constant makes the source identical on every machine, plist or no plist, network or no network.
+- **Not the feature flag §7 rules out.** That paragraph rejects a flag whose off-state is a broken feature. This pin's two states are *two working features against two data sources*, which is what a build-phase sequence is.
+
+**Pass/fail. Phase-1 acceptance requires all three, in `PlaceCatalogTests`:**
+
+| # | Assertion |
+|---|---|
+| 1 | After `await catalog.load()`, `catalog.source == .seed`. |
+| 2 | `load()` makes **zero** fetch attempts — a `PlacesFetching` spy injected into `PlaceCatalog` fails the test if its method is called at all. |
+| 3 | Assertion 1 still holds **with a populated `SupabaseConfig.plist` present** (a fixture plist supplied by the test). This is the assertion that distinguishes a pin from an accidental fall-through, and it is the one that fails if someone later "fixes" the constant away. |
+
+Assertion 2 needs a seam, and it is the one the app already uses: `PlaceCatalog.init(api: any PlacesFetching = PlacesAPI(), cache: any PlacesCaching = PlacesCache())` — protocol plus default argument, exactly `DensityStore.init(api:cache:now:)` in `passenger-code/Passenger/Density/DensityStore.swift`. No new pattern, and it is what makes assertions 2 and 3 real rather than narrative.
+
+**The Phase-1 fixture is two files, and only one of them is this task's.**
+
+| File | State today | Phase-1 obligation | Owner |
+|---|---|---|---|
+| `Resources/places-tel-aviv.json` | **Does not exist** | Hand-authored here as an explicitly provisional fixture — step **C3a** | **T-033** |
+| `Resources/hoods-tel-aviv.json` | Exists at `schemaVersion` 1, keys `id`/`name`/`polygon` only, **no `blurb`** (read directly, 4 placeholder rectangles) | Gains `blurb` + `schemaVersion` 2 decode via **T-040's C1+C2 carved into Build Phase 1** | **T-040** |
+
+**Quality floor for `places-tel-aviv.json`, stated as pass/fail so `qa` has something to fail:** real Tel Aviv place names (not "Place 1"); both categories present; **every place's coordinate inside the bundled polygon its `hood_id` names** — the bundled Hoods are placeholder rectangles, so coordinates are snapped, not real, and real coordinates would scatter pins outside the coloured shapes and read as broken; **≥8 places across ≥2 Hoods**, with **one Hood deliberately carrying zero places** and **one deliberately carrying no blurb**, so PRD req 2's two empty branches are *observed* in the Phase-1 demo rather than asserted in prose; the file declares itself provisional in-line. **[ASSUMPTION]** the four numeric floors are product's judgment for a demo that does not read as a toy, not a founder-stated threshold (`hood-place-detail.md`, same Decisions row) — cheap to overturn; the empty/blurb-less pair is the part worth keeping either way.
+
+**The blurb dependency is hard, and it is the reason the carve-out exists.** With `source == .seed`, `PlaceCatalog.blurb(for:)` reads the *bundled Hood record* (see the amendment immediately below), and that record has no `blurb` field today. Without **T-040 C1+C2**, a Phase-1 build can only ever render req 2's *no-blurb* branch — and the blurb is half of this feature's own authorizing strategy line ("Tap a Hood → hand-curated blurb + tagged spots", `strategy/passenger-strategy.md:37`) and all of decision #10's "local read". The carve-out is ratified and scoped in [`hood-dataset/TRD.md`](../hood-dataset/TRD.md) **§8 D10** — C1, C2 and a new C2a move to Build Phase 1; B1/B2/B4/B6 and C3 stay Build Phase 2. **Not a build blocker for C1–C12:** §4.8 and C7 already specify both branches, so the values can land in parallel. It **is** an acceptance-scope condition: Phase-1 acceptance of req 2 requires the blurb branch to be observable.
 
 **Amended 2026-07-31 — this file carries places only, not Hood blurbs.** It originally exported "the `places` table plus each Hood's blurb." `hood-dataset/TRD.md` **D7** (amendment 2 of 2) moves the bundled blurb to `hoods-tel-aviv.json`, which T-040 already extends to `schemaVersion` 2 with `blurb`, `isTouristTrap` and `designatedForProgression` (its §3.5, §4.3). Accepted: one field, one bundled home — a field with two homes drifts. **Precise wiring consequence for C3/C7, so it isn't discovered at build time:** `PlaceCatalog.blurb(for:)` (§4.4) keeps its signature and keeps returning the *live* blurb from §4.3's embedded `GET`, which still selects `hoods.blurb`. Only the **fallback** changes — when `source` is `.seed`, the blurb comes from `HoodCatalog`'s bundled Hood record, not from this file, because this file no longer carries one. `HoodSheet` still reads exactly one accessor and still cannot tell the difference. **Consequence for the fixture's column set:** it gains `place_type`, `keywords`, `permanently_closed` and `is_tourist_trap` per §3.1's consequences table.
 
@@ -267,6 +314,8 @@ Five rules, each load-bearing:
 
 ### 4.3 Places API — one embedded GET
 
+> **Build Phase 1: everything in this section ships built and unexercised** (added 2026-07-31, §3.4.1, §8 D10). `BuildPhase.seedIsAuthoritative` is `true`, so no build in Phase 1 issues this request — the `GET`, the `hoodID`-stamping decoder, the two live-only boundary rules, and `PlacesCache`'s disk round trip are all compiled, unit-tested against fixtures where they can be, and **never run against a server**. `ios-developer` builds this section in full and to spec; `qa` and `product` must not read a Phase-1 pass as covering it. Named up front, because this is the same shape as T-031's "heat never observed live" gap, which had to be retroactively re-read as intentional at acceptance. Its verification event is Phase 2, when the constant flips and T-042's/T-040's migrations are applied.
+
 ```
 GET {supabase_url}/rest/v1/hoods
     ?select=id,blurb,places(id,name,category,latitude,longitude)
@@ -292,7 +341,7 @@ Once per session, alongside `DensityStore.load()`. No pagination (dozens of Hood
 
 **Why the last rule is seed-only.** `places-tel-aviv.json` is flat and carries an explicit `hood_id` per place (T-042 §2.2/D4), so that value can name a Hood the bundled catalog doesn't have — a real, reachable mismatch between two independently-shipped files. The live/cached path cannot produce it: `hoodID` is stamped from the enclosing Hood the row arrived under, and that Hood came from the same response, so the id always resolves *within the payload*. It can still be a Hood absent from the **bundled** catalog, and the keep-the-place handling is identical — but it arrives by nesting, never by a mismatched key, so there is nothing to validate at the row level on that path.
 
-Config from `SupabaseConfig.plist`, same as `DensityAPI`. **A missing plist is a valid state**: the fetch reports unconfigured, the catalog falls through to cache, then to the bundled seed (§3.4), and the app builds and runs for a developer with no credentials.
+Config from `SupabaseConfig.plist`, same as `DensityAPI`. **A missing plist is a valid state**: the fetch reports unconfigured, the catalog falls through to cache, then to the bundled seed (§3.4), and the app builds and runs for a developer with no credentials. **That tolerance stays, and it is no longer what produces the Phase-1 source** — §3.4.1's constant is, and its assertion 3 proves the two are independent. No plist exists in `passenger-code/` today (checked); relying on that absence would make the demo's data source a property of the machine it was built on.
 
 ### 4.4 `PlaceCatalog` and `SavedPlacesStore`
 
@@ -437,7 +486,9 @@ Per `SALVAGE.md`, leaf code only, read line by line and adapted to Swift 6:
 
 ## 7. Rollout & migration
 
-- **No feature flag.** The off-state of a flag here is a map whose taps do nothing — a regression, not a safe default.
+- **No feature flag.** The off-state of a flag here is a map whose taps do nothing — a regression, not a safe default. **`BuildPhase.seedIsAuthoritative` (§3.4.1) is not one:** both of its states are a working feature reading a different data source, which is what a build-phase sequence is, not a half-built feature hidden behind a switch.
+- **Build Phase 1 → Build Phase 2 is one boolean.** Phase 1 ships with the seed pinned. Phase 2 flips `seedIsAuthoritative` to `false`, at which point §3.4's live → cache → seed → empty precedence takes over and the seed reverts to being a floor. Nothing else in this feature changes, no file is added, and the three tests in §3.4.1 invert into their Phase-2 counterparts.
+- **What Phase 1 does *not* verify, stated so acceptance cannot over-claim.** The live path (§4.3's `GET`, the `hoodID`-stamping decoder, the live-only boundary rules, `PlacesCache`'s disk round trip) ships **built and unexercised**; so does the `.live`/`.cache`/`.unavailable` half of §4.8's error-vs-empty distinction, which is derived from `source` and can only read `.seed` in Phase 1. Phase-1 acceptance covers PRD reqs 1–7 against the fixture — all seven are demoable there, nothing in the PRD defers — and covers none of the above. This is the same gap shape as T-031's "heat never observed live"; it is named here in advance rather than re-read as intentional afterwards.
 - ~~**Migration `003` applying is Aviran-gated.**~~ **Amended 2026-07-31 — this task hands off no migration at all** (§3.1). It **depends on** T-042's `places` migration and T-040's `hoods.blurb` migration. Both are still Aviran-gated to apply (he holds the credentials), and both are written and handed off by their own tasks; no agent applies either.
 - **The client ships independently of the backend.** The bundled seed floor (§3.4) means the iOS build is demoable, reviewable, and QA-able before either migration is applied or a single row exists — and unlike T-031, the feature's primary visual output is *observed* rather than passed by construction. **This is why the §3.1 amendment delays no C-track work:** the iOS build never waited on a migration in the first place.
 - **Backward compatibility:** both depended-on migrations are purely additive (`add column if not exists`, `create table if not exists`) and their authors state so. No existing row, policy, or client contract changes. T-031's app build keeps working against a database with either applied, and vice versa.
@@ -515,7 +566,24 @@ Five accumulated non-blocking findings applied as one pass. Each was raised by a
 
 **Not part of this pass, and not a `trd-review` finding — the build-phase question.** While this consolidation was being written, `BOARD.md` gained a build-phase replan (2026-07-31, Aviran's direct ask) putting T-033 in **Build Phase 1 — "ship the iOS app, 100% client-side, no backend"** — and flagging a tension: §4.3's live fetch reads T-042's and T-040's real Supabase tables, which that replan assigns to Build Phase 2. It asks for an architect/product pass before `build` is dispatched. **That is a scoping decision, deliberately not made here** — this pass carried no design judgment of its own by construction. Two facts for whoever takes it, offered as evidence rather than a recommendation: (1) §3.4's precedence is already **live → last-good cache → bundled seed → empty**, and §7 already states the client "ships independently of the backend… demoable, reviewable, and QA-able before either migration is applied or a single row exists" — a no-backend path is designed in, not bolted on; (2) what a Phase-1 build would need is therefore a decision about *which source is authoritative in Phase 1*, plus a real fixture, not a re-architecture of the fetch. Whichever way it lands, it changes §3.4/§4.3/§7 and step C3, and nothing that `trd-review` examined.
 
-**Nothing else in this TRD required a change.** Every other reviewer observation was either a confirmation (the four independent column-by-column schema checks against T-042/T-040, the `cascade`→`restrict` ratification, the migration-numbering check, the T-032 cross-task contract verified from both sides) or explicitly out of scope for this task (`security-auditor`'s sweep, already run and PASS on T-040/T-042 in `1cb571b`; the `hood_for_point()` shared fixture, which `data-engineer` and `code-reviewer` both confirmed T-033 does not touch at all). The one unread column noted three times — `places.updated_at` exists but nothing here reads it — is not a gap and needs no text.
+**Nothing else in this pass required a change.** Every other reviewer observation was either a confirmation (the four independent column-by-column schema checks against T-042/T-040, the `cascade`→`restrict` ratification, the migration-numbering check, the T-032 cross-task contract verified from both sides) or explicitly out of scope for this task (`security-auditor`'s sweep, already run and PASS on T-040/T-042 in `1cb571b`; the `hood_for_point()` shared fixture, which `data-engineer` and `code-reviewer` both confirmed T-033 does not touch at all). The one unread column noted three times — `places.updated_at` exists but nothing here reads it — is not a gap and needs no text.
+
+### D10 — Build Phase 1: the seed is pinned authoritative, the live fetch ships inert (added 2026-07-31)
+
+Closes the question D9 recorded and deliberately did not answer. **Decided by `product`**, not here: `hood-place-detail.md` Draft v2 Decisions log, commit `30e002f`, against `BOARD.md`'s `V1 Build Phases` section, commit `b624d2f` (Aviran's "yes, replan board around the 3 phases", `PROGRESS.md` FOUNDER-DIRECT STUB). This amendment implements that call; it makes no scoping decision of its own.
+
+| What landed | Where |
+|---|---|
+| Bundled seed authoritative in Phase 1; live fetch **built but inert, not deleted** — deleting it makes Phase 2 a re-architecture instead of a source flip | §3.4.1 |
+| The pin is `BuildPhase.seedIsAuthoritative`, a runtime constant (not `#if`, so both branches stay compiled and reviewed) | §3.4.1 |
+| Determinism as a **testable** requirement — three assertions, including "still `.seed` with a populated plist present", plus the `PlacesFetching` injection seam that makes the zero-fetch assertion provable | §3.4.1 |
+| The live path ships **built and unexercised**; Phase-1 acceptance does not cover it and must not claim to | §4.3 lead-in, §7 |
+| Phase-1 fixture is **two files**, with quality floors as pass/fail, and the `hoods-tel-aviv.json` half depending on T-040's carve-out | §3.4.1, §11 C3a |
+| Phase-1/Phase-2 emitter reconciliation for `places-tel-aviv.json` (hand-authored here now; T-042's `export_places.py` becomes sole emitter at Phase 2 and B2's drift check goes live then) | §11 B2, C3a |
+
+**Three things this decision deliberately does not do.** It cuts no requirement — all seven P0s are demoable against the fixture (`product` walked them). It changes no contract in §4 other than adding the injection seam. And it does not touch T-042's or T-040's own build phase: both stay held at Build Phase 2 apart from the two carved iOS steps.
+
+**One reading not settled here, and not mine to settle.** "100% client-side, no backend" is `chief-of-staff`'s relayed restatement of Aviran's words, self-labelled **[ASSUMPTION]** in its own stub — not a verbatim quote. A stricter reading ("no networking code may exist at all") would additionally require deleting §4.3's fetch outright. This TRD builds to the reading in `product`'s call — *must not depend on Supabase being reachable* — which satisfies both readings' safety properties and stays prunable in one commit if Aviran wants the stricter one. `chief-of-staff` is asking him directly; **this is not a build blocker** and `build` should not wait on it.
 
 ---
 
@@ -557,7 +625,7 @@ Ordered. Tags name the agent(s) each step dispatches to.
 | A2 | ~~RLS on `places`~~ → **Confirm T-042's RLS is as specified** (`places-dataset/TRD.md` §3.3: enabled on `places` and `place_types`, one public `select` each, **no write policy**) and that §4.3's embedded `GET` returns the expected shape against it. A verification step, not a change. | **[Backend]** |
 | ~~A3~~ | ~~Seed a small placeholder place set + Hood blurbs~~ → **struck.** Now T-042 step **A4** (placeholder seed, `on conflict do nothing`) and T-040 step **B5** (blurbs). | — |
 | ~~B1~~ | ~~The real curated Tel Aviv place dataset and Hood blurbs~~ → **struck.** Now T-042 step **B5** (places, blocked on T-040's geometry and on Aviran, `PAS-6` item 11) and T-040 step **B5** (blurbs). The salvage lead moves with it (§6). | — |
-| B2 | **Drift check only — T-033 does not emit `places-tel-aviv.json`.** Ownership was posed here as an open question and is now **settled**: `places-dataset/TRD.md` **§2.1 D4** (ratified at T-042's `trd-review`) makes `export_places.py` (T-042's step **B3**) the sole emitter, adopting this TRD's own recommendation — B3 already holds the validated source and the DB seed, and a second emitter is a second chance to drift. What remains here is the §3.4 seed floor's *use* plus a tripwire asserting the bundled copy round-trips against B3's output — the same relationship `export_hoods_geojson.py` has to the Hood bundle it does not author. File shape unchanged from §3.4: places only, no Hood blurbs; columns per §3.1's consequences table. **The surviving check is an iOS-side test, in the shape of `HoodCatalogTests`, not a `data-engineer` deliverable** — retagged accordingly (raised by `data-engineer` and `code-reviewer` at `trd-review`, so it is not silently assumed by both sides or neither). | **[iOS]** |
+| B2 | **Drift check only — T-033 does not emit `places-tel-aviv.json`.** Ownership was posed here as an open question and is now **settled**: `places-dataset/TRD.md` **§2.1 D4** (ratified at T-042's `trd-review`) makes `export_places.py` (T-042's step **B3**) the sole emitter, adopting this TRD's own recommendation — B3 already holds the validated source and the DB seed, and a second emitter is a second chance to drift. What remains here is the §3.4 seed floor's *use* plus a tripwire asserting the bundled copy round-trips against B3's output — the same relationship `export_hoods_geojson.py` has to the Hood bundle it does not author. File shape unchanged from §3.4: places only, no Hood blurbs; columns per §3.1's consequences table. **The surviving check is an iOS-side test, in the shape of `HoodCatalogTests`, not a `data-engineer` deliverable** — retagged accordingly (raised by `data-engineer` and `code-reviewer` at `trd-review`, so it is not silently assumed by both sides or neither). **Phase reconciliation, added 2026-07-31 (§8 D10): T-042's B3 does not exist in Build Phase 1, so there is nothing to drift against yet. In Phase 1, step C3a hand-authors the fixture and this drift check is dormant — do not stub it green. It goes live at Build Phase 2, when B3's export overwrites C3a's file and becomes the sole emitter; the sole-emitter rule is unchanged, it simply has no emitter to be sole among until then.** | **[iOS]** |
 
 **iOS track.**
 
@@ -565,7 +633,8 @@ Ordered. Tags name the agent(s) each step dispatches to.
 |---|---|---|
 | C1 | **Prove `.presentationBackgroundInteraction` first** (§4.2, §9): a throwaway sheet over the existing map, verifying a tap on the exposed map still reaches `SpatialTapGesture` under iOS 26. Nothing else starts until this is answered. | **[iOS]** |
 | C2 | `Place`, `PlaceCategory`, `PlaceHitTester` + geometry/boundary unit tests (§3.2, §4.5). Buildable against a hand-authored fixture before any backend exists. | **[iOS]** |
-| C3 | `PlacesAPI`, `PlacesCache`, `PlaceCatalog` against the §4.3 contract, boundary-validated, with the live→cache→seed→empty precedence and the `.seed` source case (§3.4) | **[iOS]** |
+| C3 | `PlacesAPI`, `PlacesCache`, `PlaceCatalog` against the §4.3 contract, boundary-validated, with the live→cache→seed→empty precedence and the `.seed` source case (§3.4). **Plus, per §3.4.1: `BuildPhase.seedIsAuthoritative` (`true` in Phase 1, short-circuiting `load()` to the seed with no fetch attempted), the `PlacesFetching`/`PlacesCaching` injection seam, and the three `PlaceCatalogTests` determinism assertions — including the one that keeps `.seed` with a populated plist present.** The live path is built in full and to spec here, and is not exercised against a server in Phase 1. | **[iOS]** |
+| C3a | **Author `Resources/places-tel-aviv.json`** — the Phase-1 provisional fixture, to §3.4.1's quality floor (real Tel Aviv names, both categories, coordinates inside the placeholder rectangle each `hood_id` names, ≥8 places / ≥2 Hoods, one Hood with zero places, one Hood with no blurb, provisional declared in-file). Column set per §3.1's consequences table. Ordering note: it can be written before or alongside C3, but C7's empty-state demo depends on it. **Overwritten wholesale by T-042's B3/B5 export at Build Phase 2** — see B2. | **[iOS]** |
 | C4 | `SavedPlacesStore` + its persistence actor, including the generation counter and a reordered-write test (§4.4, §3.5) | **[iOS]** |
 | C5 | `DetailRouter` + unit tests: depth ceiling never exceeds 2, `openHood` clears `place`, `openPlace` preserves `hood`, both idempotent — **plus the dismiss path**: `isDepth2Presented.wrappedValue = false` clears the place and leaves the Hood standing, `isDepth1Presented.wrappedValue = false` clears both, and both getters read back consistently afterwards (§4.1). Testable without presenting a sheet — the bindings are plain values | **[iOS]** |
 | C6 | `PlaceLayer` + `MapScreen` tap-resolution priority (place before Hood), replacing the T-031 stub sheet wiring (§4.5, D5) | **[iOS]** |

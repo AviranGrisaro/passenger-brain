@@ -1,7 +1,7 @@
 # Hood Dataset — Tel Aviv Geometry & Attributes — TRD
 
-**Task:** T-040 · **Linear:** `PAS-17` · **State:** `trd` → ready for `trd-review`
-**Owner:** architect · **Date:** 2026-07-31
+**Task:** T-040 · **Linear:** `PAS-17` · **State:** `trd-review` complete (6/6) → `build`-ready, **held to Build Phase 2 except for the C1/C2/C2a carve-out** (§8 D10)
+**Owner:** architect · **Date:** 2026-07-31 · **Amended:** 2026-07-31 — **Build-phase split: C1, C2 and a new C2a build in Build Phase 1; B1/B2/B3/B4/B5/B6, A1 and C3/C4/C5 stay Build Phase 2** (§3.5, §8 D10, §11)
 **PRD:** [`hood-dataset.md`](./hood-dataset.md) (Draft v1) · **Design spec:** none — pure-build/data task, no UX surface, skips `design` per `BOARD.md`'s lifecycle rule.
 **Upstream TRD this extends:** [`map-hoods-heat/TRD.md`](../map-hoods-heat/TRD.md) §3.1, §3.2, §8 D3, §11 B3 — T-031 built the schema, the bundle format, and the export script this task replaces the data inside. Nothing here re-derives those; where this TRD changes one of them, it says so by name.
 **Sibling TRD, written in parallel:** [`places-dataset/TRD.md`](../places-dataset/TRD.md) (T-042). Its §4.1 `C-HOOD-1` is the two tasks' shared contract and is quoted here verbatim in §4.4; its §6 stdlib-only dependency call is adopted in §2.3; its §2.1 resolves the other half of the migration `003` collision recorded in §8 D7. Where the two documents touch, this one defers.
@@ -222,6 +222,8 @@ Changes from v1: rings are closed (§4.2), `centroid` is precomputed (§8 D5), a
 **Why the attributes ship in the bundle at all,** given that T-033 fetches `blurb` live: the same reason T-031 bundled geometry and T-033 added a bundled place seed — no backend has ever been reachable in this pipeline, so a build agent, a reviewer and `qa` all see a Hood sheet with a real blurb, a Passport with real designated Hoods, and a tourist-trap stroke on a device with no credentials. The bundle is the seed floor; live data supersedes it where a feature fetches.
 
 **One field, one owner.** `hoods-tel-aviv.json` carries the Hood record — geometry and Hood-level attributes. T-033's `places-tel-aviv.json` carries places. `hood-place-detail/TRD.md` §3.4's bundled seed floor currently plans to carry Hood blurbs too; it should not, and that is the second amendment §8 D7 asks of T-033. A field with two bundled homes drifts.
+
+**Build Phase 1 gets this bundle by hand, once, and that is a stated exception** (added 2026-07-31, §8 D10). D2 and §5.3 say the bundle is generator-output and a hand-edited bundle is the unsupported path `HoodCatalogTests` exists to catch. That still holds for geometry. The one authorized exception: at Build Phase 1, step **C2a** hand-edits the *existing shipped* `passenger-code/Passenger/Resources/hoods-tel-aviv.json` to bump `schemaVersion` to 2 and add a `blurb` to the four placeholder Hoods — **geometry untouched, no other field added**. `centroid`, `isTouristTrap` and `designatedForProgression` stay absent, which §4.3's decode rules already handle (averaged-centroid fallback, `nil`, `false`); a Phase-1 build must not invent values for them. B6 then overwrites the whole file at Build Phase 2 and the generator is sole emitter again from that moment. The reason the exception exists at all is in T-033: [`hood-place-detail/TRD.md`](../hood-place-detail/TRD.md) §3.4.1 — with the seed pinned authoritative, its Hood sheet reads `blurb` from this bundle, so without it a Phase-1 demo can only ever render the no-blurb branch of its own authorizing strategy line.
 
 **No location or personal data is added anywhere in this task.** The source, both artifacts, and all three new columns are static public reference data about places, identical for every user, with no per-user row and no write path. T-031's privacy posture (`map-hoods-heat/TRD.md` §3.3) is untouched — this task does not give the app anything new to leak.
 
@@ -457,6 +459,16 @@ Arithmetic behind the numbers, from the shipped constant (`MapScreen.telAvivCity
 
 Exterior coverage — "does the dataset reach the edges of the city a user sees" — is deliberately **not** validated. It needs a municipal boundary the dataset does not have, and it is a judgement call ("the area a user opening the app city-wide sees") that a human reviewing the rendered map answers better than a threshold. It stays a `qa` visual check.
 
+### D10 — C1, C2 and C2a carve into Build Phase 1; everything else stays Build Phase 2 (added 2026-07-31)
+
+**Decided upstream, not here.** `product` raised it (`PROGRESS.md` 2026-07-31, T-033/PAS-13 entry, commit `30e002f`), `chief-of-staff` ratified and routed it (commit `80f3a36`); this amendment records it in the document that owns the steps. `BOARD.md`'s `V1 Build Phases` section (`b624d2f`) holds this task at Build Phase 2 as a whole, and that is unchanged for every step but three.
+
+**Why three steps move.** T-033 ships at Build Phase 1 with its bundled seed pinned authoritative ([`hood-place-detail/TRD.md`](../hood-place-detail/TRD.md) §3.4.1, §8 D10). With `source == .seed`, its Hood sheet reads `blurb` from **this** task's bundle — and today's shipped bundle is `schemaVersion` 1 with keys `id`/`name`/`polygon` only, verified by reading the file, no `blurb` anywhere. Uncaught, a Phase-1 demo could only render T-033 req 2's *no-blurb* branch, while the blurb is half of that feature's authorizing strategy line (`strategy/passenger-strategy.md:37`) and all of decision #10's "local read".
+
+**Why exactly these three, and not more.** C1 and C2 are pure client-side decode — a struct gaining optional fields and a decoder gaining boundary rules — with zero backend surface, which is what makes them Phase-1-shaped under the phase split's own no-backend constraint. C2a is one hand-edited fixture under an explicitly stated exception (§3.5). **B1/B2/B4/B6 stay Phase 2 deliberately:** pulling the generated bundle forward would drag B4, the real municipal-geometry sourcing, into Phase 1 — genuinely Phase-2-shaped effort and precisely the long pole the phase split exists to defer. A1 stays Phase 2 because it is a migration, and nothing in Phase 1 reads a column over the wire.
+
+**What this changes and what it does not.** No requirement is added, cut, or rescoped; no contract in §4 moves; the schema, the validator design, the source-file pipeline and D1–D9 are all untouched. The `trd-review` approvals stand — this is a build-order split of already-approved steps, not new design. Two consequences worth naming: the Phase-1 bundle is briefly hand-edited, which §3.5 states as a bounded exception with C3 as its retirement; and C4's blurb/ring decode assertions ride forward with C2 (**architect's own bounded call** — a decode rule shipped without the test that proves it is a rule nobody checked), while C4's non-overlap tripwire stays with the real geometry it exists to check.
+
 ---
 
 ## 9. Risks & alternatives
@@ -489,7 +501,9 @@ Exterior coverage — "does the dataset reach the edges of the city a user sees"
 
 Ordered. The two tracks are independent after B1 — `ios-developer` needs the generated bundle, nothing else.
 
-**Data / backend track.**
+**Build-phase split (added 2026-07-31, §8 D10).** This task is held to **Build Phase 2** apart from three iOS steps. **Build Phase 1: C1, C2, C2a** — pure client-side decode plus one hand-edited fixture, zero backend surface, dispatched to `ios-developer` + `ios-code-reviewer`. **Build Phase 2: everything else** — A1, B1–B6, C3, C4, C5. B4 (real municipal geometry) is the long pole and is exactly what the phase split exists to keep out of Phase 1; nothing in the Phase-1 three depends on it.
+
+**Data / backend track — all Build Phase 2.**
 
 | # | Step | Tag |
 |---|---|---|
@@ -501,15 +515,16 @@ Ordered. The two tracks are independent after B1 — `ios-developer` needs the g
 | B5 | Hand-authored blurbs into the source (may be partial; `null` is legal for every row). Founders' editorial work per the PRD's own assumption — B5 does not block B6. | **[Algo/Data]** |
 | B6 | Run the generator, commit both artifacts. `passenger-brain`: the data migration. `passenger-code`: the bundle. Regenerate-and-`git diff --exit-code` in the build report as the proof (§4.5). | **[Algo/Data]** + **[Backend]** |
 
-**iOS track — small, and B6's bundle is its only input.**
+**iOS track — small. C1/C2/C2a build at Build Phase 1 against the existing placeholder bundle; C3–C5 wait for B6's generated bundle at Build Phase 2.**
 
-| # | Step | Tag |
-|---|---|---|
-| C1 | `Hood` gains `blurb`, `isTouristTrap`, `designatedForProgression`; `centroid` becomes stored rather than averaged (§4.3, D5). No behaviour, no view, no consumer in this task. | **[iOS]** |
-| C2 | `HoodCatalog.load()` — decode the three attributes and `centroid` with §4.3's boundary rules; drop a trailing duplicate ring point when present (§4.2); keep the averaged-centroid fallback. | **[iOS]** |
-| C3 | Swap in B6's `Resources/hoods-tel-aviv.json`. | **[iOS]** |
-| C4 | `HoodCatalogTests` — the non-overlap tripwire over the shipped bundle (§5.3), plus unique ids, every ring decodes, both open and closed rings decode identically, and blurb `""` → `nil`. | **[iOS]** |
-| C5 | Confirm on device that real polygon counts do not regress T-031's cold-open budget (`map-hoods-heat/TRD.md` §7 allots ≤0.2 s to decode+projection, measured against 4 rectangles). Dozens of real polygons with real vertex counts is a different number; measure it, report it. If it regresses, the fix is a build-time Douglas–Peucker simplification pass in `build_hoods.py` — **do not** move decoding onto the launch path. | **[iOS]** |
+| # | Step | Build phase | Tag |
+|---|---|---|---|
+| C1 | `Hood` gains `blurb`, `isTouristTrap`, `designatedForProgression`; `centroid` becomes stored rather than averaged (§4.3, D5). No behaviour, no view, no consumer in this task. **Carved into Phase 1 whole**, not blurb-only: the other two fields and the stored centroid are optional-with-fallback at decode (§4.3), so carrying them costs nothing and splitting the struct across two phases would cost a second edit of the same file. | **1** | **[iOS]** |
+| C2 | `HoodCatalog.load()` — decode the three attributes and `centroid` with §4.3's boundary rules; drop a trailing duplicate ring point when present (§4.2); keep the averaged-centroid fallback. **Phase-1 scope includes its own decode assertions** — `schemaVersion` 2 accepted, `blurb` `""`/whitespace → `nil`, absent `centroid` → averaged fallback. Those three are C4's blurb/ring assertions pulled forward with the code they test; the rest of C4 (the non-overlap tripwire over the *real* shipped bundle) stays Phase 2 with the geometry it exists to check. | **1** | **[iOS]** |
+| C2a | **Hand-edit the existing `passenger-code/Passenger/Resources/hoods-tel-aviv.json`** — `schemaVersion` 1 → 2, plus a short hand-authored **provisional** `blurb` on each of the four placeholder Hoods (`florentin`, `kerem-hateimanim`, `neve-tzedek`, `lev-hair`), one of them deliberately left `null` so T-033 req 2's no-blurb branch stays observable. **Geometry untouched; no other field added** (§3.5). File declares the blurbs provisional in-line. Overwritten wholesale by B6/C3 at Phase 2. | **1** | **[iOS]** |
+| C3 | Swap in B6's `Resources/hoods-tel-aviv.json`. **This is what retires C2a's hand-edit and restores the generator as sole emitter.** | **2** | **[iOS]** |
+| C4 | `HoodCatalogTests` — the non-overlap tripwire over the shipped bundle (§5.3), plus unique ids, every ring decodes, both open and closed rings decode identically, and blurb `""` → `nil` (the last of these lands early with C2). | **2** | **[iOS]** |
+| C5 | Confirm on device that real polygon counts do not regress T-031's cold-open budget (`map-hoods-heat/TRD.md` §7 allots ≤0.2 s to decode+projection, measured against 4 rectangles). Dozens of real polygons with real vertex counts is a different number; measure it, report it. If it regresses, the fix is a build-time Douglas–Peucker simplification pass in `build_hoods.py` — **do not** move decoding onto the launch path. | **2** | **[iOS]** |
 
 **`trd-review` sign-off needed from:**
 
