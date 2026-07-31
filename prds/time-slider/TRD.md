@@ -1,9 +1,9 @@
 # Time Slider — now → +12h — TRD
 
 **Task:** T-032 · **Linear:** `PAS-15` · **Status:** ready for `trd-review`
-**Owner:** architect · **Date:** 2026-07-30
+**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-31 — nav icons render as separate side-by-side buttons, not a joined bar (§2.3, §8 D6). Visual only; no behaviour changed.
 **PRD:** [`time-slider.md`](./time-slider.md) (Draft v1) · **Design spec:** [`design/phase-1/time-slider-design.md`](../../design/phase-1/time-slider-design.md) (`design-approval` PASS after one REJECT/fix cycle; `design-review` cleared on Aviran's approval, 2026-07-30)
-**Mockup:** https://claude.ai/code/artifact/a31d3b48-5500-4eab-b962-f0e12d9f0eea — reference only. Where this TRD and the mockup disagree, this TRD wins (§8 D1–D4).
+**Mockup:** https://claude.ai/code/artifact/a31d3b48-5500-4eab-b962-f0e12d9f0eea — reference only. Where this TRD and the mockup disagree, this TRD wins (§8 D1–D6).
 **Builds on:** [`prds/map-hoods-heat/TRD.md`](../map-hoods-heat/TRD.md) (T-031, shipped and accepted). This TRD extends that module layout; it does not restate it.
 
 ---
@@ -79,6 +79,8 @@ Two consequences worth stating rather than discovering:
 
 - **`.presentationBackgroundInteraction` is not involved here and must not be reached for.** That modifier is T-033's mechanism for system sheets. This is a custom overlay in the app's own hierarchy; the scrim at z1 is the equivalent mechanism, and the map is deliberately *not* interactive while the modal is open (design §1 makes tap-outside an exit path, which requires the scrim to receive the tap).
 - **The heat modal and a system `.sheet` are never co-presented** — see D4. A `.sheet` presents above the entire hierarchy including z4, so a Hood sheet covers the nav row and the heat button while it is up; and while the modal is up, the scrim blocks the map taps that would open a sheet. Mutually exclusive by construction, in both directions.
+
+**`MapNavRow` is a layout container, not a visual one** (added 2026-07-31, founder-direct — §8 D6). The nav icons render as **separate, independent buttons sitting side by side**, each its own tap target with its own background — **not** fused into one joined bar, pill, or segmented control. `MapNavRow` groups them for layout and hit-testing only and draws no shared background, border, or capsule of its own. Nothing in the table above changes: the z4 layer, its never-covered/always-hit-testable guarantee, and the switching behaviour it exists to enable (§4.1) are exactly as specified. This is a visual-grouping call only.
 
 **The near-me cluster moves.** T-031 anchors it at `.bottom` with 32pt padding — the band the nav row now occupies. It moves above the nav row, per the mockup's own arrangement. This is a change to accepted, shipped T-031 layout; it is named here rather than left as an implementation surprise (D1).
 
@@ -288,7 +290,7 @@ Empty / offline hours are a non-event for the slider: `band(for:hour:)` returns 
 
 ## 8. Decisions and ratified deviations from the approved mockup
 
-T-031 set the precedent for this section: a deviation from an approved mockup is recorded and justified here, not silently built (T-031 §8 D1, the `ColdOpenTitle` opaque backdrop). Four apply.
+T-031 set the precedent for this section: a deviation from an approved mockup is recorded and justified here, not silently built (T-031 §8 D1, the `ColdOpenTitle` opaque backdrop). Six apply.
 
 ### D1 — The nav row ships with one button, not three
 
@@ -315,6 +317,18 @@ The mockup renders stub toggle rows (a "baseline / always on, no toggle in V1" h
 ### D5 — Native `Slider`, and the contrast bar drawn around it
 
 Native `Slider(step:)` plus a non-interactive overlay (§4.4). The consequence is recorded in §4.6 and matters: the thumb and the inactive rail are platform-drawn and are outside this app's authored contrast surface. Going custom to control them would trade a P0 (discrete VoiceOver stepping, req 6) for a bar the PRD itself already exempts the rail from. This TRD does not leave that as a preference — it is the reason the contrast test asserts the pairs it asserts and no others.
+
+### D6 — Separate side-by-side icons, not a joined nav bar (added 2026-07-31, founder-direct)
+
+**The call:** each nav icon is its own independent button, placed side by side with the others. No shared container chrome — no capsule, no bar background, no dividers, no segmented control. `MapNavRow` stays as the layout/hit-testing grouping (§2.3); what it does *not* do is draw a visual container around the icons.
+
+**Provenance:** Aviran, verbatim — *"yes, separate icons, same switching behavior."* Live chat, **relayed** to this agent via `chief-of-staff` (`PROGRESS.md`, 2026-07-31 FOUNDER-DIRECT STUB); not heard first-hand here. It reconfirms his earlier *"I don't want a nav row. I want separate icons side by side"* (`BOARD.md`, T-032 row), which had gone unanswered.
+
+**Two relays of this answer exist and are deliberately not merged into one quote** (`PROGRESS.md`, 2026-07-31 CONCURRENCY FLAG): a second `chief-of-staff` session was relayed *"separate icons side by side, not nav row."* Same gist — no grouped bar, icons rendered separately — different sentence. This TRD quotes only the relay its own dispatch carried, labelled as relayed, and states the agreement rather than inventing a combined "authoritative" wording (L-013). The decision above is the part both relays support; nothing here rests on the difference between them.
+
+**Scope — visual only; no behaviour is touched.** Modal exclusivity and the `NavSurface` state type (§4.1), the z-order table and the z4 never-covered guarantee (§2.3), the three dismissal paths (§4.2), and D2's modal-vs-`.sheet` exclusion all stand unchanged. Tapping one icon still closes whatever surface is open and switches straight to it. `ux-flows.md` §2.1's interaction model is not amended by this and was not edited.
+
+**What this decision does *not* settle:** the per-icon visual treatment — glyph size, background shape, material, spacing. No design doc pins it in text; `ux-flows.md` §2 and `time-slider-design.md` §2/§5 both say "3 side-by-side nav buttons" without saying whether they share a container, and the interactive mockup is the only artifact that renders an answer either way (reference only — this TRD wins on this point, per the header). **[ASSUMPTION]** `ios-developer` builds each icon to the existing `NearMeButton` floating-chrome idiom — same materials, same bottom band — because it is the only bottom-chrome idiom the shipped app has. Same shape as T-033's D6: an engineering default standing in for a design call, flagged rather than presented as designed, and cheap for `designer` to overturn — with one button shipping in this task (D1), it is a one-file change.
 
 ---
 
@@ -361,7 +375,7 @@ Ordered. **Every step is `[iOS]`.** No `[Backend]`, no `[Algo/Data]` — see §1
 | # | Step | Tag |
 |---|---|---|
 | C1 | `MapChromeState` + `NavSurface` (§4.1) | **[iOS]** |
-| C2 | `MapNavRow` with the heat button only (D1); wire into `MapScreen`'s `ZStack` at z4; move the near-me cluster above it; bucket-2 fade driven by `isPresenting` (§2.3). Exclusivity unit test incl. the selected-hour-survives-a-switch case (§9) | **[iOS]** |
+| C2 | `MapNavRow` with the heat button only (D1), icons as separate side-by-side buttons with no shared container chrome (D6); wire into `MapScreen`'s `ZStack` at z4; move the near-me cluster above it; bucket-2 fade driven by `isPresenting` (§2.3). Exclusivity unit test incl. the selected-hour-survives-a-switch case (§9) | **[iOS]** |
 | C3 | `HourFormat` + tests — numeral, clock label, `isNextDay`, VoiceOver string; injected clock/calendar; midnight-crossing and 0/12 cases | **[iOS]** |
 | C4 | `HourSlider` — native `Slider(in:step:)`, the `Double` bridge, ≥44pt frame, non-hit-testing tick overlay, a11y label/value/identifier (§4.3, §4.4) | **[iOS]** |
 | C5 | `HeatModalCard` + scrim + three dismissal paths + Reduce-Motion-aware transition (§4.2); `HourReadout` (numeral + "next day" pill) | **[iOS]** |
