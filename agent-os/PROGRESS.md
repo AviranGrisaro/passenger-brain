@@ -13,6 +13,22 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB: T-032 open questions 1 and 4 answered, live chat (relayed via coordinator)
+
+**Verbatim, question 1 (replace vs. supplement):** "Supplement (recommended)" — Aviran accepting `product`'s own recommendation from the v2 PRD amendment.
+
+**Verbatim, gesture-model correction:** "both edges. its not swipe from left to right..you slide the you finder from up to down on one of the edges"
+
+**As I read it:** Question 1 is resolved plainly by the quote itself — no restatement needed: the heat-button/modal invocation stays, the edge gesture is a second entry path, not a replacement.
+
+The gesture-model quote needs separating from my restatement. [ASSUMPTION] this describes one continuous motion — touch down on either screen edge, then a single up/down slide that directly moves the value — rather than the two-step "swipe inward to reveal, then separately drag" model `product`'s v2 req 7 was written against. The quote itself says "you slide the finger up/down on one of the edges"; it does not use the words "one motion" or "no separate reveal step" — that reading is inferred by contrast with the prior two-step model, not stated outright, and is recorded here as inference, not as his literal words. On this inferred reading, question 4 (continuous vs. two gestures) resolves to continuous.
+
+**Not resolved, and not treated as resolved:** whether "both edges" means one shared hour value reachable from either edge, or two independent sliders. Nothing in either quote restates this — the relay note says Aviran "did not explicitly re-confirm shared-vs-independent value" when asked. [ASSUMPTION] carried forward unchanged from the original stub and from `product`'s v2 PRD: one shared value. This is inference from context (nothing suggests two independent controls), not a direct confirmation, and is labeled as such in the PRD rather than closed out as "confirmed."
+
+**Provenance:** founder-direct, live chat with the coordinating session (relayed to chief-of-staff via `main`), 2026-07-31.
+
+---
+
 ### 2026-07-31 — product — T-032/PAS-15: time-slider PRD amended to v2 (edge-swipe invocation, vertical drag)
 
 - **Did:** amended `prds/time-slider/time-slider.md` in place to Draft v2 against the founder-direct instruction recorded in the FOUNDER-DIRECT STUB below. Read the stub's verbatim quote first and diffed it against the BOARD.md T-032 row and the Linear-facing summary — no gloss found beyond what the stub already labelled **[ASSUMPTION]** (L-013 check). Changes: Description's invocation bullet rewritten (edge swipe + vertical drag, replacing "lives inside the heat modal, opened by the heat button"); req 1's clamp bullet made orientation-neutral **plus a new bullet** that all 13 stops must be reachable in one vertical drag at max Dynamic Type (a phone's vertical axis is shorter than the horizontal one this was written against — that used to be free and isn't now); req 3/4/5 rewritten off modal-open/modal-close language onto invoke/dismiss; **new req 6 bullet** — with VoiceOver on, the control must be reachable and all 13 hours selectable *without* the edge swipe (VoiceOver claims screen swipes, Switch Control users may not be able to produce an edge drag at all); req 6's two contrast bullets made surface-neutral, and the inactive-rail 3:1 exemption re-conditioned — it was granted because the *native horizontal* `Slider` draws that rail low-contrast, and a vertical axis may mean a custom control, in which case the premise is gone; **new req 7** covering edge invocation, vertical-only axis, direction-mapping consistency, one-value-from-both-edges, dismissal, and a no-false-fire bullet (map pan/pinch away from the edge must not summon it). Technical design gained a "Superseded by v2" bullet naming exactly which parts of `TRD.md` (`2f955fe`) survive. Decisions log row appended.
