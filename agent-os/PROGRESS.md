@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB: 12h-slider edge-swipe interaction request, live chief-of-staff chat
+
+**Verbatim request:** "12h slider — want it from screen edge. User slides finger from either screen edge, 12h slider(s) appear, user drags vertically (up/down, not horizontal) to move the value."
+
+**As I read it:** [ASSUMPTION] this describes a new invocation/manipulation gesture for the existing "Time slider — now → +12h" feature (T-032 / PAS-15 / `prds/time-slider/time-slider.md`), not a new feature — edge-swipe-to-reveal replacing (or supplementing, unstated) the current heat-button-opens-a-modal flow, and vertical drag replacing the current horizontal `Slider(in:0...12,step:1)`. [ASSUMPTION] "either screen edge" means the control is reachable from either side, not that two independent/simultaneous sliders exist — "slider(s)" read as one underlying value with a redundant entry point, not a spec for two synced controls. [ASSUMPTION] whether this fully replaces the already-approved heat-modal/nav-row invocation model (design-approval + design-review already passed for that model, 2026-07-30) or adds a second entry path alongside it is genuinely unstated — flagged as open, not resolved here. Not verified against iOS system edge-swipe gestures (left-edge = back-navigation) — a real technical risk for architect/ios-developer to weigh in on, not assumed away.
+
+**Provenance:** founder-direct, live chief-of-staff chat, 2026-07-31.
+
+---
+
 ### 2026-07-31 — chief-of-staff — full BOARD.md ↔ Linear reconciliation pass (Aviran's direct ask)
 
 - **Scope:** every T-xxx and PAS-xxx row in `BOARD.md` cross-checked against Linear (team `Passenger`, project `Passenger V1`, 19 issues at start of pass) — state/status, owner, stale text, duplicates, orphans in both directions.
