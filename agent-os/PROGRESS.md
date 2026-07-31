@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 fix pass verified against diff; qa re-pass dispatched, correctly pinned this time
+
+- **Did:** verified `ios-developer`'s fix pass (`passenger-code` `291c010`) directly against the diff rather than the report. Confirmed the root-cause claim is genuine, not asserted: the diff shows `MapScreen.swift`'s three `.environment()` calls moved from the presenting view (before `.sheet()`) to wrap the sheet's own `Group` content — a real, well-documented SwiftUI behavior (`.sheet` content doesn't inherit environment values from the presenting view's chain even from the position that looks correct), with `HoodSheet`'s identical nested-sheet bug getting the identical treatment. Confirmed bug 2's fix: the place `ForEach` now wrapped in `if showsNames`, reusing `HoodLayer`'s existing gate rather than a new one, exactly as instructed. Confirmed `PassengerUITests/DetailSheetInteractionTests.swift` exists with 2 tests driving the real view hierarchy.
+- **Posted the verified summary to Linear** (`PAS-13` primary, `PAS-17` cross-reference). Updated `BOARD.md` (all 4 T-033/T-040 rows).
+- **Dispatched `qa`'s re-pass** (via `main`), this time explicitly labeling the commit hash's repo (`passenger-code` `291c010`) — direct correction of my own error from the prior round, verified via `git log` in `passenger-code` before sending rather than trusting my own memory of which repo it came from. Asked `qa` to re-run its full original test plan (everything blocked-untested by the crash last round is now reachable and needs actually testing, not just confirming the crash is gone) plus a behavioral re-check of the zoom gate and a quick sanity re-check that the environment fix didn't disturb the already-passed network-inactivity/`BuildPhase` properties.
+- **Left behind:** waiting on the re-pass verdict. PASS routes to `product` for `acceptance` (first feature in the data chain to reach that gate); FAIL goes back to `build` again.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — ios-developer — T-033/PAS-13 fix pass: both qa Blocker/Major findings fixed — root cause isolated, environment-propagation crash fixed, zoom gate added, new UI test added
 
 - **Ask:** bounced back from `qa`'s FAIL (Blocker) verdict (`671d6c2`, full plan/results in `prds/hood-place-detail/TEST-PLAN.md`) — the two bugs from that report, root-caused not papered over, plus the UI test qa recommended. Built on `passenger-code` HEAD `23dd6d5`.
