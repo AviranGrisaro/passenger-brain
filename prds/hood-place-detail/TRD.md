@@ -1,7 +1,7 @@
 # Hood & Place Detail — TRD
 
-**Task:** T-033 · **Linear:** `PAS-13` · **Status:** `trd` — **the nav-row question that held this task is answered (2026-07-31, §8 D8); ready for `trd-review`**
-**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-31 — §3.1 schema ownership handed to T-042 / T-040 (§3.1, §8 D7, §11); nav-row grouping answered, no text in this TRD changed by it (§8 D8)
+**Task:** T-033 · **Linear:** `PAS-13` · **Status:** **`trd-review` complete — 6/6 unanimous approve, zero blocking findings, all findings folded in** (2026-07-31, §8 D9). One *separate* question, not a review finding and not addressed by that pass: `BOARD.md`'s 2026-07-31 build-phase replan asks whether this feature's live Supabase fetch belongs in Build Phase 1 at all — see §8 D9's closing note.
+**Owner:** architect · **Date:** 2026-07-30 · **Amended:** 2026-07-31 — §3.1 schema ownership handed to T-042 / T-040 (§3.1, §8 D7, §11); nav-row grouping answered, no text in this TRD changed by it (§8 D8); **`trd-review` consolidation pass — five non-blocking findings folded in, §8 D9 lists all five and what they touched**
 **PRD:** [`hood-place-detail.md`](./hood-place-detail.md) (Draft v1) · **Design spec:** [`design/phase-1/hood-place-detail-design.md`](../../design/phase-1/hood-place-detail-design.md) (revised post-REJECT, `design-approval` PASS, `design-review` cleared on Aviran's approval)
 **Mockup:** https://claude.ai/code/artifact/06f8a49b-7de4-430f-a701-96279db74611 — reference only. Where this TRD and the mockup disagree, this TRD wins.
 **Builds on:** [`map-hoods-heat/TRD.md`](../map-hoods-heat/TRD.md) (T-031, built and accepted). Every module boundary, naming convention, and concurrency rule there applies here unchanged; this document extends that layout, it does not restate it.
@@ -95,7 +95,7 @@ Xcode synchronized file groups are on; adding a file to the folder is enough.
 | `public.places` (+ `public.place_types`, its FK target) | **T-042** `places-dataset` (TRD delivered, commit `4d126f1`) | [`places-dataset/TRD.md`](../places-dataset/TRD.md) §3.1–§3.3 |
 | `hoods.blurb` | **T-040** `hood-dataset` (TRD in flight) | [`hood-dataset/TRD.md`](../hood-dataset/TRD.md) §3.1 |
 
-Both reconciliations are those TRDs' explicit decisions, not this TRD's reinterpretation of them: `places-dataset/TRD.md` **D1** (§2.1) and `hood-dataset/TRD.md` **D7** (§8). Ratifying them is `trd-review`'s job for all three tasks.
+Both reconciliations are those TRDs' explicit decisions, not this TRD's reinterpretation of them: `places-dataset/TRD.md` **D1** (§2.1) and `hood-dataset/TRD.md` **D7** (§8). **Ratified at `trd-review` for all three tasks** (2026-07-31 — T-033 6/6, T-042 3/3, T-040 6/6; §8 D9).
 
 **The iOS track is not blocked by any of this.** §3.4's bundled seed floor is exactly the mechanism that makes that true: the client builds, demos, reviews and QAs against a local fixture with no backend reachable at all. Only this task's two backend steps move (§11 A1/A2 below); C1–C12 are untouched and un-resequenced.
 
@@ -115,7 +115,7 @@ T-042's `places` is a superset of what was struck, and two of its added columns 
 | Consequence | Where it lands | Status |
 |---|---|---|
 | `places-tel-aviv.json` (§3.4) gains `place_type`, `keywords`, `permanently_closed`, `is_tourist_trap` | §11 step B2 | **Accepted.** The fixture must round-trip whatever the export produces, and `place_type`/`keywords` are `not null` at source. |
-| `Place` (§3.2) gains the four fields | §3.2, §11 step C2 | **Flagged, not accepted — see §8 D7.** A model field with no reader in this task contradicts this TRD's own "don't build for a feature that isn't specced yet" (D2's reasoning). |
+| `Place` (§3.2) gains the four fields | nowhere — **not in this task** | **Resolved, does not apply — see §8 D7.** A model field with no reader in this task contradicts this TRD's own "don't build for a feature that isn't specced yet" (D2's reasoning); `places-dataset/TRD.md` §2.1 D5 settled it that way. `Place` stays the five-field struct §3.2 shows, and **C2 builds exactly that**. |
 
 **Fetch contract unaffected.** §4.3's embedded `GET` still works verbatim — T-042's §4.5 states the same request with a wider `select` list, and the FK it relies on is declared in T-042's `places` exactly as it was here.
 
@@ -204,6 +204,11 @@ final class DetailRouter {
 
     /// nil when no modal is open. Never returns a value greater than 2.
     var placeDepth: Int? { place == nil ? nil : (hood == nil ? 1 : 2) }
+
+    // The two accessors §4.2's `.sheet(isPresented:)` calls bind to.
+    // Two-way by necessity — see "The bindings are two-way" below.
+    var isDepth1Presented: Binding<Bool> { get }   // true ⟺ hood != nil || place != nil
+    var isDepth2Presented: Binding<Bool> { get }   // true ⟺ hood != nil && place != nil
 }
 ```
 
@@ -212,6 +217,14 @@ final class DetailRouter {
 - **`openPlace` never clears `hood`.** A pin tap on the exposed map while the Hood sheet is open therefore lands at depth 2 — correct, since the user is still inside that Hood's context.
 - **`openHood` clears `place`.** Tapping a different Hood while a place modal is open at depth 1 swaps the depth-1 destination in place rather than stacking. One tap, one destination.
 - **`openPlace`/`openHood` are idempotent for the same value** — assigning the already-current place is a no-op. §4.5 depends on this.
+- **The bindings are two-way, and their setters are the swipe-to-dismiss path.** `.sheet(isPresented:)` takes a `Binding<Bool>`, not a read-only computed property: when the user drags a sheet down, SwiftUI writes `false` back through that binding. A getter-only accessor would leave the sheet visually gone with `router.hood`/`router.place` still set — the exact desync class this document is careful about everywhere else. So each accessor's setter routes into the existing verbs, and owns nothing of its own:
+
+  | Accessor | `get` | `set(false)` | `set(true)` |
+  |---|---|---|---|
+  | `isDepth1Presented` | `hood != nil \|\| place != nil` | `closeHood()` — clears both fields, so a depth-1 dismiss cannot strand a place | ignored (a no-op; a sheet is only ever *opened* by `openHood`/`openPlace`, never by writing the binding) |
+  | `isDepth2Presented` | `hood != nil && place != nil` | `closePlace()` — clears the place only, leaving the Hood sheet standing, which is design spec §1's "exactly one level up" | ignored, same reason |
+
+  Writing `true` is ignored rather than mapped to some default destination because there is no place or Hood to open without a value; the ✕ buttons call `closePlace()`/`closeHood()` directly and do not go through the bindings at all. **Flagged independently by `ios-developer` and `ios-code-reviewer` at `trd-review`** — derivable before, declared now.
 
 ### 4.2 The two presentation sites — the canonical statement of the mechanism
 
@@ -250,7 +263,7 @@ Five rules, each load-bearing:
 4. **There is no backdrop view, at any depth.** The REJECT's B1 defect was a full-surface tap-swallowing backdrop. A tap on the exposed map reaches the map and does *not* dismiss the sheet. Dismissal is the drag handle or the ✕ only (design spec §1). `ios-code-reviewer` should treat any full-surface overlay behind these sheets as a blocking finding.
 5. **Bottom chrome is covered while a sheet is open, and that is correct.** At `.medium` the sheet covers the near-me button, the Hood button, and (once T-032 lands) the nav row. The exposed map *above* the sheet stays interactive; the chrome underneath does not need to be, and no requirement says otherwise. Dismissing restores it.
 
-**Cross-task contract with T-032.** T-032's heat modal is a custom `ZStack` overlay in the map's own hierarchy, not a `.sheet` (`time-slider-design.md` §2). A system sheet presented over it covers it completely, including the nav row that overlay is carefully positioned to preserve. **Rule: opening a Hood sheet or place modal from the map closes any open nav-row modal first.** This is lossless — `selectedHour` is session state living above the modal, so reopening the heat modal later shows the same hour. Whichever of T-032/T-033 builds second wires the call; both TRDs must agree on it, so this is flagged for T-032's `trd-review` as well. **The nav row's own visual grouping is T-032's to specify and lives there** (`time-slider/TRD.md` §2.3 and §8 D6 — separate side-by-side icons, no shared container chrome). Nothing in this rule depends on it: a sheet covers that band either way.
+**Cross-task contract with T-032.** T-032's heat modal is a custom `ZStack` overlay in the map's own hierarchy, not a `.sheet` (`time-slider-design.md` §2). A system sheet presented over it covers it completely, including the nav row that overlay is carefully positioned to preserve. **Rule: opening a Hood sheet or place modal from the map closes any open nav-row modal first.** **§4.7 states when this rule has a reachable trigger and when it is redundant with T-032's own by-construction exclusivity — read it alongside this paragraph.** This is lossless — `selectedHour` is session state living above the modal, so reopening the heat modal later shows the same hour. Whichever of T-032/T-033 builds second wires the call; both TRDs must agree on it, so this is flagged for T-032's `trd-review` as well. **The nav row's own visual grouping is T-032's to specify and lives there** (`time-slider/TRD.md` §2.3 and §8 D6 — separate side-by-side icons, no shared container chrome). Nothing in this rule depends on it: a sheet covers that band either way.
 
 ### 4.3 Places API — one embedded GET
 
@@ -263,17 +276,21 @@ Headers: apikey: <anon>, Authorization: Bearer <anon>, Accept: application/json
 
 One round trip returns exactly the shape both sheets read: each Hood with its blurb and its places. PostgREST resource embedding works because `places.hood_id` has the FK declared in §3.1. If embedding proves awkward at build time, the fallback is two flat GETs (`hoods?select=id,blurb` and `places?select=...`) merged client-side — a change inside `PlacesAPI`, invisible to every caller.
 
+**The decoder stamps `hoodID` from the enclosing Hood. State it, don't infer it.** The `select` list above deliberately does not request `hood_id` on the embedded place rows — under embedding a place's Hood is structural (it arrives nested inside exactly one Hood), so the column would be redundant on the wire. But `Place` (§3.2) requires a non-optional `hoodID: String`. **`PlacesAPI` must therefore assign each decoded place's `hoodID` from its parent Hood's `id` while walking the response** — the nesting is the authority, and there is no per-place key to read it from. Two structurally different sources feed one `Place` (this path, and §3.4's flat bundled seed where `hood_id` *is* a literal per-row field), which is fine, but the two decode paths are genuinely different code and the TRD says so rather than leaving `ios-developer` to guess. **Guessing wrong here is a silent Hood-misattribution — a place listed under the wrong Hood's sheet — not a crash**, which is why it is pinned. Flagged by `ios-code-reviewer` at `trd-review`.
+
 Once per session, alongside `DensityStore.load()`. No pagination (dozens of Hoods, low hundreds of places). **No query parameter carries anything user-specific** — the request is byte-identical for every user, the same property T-031 §3.3 establishes and for the same reason.
 
-**Boundary validation, per row, one row at a time** (`passenger-code/CLAUDE.md`):
+**Boundary validation, per row, one row at a time** (`passenger-code/CLAUDE.md`). **The "applies to" column is load-bearing** — the last rule can only arise on one of the two sources, and stating them in one undifferentiated table read as though both sources could hit every rule (`code-reviewer`, `trd-review`):
 
-| Condition | Handling |
-|---|---|
-| `category` is not one of the two keys | Drop that place. Never map to a default — PRD req 6 forbids a third value existing anywhere, and a silent default is how it would. |
-| latitude/longitude missing or out of range | Drop that place. It cannot be drawn or routed to. |
-| `blurb` is `""` or whitespace | Treated as null — "not curated" (§3.1). |
-| `hood_id` not present in the bundled Hood catalog | **Keep the place.** It renders as a pin and appears in no Hood sheet. Dropping curated content because the *bundled geometry* is stale would hide real places for a reason the user cannot see; T-040 closes the underlying mismatch. |
-| Any of the above | Never fails the whole payload, never crashes. |
+| Condition | Applies to | Handling |
+|---|---|---|
+| `category` is not one of the two keys | both sources | Drop that place. Never map to a default — PRD req 6 forbids a third value existing anywhere, and a silent default is how it would. |
+| latitude/longitude missing or out of range | both sources | Drop that place. It cannot be drawn or routed to. |
+| `blurb` is `""` or whitespace | live/cached fetch (the seed carries no blurb — §3.4) | Treated as null — "not curated" (§3.1). |
+| `hood_id` not present in the bundled Hood catalog | **bundled seed only** | **Keep the place.** It renders as a pin and appears in no Hood sheet. Dropping curated content because the *bundled geometry* is stale would hide real places for a reason the user cannot see; T-040 closes the underlying mismatch. |
+| Any of the above | both sources | Never fails the whole payload, never crashes. |
+
+**Why the last rule is seed-only.** `places-tel-aviv.json` is flat and carries an explicit `hood_id` per place (T-042 §2.2/D4), so that value can name a Hood the bundled catalog doesn't have — a real, reachable mismatch between two independently-shipped files. The live/cached path cannot produce it: `hoodID` is stamped from the enclosing Hood the row arrived under, and that Hood came from the same response, so the id always resolves *within the payload*. It can still be a Hood absent from the **bundled** catalog, and the keep-the-place handling is identical — but it arrives by nesting, never by a mismatched key, so there is nothing to validate at the row level on that path.
 
 Config from `SupabaseConfig.plist`, same as `DensityAPI`. **A missing plist is a valid state**: the fetch reports unconfigured, the catalog falls through to cache, then to the bundled seed (§3.4), and the app builds and runs for a developer with no credentials.
 
@@ -356,6 +373,8 @@ struct DirectionsService: Sendable {
 
 Conditional chrome, visible at Hood zoom and closer, naming the Hood nearest the map's centre; tapping calls `router.openHood`. It reuses `MapScreen`'s existing `nameLabelSpanThreshold` (0.06) so the button appears exactly when Hood name labels do — one zoom concept, not two that can drift. Resolution is `HoodHitTester.hood(at:tolerance:)` against the camera centre point, so no new geometry code exists.
 
+**Z-order against T-032's nav-row chrome, stated from this side** (added 2026-07-31, `ios-code-reviewer` at `trd-review`). `HoodButton` follows the `NearMeButton` chrome idiom (D6) all the way, including its stacking behaviour: it is **bucket-2 chrome** — hidden and hit-testing-disabled while any nav-row surface is presented, exactly as `time-slider/TRD.md` §2.3 already specifies for `NearMeButton` + `SettingsHint`. Nothing in T-032 changes; this sentence classifies a control T-032's table was written before knowing existed, and it classifies it into the bucket its own idiom already implies. **Consequence, worth naming because it is the reason this was asked:** with map taps blocked by T-032's scrim and this button hidden, §4.2's cross-task rule ("opening a Hood sheet or place modal from the map closes any open nav-row modal first") has **no reachable trigger while a nav surface is up** — the exclusivity T-032's §2.3 claims "by construction, in both directions" holds here too, and the §4.2 rule stands as the stated invariant rather than a call anyone has to wire. It is kept, not struck: if either task later exempts a control from bucket 2 the way `MapNavRow` is exempt, the trigger becomes reachable and the rule is what says what must happen. Whichever task changes that ownership re-checks both documents.
+
 ### 4.8 Sheet content contracts
 
 **`HoodSheet(hood:)`** — reads `PlaceCatalog`, `DetailRouter` from the environment.
@@ -371,7 +390,7 @@ Detents `[.medium, .large]`. P1 grouping-by-category is not built (design spec �
 
 **`PlaceDetailModal(place:)`** — reads `PlaceCatalog`, `SavedPlacesStore`, `DetailRouter`, `DirectionsService`.
 
-Header: name, ✕ (32pt visual glyph in a 44×44pt target), Save toggle (44×44pt, `bookmark`/`bookmark.fill`, accessibility label "Save"/"Saved" tracking state, never a checkmark). Body: category row (glyph + `displayName`), then **one reserved line for T-035's tourist-heavy flag** — this modal renders exactly the string "Tourist-heavy spot" when flagged and nothing when not, and owns neither the icon nor the animation nor the busy+flagged phrasing. Bottom: the full-width `.borderedProminent` Route button, the modal's only primary action. Detent `[.medium]`.
+Header: name, ✕ (32pt visual glyph in a 44×44pt target), Save toggle (44×44pt, `bookmark`/`bookmark.fill`, accessibility label "Save"/"Saved" tracking state, never a checkmark). Body: category row (glyph + `displayName`), then **one reserved line for T-035's tourist-heavy flag** — this modal renders exactly the string "Tourist-heavy spot" when flagged and nothing when not, and owns neither the icon nor the animation nor the busy+flagged phrasing. **In V1 the slot ships genuinely empty, because there is nothing to condition on yet:** per D7, `Place` carries no `isTouristTrap` field in this task — it lands with T-035, which owns both the field and the condition. C8 therefore builds the layout slot and no branch. **Do not fabricate a placeholder `isTouristTrap` on `Place` to have something to read** (that contradicts D7), **and do not hardcode the line to always-absent as though the always-absent case were the decision** — the line is unrendered because its input does not exist yet, which is an acknowledged gap, not a call this task made. Flagged by `ios-code-reviewer` at `trd-review`. Bottom: the full-width `.borderedProminent` Route button, the modal's only primary action. Detent `[.medium]`.
 
 Nothing else in this modal navigates anywhere (PRD req 3). No closed-place badge, no provenance word, no Places-list row — all T-036's.
 
@@ -460,15 +479,15 @@ Built: single pins at close zoom, category glyph, ≥44pt target, VoiceOver name
 
 §1.2 and §4.7: the button is required by PRD req 1 and specified nowhere. This TRD specifies its **behaviour and trigger condition** and directs `ios-developer` to build it to the existing `NearMeButton` chrome idiom — a floating capsule in the same bottom band, same materials, same Reduce Motion handling. That is an engineering default standing in for a design call, flagged rather than presented as designed. If `designer` wants a different treatment, it is a swap inside one file, not a re-architecture.
 
-### D7 — Schema ownership handed to T-042 and T-040; `Place`'s four new fields flagged, not accepted (added 2026-07-31)
+### D7 — Schema ownership handed to T-042 and T-040; `Place` gains no new fields in this task (added 2026-07-31, **resolved 2026-07-31 at `trd-review`**)
 
-The substance is in §3.1. Recorded here because it changes what this task builds, and because one half of it is a **question for `trd-review`, not a resolved call**.
+The substance is in §3.1. Recorded here because it changes what this task builds. **Both halves are now settled** — the second half was posed here as a question for `trd-review` and was answered there; the resolution is recorded below rather than the question being left standing.
 
 **Accepted without reservation:** `places` is defined once, in T-042 (`places-dataset/TRD.md` D1); `hoods.blurb` is defined once, in T-040 (`hood-dataset/TRD.md` D7); `on delete cascade` becomes `on delete restrict` (§3.1 — confirmed no path in this feature depends on cascade); the bundled fixture drops Hood blurbs and gains T-042's four columns (§3.4). Each of those is another TRD's decision that this task's own reasoning independently supports, and the alternative — two TRDs defining one table — is the failure this reconciliation exists to prevent.
 
-**Flagged, not accepted: `Place` (§3.2) gaining `placeType`, `keywords`, `permanentlyClosed`, `isTouristTrap`.** `places-dataset/TRD.md` §2.2 assigns this amendment to T-033. It is in genuine tension with this TRD's own standing rule — D2's "don't build for a feature that isn't specced yet," which is the reason `created_at` is absent from §3.5 and the reason §3.1 originally excluded these very columns. In this task none of the four has a reader: `permanentlyClosed` is T-036's badge, `isTouristTrap` is T-035's flag line (§4.8 reserves the line and deliberately owns neither the value nor the phrasing), `placeType` is T-037's sticker shape, `keywords` is T-038's matching. Adding all four to `Place` now ships four fields with no reader and pre-empts four downstream design calls.
+**Resolved: `Place` (§3.2) gains none of `placeType`, `keywords`, `permanentlyClosed`, `isTouristTrap` in this task.** An earlier draft of `places-dataset/TRD.md` §2.2 assigned that amendment to T-033, and this section flagged it as in tension with this TRD's own standing rule — D2's "don't build for a feature that isn't specced yet," the reason `created_at` is absent from §3.5 and the reason §3.1 originally excluded these very columns. In this task none of the four has a reader: `permanentlyClosed` is T-036's badge, `isTouristTrap` is T-035's flag line (§4.8 reserves the line and deliberately owns neither the value nor the phrasing), `placeType` is T-037's sticker shape, `keywords` is T-038's matching.
 
-**Recommendation, for T-033's and T-042's reviewers to settle together:** the *fixture* carries all four (it must — it round-trips the export, and `place_type`/`keywords` are `not null` at source), and the *Swift model* gains each field in the task that first reads it. `Decodable` ignores unknown JSON keys, so a fixture wider than the model is already a supported state and costs nothing. If reviewers prefer the model to mirror the fixture in one step, that is a defensible call — it is just not one this TRD should make silently on T-035/T-036/T-037/T-038's behalf.
+**The resolution, and where it lives:** `places-dataset/TRD.md` **§2.1 D5** — ratified at T-042's own `trd-review` — adopts this TRD's recommendation verbatim: the *fixture* carries all four (it must — it round-trips the export, and `place_type`/`keywords` are `not null` at source), and the *Swift model* gains each field in the task that first reads it (`is_tourist_trap`→T-035, `permanently_closed`→T-036, `place_type`→T-037, `keywords`→T-038). `Decodable` ignores unknown JSON keys, so a fixture wider than the model is an already-supported, costless state. **Consequence for this task, stated so C2 cannot get it wrong: `Place` stays exactly the five-field struct §3.2's code block already shows.** Confirmed independently at T-033's own `trd-review` by `developer`, `code-reviewer`, `ios-developer` and `ios-code-reviewer` — four reviewers, no dissent. Not an open question.
 
 ### D8 — The nav-row question that held this task is answered; nothing in this TRD's own text changed (added 2026-07-31, founder-direct)
 
@@ -477,6 +496,26 @@ The substance is in §3.1. Recorded here because it changes what this task build
 **It is specified in T-032, not here.** This TRD never described the nav row's visual grouping — the nav row appears in exactly two places, §4.2 rule 5 (a sheet at `.medium` covers it, correctly) and §4.2's cross-task contract (opening a Hood sheet or place modal closes any open nav-row modal first). Both are about *coverage and exclusivity*, not about how the icons are grouped, and both read identically whether the icons are joined or separate. The visual call therefore lives in `time-slider/TRD.md` §2.3 / §8 D6, where the row is actually built; a pointer was added to §4.2 so a reader does not go looking for it here.
 
 **Consequence for this task:** the `trd`-state hold recorded in the header and on `BOARD.md` is cleared. It was the only thing outstanding — the schema-ownership question closed separately (D7, §3.1) — so this TRD is ready for `trd-review` with no other section touched by this amendment.
+
+### D9 — `trd-review` consolidation pass: 6/6 approve, five non-blocking findings folded in (added 2026-07-31)
+
+All six `trd-review` verdicts landed on 2026-07-31 — `developer` + `code-reviewer` (A1–A2), `data-engineer` + `code-reviewer` (B2), `ios-developer` + `ios-code-reviewer` (C1–C12) — **unanimous APPROVE / APPROVE WITH MINOR NOTES, zero blocking findings.** Verdict commits: `72bf8d0`, `dbb6045`, `7694bf4`, `db1a7cb`, plus `48400bc` (chief-of-staff processing the sixth); full verdict text is canonical in `PROGRESS.md`, not summarised here. This pass amends the TRD from `431b690`.
+
+Five accumulated non-blocking findings applied as one pass. Each was raised by at least two reviewers independently, and none is a design change — every one pins something that was derivable-but-unstated, which is precisely the class of gap that becomes a build-time guess:
+
+| # | Fix | Where | Raised by |
+|---|---|---|---|
+| 1 | D7 and §11 B2 rewritten to point at their resolutions instead of still posing them as open cross-TRD questions — both settled in `places-dataset/TRD.md` §2.1 **D5** (`Place` gains no new fields here) and **D4** (`export_places.py` is the sole emitter; T-033 keeps a drift check), in the exact terms this TRD proposed | §8 D7, §11 B2 | 4 reviewers independently |
+| 2 | `isDepth1Presented`/`isDepth2Presented` declared as two-way `Binding<Bool>`, with the setter routed to `closeHood()`/`closePlace()` so swipe-to-dismiss cannot desync the router from the screen; C5's test scope extended to the dismiss path | §4.1, §11 C5 | `ios-developer`, `ios-code-reviewer` |
+| 3 | §4.3's boundary table split by data source (the stale-`hood_id` rule is bundled-seed-only), and the live path's decoder told explicitly to stamp `hoodID` from the enclosing Hood while walking the nested response — guessing wrong is silent Hood misattribution, not a crash | §4.3 | `code-reviewer` (conflation), `ios-code-reviewer` (decode gap) |
+| 4 | `HoodButton` classified as T-032 bucket-2 chrome, which resolves whether §4.2's cross-task rule has a reachable trigger. **Stated from T-033's side only** — `time-slider/TRD.md` is mid-design-pass on an unrelated thread and was not touched | §4.7 (pointer in §4.2) | `ios-code-reviewer` |
+| 5 | §4.8's reserved T-035 flag line clarified as a genuinely empty slot with no field to condition on, so C8 neither fabricates a placeholder `isTouristTrap` (against D7) nor hardcodes always-absent as a decision | §4.8 | `ios-code-reviewer` |
+
+**One tag changed as a consequence, not as a re-scoping:** §11 B2 drops `[Algo/Data]` and is now `[iOS]` only. With the export owned by T-042's B3, what remains is a bundled-fixture drift test in the shape of `HoodCatalogTests`. Both B2 reviewers (`data-engineer`, `code-reviewer`) said so in their own verdicts — the retag is theirs, and it removes an ambiguity where the check could be assumed by both agents or neither.
+
+**Not part of this pass, and not a `trd-review` finding — the build-phase question.** While this consolidation was being written, `BOARD.md` gained a build-phase replan (2026-07-31, Aviran's direct ask) putting T-033 in **Build Phase 1 — "ship the iOS app, 100% client-side, no backend"** — and flagging a tension: §4.3's live fetch reads T-042's and T-040's real Supabase tables, which that replan assigns to Build Phase 2. It asks for an architect/product pass before `build` is dispatched. **That is a scoping decision, deliberately not made here** — this pass carried no design judgment of its own by construction. Two facts for whoever takes it, offered as evidence rather than a recommendation: (1) §3.4's precedence is already **live → last-good cache → bundled seed → empty**, and §7 already states the client "ships independently of the backend… demoable, reviewable, and QA-able before either migration is applied or a single row exists" — a no-backend path is designed in, not bolted on; (2) what a Phase-1 build would need is therefore a decision about *which source is authoritative in Phase 1*, plus a real fixture, not a re-architecture of the fetch. Whichever way it lands, it changes §3.4/§4.3/§7 and step C3, and nothing that `trd-review` examined.
+
+**Nothing else in this TRD required a change.** Every other reviewer observation was either a confirmation (the four independent column-by-column schema checks against T-042/T-040, the `cascade`→`restrict` ratification, the migration-numbering check, the T-032 cross-task contract verified from both sides) or explicitly out of scope for this task (`security-auditor`'s sweep, already run and PASS on T-040/T-042 in `1cb571b`; the `hood_for_point()` shared fixture, which `data-engineer` and `code-reviewer` both confirmed T-033 does not touch at all). The one unread column noted three times — `places.updated_at` exists but nothing here reads it — is not a gap and needs no text.
 
 ---
 
@@ -518,7 +557,7 @@ Ordered. Tags name the agent(s) each step dispatches to.
 | A2 | ~~RLS on `places`~~ → **Confirm T-042's RLS is as specified** (`places-dataset/TRD.md` §3.3: enabled on `places` and `place_types`, one public `select` each, **no write policy**) and that §4.3's embedded `GET` returns the expected shape against it. A verification step, not a change. | **[Backend]** |
 | ~~A3~~ | ~~Seed a small placeholder place set + Hood blurbs~~ → **struck.** Now T-042 step **A4** (placeholder seed, `on conflict do nothing`) and T-040 step **B5** (blurbs). | — |
 | ~~B1~~ | ~~The real curated Tel Aviv place dataset and Hood blurbs~~ → **struck.** Now T-042 step **B5** (places, blocked on T-040's geometry and on Aviran, `PAS-6` item 11) and T-040 step **B5** (blurbs). The salvage lead moves with it (§6). | — |
-| B2 | Export `places-tel-aviv.json` — the §3.4 seed floor. **Amended:** places only, no Hood blurbs (§3.4); columns per §3.1's consequences table. Same drift rule as `hoods-tel-aviv.json`. **Ownership needs one line settling at `trd-review`** — `places-dataset/TRD.md` §2.2 leaves this file with T-033 ("owns the export, its step B2") while its own step **B3** has `export_places.py` producing `places-tel-aviv.json` in the same run as the DB seed. Both cannot own the emitter. **Recommendation: T-042's B3 emits it** (it already holds the validated source and the DB seed, and a second emitter is a second chance to drift); T-033 keeps only the drift rule and the fixture's use. | **[Algo/Data]** + **[iOS]** |
+| B2 | **Drift check only — T-033 does not emit `places-tel-aviv.json`.** Ownership was posed here as an open question and is now **settled**: `places-dataset/TRD.md` **§2.1 D4** (ratified at T-042's `trd-review`) makes `export_places.py` (T-042's step **B3**) the sole emitter, adopting this TRD's own recommendation — B3 already holds the validated source and the DB seed, and a second emitter is a second chance to drift. What remains here is the §3.4 seed floor's *use* plus a tripwire asserting the bundled copy round-trips against B3's output — the same relationship `export_hoods_geojson.py` has to the Hood bundle it does not author. File shape unchanged from §3.4: places only, no Hood blurbs; columns per §3.1's consequences table. **The surviving check is an iOS-side test, in the shape of `HoodCatalogTests`, not a `data-engineer` deliverable** — retagged accordingly (raised by `data-engineer` and `code-reviewer` at `trd-review`, so it is not silently assumed by both sides or neither). | **[iOS]** |
 
 **iOS track.**
 
@@ -528,7 +567,7 @@ Ordered. Tags name the agent(s) each step dispatches to.
 | C2 | `Place`, `PlaceCategory`, `PlaceHitTester` + geometry/boundary unit tests (§3.2, §4.5). Buildable against a hand-authored fixture before any backend exists. | **[iOS]** |
 | C3 | `PlacesAPI`, `PlacesCache`, `PlaceCatalog` against the §4.3 contract, boundary-validated, with the live→cache→seed→empty precedence and the `.seed` source case (§3.4) | **[iOS]** |
 | C4 | `SavedPlacesStore` + its persistence actor, including the generation counter and a reordered-write test (§4.4, §3.5) | **[iOS]** |
-| C5 | `DetailRouter` + unit tests: depth ceiling never exceeds 2, `openHood` clears `place`, `openPlace` preserves `hood`, both idempotent (§4.1) | **[iOS]** |
+| C5 | `DetailRouter` + unit tests: depth ceiling never exceeds 2, `openHood` clears `place`, `openPlace` preserves `hood`, both idempotent — **plus the dismiss path**: `isDepth2Presented.wrappedValue = false` clears the place and leaves the Hood standing, `isDepth1Presented.wrappedValue = false` clears both, and both getters read back consistently afterwards (§4.1). Testable without presenting a sheet — the bindings are plain values | **[iOS]** |
 | C6 | `PlaceLayer` + `MapScreen` tap-resolution priority (place before Hood), replacing the T-031 stub sheet wiring (§4.5, D5) | **[iOS]** |
 | C7 | `HoodSheet` — header, blurb-when-present, place list, both empty states with the ≥44pt CTA, the error banner, presentation site A (§4.8, §4.2) | **[iOS]** |
 | C8 | `PlaceDetailModal` + presentation site B — save toggle reading straight off the store, category row, the reserved T-035 flag line, ✕ in a 44pt target (§4.8, §4.2) | **[iOS]** |
@@ -537,6 +576,6 @@ Ordered. Tags name the agent(s) each step dispatches to.
 | C11 | VoiceOver pass: rows and pins announce "Name, Category"; Save announces "Save"/"Saved"; Dynamic Type at the largest accessibility sizes wraps rather than truncates (design spec §4) | **[iOS]** |
 | C12 | Re-run the launch metric to confirm the two new `.task` loads didn't touch T-031 §7's cold-open budget; grep the shipped app and data for "Food & drinks" (D4). Numbers in the build report. | **[iOS]** |
 
-**`trd-review` sign-off needed from:** `ios-developer` + `ios-code-reviewer` (C1–C12, now the whole build), `developer` + `code-reviewer` (A1–A2, now confirmation steps rather than schema authorship), `data-engineer` + `code-reviewer` (B2). §4.2's cross-task rule should also be put in front of whoever holds T-032's TRD.
+**`trd-review` sign-off: complete, 6/6, unanimous APPROVE / APPROVE WITH MINOR NOTES, zero blocking findings** (2026-07-31, all six verdicts in `PROGRESS.md`) — `ios-developer` + `ios-code-reviewer` (C1–C12, the whole build), `developer` + `code-reviewer` (A1–A2, confirmation steps rather than schema authorship), `data-engineer` + `code-reviewer` (B2, reviewed while B2 was still tagged `[Algo/Data]`; both reviewers are the source of the retag to `[iOS]` above, so the change is theirs, not a post-review re-scoping around them). §4.2's cross-task rule is on record with whoever holds T-032's TRD.
 
-**Cross-task ratification this amendment needs** (2026-07-31): T-042's and T-040's reviewers should confirm §3.1 and D7 match their own D1/D7 — and settle the two items this TRD flags rather than decides, **D7's `Place` model question** and **B2's export ownership**.
+**Cross-task ratification this amendment needed** (2026-07-31): **done.** T-042's and T-040's reviewers confirmed §3.1 and D7 against their own D1/D7, and both items this TRD flagged rather than decided are settled in T-042's text and mirrored here — **D7's `Place` model question** (→ `places-dataset/TRD.md` §2.1 D5) and **B2's export ownership** (→ its §2.1 D4). Nothing in this TRD is waiting on another document.
