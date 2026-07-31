@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): nav-row question reconfirmed
+
+- **Provenance:** founder-direct, live chief-of-staff chat, relayed via coordinator. Not yet acted on beyond this stub.
+- **Verbatim request:** "yes, separate icons, same switching behavior."
+- **As I read it:** [ASSUMPTION] this confirms option (A) — the nav icons (search/heat/profile, near-me) render as separate independent buttons side by side, not a fused/joined bar. The relay described this as "visual only," with the underlying switching logic (tap one closes whatever else is open, one active surface at a time, z-order/stacking/modal-exclusivity) staying exactly as T-032's and T-033's TRDs already specify — that framing is the coordinator's restatement, not Aviran's own words, and is labeled as such here.
+- **Scope note from the relay (also restatement, not verbatim):** described as a small, contained visual revision to T-032/T-033, not a rework of `ux-flows.md` §2.1's interaction model. Treating as [ASSUMPTION] pending the actual diff.
+- **Left behind:** board note on T-032 currently says this question is unresolved — relay states an earlier answer "apparently never landed." Dispatching architect now to apply as a small TRD-level revision to T-032 and T-033; this stub is the durable record ahead of that dispatch.
+
+---
+
 ### 2026-07-31 — product — T-032/PAS-15: time-slider PRD amended to v3 (gesture model corrected, Q1/Q4 closed, Q5/Q6 surfaced)
 
 - **Did:** amended `prds/time-slider/time-slider.md` in place to Draft v3. Read the FOUNDER-DIRECT STUB's two verbatim quotes first and worked from them rather than from any summary (L-013). **Req 7 fully rewritten** off the two-step "swipe inward to reveal, then separately drag" model v2 was written against, onto one continuous motion: touch down on either screen edge, one up/down slide changes the hour from the start of the slide, no reveal step and no second gesture; the hour under the finger at lift is the selected hour and no further gesture commits it or clears the control. Also in req 7: a bullet that the edge slide and the heat button drive one value (the supplement answer made that testable), a bullet that the gesture is unavailable while a sheet is presented (Q6, below), and the old conditional left-edge bullet replaced by a per-device-idiom bullet. **Req 1's reachability bullet widened** — the slide now starts wherever the finger lands on the edge, so an hour mapped to absolute screen position would put some stops out of reach; the pass condition now names a slide starting near the top or bottom of the edge. **Req 4** now says the hour is restored by either edge *and* by the heat button. **Req 6's VoiceOver bullet simplified** — it was written as a bar every invocation model had to clear while replace-vs-supplement was open; with the button path confirmed permanent it just names that path as what satisfies it, and names removing it as the risk. Decisions log row appended. `strategy/passenger-strategy.md` not touched.
