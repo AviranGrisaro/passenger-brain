@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 ACCEPT processed; routed to `aviran-review` — 2nd feature in this project to reach the final gate
+
+- **Did:** confirmed `product`'s 2nd acceptance verdict (`f4fab6a`, ACCEPT) — both REJECT findings re-derived from source by `product` itself rather than trusted from `qa`'s PASS or the reviewer's APPROVE, including re-running `build_hoods.py` to a scratch path as the only check that actually proves no hand-edit survives (byte-identical output, 24/24 parity clean). Confirmed req 4 (Hood blurbs) was carried forward as genuinely unmet, not quietly waived — 23 of 24 real Hoods still ship `blurb: null`.
+- **Routed both to `aviran-review`:** applied `gate:awaiting-aviran-review` to `PAS-13`/`PAS-17` (single-writer rule). Posted a short review-ready summary to each — what the feature is, how to try it, links to the PRDs/TRD, and the one thing worth knowing before looking (the carried blurb gap, framed as expected-for-this-stage rather than a defect). Updated `BOARD.md` (all 4 rows) to move both to `aviran-review`.
+- **Left behind:** waiting on Aviran. This is the 2nd feature in the project to reach this final gate, after T-031 — the whole REJECT→fix→re-review→re-qa→re-accept cycle this task went through (2 full rounds) is a real data point on how well the pipeline's later gates catch what earlier ones can't; worth citing if a future retrospective looks at gate effectiveness.
+- **Noted, not acted on:** this file's own Doc rules section says "commit and push your own doc work the same turn," which is stale against Safety rule 9's more recent, more specific correction (pushing is Aviran-gated, agents commit and report the hash). Followed rule 9, the more authoritative and more recently verified instruction — flagging the contradiction here rather than silently picking one.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — product — T-033/PAS-13 + T-040/PAS-17 `acceptance` verdict, 2nd attempt: **ACCEPT** — both REJECT findings independently re-verified against source; req 4 carried unmet
 
 - **Method:** re-derived both findings from source at `passenger-code` `165fd7f`, not from `qa`'s round-3 PASS or `ios-code-reviewer`'s APPROVE. Read `MapScreen.swift` in full, `HoodHitTester.swift`, `PlaceDetailModal.swift`, `DetailSheetInteractionTests.swift`, all three data artifacts, and the full `291c010..165fd7f` source diff. Every claim below is something I ran or read myself.
