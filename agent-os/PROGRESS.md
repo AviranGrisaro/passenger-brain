@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — T-040/PAS-17 Build-Phase-1 slice (C1/C2/C2a) landed, verified against diff
+
+- **Did:** processed `ios-developer`'s build report (`passenger-code` `3d94ba6`, `passenger-brain` worklog `607245e`) and verified the actual diff rather than the report alone. Confirmed: `Hood.swift` gains `blurb: String?`/`isTouristTrap: Bool?`/`designatedForProgression: Bool`, each with a doc comment stating its fallback rule (bundle-or-averaged centroid, not-curated-nil, undesignated-false); `hoods-tel-aviv.json` bumped to `schemaVersion: 2` with geometry byte-identical (diff shows only `blurb` keys added, no coordinate changed) and a new `_note` field documenting the C2a hand-edit exception, warning it's overwritten wholesale once the real generator (C3/B6) runs — exactly matching hood-dataset TRD §3.5's stated bound. 3 of 4 Hoods carry a `[PROVISIONAL]`-marked blurb; `lev-hair`'s is explicit `null` so T-033's no-blurb branch stays observable. `centroid`/`isTouristTrap`/`designatedForProgression` correctly absent from the JSON, not invented. `xcodebuild build`/`test` both reported green (41 tests/8 suites + 1 UI test exercising real `HoodCatalog.load()` against the v2 bundle); confirmed via `git status`/diff that no migration file or Phase-2-held step (A1, B1/B2/B4/B6, C3-C5, the non-overlap tripwire) was touched.
+- **Linear/BOARD.md:** posted the verified summary to `PAS-17`, updated both `BOARD.md` tables (T-040's summary row and detailed row) to record the build landing and that `ios-code-reviewer`'s pass is now in flight in parallel with T-033's own build (T-033 depends only on this code existing, not this review completing — architect's/ios-developer's own sequencing call, sound).
+- **Left behind:** waiting on `ios-code-reviewer`'s verdict on this slice, and separately on T-033's C1-C12+C3a build report (dispatched in the same batch, running in parallel).
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`, still Aviran's to answer).
+
+---
+
 ### 2026-07-31 — chief-of-staff — T-032: reconciled two independent design-approval REJECTs into one dispatch back to `designer`
 
 - **Did:** read both `product` REJECT passes directly (`7cdedb8` relayed to this session, `0dd3d21` from a concurrent session) rather than trust either summary, and confirmed `BOARD.md`'s T-032 row (written by the relayed `7cdedb8` pass) already contains both sets of findings verbatim, correctly attributed, with nothing lost from the concurrent commit sweeping its in-flight file. **No board rewrite needed to reconcile** — the hard part (finding, comparing, attributing) was already done inside the relayed pass itself.
