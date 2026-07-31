@@ -138,3 +138,50 @@ Both crash sites are Site A (`MapScreen`'s own `.sheet(isPresented: detailRouter
 - Live Supabase fetch path, `PlacesAPI`/`PlacesCache` disk round trip, `.live`/`.cache`/`.unavailable` states — built and unexercised per TRD-hpd-§4.3, §7.
 - Route hand-off to Apple Maps app-switch round trip (device-dependent, out of this session's simulator reach beyond confirming the button/disabled-state logic).
 - Save-state persistence across app relaunch (not named in this dispatch; flagged only if found broken incidentally).
+
+---
+
+## Re-pass results (executed 2026-08-01, checkout `passenger-code` `291c010`)
+
+**Checkout independently verified before testing** (per the discipline that caught last round's wrong hash): `git log -1` on `passenger-code` confirmed HEAD is `291c010` verbatim, `git show --stat` confirmed the diff matches the dispatch's description (`MapScreen.swift`, `PlaceLayer.swift`, `HoodButton.swift`, `HoodSheet.swift`, `PlaceDetailModal.swift`, `DetailSheetInteractionTests.swift`, no unrelated files). Fresh clean build (deleted DerivedData) + fresh `simctl install` on `iPhone 17 Pro` (iOS 26.5), same device class as last round.
+
+**Overall verdict: PASS.** Both prior Blocker/Major findings are fixed and independently confirmed; every case blocked last round is now reachable and passes. One environment/tooling note below, no product defect.
+
+| # | Case | Verdict | Note |
+|---|---|---|---|
+| 1.1 | `PlaceCatalogTests` 3 determinism assertions | PASS | Full suite run (see 8.1), all green |
+| 1.2 | Zero network requests, observed behaviorally | PASS | `lsof -p <Passenger PID> -i` empty — zero TCP/UDP sockets for the app process, checked after ~20 min of continuous interaction (pin taps, Hood taps, sheet open/close, Save toggles) |
+| 1.3 | Sheets render with no network reachable | PASS | Every sheet opened during this pass rendered full bundled content while the app held zero network sockets throughout (see 1.2) — not a separate airplane-mode run, but behaviorally equivalent since the app never had a socket to lose |
+| 2.1 | `florentin` blurb renders | PASS | Blurb text renders above the place list, no crash, no layout artifact |
+| 2.2 | `kerem-hateimanim` no-blurb branch | PASS | No blurb section, no gap, no placeholder — title goes straight to the 3-place list |
+| 2.3 | `neve-tzedek` no-blurb branch | PASS | Same, second no-blurb Hood confirmed independently |
+| 2.4 | Only `florentin` has non-null blurb | PASS | Unchanged since last round's static check; re-confirmed by the 3 live Hood-sheet opens above (2 no-blurb, 1 blurb) |
+| 3.1 | 9/9 places inside real Hood polygon | PASS | Unchanged; static finding from last round, not re-derived (no geometry touched by this diff) |
+| 3.2 | Pins render inside Hood's coloured shape, close zoom only | PASS | **Zoom gate confirmed behaviorally both directions**: zero pins visible at cold-open (multiple screenshots, full Tel Aviv south in view, nothing rendered); zoomed to Florentin/Kerem HaTeimanim/Neve Tzedek (span crossing the 0.06 threshold) — all pins and Hood name labels appeared together, exactly the `showsNames` gate `PlaceLayer` now shares with `HoodLayer`. Hood polygon *fill color* itself is `.clear` at every zoom in this run — traced to `DensityStore` (live-fetch-only, no bundled seed, falls back to `.unavailable` offline) via source read, not a regression from this diff and not in T-033's scope; flagged as context, not a finding |
+| 3.3 | Tap a pin in `florentin` → opens that place's modal directly | PASS | Tapped HaMakolet's pin, modal opened directly, no crash, no two-step preview |
+| 3.4 | Tap a pin in `kerem-hateimanim` → correct place modal | PASS | Tapped Suzana Yemenite Kitchen's pin directly (not via row) — correct modal, no crash |
+| 3.5 | Tap a pin in `neve-tzedek` → correct place modal | PASS | Tapped Nachum Gutman Museum's pin directly — correct modal, no crash |
+| 3.6 | Tap a Hood-sheet row → opens that place's modal at depth 2 | PASS | Tapped "Dr. Shakshuka" row inside Kerem HaTeimanim's sheet — depth-2 modal opened correctly |
+| 4.1 | `HoodSheet` ✕ → closes, map restored | PASS | Confirmed via Lev HaIr and Kerem HaTeimanim sheets — closes fully, camera/zoom unchanged |
+| 4.2 | `PlaceDetailModal` ✕ at depth 1 → closes fully to map | PASS | Tapped HaMakolet's modal ✕ — full dismiss to map |
+| 4.3 | `PlaceDetailModal` ✕ at depth 2 → closes place only, Hood sheet stands | PASS | Closed Dr. Shakshuka at depth 2 — Kerem HaTeimanim sheet still standing underneath, list intact |
+| 5.1 | Swipe down `HoodSheet` → dismisses, state cleared; re-tap reopens cleanly | PASS | Swiped Kerem HaTeimanim closed, re-tapped same Hood — reopened correctly, all 3 rows intact, no stale/stuck state |
+| 5.2 | Swipe down `PlaceDetailModal` at depth 2 → dismisses place only | PASS | Swiped Dr. Shakshuka closed at depth 2 — Kerem HaTeimanim sheet still standing, interactive |
+| 5.3 | Re-tap after swipe-dismiss opens correctly, no stuck/double-open state | PASS | Same evidence as 5.1 |
+| 5.4 | Swipe-dismiss the Hood sheet while a place modal is open → both close | **PASS (unit-test level only)** | Not reachable via a manual gesture: the depth-2 modal fully covers the depth-1 sheet's own drag handle/dismiss affordance, so there is no user-operable path to swipe the parent while the child is on top — by design, each swipe dismisses one level (confirmed 5.2). The invariant this case actually protects (`closeHood()` clearing both `hood` and `place` fields together) is directly covered by `DetailRouterTests`' `"closeHood clears both fields"`, part of the green 80-test run (8.1). Flagging the method gap honestly rather than claiming a manual repro that didn't happen |
+| 6.1 | Empty Hood — clean sheet, no crash, no error banner | PASS | Hit twice independently (`Neve Ofer` via a background map tap, `Lev HaIr` via direct Hood-area tap) — both show "No places curated here yet." with the mappin.slash icon, no error banner (source is `.seed`, correctly distinguished from `.unavailable`) |
+| 6.2 | Empty-state CTA "Explore another Hood" tappable, calls `closeHood()` | PASS | Tapped the CTA on `Lev HaIr`'s empty sheet — dismissed cleanly to map |
+| 7.1 | VoiceOver on `HoodSheet` ✕ — "Close" | PASS (source-verified) | `HoodSheet.swift` closeButton: `.accessibilityLabel("Close")`. Full live-VoiceOver pass not practical in this automation environment (screenshot/tap-driven, no VoiceOver gesture layer); verified the modifier directly in source plus indirectly via the accessibility-identifier-driven UI tests (`DetailSheetInteractionTests`) passing, which proves the accessibility tree resolves correctly for these exact elements |
+| 7.2 | VoiceOver on `PlaceDetailModal` ✕ — "Close" | PASS (source-verified) | `PlaceDetailModal.swift` closeButton: `.accessibilityLabel("Close")`, same method note as 7.1 |
+| 7.3 | VoiceOver on place rows — "Name, Category" | PASS (source-verified) | `HoodSheet.swift` place row: `.accessibilityLabel("\(place.name), \(place.category.displayName)")` — exact format |
+| 7.4 | VoiceOver on Save button — "Save"/"Saved", never a checkmark | PASS (source-verified) | `PlaceDetailModal.swift` saveButton: `.accessibilityLabel(isSaved ? "Saved" : "Save")`, glyph pair is `bookmark`/`bookmark.fill`, never a checkmark. Behaviorally exercised too: toggled Save on Suzana Yemenite Kitchen (reached via HoodSheet → depth 2, the exact nested-environment path the fix targeted) — bookmark filled correctly, `SavedPlacesStore` resolved with no crash |
+| 8.1 | Full suite, one invocation | PASS | `PassengerTests` (Swift Testing, 80 tests/15 suites) + `PassengerUITests` (3 tests: `ColdOpenPerformanceTests` + 2 new `DetailSheetInteractionTests`) — **83 tests total, 0 failures**, single `xcodebuild test` invocation, not scoped |
+| 8.2 | Cold-open budget with real geometry | PASS | `ColdOpenToInteractive` avg 0.465s (5 iterations, rel. std dev 2.56%), same as developer's reported figure, within the 2.0s budget, no regression |
+
+**Zero app crashes observed** across this entire pass — extensive manual interaction (pin taps across all 3 populated Hoods, empty-Hood taps, row taps, ✕ at both depths, swipe-dismiss at both depths, Save toggles, repeated re-opens) plus the 3 automated UI tests. Cross-checked `~/Library/Logs/DiagnosticReports` for `Passenger-*.ips` crash reports: the only ones present (`00:13`–`00:40`) predate this session's build (started `01:06`) — no new crash reports during or after this pass.
+
+**Tooling note, not a product finding:** the iOS Simulator control tool's screenshot pixel space is ~2.28x the device's point space (402×874pt); early taps in this pass used unconverted coordinates and silently missed small targets (system permission alert, sheet ✕/CTA buttons) while large-target gestures (the map itself) still "worked" by landing somewhere valid, masking the mismatch initially. Calibrated using the ✕ button as a known target once the pattern was noticed; all coordinates after that point used the corrected scale. Recorded here so a future QA pass on this same tooling doesn't re-lose the same time.
+
+**Confirmed unchanged, as expected:**
+- `BuildPhase.seedIsAuthoritative == true` (`Passenger/Support/BuildPhase.swift:17`) — unchanged by this diff, re-read directly from source.
+- Zero-network property — re-verified behaviorally post-fix (1.2), not just assumed carried over.
