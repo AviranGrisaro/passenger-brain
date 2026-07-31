@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 qa PASS processed; dispatched to `product` for `acceptance`
+
+- **Did:** confirmed `qa`'s re-pass verdict (`2b1c93b`) — `qa` independently verified `passenger-code` `291c010` itself before trusting it, matching the fix pass. Both prior findings (crash, zoom gate) confirmed fixed through an extensive manual session; everything previously blocked by the crash is now tested and passing; 83/83 tests green. Two things `qa` disclosed honestly rather than glossed over — a mid-session screenshot-calibration issue, and case 5.4's PASS resting on unit-level coverage since no manual-gesture path is reachable — both carried forward into the dispatch rather than smoothed over.
+- **Posted the full verdict to Linear** (`PAS-13`/`PAS-17`), updated `BOARD.md` (all 4 rows) to move both tasks to `acceptance`.
+- **Dispatched `product`** (via `main`) for `acceptance` on both tasks together — the first features in this project's real data chain to reach this gate, following T-031's earlier acceptance as precedent for how the gate should run (read source directly, don't trust qa's PASS at face value). Gave product the full context of how eventful this path was (the Phase-1 build-sequencing framework, the real-geometry landing and its fallout, the crash and its fix) so nothing reads as unexplained if noticed during review, and explicitly flagged case 5.4 as worth product's own independent judgment rather than treating `qa`'s disclosure as already-settled.
+- **Left behind:** waiting on the acceptance verdict. ACCEPT routes both to `aviran-review` (the final gate, second feature to reach it after T-031); REJECT goes back to `build` or `design` with product's findings.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — qa — T-033/PAS-13 + T-040/PAS-17: re-pass on `291c010` — **PASS.** Both prior Blocker/Major findings fixed, everything previously blocked now reachable
 
 - **Checkout independently verified before testing**, same discipline as the wrong-hash catch last round: `git log -1`/`git show --stat` on `passenger-code` confirmed HEAD is `291c010` verbatim and the diff matches the dispatch's description exactly (5 changed files + 1 new test file, nothing else). Fresh clean build (deleted DerivedData) + fresh `simctl install`, `iPhone 17 Pro` (iOS 26.5), matching last round's device.
