@@ -13,6 +13,18 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — T-032/T-033 nav-row resolution processed, T-033 dispatched to trd-review
+
+- **Did:** processed `architect`'s report on the founder-direct nav-row answer (relayed via `main`, dispatched from this session's own `61b7cdf` stub). Verified the actual diff (`431b690`) rather than trusting the report: `prds/time-slider/TRD.md` gained a new §2.3 paragraph ("MapNavRow is a layout container, not a visual one... separate, independent buttons... not fused into one joined bar") plus §8 D6 with Aviran's verbatim quote, provenance, and an explicit fence of what did NOT change (exclusivity rule, z-order table, dismissal paths); a stale "Four apply"→"Six apply" count in §8 was also corrected. `prds/hood-place-detail/TRD.md` (T-033) never actually described the nav row's visual grouping — architect added §8 D8 recording the answer plus a pointer clause instead of inventing text, and flipped T-033's header from "held at trd" to cleared. `design/ux-flows.md` confirmed untouched (`git status` clean per architect's report, spot-checked). BOARD.md was already updated correctly by the architect dispatch itself (both rows read cleanly, pipe-count verified) — no further board edit needed from me.
+- **Concurrency note, reconciled:** a separate chief-of-staff session had, in parallel, received a *differently-worded* relay of the same founder answer ("separate icons side by side, not nav row" vs. this session's "yes, separate icons, same switching behavior") and correctly stood down per L-007 rather than double-dispatch (its own entry: commit `55f0a0f`, "CONCURRENCY FLAG"). Both quotes agree in substance (separate icons, unchanged switching logic); per L-013 they are recorded as two distinct relays, not merged into one authoritative quote. Recommended in both PAS-13's Linear comment and here that Aviran gets a quick chance to confirm the two relays describe one answer — not blocking, since architect's TRD text already handles this correctly (quotes only its own relay, labels it, notes the second exists and agrees on substance).
+- **Linear (PAS-13):** confirmed no outstanding holds. Applied `owner:ios-developer`, `owner:developer`, `owner:data-engineer` (kept `gate:design-approved`), posted a comment recording the resolution + commit + trd-review dispatch. Status left at In Progress (already correct).
+- **Dispatched via `main`:** 3 `trd-review` pairs for T-033 — `ios-developer`+`ios-code-reviewer` (C1-C12), `developer`+`code-reviewer` (A1-A2), `data-engineer`+`code-reviewer` (B2) — each briefed with TRD path, PRD path, the T-040/T-042 schema dependency, and told to report verdict + findings back through `main`.
+- **T-032 unaffected:** still at `design`, `designer` mid-pass on the additive edge-gesture spec (Q2/Q3/Q5) — the nav-row question closing does not unblock it; noted so on the board already by architect.
+- **Left behind:** waiting on the 3 trd-review verdicts before advancing T-033 to `build`. The two-relay discrepancy is a nice-to-confirm with Aviran, not a blocker. `T-045` (uncommitted agent-mirror files) still unclaimed, not touched this pass.
+- **Git:** committed `agent-os/PROGRESS.md` (explicit path), this entry only. Committed, not pushed — no remote (L-015, PAS-21).
+
+---
+
 ### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): T-031/PAS-12 accepted at aviran-review
 
 - **Provenance:** founder-direct, live chief-of-staff chat, direct (not relayed).
