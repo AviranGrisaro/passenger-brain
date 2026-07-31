@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/PAS-13 tap-gate fix verified against diff; both REJECT findings resolved; combined fast re-review dispatched
+
+- **Did:** verified `ios-developer`'s fix (`passenger-code` `165fd7f`) directly against the diff. Confirmed the gate is exactly the one-line fix the finding named: `handleTap`'s place branch now reads `if showsNames, let place = placeHitTester.place(...)`, with the existing Hood-branch fallback unchanged on a miss. Confirmed `DetailSheetInteractionTests.swift` was genuinely reworked rather than patched to pass around the old bug — read both new test bodies: the cold-open test now positively asserts no place modal opens (new coverage that literally could not have existed before this fix, since the old code opened one every time), and the zoomed-in test's `-uiTestZoomedIn` launch-argument mechanism is explained and gated so a real launch always gets the default region.
+- **Both REJECT findings are now resolved** — T-033's tap-gate (this entry) and T-040's blurb relocation (prior entry, `d0b500a`/`37c402f`). Posted the verified summary to Linear (`PAS-13`, `PAS-17`). Updated `BOARD.md` (all 4 rows) to record both fixes landed.
+- **Dispatched `ios-code-reviewer`** (via `main`) for one combined fast re-review covering both commits (`37c402f`, `165fd7f`) rather than two separate passes — asked it to independently re-derive the cold-open test's coordinate claim rather than trust it (this exact class of claim was wrong once already this saga), confirm the `-uiTestZoomedIn` backdoor is genuinely inert on a real launch, and diff the blurb regeneration itself rather than trust the report.
+- **Left behind:** waiting on the re-review verdict. If clean, straight to a third `qa` round — told to reuse the existing test plan rather than start over, plus specifically re-verify the two previously-blocked behaviors.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — chief-of-staff — T-040/PAS-17 blurb-relocation fix verified against all 3 artifacts; holding for T-033's fix before re-review
 
 - **Did:** verified `data-engineer`'s fix pass (`passenger-brain` `d0b500a`, `passenger-code` `37c402f`) directly rather than from the report — read all 3 artifacts myself: `database/data/hoods-tel-aviv.source.json`'s `florentin.blurb` now carries the `[PROVISIONAL]` text (was `null` at REJECT time), migration `006`'s `florentin` row matches, and the iOS bundle matches both. This is a genuine generator round-trip this time, not a second hand-edit of generated output — confirms the fix addresses exactly what `product` found.
