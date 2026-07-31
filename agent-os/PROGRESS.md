@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 combined re-review APPROVE processed; qa round 3 dispatched
+
+- **Did:** confirmed `ios-code-reviewer`'s combined re-review verdict (`1f233a3`, APPROVE, no findings) — both fixes independently re-verified by the reviewer rather than trusted, including a notable self-correction: the reviewer hand-derived the cold-open test's tap coordinate, initially got a point outside the polygon (which would have been a blocking finding), traced the discrepancy to MapKit's aspect-ratio adjustment of a square-delta region, and rather than trust either its own math or the commit, ran a real clean build against a booted simulator to settle it empirically. Worth naming in the record as the right instinct, not just noting the verdict.
+- **Posted the verdict to Linear** (`PAS-13`, `PAS-17`). Updated `BOARD.md` (all 4 rows).
+- **Dispatched `qa` round 3** (via `main`), pinned to `passenger-code` `165fd7f`. Told it to reuse the existing test plan rather than start over, focus verification on the exact rejected behavior (cold-open tap inside a populated Hood must open the Hood sheet, not an invisible pin's modal) plus a regression sweep of everything from round 2, and flagged `product`'s optional case-5.4 upgrade suggestion (the Directions button's `closeHood()` call) as worth adding if easy, not blocking.
+- **Left behind:** waiting on the round-3 verdict. PASS routes back to `product` for a second acceptance attempt; FAIL goes back to `build` again — third time would start to look structural rather than incidental, worth watching for if it recurs.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — ios-code-reviewer — T-033/PAS-13 + T-040/PAS-17 combined fast re-review: **APPROVE**
 
 - **Scope:** re-reviewed both commits from the acceptance REJECT (`7e388e7`) fix pass — `passenger-code` `37c402f` (data-engineer, blurb regeneration) and `165fd7f` (ios-developer, `showsNames` tap gate). Read `PROGRESS.md`'s recent worklog (the full T-033/T-040 REJECT-and-fix saga) before starting, per the dispatch brief; did not re-litigate settled ground.
