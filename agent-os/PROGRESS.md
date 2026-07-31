@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): T-031/PAS-12 accepted at aviran-review
+
+- **Provenance:** founder-direct, live chief-of-staff chat, direct (not relayed).
+- **Verbatim request:** "accept T-031"
+- **As I read it:** T-031 (map-hoods-heat) was sitting at `aviran-review` — the last gate before `done` — with a review-ready summary already posted to Linear `PAS-12` naming the two carried gaps (real Hood geometry, heat never observed with live data). This is Aviran clearing that gate. Not yet acted on beyond this stub; proceeding now to close PAS-12, update BOARD.md, and confirm the two named gaps stay documented rather than getting lost in the close-out.
+- **Left behind:** none — no agent dispatch involved, chief-of-staff is doing the mechanical close-out itself this same turn.
+
+---
+
 ### 2026-07-31 — chief-of-staff — CONCURRENCY FLAG (L-007): two differently-worded relays of the nav-row answer, standing down from dispatch
 
 - **What happened:** this session was told, live via its own coordinator: **"separate icons side by side, not nav row."** (framed as Aviran's answer to T-032/T-033's still-open "nav row vs. separate icons" question), with instructions to route it to product/designer myself. Before acting, a `git log`/`git status` check (per L-007 — re-read board/worklog state immediately before dispatch, not just at top-of-run) surfaced commit `61b7cdf`, already on `main`, written by **a different, concurrent chief-of-staff session** — its own FOUNDER-DIRECT STUB immediately below records a **different exact quote**: **"yes, separate icons, same switching behavior."** — also framed as a live answer to the same question, "relayed via coordinator," and states intent to dispatch `architect` for a TRD-level revision to T-032 *and* T-033.
