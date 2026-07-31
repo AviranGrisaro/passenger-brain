@@ -25,6 +25,17 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — T-031/PAS-12: DONE — Aviran accepted at `aviran-review`, first feature in this project to close
+
+- **Trigger:** Aviran, direct live chat (not hilos, not relayed): **"accept T-031"**. Durable stub recorded immediately below this entry, per L-002, before any change was made.
+- **Did:** T-031 (`map-hoods-heat`) was sitting at `aviran-review` — the last gate before `done`, with a review-ready summary already posted to `PAS-12` (2026-07-30). Closed it out: (1) posted an acceptance comment on `PAS-12` quoting the verbatim instruction and re-stating the two carried gaps so they're on record at close, not just in the PRD; (2) moved `PAS-12` `In Progress` → `Done`, removed `gate:awaiting-aviran-review` (no other labels were on the issue); (3) updated `BOARD.md`'s T-031 row from `aviran-review` to `done`, owner cleared, prior history preserved beneath the new summary rather than deleted.
+- **Checked the two named gaps are still documented, not silently dropped (explicit ask):** read `prds/map-hoods-heat/map-hoods-heat.md` directly rather than trusting the board summary. Both gaps are present in two places each — inline in the requirement they attach to *and* in the Decisions log: req 3's "dozens of Hoods, not thousands" (shipped data is 4 client-bundle rectangles + 5 DB-seed placeholders, not real geometry — now owned by `T-040`/`PAS-17`, itself `build`-ready) and the Open questions & risks bullet "This feature was accepted without anyone ever seeing heat render" (every heat bullet passed by construction/code-read, not observation — becomes real the moment Aviran applies migrations `001`/`002` and enables `pg_cron`). The PRD's header line already reads "two named data gaps carried past acceptance" and stays accurate after this close — no PRD edit was needed or made.
+- **Did not:** resolve either gap — not asked to, and neither is closeable from this task (one needs `T-040`'s real geometry, the other needs Aviran's own DB-apply step, both already tracked elsewhere). Did not touch the PRD file. Did not dispatch any agent — this was mechanical Linear/BOARD.md close-out on a direct founder instruction, no relay needed.
+- **Evidence:** Linear `PAS-12` — `status: Done`, `labels: []` (was `gate:awaiting-aviran-review`), comment posted. `BOARD.md` T-031 row.
+- **Git:** committed to `passenger-brain` (`main`), explicit paths (`agent-os/BOARD.md`, `agent-os/PROGRESS.md`). Committed, not pushed — no remote configured (`PAS-21`, L-015).
+
+---
+
 ### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): T-031/PAS-12 accepted at aviran-review
 
 - **Provenance:** founder-direct, live chief-of-staff chat, direct (not relayed).
