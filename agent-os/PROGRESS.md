@@ -13,6 +13,17 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — CONCURRENCY FLAG (L-007): two differently-worded relays of the nav-row answer, standing down from dispatch
+
+- **What happened:** this session was told, live via its own coordinator: **"separate icons side by side, not nav row."** (framed as Aviran's answer to T-032/T-033's still-open "nav row vs. separate icons" question), with instructions to route it to product/designer myself. Before acting, a `git log`/`git status` check (per L-007 — re-read board/worklog state immediately before dispatch, not just at top-of-run) surfaced commit `61b7cdf`, already on `main`, written by **a different, concurrent chief-of-staff session** — its own FOUNDER-DIRECT STUB immediately below records a **different exact quote**: **"yes, separate icons, same switching behavior."** — also framed as a live answer to the same question, "relayed via coordinator," and states intent to dispatch `architect` for a TRD-level revision to T-032 *and* T-033.
+- **Not reconciled, not merged, not treated as one quote.** The two readings are consistent in gist (no grouped bar; icons rendered separately) but are not the same sentence, and L-013 is explicit that inference must never be dressed as verbatim — fabricating a combined "authoritative" quote from two different relays would be exactly that. Genuinely unclear whether: (a) Aviran said this once and it was paraphrased differently by two relay paths, (b) he was asked twice (by two concurrent sessions) and answered twice, in his own words, slightly differently both times, or (c) one of the two relays is a misattribution. No way to tell from here which, if any, is the more precise quote.
+- **Action taken: standing down from dispatching architect/designer for this myself.** The other session's stub states it as already "dispatching architect now" for T-032 **and** T-033 — proceeding independently here risks exactly the duplicate/racing dispatch L-007 exists to prevent (precedent: T-042/T-043's near-collision and duplicate-Linear-issue incidents, both in this same PROGRESS.md history). `BOARD.md`'s T-032/T-033 rows are unchanged by the other session as of this check (`git log -- agent-os/BOARD.md` still shows my own `b1c50fd` as latest) — so nothing has been overwritten, but I am not adding a second dispatch on top of one already declared in flight.
+- **Left behind:** whoever runs the next chief-of-staff pass should check whether the other session's architect dispatch landed, and if so, verify its output against **both** quotes before treating T-032/T-033's nav-row question as closed — if the two relays turn out to describe different underlying answers (not just different phrasing of the same one), the architect work may need a second look. Recommend surfacing the discrepancy to Aviran directly rather than silently picking one quote as authoritative.
+- **Did not:** touch `BOARD.md`, dispatch `architect`/`designer`/`product`, or edit either T-032's or T-033's row for this specific item. Did not stage the unrelated agent-mirror drift or the two untracked `design/*.md` files (still `T-045`'s, unowned).
+- **Git:** this entry only, `agent-os/PROGRESS.md`, explicit path. Committed, not pushed (no remote, PAS-21/L-015).
+
+---
+
 ### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): nav-row question reconfirmed
 
 - **Provenance:** founder-direct, live chief-of-staff chat, relayed via coordinator. Not yet acted on beyond this stub.
