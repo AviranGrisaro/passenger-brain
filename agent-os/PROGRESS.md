@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — FOUNDER-DIRECT STUB: Phase 2 place-metadata/tagging task, live `/cos` chat
+
+**Verbatim request:** "add metadata attributes for each place — romantic, seating outside, allow smoking, and similar tags (etc implies more attributes of this kind, use judgment for a reasonable starter list e.g. romantic, seat_outside, allow_smoking, kid_friendly, wifi, pet_friendly — but don't over-scope, just capture intent as a discovery-engine metadata/tagging task)." Requested filed in Linear, team Passenger, project Passenger V1, "under Phase 2 (Discovery engine) scope."
+
+**As I read it:** [ASSUMPTION] this is a request for a single traceability/backlog ticket capturing intent for a future place-attribute/tagging capability — not a PRD, not a build task, and not authorized to build now (Phase 2 is parked per the standing scope gate). [ASSUMPTION] the six named attributes (romantic, seat_outside, allow_smoking, kid_friendly, wifi, pet_friendly) are a starter list Aviran gave as examples, not a closed spec — final schema, data type, and sourcing method are unscoped and belong to a future PRD.
+
+**Provenance:** founder-direct, live chief-of-staff chat (`/cos`), 2026-07-31.
+
+---
+
 ### 2026-07-31 — chief-of-staff — data-chain saga closed: T-040/T-042/T-043 all `build`-ready
 
 - **Did:** verified the consolidation architect's pass (`293ddb2`) directly — all 6 fixes present as claimed, including the data-seed renumber and the C-HOOD-1 clause-4 correction (handled cleanly: T-042's own clause-4 text is untouched since it correctly describes T-042's own containment check; the correction for how it was *misapplied* to T-040's non-overlap estimate lives in T-040's document, where the misapplication occurred).
