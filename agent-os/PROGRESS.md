@@ -13,6 +13,22 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — full BOARD.md ↔ Linear reconciliation pass (Aviran's direct ask)
+
+- **Scope:** every T-xxx and PAS-xxx row in `BOARD.md` cross-checked against Linear (team `Passenger`, project `Passenger V1`, 19 issues at start of pass) — state/status, owner, stale text, duplicates, orphans in both directions.
+- **Found and fixed, real desyncs:**
+  1. **`PAS-6` was marked Done in Linear** (completed 2026-07-30 20:58) despite having 10 genuinely unresolved items (7–16) in its own comment history — the single most consequential finding, since `chief-of-staff`'s own standing rule is not to dispatch work against those items until Aviran answers, and a "Done" status could have let that rule get silently ignored. Reopened to Backlog, rewrote the stale description (previously still said "none resolved" for all 7 original items) to reflect the actual current state.
+  2. **Stale `owner:*` labels on `PAS-17`/`PAS-19`/`PAS-20`** (T-040/T-042/T-043) — all three still carried labels from their `trd-review` dispatch, even though all three reviews are long since complete and the tasks are `build`-ready. Cleared all 4 labels, commented the reason on each.
+  3. **6 tasks with zero Linear tracking**: T-034, T-035, T-036, T-037, T-038, T-041 all existed on `BOARD.md` (some since 2026-07-30) with no corresponding Linear issue at all — a real, systemic gap, not isolated. Created `PAS-25` through `PAS-30`, backfilled the BOARD.md rows with the new IDs.
+  4. **2 Linear issues with no BOARD.md row**: `PAS-16` (map-background-interaction centralization, referenced *within* other rows' text but never given its own row) and `T-044`/`PAS-22` (closed-state refresh — I created the Linear issue for this two turns ago but never added the board row). Added both rows.
+- **Confirmed clean, no action needed:** `PAS-5`, `PAS-7`–`PAS-11`, `PAS-12`/T-031, `PAS-13`/T-033, `PAS-14` (closed, correctly unrowed), `PAS-15`/T-032, `PAS-21`, `PAS-23` (already-handled duplicate), `PAS-24` — all state/owner/label combinations matched their BOARD.md counterparts on direct comparison.
+- **Known, accepted gap, not fixed:** T-039 (done, closed 2026-07-30) has no Linear issue and none was created retroactively — zero ongoing risk, lower value than the active-task gaps above.
+- **M1 (marketing) correctly untracked in Linear** — marketing/research tasks use a lighter lifecycle (`backlog → in-progress → acceptance → done`) that doesn't require a Linear issue per this workspace's own documented convention; not a gap.
+- **Final count:** 25 Linear issues, every one now cross-checked against a specific BOARD.md row (or explicitly confirmed as correctly out-of-scope).
+- **Did not:** touch `strategy/passenger-strategy.md`. Did not stage other sessions' in-flight/unrelated files.
+
+---
+
 ### 2026-07-31 — chief-of-staff — PAS-24 filed: Phase 2 place metadata/tagging candidate
 
 - **Did:** filed `PAS-24` ("Phase 2 candidate: place metadata/tagging attributes (discovery engine)") in Linear, team Passenger, project Passenger V1 — the founder-direct ask recorded in the stub immediately below. Checked existing convention first: no `type:data-request`/`type:feature` labels are actually configured in this Linear workspace (only `Feature`/`Bug`/`Improvement`, plus `owner:*`/`gate:*`/`aviran-blocker`) — used `Feature`, the closest real label, rather than inventing a new one. Followed `PAS-11`'s precedent exactly (same "Phase 2 candidate" title pattern, Backlog status, traceability-only framing) since it's the only prior ticket in this exact category. Did **not** apply `aviran-blocker`: unlike PAS-11, there's no open tension here needing Aviran's decision before it can sit in Backlog — it's parked only because Phase 2 itself is parked, same as every other Phase 2 item, and no owner label since nothing is being dispatched.
