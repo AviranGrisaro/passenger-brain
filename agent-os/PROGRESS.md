@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-040/PAS-17 blurb-relocation fix verified against all 3 artifacts; holding for T-033's fix before re-review
+
+- **Did:** verified `data-engineer`'s fix pass (`passenger-brain` `d0b500a`, `passenger-code` `37c402f`) directly rather than from the report — read all 3 artifacts myself: `database/data/hoods-tel-aviv.source.json`'s `florentin.blurb` now carries the `[PROVISIONAL]` text (was `null` at REJECT time), migration `006`'s `florentin` row matches, and the iOS bundle matches both. This is a genuine generator round-trip this time, not a second hand-edit of generated output — confirms the fix addresses exactly what `product` found.
+- **Posted the verified confirmation to Linear `PAS-17`.** Updated `BOARD.md` (both T-040 rows) to record the fix landing.
+- **Deliberately not dispatching the fast re-review yet** — `data-engineer` correctly left T-033's tap-gate fix untouched (still in flight per its own report), and both findings need to close before a combined review makes sense, matching how this session has sequenced every prior joint T-033/T-040 gate.
+- **Left behind:** waiting on `ios-developer`'s tap-gate fix. Once both are in, dispatch one fast re-review covering both diffs, then a third `qa` round.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — data-engineer — T-040/PAS-17 fix pass: `florentin`'s `[PROVISIONAL]` blurb relocated from the generated iOS bundle into the authored source, `build_hoods.py` re-run
 
 - **Did:** exactly `product`'s Finding 2 from the `acceptance` REJECT (`7e388e7`), no broader rework. Verified independently first that the finding was still live: `hoods-tel-aviv.source.json`'s `florentin.blurb` was `null`, migration `006`'s `florentin` row had `null` in the blurb column, and only `passenger-code/Passenger/Resources/hoods-tel-aviv.json` carried the `[PROVISIONAL]` string — matches both `product`'s and `chief-of-staff`'s independent confirmations verbatim. Set `florentin.blurb` in the authored source to the exact same `[PROVISIONAL]`-prefixed string that was hand-edited into the iOS bundle (byte-for-byte, not reworded — this is a relocation, not new copy). Confirmed it's the only field on the only Hood that changed: `grep`'d the source for `"florentin"`, one match, and diffed the full source's non-null-blurb hood list before/after (`['florentin']` both times, no other row touched). Ran `build_hoods.py --check` clean (0 errors, 0 warnings, 24 hoods) before writing anything, then `build_hoods.py --migration-number 006` to regenerate `006_hoods_tel_aviv_data.sql` and the iOS bundle from the corrected source — no hand-editing of either generated artifact.
