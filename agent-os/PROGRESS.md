@@ -13,6 +13,17 @@ Entry format:
 
 ---
 
+### 2026-07-31 — chief-of-staff — T-033/PAS-13 fix pass verified; blurb-branch scoping decision made; blurb fix + fast re-review dispatched
+
+- **Did — verified the fix pass independently, not from the report:** confirmed `HoodSheet.swift`'s diff matches exactly (new `header`/`closeButton` computed properties, `xmark.circle.fill`, 44×44pt frame, `.accessibilityLabel("Close")`, wired to `router.closeHood()` — same pattern as `PlaceDetailModal`'s existing `closeButton`). Confirmed `PassengerTests/PlaceCategoryTests.swift` exists and asserts both display strings. **Re-ran my own point-in-polygon check** (same script as the earlier finding) against the updated fixture — all 9 places now confirmed inside their real Hood polygon, up from 3/9 before this fix; diff to `places-tel-aviv.json` confirmed minimal (~18 lines, coordinates only, matching the claimed targeted-edit approach after the reported json.dump false start).
+- **Made the blurb-branch scoping decision** (explicitly mine, flagged in the prior dispatch as not `ios-developer`'s to resolve): rather than invent new curated content or leave the demo permanently blurb-less, extended the exact precedent this project already used and accepted once — T-040's own earlier disclosed-placeholder pattern (C2a). One `[PROVISIONAL]`-marked blurb, hand-added to the real `florentin` Hood (already anchoring 3 of T-033's demo places), reusing its own old placeholder copy rather than writing anything new. Framed explicitly as a temporary Phase-1 fixture decision, cheap to revise, not a curated-content decision.
+- **Dispatched (via `main`), sequenced:** (1) `ios-developer` for the single-Hood blurb edit, told explicitly not to touch geometry/other Hoods and to use a targeted edit given the file's size (16k+ lines) rather than repeat the earlier full-rewrite near-miss; (2) `ios-code-reviewer` for a fast re-review (not a full one) of the combined diff since the last REQUEST CHANGES — the ✕ button, the D4 test, the 9-coordinate reposition, and the new blurb edit together. This is the explicit last gate before `qa`.
+- **Updated `BOARD.md`** (both T-033 rows) to record the verified fix landing, the blurb decision and its rationale, and the fast-re-review dispatch. Posted the same to Linear `PAS-13`.
+- **Left behind:** waiting on the fast re-review verdict. If clean, T-033 and T-040 (already code-review-approved) move to `qa` together — the joint-qa decision made several entries back still stands.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-07-31 — ios-developer — T-033/PAS-13 fix pass: ✕ dismiss control, D4 display-string test, real-Hood fixture reposition
 
 - **Ask:** bounced back from `ios-code-reviewer`'s REQUEST CHANGES on `473f325` (review commit `6d0f157`) plus one unrelated issue `chief-of-staff` found independently while processing that review — two unrelated problems bundled in one dispatch, per the entry above.
