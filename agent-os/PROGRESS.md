@@ -13,6 +13,17 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 qa FAIL processed; own dispatch error acknowledged; fix pass dispatched back to build
+
+- **Did — processed the verdict:** `qa` FAIL (Blocker) on the joint T-033/T-040 pass (`671d6c2`, full plan/results in `prds/hood-place-detail/TEST-PLAN.md`). Confirmed the two blocking findings directly rather than only from the report: read `MapScreen.swift` lines 110-135 and confirmed `.environment(placeCatalog)`/`.environment(detailRouter)`/`.environment(savedPlacesStore)` are applied at lines 125-127 immediately before `.sheet(isPresented:)` at line 129, matching the crash description exactly; read `PlaceLayer.swift` in full and confirmed it has no zoom-gating conditional anywhere, unlike `HoodLayer.swift`'s `showsName` gate (grepped both files side by side) — matches the "pins visible at every zoom level" finding exactly, contradicting `hood-dataset/TRD.md` §3.3/§8 D5.
+- **Acknowledged my own error, not buried:** my `qa` dispatch pinned `passenger-code` to `a5351ed` — that hash is actually a `passenger-brain` commit (the `ios-code-reviewer` fast-re-review record), not a `passenger-code` one. `qa` caught this itself (`git log` showed no such commit in `passenger-code`), correctly tested against actual `HEAD` (`23dd6d5`) instead of silently guessing, and flagged the discrepancy rather than either failing the dispatch or quietly substituting. Recorded this in both Linear comments and `BOARD.md` rather than letting it pass — going forward, cross-repo commit hashes need the repo named alongside them, not just the hash, given how easy this mixup was.
+- **Posted the full verdict to Linear** (`PAS-13` primary with full detail, `PAS-17` cross-reference noting neither bug is T-040's fault — both are `MapScreen`/`PlaceLayer` client-code issues). Updated `BOARD.md` (all 4 T-033/T-040 rows) to record the FAIL, both bugs, what passed, and what's still blocked-untested.
+- **Dispatched `ios-developer`** (via `main`), correctly pinned to `passenger-code` `23dd6d5` this time: root-cause and fix the SwiftUI environment-propagation crash (not just re-inject environment objects redundantly if a cleaner single-point fix exists), add the zoom gate to `PlaceLayer.swift` reusing `MapScreen`'s existing `showsNames` boolean, add the UI test `qa` recommended (tap a pin, assert the sheet actually renders), and verify manually via the same clean-build/clean-install method `qa` used before committing.
+- **Left behind:** waiting on the fix-pass report. Full re-`qa` needed once it lands — this was a genuine blocker, not a minor gap, so no partial credit toward `acceptance`.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — qa — T-033/PAS-13 + T-040/PAS-17: first behavioral QA pass — **FAIL, Blocker.** App crashes on every tap that opens either sheet
 
 - **Did:** wrote `prds/hood-place-detail/TEST-PLAN.md` against both TRDs' actual requirement list before executing (per L-018), then ran it. Confirmed checkout state first: the dispatch named `a5351ed` as the pinned `passenger-code` commit, but that hash is actually a `passenger-brain` commit (the `ios-code-reviewer` fast-re-review record) — `passenger-code` HEAD is `23dd6d5` (T-040 real geometry `72f4fc7` + T-033 build `473f325` + fix pass `307e5af` + florentin blurb hand-edit `23dd6d5`), which is the tree `a5351ed`'s own review text describes verifying. Tested against `23dd6d5`, noted the discrepancy rather than silently substituting.
