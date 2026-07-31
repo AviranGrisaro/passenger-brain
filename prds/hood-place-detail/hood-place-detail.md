@@ -29,6 +29,7 @@
    - [ ] Tapping a Hood polygon, or the Hood button when it is showing, opens the same sheet — one destination, more than one door.
    - [ ] The map stays visible and interactive behind the sheet; the sheet is never a full-screen push.
    - [ ] Dismissing returns to the map with camera and selected hour unchanged.
+   - [ ] **Added at acceptance 2026-08-01.** At any zoom where place pins are not drawn, a tap inside a Hood opens **that Hood's sheet** — never a place modal for a pin the user cannot see. Concretely: at the app's default city-wide camera, tapping the middle of Florentin, Kerem HaTeimanim or Neve Tzedek opens that Hood's sheet.
 
 2. **Hood sheet content.**
    - [ ] Shows the Hood name and its hand-curated blurb (decision #10).
@@ -41,6 +42,7 @@
    - [ ] Shows name and category.
    - [ ] Offers a save action and a route action, and nothing else that navigates away.
    - [ ] Opens directly on one tap of a pin or a Hood-sheet row — never a two-step preview (`design/map-rendering-spec.md` §4).
+   - [ ] **Added at acceptance 2026-08-01.** No tap opens a place modal unless that place's pin is visible on screen at the moment of the tap. Tap resolution and pin rendering share one zoom gate; a hit target with no drawn pin is a failure of this bullet.
 
 4. **One primary action, not three equal ones.**
    - [ ] Exactly one action in the modal reads as primary — unique colour and ≥1.5× the secondary's weight (`design/design-principles.md` §2, Von Restorff).
@@ -99,4 +101,5 @@
 | 2026-07-30 | Localness-label copy resolved to "tourist-heavy spot" | Decision #42, at PAS-9 acceptance. Only the copy — the mechanic and filter placement were reconciled separately, below |
 | 2026-07-30 | Data-sourcing bullet added: the blurb column and the whole `places` table are named as other PRDs' deliverables | Standing rule, founder-direct 2026-07-30. The PRD stated the *shape* of both and left "who authors the rows" implicit; reqs 2 and 6 cannot pass against an empty dataset |
 | 2026-07-30 | Three stale PAS-6 exclusions rewritten: tag mechanic (#37), filter placement (#41), closed-place save (#38) | All three resolved live by Aviran; the tag line and the closed badge now have owning PRDs. Scope unchanged — only the reasons and the pointers |
+| 2026-08-01 | `acceptance` **REJECT**. Two pass/fail bullets added (req 1, req 3) making pin-render/tap-resolution parity falsifiable | The Bug-2 fix gated pin *rendering* on zoom but left tap *resolution* ungated, so at the default camera every populated Hood's polygon-tap door resolves to an invisible pin. No requirement said hit target and drawn pin must agree, so neither code review nor QA had anything to fail it on (L-009) |
 | 2026-07-31 | Build-Phase-1 scoping call: **the bundled seed is authoritative for Phase 1**; the live Supabase fetch is built but inert. Phase-1 fixture specified as a two-file data need. No requirement added, cut, or changed | `BOARD.md` V1 build-phase sequencing. All 7 P0s are demoable and QA-able against a fixture, so nothing in this PRD defers to Phase 2 — but "fake data" without a stated quality floor produces a demo that fails req 2's blurb bullet by omission |
