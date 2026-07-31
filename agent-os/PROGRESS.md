@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-08-01 — chief-of-staff — T-033/T-040 code-review fully closed; dispatched jointly to `qa`
+
+- **Did:** processed `ios-code-reviewer`'s fast re-review verdict (`a5351ed`, APPROVE, clean — all 4 items independently re-verified: ✕ button, all 9 fixture coordinates, the `florentin` blurb edit's exact scope, fresh full-suite run). This retires the original REQUEST CHANGES from `6d0f157`. Posted the verdict to Linear `PAS-13`/`PAS-17`, updated `BOARD.md` (both T-033 rows, both T-040 rows) to record code-review as fully closed for both tasks' Build-Phase-1 slices.
+- **Dispatched `qa`** (via `main`) for the first real behavioral QA pass in this project's data chain — T-033 and T-040 together, since T-040's slice has no UI of its own. Pinned the checkout explicitly to `a5351ed` (the exact commit this whole review chain verified) rather than letting `qa` run against whatever's newest, since this tree has moved fast today. Named 7 specific areas worth deliberate attention given everything that happened getting here: the Build-Phase-1 source pin (network-inactivity, not just the unit test), the blurb branch on `florentin` vs. the no-blurb branch elsewhere, place pins actually rendering inside their real Hood boundary, the ✕ control end-to-end, swipe-to-dismiss not desyncing, an empty real Hood's sheet, and a basic VoiceOver pass. Told `qa` to write its test plan against the TRD's actual requirement list first, per this project's own L-018 lesson.
+- **Left behind:** waiting on the QA verdict. If PASS, routes to `product` for `acceptance`; if FAIL, back to `build` with `qa`'s findings.
+- **Git:** committed `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths). Committed, not pushed (`PAS-21`).
+
+---
+
 ### 2026-08-01 — ios-code-reviewer — T-033/PAS-13 fast re-review of combined diff since `6d0f157`: **APPROVE**
 
 - **Scope:** fast re-review, not a full review — the two commits since my last REQUEST CHANGES verdict (`6d0f157`, blocking on `HoodSheet`'s missing ✕). `307e5af` (✕ button, `PlaceCategoryTests.swift`, 9-coordinate reposition) and `23dd6d5` (single `florentin` blurb hand-edit). All 3 original review items were already fully specified going in — confirming execution matched intent, not re-deriving requirements.
