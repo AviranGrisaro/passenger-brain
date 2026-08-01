@@ -27,6 +27,7 @@ Scope changes come from Aviran editing the strategy doc. Not from a PRD, not fro
 | `strategy/decisions.md` | Locked decisions, numbered, with dates | Append; never rewrite history |
 | `prds/<feature-slug>/<feature-slug>.md` | One PRD per feature, flat — no phase folder | Phase goes on the `**Phase:**` header line |
 | `design/` | Design specs, principles, review notes | |
+| `analytics/EVENTS.md` | Canonical event taxonomy + Supabase analytics tables (`app_installs`, `app_sessions`, `app_events`) | Owned by `analytics-engineer`. Per-feature detail lives in each PRD's own `ANALYTICS.md` |
 | `database/migrations/` | Supabase SQL migrations, `NNN_name.sql` | Starts at `001`. Applying is Aviran-gated (he holds the credentials) |
 | `agent-os/` | `BOARD.md`, `PROGRESS.md`, `LESSONS.md`, `README.md`, `ONBOARDING.md`, `ACCOUNTS-AND-COSTS.md` | Team state and team memory |
 | `agent-os/agents-mirror/` | Backup of the workspace-root `.claude/agents/` | See the live↔mirror rule below |
