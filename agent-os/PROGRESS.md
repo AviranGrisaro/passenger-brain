@@ -13,6 +13,19 @@ Entry format:
 
 ---
 
+### 2026-08-02 — coordinating session (main) — FOUNDER-DIRECT STUB (L-002): T-032 Q7/Q8/Q3 ruled
+
+- **Provenance:** founder-direct, live chat with the coordinating session (`main`) this session, 2026-08-02 — not routed through `chief-of-staff` (that agent's own `aviran-review` gate for T-033/T-040 is separately unresolved this same session, see the entry below; this is a different gate — `design-review` on the T-032 PRD's open questions — recorded directly by the session actually holding the live conversation).
+- **Verbatim request:** "approve edge zone Q7, keep hint Q8, one shared hour Q3"
+- **As I read it (restatement, not Aviran's own words — labelled per L-013):** three separate rulings on `prds/time-slider/time-slider.md`'s open Q7/Q8/Q3 —
+  - **Q7 — ratifies the 24pt edge capture zone** as a stated, accepted departure from req 6's 44pt touch-target floor (design spec's own argument: edge-anchored target can't overshoot past the bezel; gesture axis is 688–708pt, far above the floor; req 6's own bullet keeps all 13 hours reachable without the edge slide as a fully-conforming fallback).
+  - **Q8 — keeps the persistent edge idle hint**, adopting `product`'s own recommendation verbatim (`time-slider.md` v6 log): widens this PRD's Description line ("not permanent chrome") to admit the hint as a stated exception, rather than dropping the hint to keep the line as originally written.
+  - **Q3 — confirms one shared hour value** across both edges and the heat button, not two independent sliders — the mockup's existing demonstration (edge drag then heat-button readback shows the same value) is now the confirmed behavior, not an **[ASSUMPTION]** pending his call.
+- **Did (this stub only):** recorded verbatim before editing the PRD, per L-002. PRD edit (Description line, Open questions, Decisions log) follows in the same commit as this stub.
+- **Left behind:** T-032 still needs its BOARD.md/Linear state advanced past `design-review` (all three routed questions now closed) — that's `chief-of-staff`'s lifecycle-state call, not made by this stub. The PRD text itself is authoritative regardless of when the board state catches up; `chief-of-staff` or any other session can verify these rulings by reading the PRD's Decisions log directly rather than trusting this stub's say-so.
+
+---
+
 ### 2026-08-02 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): "change the heat icon to flame"
 
 - **Provenance:** founder-direct, via hilos/@chief (not a live interactive chief-of-staff chat — routed through the hilos relay per `chief-of-staff.md`'s hilos section).
