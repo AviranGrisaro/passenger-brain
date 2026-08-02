@@ -633,7 +633,7 @@
         ]
       ],
       "blurb": "[PROVISIONAL] Tel Aviv's street-art-and-nightlife district — graffiti-covered walls, converted warehouses, and bars that fill up late.",
-      "isTouristTrap": null,
+      "isTouristTrap": true,
       "designatedForProgression": false,
       "provenance": {
         "source": "osm",
@@ -3565,7 +3565,7 @@
         ]
       ],
       "blurb": null,
-      "isTouristTrap": null,
+      "isTouristTrap": true,
       "designatedForProgression": false,
       "provenance": {
         "source": "osm",
@@ -6365,7 +6365,7 @@
         ]
       ],
       "blurb": null,
-      "isTouristTrap": null,
+      "isTouristTrap": false,
       "designatedForProgression": false,
       "provenance": {
         "source": "osm",
