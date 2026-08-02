@@ -10,7 +10,7 @@ Strategy, verbatim: *"Nothing else matters until we know if a real person reopen
 
 ## Identity constraint (load-bearing)
 
-**V1 has no accounts.** Every table keys on an anonymous **`install_id`** — the same identifier `local_qa_answers` already uses (`prds/tourist-trap-flag/tourist-trap-flag.md`). No user id, no email, no cross-install identity. This is not a simplification to revisit later; it's the same "no accounts/login" constraint the whole product is built under (`CLAUDE.md` standing prohibitions).
+**V1 has no accounts.** Every analytics table keys on an anonymous **`install_id`**, the same **pattern** `local_qa_answers` uses (`prds/tourist-trap-flag/tourist-trap-flag.md`) — not the same value. **`local_qa_answers.install_id` is a deliberately separate identifier, with no FK to `app_installs`, ever** (`prds/tourist-trap-flag/TRD.md` §8 D9, ratified by `analytics-engineer` 2026-08-02, see Decisions log): it carries its own install-scoped UUID so a physical-visit record can never be joined to a person's full behavioural stream — the correlation surface neither table exposes alone. No V1 KPI below reads `local_qa_answers`; Local-QA health is computed entirely from `app_events` rows (`local_qa_toast_answered`/`local_qa_toast_ignored`). No user id, no email, no cross-install identity anywhere. This is not a simplification to revisit later; it's the same "no accounts/login" constraint the whole product is built under (`CLAUDE.md` standing prohibitions).
 
 ## Tables
 
@@ -19,7 +19,7 @@ One row per device install. Written once, on first launch.
 
 | Column | Type | Notes |
 |---|---|---|
-| `install_id` | uuid, PK | Client-generated, persisted in SwiftData. Lost on reinstall — same loss Places/Passport already accept. |
+| `install_id` | uuid, PK | Client-generated, persisted client-side. **Not SwiftData** — `passenger-code` has zero SwiftData/`@Model` usage anywhere; every shipped store (e.g. `SavedPlacesPersistence`) is an actor over Application Support JSON, and this table's client-side counterpart follows the same pattern. Lost on reinstall — same loss Places/Passport already accept. |
 | `first_seen_at` | timestamptz | First cold launch. |
 | `platform` | text | `ios` only in V1. |
 | `app_version` | text | For version-correlated funnel breaks. |
@@ -145,6 +145,12 @@ Every event below is a row in `app_events`. Grouped by the PRD that specs the in
 - Raw search query text, raw GPS coordinates in event properties, anything that would require accounts — all excluded per the Privacy section in the `analytics-engineer` agent file (`.claude/agents/analytics-engineer.md`).
 - Scenic Walk and TikTok import events — both features are still held (Aviran's ship-vs-slip / ToS calls), not written PRDs yet. Add their events once a PRD exists, not before.
 - `live-events-pipeline`'s ingest-side metrics (source freshness, dedup rate) — that's `data-engineer`'s operational monitoring, not user-facing product analytics, and belongs in that PRD's own TRD, not here.
+
+## Decisions log
+
+| Date | Decision | Why |
+|---|---|---|
+| 2026-08-02 | **`analytics-engineer` ruling on `prds/tourist-trap-flag/TRD.md` §8 D9: agree, no override.** `local_qa_answers.install_id` stays a deliberately separate identifier from `app_installs.install_id`, never FK'd. Line 13 corrected from "the same identifier" to "the same pattern, different value on purpose"; line 22's "persisted in SwiftData" corrected — `passenger-code` has zero SwiftData usage. | No KPI in this doc's rollup list reads `local_qa_answers` — Local-QA health is computed entirely from `app_events` (`local_qa_toast_answered`/`local_qa_toast_ignored`), both already keyed on the analytics `install_id`. Nothing here needs the join a shared id would buy, and unifying would create a correlation surface (physical-visit history joined to full in-app behavioural stream) that §3.3's own minimisation design exists to prevent. If a future KPI genuinely needs "do local-QA answerers retain better," the answer is analyzing the already-catalogued `local_qa_toast_answered` event inside `app_events`, not merging identifiers. |
 
 ## Next steps
 
