@@ -273,6 +273,19 @@ Entry format:
 
 ---
 
+### 2026-08-02 — chief-of-staff — trd-review batch processed (T-032 split/back to trd; T-034/T-035/T-036 claimed for trd-review); all five source commits independently verified
+
+- **Context:** a "coordinator" relay reported five results for agents I'd dispatched directly (T-032's two `trd-review` verdicts, three architect TRDs for T-034/T-035/T-036), citing specific commit hashes and inviting independent verification rather than asking me to act on its summary.
+- **Did:** read all five commits' full diffs myself before acting (`27faac4`, `7a1f99c`, `7c4490f`, `a6c1c73`, `0051ef0`) — confirmed each exists, is authored on this exact content (not just a matching hash), and that the relay's summary was faithful (in places, less detailed than the actual entries — no findings were invented or omitted in translation). This is the same standard applied to the earlier `eb1cb7b`/`1e1fe57` verification, now run five more times rather than assumed to extend from precedent.
+- **T-032: net REQUEST CHANGES.** `ios-developer` APPROVE WITH MINORS, `ios-code-reviewer` REQUEST CHANGES (blocking: §9 row 7/C13 never verifies camera immobility during a normal in-band vertical edge drag — the gesture the task exists to ship — only inert/outside-band cases are checked). Per T-032's own routing both signoffs are required, so one REQUEST CHANGES nets the whole review. Routed back to `trd`, re-dispatched `architect` for a v3 patch addressing the blocking finding plus three non-blocking ones from both reviews (coordinate-space fix, two citation/granularity nits).
+- **T-034, T-035, T-036: claimed for `trd-review`, review pairs dispatched.** T-034 and T-036 are iOS-only (`ios-developer` + `ios-code-reviewer` each). T-035 is not — three pairs needed (`ios-developer`+`ios-code-reviewer` for the bulk, `data-engineer`+`code-reviewer` for A1's fake-flag-seeding-through-the-generator step); `developer`/B1 (`007_local_qa_answers.sql`) stays explicitly undispatched, HELD for Build Phase 2 per the TRD's own routing.
+- **Not yet dispatched, flagged for `product`:** T-034's D1/D4/D8/D9/D2 findings, T-035's D3/D5 findings, T-036's D4/D5/D7/row-5 findings — all architect calls correctly routed to `product` rather than decided unilaterally, none yet given to `product` as an actual dispatch. Next action once the current `trd-review` round reports.
+- **Also noted, not yet acted on:** the relay flagged a real concurrency hazard (three architect sessions writing `BOARD.md`/`PROGRESS.md` in the same minutes; T-035's own commit self-reports catching and reverting an accidental clobber of T-034's commit before it landed cleanly). Worth a note to `project-manager` — not filed this pass, flagging here so it isn't lost.
+- **Left behind:** T-033/T-040 remain untouched at `aviran-review` — unaffected by any of this. T-037 stays queued (unblocked by T-036's TRD, not yet claimed — next once a `trd-review` slot frees). T-038 still unclaimed at `trd`, not yet dispatched.
+- **Git:** `agent-os/BOARD.md` (T-032/034/035/036 rows, both tables). Committed, not pushed.
+
+---
+
 ### 2026-08-02 — chief-of-staff — T-032 Q7/Q8/Q3 verified independently, claimed, `architect` dispatched
 
 - **Context:** a "coordinator" message asked me to advance T-032 past `design-review` on the strength of commit `eb1cb7b` (Q7/Q8/Q3 ratification) and `1e1fe57` (pre-code design gate retirement), explicitly inviting independent verification rather than asking me to trust its description — a materially different ask than the still-unresolved T-033/T-040 `aviran-review` request earlier this session, which offered no artifact at all, only a claim.
