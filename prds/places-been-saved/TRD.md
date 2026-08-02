@@ -1,11 +1,20 @@
 # Places — Been & Saved — TRD
 
-**Task:** T-036 · **Linear:** `PAS-27` · **Status:** v1 — ready for `trd-review`
-**Owner:** architect · **Date:** 2026-08-02
+**Task:** T-036 · **Linear:** `PAS-27` · **Status:** v2 — ready for `trd-review` re-run
+**Owner:** architect · **Date:** 2026-08-02 · **Revised:** 2026-08-02 (v2)
 **PRD:** [`places-been-saved.md`](./places-been-saved.md) (Draft v1)
 **Design reference:** [`design/phase-1/places-been-saved-design.md`](../../design/phase-1/places-been-saved-design.md) + its mockup — **informational input, not a gate.** The pre-code design gate was retired 2026-08-02 (`BOARD.md` lifecycle section). Where this TRD and that spec disagree, this TRD wins and says so (§8).
 **Builds on:** [`prds/hood-place-detail/TRD.md`](../hood-place-detail/TRD.md) (T-033, shipped and accepted — `Place`, `PlaceCatalog`, `SavedPlacesStore`, `PlaceLayer`, `DetailRouter`) and [`prds/time-slider/TRD.md`](../time-slider/TRD.md) (T-032, `trd-review` — the chrome layering rule this feature's container sits inside). Neither is restated.
 **Adjacent, not built here:** [`prds/places-dataset/TRD.md`](../places-dataset/TRD.md) (T-042) owns the `places.permanently_closed` column and migration `004_places.sql`.
+
+**What changed at v2 (2026-08-02).** `trd-review` came back **REQUEST CHANGES** from both signoffs — `ios-developer` (`passenger-brain 1002595`) and `ios-code-reviewer` (`passenger-brain 158a5f3`…`d3fa249`) — on the same blocking finding, independently derived. This revision resolves exactly those findings and nothing else. No decision, contract or build step is redesigned; D1–D9 all stand as written at v1.
+
+| # | Finding | Raised by | Fix in v2 |
+|---|---|---|---|
+| 1 | **Blocking.** §4.5 declared `enum NavSurface: Equatable { case heat, places }` and §2.2 claimed an "identical contract, either build order" with T-032. **The two documents specified different types.** T-032's real, live §4.1 is `enum NavSurface: String, CaseIterable, Sendable, Identifiable { case search, heat, places, profile }`, built **unconditionally** at its C1 with no "skip if it exists" clause anywhere in its text — it ships the full four-member set up front precisely to stop T-036/T-037/T-038 each inventing a private type (`ux-flows.md` §2.1's lock; T-032 §7's dependency-direction line). So in the live ordering (T-036 could land first) T-036's own C6 would create a narrower 2-case stub that T-032's C1 then has to restructure — 2→4 cases, three added conformances, a changed raw representation. That is exactly the restructuring §2.2 promised would not happen, promised unilaterally: there is **no reciprocal "whoever builds second doesn't restructure" language on T-032's side** | `ios-developer`, concurred independently by `ios-code-reviewer` | §4.5 now declares T-032 §4.1's contract **verbatim** — all four cases, real conformances. §2.2 is rewritten to state the dependency as it actually is (T-036 is a consumer of a type T-032 owns and fully specifies, not a co-author of it). C6's conditional now reads "if the file doesn't exist yet, create it exactly per T-032 §4.1; otherwise add nothing — `.places` is already there." §10's risk row restated to match |
+| 2 | Should-fix, non-blocking. §3.4's "constraint the real detector inherits" list pinned the record *shape* but not the **update** invariant — keep-the-higher-kind on a revisit — which today exists only as a Phase-1 fixture-authoring rule (§4.2, tested by C4). PRD req 3 bullet 4 ("revisiting a Been place changes no label") depends on that invariant surviving into the real detector's write path at Phase 2 | `ios-code-reviewer` | One line added to §3.4 |
+
+**Not fixed here, and why.** `ios-code-reviewer` also asked for a one-line correction to **T-032's own D1** prose ("the rest" slot into `MapNavRow` → Search and Profile only; Places is bucket-2 chrome, per D7) and `ios-developer` recommended a symmetric no-op note on **T-032's C1**. Both are edits to `prds/time-slider/TRD.md`, which **has another session's uncommitted v3 work in the shared working tree right now** — staging it would sweep in that session's in-flight text and attribute it to this pass (`CLAUDE.md` rule 2, the exact 2026-07-31 `0dd3d21` failure). Left for T-032's in-flight v3 pass to fold in; named in §10 and in this pass's worklog entry so it is owned, not dropped. **T-036 does not depend on either edit landing** — after this revision T-036 declares T-032's type verbatim and creates nothing that T-032 would have to restructure, in either build order.
 
 ---
 
@@ -70,7 +79,7 @@ Passenger/
     MapScreen.swift             MODIFIED — hosts the surface, the button, the teardown rule
     PlaceLayer.swift            MODIFIED — isListed → dashed ring + a11y clause (§4.9)
     PlacesButton.swift          new — bucket-2 chrome button (D7)
-    MapChromeState.swift        shared with T-032 C1 — see §2.2
+    MapChromeState.swift        NOT MODIFIED — T-032's type (its C1/§4.1). Created verbatim only if T-036 builds first; see §2.2
   Support/
     BuildPhase.swift            MODIFIED — + visitsAreSeeded (D2)
 Resources/
@@ -82,14 +91,20 @@ Assets.xcassets/
 
 Xcode synchronized file groups are on — dropping files in the folder is enough, no `project.pbxproj` edit.
 
-### 2.2 The one shared file with T-032, and how to build either order
+### 2.2 The one shared file with T-032 — T-032 owns it, T-036 consumes it (corrected at v2)
 
-`MapChromeState` (holding `NavSurface` and the one-surface-at-a-time rule) is **T-032's C1**. T-036 needs it and adds one case. Neither task should wait on the other, so the contract is pinned identically in both TRDs (§4.5 here, §4.1 there):
+`MapChromeState.swift` (holding `NavSurface` and the one-surface-at-a-time rule) is **T-032's C1 and T-032's contract**, specified in full at its §4.1. T-036 is a **consumer**, not a co-author: it adds no case, no conformance and no method to that file, because T-032's type already contains `.places`.
 
-- **If T-032's C1 has landed when T-036 builds:** T-036 adds `case places` to `NavSurface` and nothing else to that file.
-- **If T-036 builds first:** it creates `MapChromeState` to exactly that contract with `case places` only, and T-032 adds `case heat`.
+That is not a courtesy reading of T-032's TRD, it is what the document says. T-032's C1 is unconditional and its §4.1 ships the whole four-member set (`search, heat, places, profile`) up front, deliberately — `ux-flows.md` §2.1 locks the set, and T-032's own commentary says the four members exist "to stop T-036/T-037/T-038 each inventing a private boolean." Its §7 dependency-direction line says the same from the other end: the downstream tasks add their own *views*, not their own state type.
 
-Whoever builds it second must not restructure it. This is the only file the two tasks share; every other file in §2.1 is T-036's alone.
+So the build-order rule is one-directional, not a negotiation:
+
+- **T-032's C1 has landed when T-036 builds (the expected order):** T-036 imports and reads `MapChromeState`. **Zero edits to that file.** `.places` already exists.
+- **T-036 builds first:** it creates `MapChromeState.swift` **exactly per T-032 §4.1 — all four cases, all four conformances, verbatim** (reproduced at §4.5 so `ios-developer` does not have to open the other TRD to get it right). T-032's C1 then finds the file already correct and adds nothing to it.
+
+Either way nobody restructures anything, because there is only ever one shape of this type in the tree. **v1 got this wrong** — it specified a narrower 2-case `Equatable` enum and promised, on T-032's behalf, that whoever built second wouldn't restructure it. T-032 never made that promise and its C1 would have had to break it. `ios-developer` and `ios-code-reviewer` both caught it at `trd-review`; the fix is to state T-032's real contract, not to negotiate a new one.
+
+This is the only file the two tasks share; every other file in §2.1 is T-036's alone. **If T-032's §4.1 changes before either task builds, this section and §4.5 are stale by definition** — T-032 is the source, and a `trd-review` re-run on T-036 should diff the two before approving.
 
 ### 2.3 Boundaries — who is allowed to know what
 
@@ -182,6 +197,7 @@ A Been/Visited set **is** location history: the list of real places a person phy
 - **Phase 1 stores nothing derived from the device's location.** The fixture is read-only bundle content; `VisitedPlacesStore` has no write path, no persistence file, and no `CoreLocation` import. §9 row 5 checks this at review, and it is the strongest form of "degraded permission never breaks this feature": there is no permission-dependent code path to degrade.
 - **`saved-places.json` stays exactly as shipped** — slugs, no coordinates, no timestamps. This task adds nothing to it (D4 is chosen partly to keep that true).
 - **The constraint the real detector inherits, written down now so it is not re-litigated later:** when the shared detector lands, the device-local record is `{place_id, kind, first_observed_at}` and nothing more — never a coordinate, never a dwell track, never a second visit's timestamp. Anything richer is a movement log, and this feature has no requirement that needs one.
+- **The update invariant it inherits with it (added at v2):** on a repeat observation of a `place_id` already held, **keep the higher `VisitKind` and drop the other — never overwrite, never append a second row.** In Build Phase 1 this is a fixture-authoring rule enforced at load (§4.2, tested by C4); at Phase 2 it becomes the detector's write path, and PRD req 3 bullet 4 ("revisiting a Been place changes no label") is satisfied by nothing else. Written here rather than only in §4.2 so it survives the fixture being swapped out.
 - **PRD open question answered: no server copy of provenance in V1.** Uploading a per-device Been set would create exactly the per-user movement log the strategy's no-accounts posture avoids by accident today. If the localness pipeline later needs this signal, that is a new PRD with its own privacy review — not a field quietly added here.
 
 ---
@@ -300,17 +316,28 @@ The whole row is one tap target (`min-height` 64pt); nothing inside it is indepe
 
 `PlacesListOverlay` is a `ZStack` layer at T-032's z5, **not** `.sheet()` — same reason and same construction as T-032's D2, reused rather than re-derived: a system sheet covers the nav row and breaks `ux-flows.md` §2.1's direct-switch rule.
 
+The chrome state this container hangs off is **T-032's, reproduced verbatim from its §4.1** (`prds/time-slider/TRD.md`) so `ios-developer` builds against one shape whichever task lands first. T-036 adds nothing to it — `.places` is already a member (§2.2):
+
 ```swift
-enum NavSurface: Equatable { case heat, places }   // §2.2: whichever task lands first declares its own case
+// T-032 §4.1, verbatim. T-036 does not modify this type.
+enum NavSurface: String, CaseIterable, Sendable, Identifiable {
+    case search, heat, places, profile
+    var id: String { rawValue }
+}
 
 @MainActor @Observable
 final class MapChromeState {
     private(set) var presented: NavSurface?
-    func toggle(_ surface: NavSurface)   // same surface → dismiss; different → swap, no intermediate nil frame
-    func dismiss()
     var isPresenting: Bool { presented != nil }
+
+    /// Exclusivity (`ux-flows.md` §2.1): presenting a surface replaces whatever
+    /// was open — it never stacks. Presenting the already-open surface closes it.
+    func toggle(_ surface: NavSurface)
+    func dismiss()
 }
 ```
+
+`.search` and `.profile` are T-038's and T-037's and have no view in this task's diff — same rule T-032 states for its own build: a case with no view ships nothing, and `ios-code-reviewer` should reject *view* work for any surface other than `.places` in T-036's diff. `toggle(.places)` on the already-open list dismisses it, but note the D7 consequence: the Places button is bucket-2 chrome and has faded by then, so that path is unreachable by tap in this feature (§2.4). It is still the correct semantic and is what a programmatic switch between surfaces relies on.
 
 Dismissal paths: drag handle (downward `DragGesture` past a threshold), a 44×44pt ✕, and the z3 scrim tap. Entrance/exit transition honours Reduce Motion by collapsing to 0 duration, never by skipping the state change.
 
@@ -462,7 +489,7 @@ Per `architect.md` (L-018): every P0 names a falsifiable check with an observabl
 | A third derived store drifts from its two sources | Avoided by construction (D3). A function cannot be stale |
 | `isListed` degrades pin rendering at Phase 2 scale | Contracted as an O(1) lookup, never a scan over `entries` (§4.3), with a test that the two agree. At a few hundred places this is not a measurable cost; if it ever is, the seam is one function |
 | Adding a field to `PlacesCache` orphans an existing cache file | It cannot — Phase 1 never writes that file, and the decode-failure path already falls through to the seed. Proven by a test (C1), not assumed (§3.2) |
-| `MapChromeState` is built twice, or differently, by T-032 and T-036 | §2.2 pins one contract for both and says who adds which case in either build order. It is the only shared file |
+| `MapChromeState` is built twice, or differently, by T-032 and T-036 | **Restated at v2, after `trd-review` found v1's version of this row was false.** There is one owner (T-032 §4.1) and one shape; §4.5 reproduces it verbatim and C6 makes T-036's step a create-if-absent of *that exact type*, never a narrower one. T-036 adds no case, so there is nothing for T-032's unconditional C1 to restructure in either order. Residual risk: T-032's §4.1 changing after this was copied — §2.2 names diffing the two as a re-review step |
 | The Places icon fading under its own surface reads as broken | D7 — the design spec asserts the same behaviour, three dismissal paths remain, and it is flagged for `product`/`designer` with a one-line reversal |
 | The row's density design can't be fully exercised until T-035 lands | D9, and §9 row 4 names the untested combination rather than passing it by construction |
 | Row sort is not the sort anyone would choose | D4 — deliberate, reasoned against a real migration cost, flagged for `product`, one line to change |
@@ -484,7 +511,7 @@ Ordered. **Every step is `[iOS]`.** No `[Backend]`, no `[Algo/Data]` — see §1
 | C3 | `PlaceProvenance` + `VisitKind` + `PlacesListComposition` (§4.1, §4.3) with the full test matrix: precedence, one-row-per-place, unresolvable-id skip, `isListed` agreement, deterministic sort (§9 rows 1, 2) | **[iOS]** |
 | C4 | `VisitSourcing` + `BundledVisitSource` + `VisitedPlacesStore` + `place-visits-tel-aviv.json` + `BuildPhase.visitsAreSeeded` (§3.3, §4.2). Fixture authoring rule enforced by a test: ≥1 `been`, ≥1 `visited`, ≥1 place in no source; duplicate id keeps the higher kind; missing/corrupt file yields `[:]`, never a crash | **[iOS]** |
 | C5 | `SavedPlacesStore.savedPlaceIDs` — the **only** change to that file. Shipped tests must pass unmodified (§4.2) | **[iOS]** |
-| C6 | `MapChromeState` + `NavSurface.places` — **build only if T-032's C1 has not landed**; otherwise add the one case (§2.2). Exclusivity unit test | **[iOS]** |
+| C6 | `MapChromeState` (§2.2, §4.5). **If `MapChromeState.swift` does not exist yet, create it exactly per T-032 §4.1 — all four cases, all four conformances, verbatim. If it already exists, add nothing: `.places` is already a member and this task modifies that file in neither direction.** Exclusivity unit test (`toggle` swaps rather than stacks; `toggle` on the presented surface dismisses) — the test is T-036's regardless of who wrote the type | **[iOS]** |
 | C7 | `PlacesButton` in the bucket-2 chrome cluster beside `NearMeButton`; fade + `.allowsHitTesting(false)` driven by `chrome.isPresenting` (§2.4, D7) | **[iOS]** |
 | C8 | `PlacesListOverlay` at z5 — drag handle, 44×44pt ✕, scrim tap, Reduce-Motion-aware transition (§4.5) | **[iOS]** |
 | C9 | `PlacesListRow` — glyph, name, provenance word, closed badge with `nosign`; the reserved empty tourist-heavy slot with T-035's comment (§4.4, D9) | **[iOS]** |
@@ -497,6 +524,6 @@ Ordered. **Every step is `[iOS]`.** No `[Backend]`, no `[Algo/Data]` — see §1
 **`trd-review` sign-off needed from: `ios-developer` + `ios-code-reviewer` only.** `developer`, `code-reviewer` and `data-engineer` have no step to review — this TRD writes no SQL, no RLS, no pipeline, and no algorithm.
 
 **Three cross-checks worth one explicit pass at review:**
-- **T-032's TRD** against §2.2 and §2.4 — the shared `MapChromeState` contract, and D7's correction to T-032's D1 about which chrome bucket this button lives in.
+- **T-032's TRD** against §2.2/§4.5 and §2.4 — **diff §4.5's reproduced block against T-032's live §4.1 character by character** (that mismatch is what sent v1 back), and re-read D7's correction to T-032's D1 about which chrome bucket this button lives in. **Two one-line edits are owed to T-032's own TRD and are not made here** — its D1 prose still says the remaining nav buttons ("the rest") slot into `MapNavRow`, which D7 corrects for Places; and its C1 would read better with a symmetric "no-op if `MapChromeState.swift` already exists with this exact shape." Both belong to T-032's in-flight v3 pass; that file had another session's uncommitted work in the shared tree when this revision was written, so touching it would have violated `CLAUDE.md` rule 2. **Neither is a blocker for T-036** — after v2, T-036 creates nothing T-032 would restructure.
 - **T-042's TRD** against §3.2 — this task widens `PlacesAPI`'s `select=` to include `permanently_closed` and only that column; T-042's §4 shows the fully-widened select and its own reviewers should confirm the split is as its amendment table intends.
 - **`product`** on D4 (sort), D5 (no offline banner), D7 (button placement and the fade consequence), and §9 row 5's honest statement that req 5's Been/Visited bullets are checked as absence-of-a-sensor-path in Phase 1, not as runtime behaviour.
