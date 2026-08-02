@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-08-02 — chief-of-staff — FOUNDER-DIRECT STUB (L-002): "change the heat icon to flame"
+
+- **Provenance:** founder-direct, via hilos/@chief (not a live interactive chief-of-staff chat — routed through the hilos relay per `chief-of-staff.md`'s hilos section).
+- **Verbatim request:** "change the heat icon to flame."
+- **As I read it (restatement, not Aviran's own words — labelled per L-013):** no SF Symbol or asset anywhere in `passenger-code` or the design docs is currently named/used as a distinct "heat icon" — checked directly (`grep -rn systemName passenger-code/Passenger`, `HeatPalette.swift`/`HeatBand.swift` are a color+opacity table, not an icon). The only "heat" UI element on record at all is the **heat button** in T-032/PAS-15's nav row (`design/phase-1/time-slider-design.md`, `prds/time-slider/TRD.md`), which opens the heat/time-slider modal — its glyph is explicitly unpinned in text (`TRD.md` §8 D1: "the per-icon visual treatment — glyph size, background shape, material, spacing... No design doc pins it in text"). Reading this request as Aviran specifying that glyph as SF Symbol **[ASSUMPTION]** `flame` (exact variant — `flame` vs `flame.fill` — not stated by him, left to designer to match the app's existing icon idiom) is **[ASSUMPTION]** — a plausible but unconfirmed target, since T-032 is the only thing in the app called "heat" that has a glyph to set at all, and it happens to be sitting at `design-review` (his own gate) right now.
+- **Left behind:** posting this to Linear PAS-15 and relay-dispatching `designer` to pin the glyph in the design spec, per the ambiguity routing in this brief (unbuilt UI element, glyph not pinned anywhere, touches the heat-button's visual language). Not dispatching `ios-developer` — no code exists yet for T-032's nav row to swap an icon in.
+
+---
+
 ### 2026-08-02 — retrospective — nightly run, covering the missed nights of 07-31 and 08-01: 6 lessons (L-020…L-025), 4 applied + L-018 upgraded, 1 promoted to `verified`
 
 - **Ran late and wide, deliberately.** 08-02 read as a zero-activity day at 19:04 (no commits since midnight, no Linear issue updated today) and the old step 0 would have short-circuited on it. It didn't, because `LESSONS.md`'s newest header was **2026-07-30** — the nightly retro was marked `lastRunAt 2026-08-01T20:58:59Z` and produced **nothing** on either 07-31 or 08-01, the two busiest days on record (106 `passenger-brain` + 11 `passenger-code` commits, T-031 accepted, T-033/T-040 through the full gate cascade twice). Three output surfaces silent: no `LESSONS.md` section, no `PROGRESS.md` retro entry, no Retro Log comment. That is **L-020**, and the fix is in `retrospective.md`'s step 0 — the window now starts at `LESSONS.md`'s newest header, not at last midnight, so a missed night self-heals on the next run.
