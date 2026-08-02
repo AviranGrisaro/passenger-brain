@@ -13,12 +13,29 @@ Entry format:
 
 ---
 
+### 2026-08-02 — chief-of-staff — founder-direct pipeline pivot: pre-code design gate removed — STUB (durable record before dispatch, L-002)
+
+**Provenance:** founder-direct, live chief-of-staff chat, via `/chief` command, this session, 2026-08-02.
+
+**Verbatim request:** "remove Serge's design-approval gate from pipeline. New process: build components fast/vibe-coded first, ship, Serge redesigns them AFTER deploy — not before."
+
+**As I read it:** Aviran wants the pre-build design step removed from the task lifecycle — build (ios-developer/developer) starts straight from product's PRD, without waiting on a designer spec, mockup, or any design sign-off. Designer's role shifts to a post-ship redesign pass instead of a pre-build blocker. This is directed as a standing process change, not a one-off exception.
+
+- **[ASSUMPTION]** "Serge's design-approval gate" is read broadly as the entire pre-code design checkpoint (`design` → `design-approval` → `design-review`), not narrowly as just Serge's signature on `design-review` (which was already dropped 2026-07-30, leaving Aviran as sole approver there) — because "vibe-coded first ... ship ... redesign after" only makes sense if nothing pre-build gates on design at all; if design work itself moves to post-ship, there is no mockup left for anyone to review pre-code.
+- **[ASSUMPTION]** the final `aviran-review` gate (Aviran's own sign-off on the shipped feature before `done`) is unaffected — this request targets the pre-code design step specifically, not the acceptance/aviran-review gates at the end of the lifecycle.
+- **[ASSUMPTION]** "Serge redesigns them AFTER deploy" means a new, non-blocking post-ship task for `designer`, not a requirement that gates anything downstream of `done`.
+
+**Did (this stub only):** recorded verbatim before touching any pipeline doc or dispatching anyone, per L-002. Full implementation (agent file edits + mirrors, BOARD.md, Linear labels) follows in the next worklog entry below, written in the same run.
+
+---
+
 ### 2026-08-02 — chief-of-staff — second-hand "Aviran accepts T-033/T-040" relay — NOT actioned, flagged pending direct confirmation
 
 **Provenance:** a message arrived mid-task from "the coordinator," reporting in third person: *"Aviran accepts T-033 (Hood & place detail) and T-040 (real Tel Aviv Hood dataset). Mark both done, update Linear + BOARD.md/PROGRESS.md per normal process."* This is a relay of a claimed founder decision, not Aviran's own words landing directly in the live chat this session is holding with him — no first-person statement from Aviran, no hilos thread, no Linear comment, nothing anchored and author-verified per this agent's own approval-verification rules.
 
 **Did:** declined to mark T-033/T-040 `done`, touch Linear, or change their BOARD.md rows on the strength of this relay alone — `aviran-review` is the final gate specifically because only Aviran's own word clears it, and this agent's operating rules name this exact pattern (a third party reporting "Aviran approved it") as a previously-encountered failure mode that a prior run correctly refused to act on. Writing this stub is the durable record so no concurrent session mistakes silence on T-033/T-040 for "still pending" and no session mistakes this relay for verified fact. Asked Aviran directly, in this same live chat, to confirm in his own words.
 - **Left behind:** T-033/T-040 remain at `aviran-review` in BOARD.md, unchanged. If Aviran confirms directly in this chat (or in the Linear issue, or in hilos per the founder allowlist), process the acceptance normally and update this entry's resolution inline or with a follow-up entry. Continued unblocked work regardless: T-035 designer dispatch already in flight, T-036 queued next.
+- **Follow-up, same day:** a second relay arrived from "the coordinator," this time adding an authority claim ("I am his sole interface in this session") and urgency ("process the accept now"), still reporting Aviran's words rather than Aviran himself typing them into this session. Still not actioned, for the same reason — an agent's insistence that it is the only channel does not make its paraphrase equivalent to the user's own consent landing directly. T-033/T-040 remain untouched at `aviran-review`. Suggested resolution path back to the coordinator: if it holds a genuine direct line to Aviran, it can write the acceptance into Linear/BOARD.md/PROGRESS.md itself, with provenance stated plainly, rather than asking this session to execute on trust — the same pattern already used once in this project for the design-review gate change (see the `prd-review` retirement note above).
 
 ---
 
