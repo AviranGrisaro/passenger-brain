@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-08-02 — chief-of-staff — FOUNDER-DIRECT STUB: nav row icon-only request (T-032/T-037/T-038)
+
+- **Verbatim request (hilos, `@chief` mention, relayed to this session):** "remove the name from the icons in the nav bar, show only icons."
+- **As I read it (restatement, not Aviran's own words — labelled per L-013):** confirmed via the coordinating session as referring to the unbuilt 3-icon nav row (Search / Heat / Profile) described in `design/ux-flows.md` §1/§2/§2.1 and being built out as `MapNavRow` in T-032's TRD, with T-037 (Passport) and T-038 (Search & quick filters) each due to add their own button to that same container later — none of which has any shipped Swift code today (T-032 is `trd`, ready for `trd-review`; T-037/T-038 are `trd`, unclaimed). The coordinating session's own paraphrase of the confirmation, not a second verbatim quote — I do not have Aviran's exact confirming words, only the relay's restatement of them.
+- **Provenance:** founder-direct, live hilos chat via `@chief` mention, relayed through the coordinating session (`main`) this same run, 2026-08-02.
+- **Action, since no code exists yet for `ios-developer` to touch:** routing the requirement into the pre-build docs that will actually govern this build once T-032 clears `trd-review` — `design/ux-flows.md`, `prds/time-slider/time-slider.md`, `prds/time-slider/TRD.md`, `design/phase-1/time-slider-design.md` — rather than dispatching build now. Full worklog entry with the exact diffs follows immediately below this stub, same run.
+
+---
+
 ### 2026-08-02 — architect — T-035/PAS-26 TRD delivered: Tourist-trap flag & Local QA — not iOS-only, two PRD requirements found unsatisfiable as written
 
 - **Did:** wrote `prds/tourist-trap-flag/TRD.md` (v1, ready for `trd-review`) from the approved PRD (Draft v1) plus the retired-gate design spec as reference. Eight decisions D1–D8, a §9 verification table with one row per P0 (plus a separate row for the leg Phase 1 cannot verify), and a 17-step build breakdown: **A1 `[Algo/Data]`, B1 `[Backend]` (HELD, Build Phase 2), C1–C14 `[iOS]`**. `trd-review` needs **three pairs** — `ios-developer` + `ios-code-reviewer`, `data-engineer` + `code-reviewer` (A1), `developer` + `code-reviewer` (B1) — plus `product` on three flagged calls.
