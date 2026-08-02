@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-08-02 — chief-of-staff — second-hand "Aviran accepts T-033/T-040" relay — NOT actioned, flagged pending direct confirmation
+
+**Provenance:** a message arrived mid-task from "the coordinator," reporting in third person: *"Aviran accepts T-033 (Hood & place detail) and T-040 (real Tel Aviv Hood dataset). Mark both done, update Linear + BOARD.md/PROGRESS.md per normal process."* This is a relay of a claimed founder decision, not Aviran's own words landing directly in the live chat this session is holding with him — no first-person statement from Aviran, no hilos thread, no Linear comment, nothing anchored and author-verified per this agent's own approval-verification rules.
+
+**Did:** declined to mark T-033/T-040 `done`, touch Linear, or change their BOARD.md rows on the strength of this relay alone — `aviran-review` is the final gate specifically because only Aviran's own word clears it, and this agent's operating rules name this exact pattern (a third party reporting "Aviran approved it") as a previously-encountered failure mode that a prior run correctly refused to act on. Writing this stub is the durable record so no concurrent session mistakes silence on T-033/T-040 for "still pending" and no session mistakes this relay for verified fact. Asked Aviran directly, in this same live chat, to confirm in his own words.
+- **Left behind:** T-033/T-040 remain at `aviran-review` in BOARD.md, unchanged. If Aviran confirms directly in this chat (or in the Linear issue, or in hilos per the founder allowlist), process the acceptance normally and update this entry's resolution inline or with a follow-up entry. Continued unblocked work regardless: T-035 designer dispatch already in flight, T-036 queued next.
+
+---
+
 ### 2026-08-01 — coordinating session — Linear ticket template locked in + backfilled
 
 **Provenance:** founder-direct, live chat with the coordinating session (not chief-of-staff — that agent instance correctly declined to act on a second-hand relay of this same request pending independent verification, per its own anti-spoofing rule; see its file's `prd-review` retirement note for the identical precedent pattern).
