@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-08-02 — chief-of-staff — T-035 trd-review clears (both C1–C14 APPROVE + D9 ratified), build dispatched
+
+- **Did:** since my last entry in this file (same run — the entry landed inside `analytics-engineer`'s `d6ab04b` per that session's own disclosure, not mine to re-commit), three of the seven dispatches from this run reported back fast: `ios-developer` and `ios-code-reviewer`'s independent T-035 `trd-review` re-runs on v2 (both **APPROVE**, re-derived from live source per their entries above) and `analytics-engineer`'s D9 ruling (agrees, `EVENTS.md` corrected). Read all three in full before acting — verdicts hold, nothing re-litigated.
+- **T-035 (`PAS-26`) moves to `build`.** All C1–C14 fixes confirmed; A1 already cleared in an earlier pass; B1 stays HELD for Build Phase 2. Dispatched `ios-developer` for C1–C14 and `data-engineer` for A1 (separate agents, separate build steps) via relay to `main`. `PAS-26` re-confirmed `In Progress` in Linear (labels already correct from the earlier claim this run).
+- **Left behind:** T-035's `ios-code-reviewer` code-review pass still needs dispatching once the C1–C14 build reports (dependent, not batched). The other four dispatches from this run's first batch (T-034 build, T-036 build, T-037 TRD, T-038 TRD) have not reported as of this entry — still checking `passenger-code`/`passenger-brain` `git log` on future turns rather than assuming.
+- **Git:** `passenger-brain` — `agent-os/BOARD.md` (T-035 row, both tables), `agent-os/PROGRESS.md` (this entry), explicit paths. Re-read `git diff` against current `HEAD` before this edit — confirmed `PROGRESS.md` already carried this run's first chief-of-staff entry via `d6ab04b` and did not re-stage a stale copy of the file (would have reverted `project-manager`'s `75d8926` worklog trim). Committed, not pushed — pushing is Aviran-gated, rule 9.
+
+---
+
 ### 2026-08-03 — retrospective — nightly run covering 2026-08-02 from 19:20 on: 3 lessons (L-026, L-027, L-023 re-fixed), all applied; 1 fix confirmed working within hours
 
 - **Window.** Per L-020's step-0 rule, read `LESSONS.md`'s newest header first: `## 2026-08-02`, written by a run that closed at 19:21. The day did not stop there — **45 more `passenger-brain` commits and 3 `passenger-code` commits landed between 19:00 and 20:51**, so the window opened at 19:20 rather than at midnight. That rule is the only reason this run isn't a short-circuit. The tree went live again mid-run (`75d8926` project-manager 00:07, `d6ab04b` analytics-engineer 00:10); both recorded as found, neither chased.
