@@ -13,6 +13,31 @@ Entry format:
 
 ---
 
+### 2026-08-02 — ios-developer — T-036/PAS-27 `trd-review`: **REQUEST CHANGES** — the shared `MapChromeState` contract is not actually shared
+
+- **Did:** read `prds/places-been-saved/TRD.md` (v1) in full against the PRD (`places-been-saved.md`, Draft v1), `BOARD.md`'s T-036 row, and the relevant `PROGRESS.md` history (architect's 2026-08-02 T-036 TRD entry, `0051ef0`). Cross-checked every factual claim about shipped code directly against source rather than trusting the TRD's own citations: `Passenger/Places/Place.swift`, `PlaceCatalog.swift`, `PlacesAPI.swift`, `PlacesCache.swift`, `SavedPlacesStore.swift`, `Passenger/Map/PlaceLayer.swift`, `Passenger/Detail/PlaceDetailModal.swift`, `DetailRouter.swift`, `Passenger/Support/BuildPhase.swift`, and — because the dispatch specifically asked for it — `prds/time-slider/TRD.md` (T-032, currently `trd` for a v3 fix) for the `MapChromeState`/`NavSurface` contract §2.2 claims to share.
+- **D1 verified accurate.** `Place` today is exactly the 5-field shape the TRD says (`id, name, category, hoodID, coordinate`), no `permanentlyClosed`. All three of `PlaceCatalog`'s source paths currently and deliberately exclude the field: `SeedFile.Entry`'s own comment says so explicitly ("`permanently_closed`... deliberately undeclared"), `PlacesAPI.PlaceRow` + its `select=` query string carry no such column, and `PlacesCache.CachedPlace` carries no such field either. Threading it through all three, non-optional, is real work and not already partially done — the TRD's claim checks out.
+- **D8 verified accurate.** `DetailRouter.swift`'s `closeHood()`/`closePlace()`/`openPlace(_:)`/`placeDepth` are exactly as described, and `MapScreen.swift:186` does carry `.presentationBackgroundInteraction(.enabled(upThrough: .medium))` — the mechanism §4.6 builds its exclusivity rule on is real, not asserted.
+- **Blocking finding — §2.2's "identical contract, either build order" claim is false, checked against T-032's actual TRD text, not assumed.** T-036 §4.5 specs:
+  ```swift
+  enum NavSurface: Equatable { case heat, places }   // §2.2: whichever task lands first declares its own case
+  ```
+  T-032's real, current §4.1 (v2, the version live right now — its pending v3 fix is scoped to an edge-gesture camera-immobility test, nowhere near this section) specs a **different type**:
+  ```swift
+  enum NavSurface: String, CaseIterable, Sendable, Identifiable {
+      case search, heat, places, profile
+      var id: String { rawValue }
+  }
+  ```
+  Different case membership (2 vs. 4), different protocol conformances (`Equatable` only vs. `String, CaseIterable, Sendable, Identifiable`), and — the part that actually breaks the "either build order" claim — **no reciprocal coordination logic on T-032's side**. T-032's TRD text (§4.1's own commentary, plus §7's dependency-direction line: *"T-036/T-037/T-038 add their own `NavSurface` views and their own buttons to `MapNavRow`"*) states flatly that it ships the full four-member set up front because `ux-flows.md` §2.1 locks it, specifically to stop T-036/T-037/T-038 each inventing a private type. T-032's own build step (C1, unconditional, no "if it already exists" clause) just builds that file. There is no "whoever builds it second doesn't restructure it" language anywhere in T-032's TRD — that promise exists only in T-036's document, unilaterally, describing an agreement the other party never made.
+  - **Concretely, in the order the dispatch flagged as live right now (T-036 lands before T-032's v3 clears review):** T-036's own build step C6 says "build `MapChromeState`+`NavSurface.places` only if T-032's C1 has not landed" and would create the 2-case `Equatable` stub per §4.5. When T-032 later builds its unconditional C1 against a file that already exists with the wrong shape, it has to change the case count (2→4), add three conformances, and rename the raw representation — that is restructuring, not "add one case," directly violating T-036's own §2.2 guarantee to whoever builds second.
+  - **In the reverse order (T-032 lands first)** there's no collision, because T-032's real enum is a superset that already contains `.places` — T-036 would just read the shipped file and reuse it. But that's exactly why the fix is cheap: T-036 §4.5 should be corrected to declare the *actual* T-032 §4.1 contract verbatim (all four cases, real conformances) rather than a narrower invented one, and its build-step C6 conditional should read "if it doesn't exist yet, create it exactly per T-032 §4.1" — not a 2-case subset. That makes both build orders safe, including the live one.
+- **Everything else checked out on this pass — D2–D7, D9, the §9 verification table, and the build breakdown are sound**, and the two "carried, not claimed" honesty notes (§9 rows 3/5 on the Been/Visited fixture-vs-detector gap, row 4 on T-044's ownerless freshness job) are accurate reads of what's actually built vs. what's asserted. Not re-litigating those; only the MapChromeState mismatch blocks.
+- **Evidence:** direct source reads listed above; no code written this pass (review only, no `passenger-code` changes).
+- **Left behind:** `architect` needs to correct T-036 §4.5/§2.2/build-step C6 to match T-032's real §4.1 verbatim before this can move to `build` — otherwise the currently-plausible T-036-first ordering ships a `MapChromeState` that T-032 then has to tear up, which is the exact failure §2.2 claims is impossible. Worth a one-line note added to T-032's own C1 too ("skip if `MapChromeState.swift` already exists with this exact shape") for full symmetry, though that's T-032's TRD to edit, not this task's. Not touching `BOARD.md`'s state — that's `chief-of-staff`'s call per the dispatch brief. `ios-code-reviewer`'s independent pass still needed regardless of this finding, per T-036's own two-signoff routing (§10).
+
+---
+
 ### 2026-08-02 — chief-of-staff — FOUNDER-DIRECT STUB: nav row icon-only request (T-032/T-037/T-038)
 
 - **Verbatim request (hilos, `@chief` mention, relayed to this session):** "remove the name from the icons in the nav bar, show only icons."
