@@ -113,10 +113,10 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>hood-place-detail/hood-place-detail.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="hood-place-detail-prd">Hood &amp; Place Detail — PRD</h1>
-<p><strong>Status:</strong> Draft v2
+<p><strong>Status:</strong> <strong>Accepted 2026-08-01</strong> (<code>acceptance</code>, second attempt — all 7 P0s pass; awaiting <code>aviran-review</code>)
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Owner:</strong> Aviran Grisaro
-<strong>Last updated:</strong> 2026-07-30
+<strong>Last updated:</strong> 2026-08-01
 <strong>Scope note, updated 2026-07-30:</strong> both items this PRD left unanswered are now <strong>resolved upstream and owned by other PRDs</strong>, not open questions here. The tourist-trap line in the place modal is decision #37, spec'd in <a href="../tourist-trap-flag/tourist-trap-flag.html"><code>../tourist-trap-flag/</code></a> req 6. Quick-filters placement is decision #41 — sheet-internal, decision #25 stands — and belongs to the search PRD, not this one. This PRD's own scope is unchanged.</p>
 <h2 id="description">Description</h2>
 <ul>
@@ -140,7 +140,8 @@ strong { font-weight: 600; }
 <p><strong>Hood sheet opens in one tap and does not lose the map.</strong>
    - ☐ Tapping a Hood polygon, or the Hood button when it is showing, opens the same sheet — one destination, more than one door.
    - ☐ The map stays visible and interactive behind the sheet; the sheet is never a full-screen push.
-   - ☐ Dismissing returns to the map with camera and selected hour unchanged.</p>
+   - ☐ Dismissing returns to the map with camera and selected hour unchanged.
+   - ☐ <strong>Added at acceptance 2026-08-01.</strong> At any zoom where place pins are not drawn, a tap inside a Hood opens <strong>that Hood's sheet</strong> — never a place modal for a pin the user cannot see. Concretely: at the app's default city-wide camera, tapping the middle of Florentin, Kerem HaTeimanim or Neve Tzedek opens that Hood's sheet.</p>
 </li>
 <li>
 <p><strong>Hood sheet content.</strong>
@@ -154,7 +155,8 @@ strong { font-weight: 600; }
 <p><strong>Place detail modal content.</strong>
    - ☐ Shows name and category.
    - ☐ Offers a save action and a route action, and nothing else that navigates away.
-   - ☐ Opens directly on one tap of a pin or a Hood-sheet row — never a two-step preview (<code>design/map-rendering-spec.md</code> §4).</p>
+   - ☐ Opens directly on one tap of a pin or a Hood-sheet row — never a two-step preview (<code>design/map-rendering-spec.md</code> §4).
+   - ☐ <strong>Added at acceptance 2026-08-01.</strong> No tap opens a place modal unless that place's pin is visible on screen at the moment of the tap. Tap resolution and pin rendering share one zoom gate; a hit target with no drawn pin is a failure of this bullet.</p>
 </li>
 <li>
 <p><strong>One primary action, not three equal ones.</strong>
@@ -247,6 +249,16 @@ strong { font-weight: 600; }
 <td>2026-07-30</td>
 <td>Three stale PAS-6 exclusions rewritten: tag mechanic (#37), filter placement (#41), closed-place save (#38)</td>
 <td>All three resolved live by Aviran; the tag line and the closed badge now have owning PRDs. Scope unchanged — only the reasons and the pointers</td>
+</tr>
+<tr>
+<td>2026-08-01</td>
+<td><code>acceptance</code> <strong>REJECT</strong>. Two pass/fail bullets added (req 1, req 3) making pin-render/tap-resolution parity falsifiable</td>
+<td>The Bug-2 fix gated pin <em>rendering</em> on zoom but left tap <em>resolution</em> ungated, so at the default camera every populated Hood's polygon-tap door resolves to an invisible pin. No requirement said hit target and drawn pin must agree, so neither code review nor QA had anything to fail it on (L-009)</td>
+</tr>
+<tr>
+<td>2026-08-01</td>
+<td><code>acceptance</code> <strong>ACCEPT</strong> (second attempt). Status flipped to Accepted; routing to <code>aviran-review</code>. No requirement added, cut, or changed</td>
+<td>Both REJECT findings closed and re-verified against source, not against the QA verdict. Req 1 bullet 4: <code>MapScreen.handleTap</code>'s place branch now reads <code>if showsNames, let place = …</code> — the same flag gating the pin <code>ForEach</code>, so Swift short-circuits the hit test away entirely when pins aren't drawn, and <code>HoodHitTester</code> tests containment before tolerance, so a tap inside Florentin resolves to Florentin. Req 3 bullet 4: tolerance is 22 <em>screen</em> points converted per-tap, so it is visually constant at every zoom — a hit target can never sit more than a half-finger from a drawn pin. Req 5 bullet 3 (carried untested since the first pass) closed by QA's real Apple Maps hand-off round trip</td>
 </tr>
 <tr>
 <td>2026-07-31</td>
