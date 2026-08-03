@@ -4,7 +4,7 @@ description: A relentless interview to sharpen a plan or design before you build
 disable-model-invocation: true
 metadata:
   source: https://github.com/mattpocock/skills (MIT)
-  adapted-for: Locali Agent OS
+  adapted-for: Passenger Agent OS
 ---
 
 Run a `/grilling` session.
