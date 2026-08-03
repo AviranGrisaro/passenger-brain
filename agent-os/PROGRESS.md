@@ -13,6 +13,14 @@ Entry format:
 
 ---
 
+### 2026-08-03 — chief-of-staff — L-002 stub: founder-direct hilos/chat request, Supabase connect question
+
+- **Verbatim request** (Aviran, founder-direct, live `/chief` chat): "i want to connect supabase to the project so we will have database, every place, every user, every live event, weighted street, will be save. do we have schemas that we can start deploying?"
+- **As I read it:** a status question — does deployable schema exist for places, users, live events, and weighted-street (Scenic Walk) data — plus an intent to move toward wiring Supabase up for real. **[ASSUMPTION]** "every user" means some form of user/identity data, unspecified in his own words whether that's an account system or anonymous presence — not something I should read into further without asking. **[ASSUMPTION]** "weighted street" ties to the Scenic Walk Attractiveness street-segment concept already named in `strategy/passenger-strategy.md` — no other "street" concept exists anywhere in this workspace. This stub records the request only; the answer and any resulting dispatch are in the chat response, not restated here as fact.
+- **Provenance:** founder-direct, live chief-of-staff chat, no Linear/BOARD.md event preceded it.
+
+---
+
 ### 2026-08-03 — chief-of-staff — run the company (round 3): verified all round-2 verdicts, caught+corrected a concurrent-session misdiagnosis on PAS-36, dispatched builds for T-037/T-038, fixes for T-035/T-036
 
 - **Did:** continued from the prior run's report (all trd-review/code-review verdicts pending). Verified every claimed verdict against source rather than the relay summary, per standing instruction:
