@@ -162,7 +162,7 @@ strong { font-weight: 600; }
 <p><strong>Permanently-closed places save, and say so on the row.</strong>
    - ☐ Saving a permanently-closed place succeeds — no block, no dialog that prevents it (#38).
    - ☐ Its row renders a distinct "permanently closed" badge, readable from the list without opening the place.
-   - ☐ The badge is visually distinct from the tourist-heavy line and never substitutes for it — the two are independent (#38).
+   - ☐ The badge is visually distinct from the tourist-heavy line and never substitutes for it — the two are independent (#38). <strong>The two are never compared on a Places row</strong>: the tourist-heavy line lives in the place detail modal "and nowhere else" (<code>tourist-trap-flag</code> req 6, <code>map-rendering-spec.md</code> §4), so this bullet is verified in the modal, and a Places row renders the closed badge only. <em>(Ruled at acceptance 2026-08-03 — the two PRDs contradicted each other and the build reserved a permanently-empty slot on the row to satisfy both.)</em>
    - ☐ A place that closes <em>after</em> being saved shows the badge next time the list renders, not only at save time.
    - ☐ The badge never removes the row and never disables the route action.</p>
 </li>
@@ -174,8 +174,8 @@ strong { font-weight: 600; }
 </li>
 <li>
 <p><strong>Empty and offline states are plain, not errors.</strong>
-   - ☐ An empty list shows a plain empty state naming what would fill it (<code>design-principles.md</code> §4).
-   - ☐ Offline: existing rows render from device, and an offline save appears immediately and syncs later.
+   - ☐ An empty list shows a plain empty state naming what would fill it (<code>design-principles.md</code> §4) — its copy must state the three ways a place gets here (save one, or spend time at one), not only that the list is empty. <em>(Pass condition sharpened at acceptance 2026-08-03: the TRD's §9 row 6 dropped "naming what would fill it" and checked only icon + line + CTA, so no gate could fail the shipped "Nothing here yet." With no onboarding in V1, this empty state is the only place the feature can explain itself. L-009.)</em>
+   - ☐ Offline: existing rows render from device, and an offline save appears immediately. <del>and syncs later</del> — <strong>struck at acceptance 2026-08-03</strong>: V1 writes nothing server-side (see Technical design), so there is no sync to perform and no offline banner ships (TRD D5, confirmed). Restore this clause only when a server copy of provenance exists.
    - ☐ A row whose place has no current-hour density still opens; the heat readout says so rather than blocking (Journey 3).</p>
 </li>
 <li>
@@ -218,7 +218,7 @@ strong { font-weight: 600; }
 <li><strong>Reinstall loses everything collected.</strong> Places and Passport both vanish on device change. The alternative is anonymous server identity, which strategy parks until Phase 3 — Aviran's call, not a build decision.</li>
 <li><strong>Background Location Always reliability</strong> is load-bearing for Been and Visited both (<code>ux-flows.md</code> §9 Q4); needs the architect's read.</li>
 <li><strong>Permission sequence is a proposal, not a decision</strong> (§9 Q10) — three system permissions for a product whose #8 rules out a permission gate.</li>
-<li><strong>Row density risk:</strong> a row can carry a provenance word, a closed badge, and a tourist-heavy line at once, where <code>design-principles.md</code> §2 allows one special element. Designer's, at <code>design-review</code>.</li>
+<li><del><strong>Row density risk:</strong> a row can carry a provenance word, a closed badge, and a tourist-heavy line at once</del> — <strong>resolved at acceptance 2026-08-03</strong>: the row never carries a tourist-heavy line (req 4 bullet 3 above), so the worst case is a provenance word plus a closed badge — one special element, within <code>design-principles.md</code> §2.</li>
 <li><strong>The closed-state refresh has no owner and no cadence.</strong> Req 4 requires a place that closes after being saved to badge on next render; nothing schedules the check that would make that true. Spec'd as a field in <code>places-dataset</code> req 5, but the job that runs it is unassigned. <code>data-engineer</code>'s or <code>developer</code>'s — needs assigning before this feature's req 4 can be QA'd honestly.</li>
 <li><strong>Visited is the weakest of the three</strong> — a row the user never chose, for somewhere they walked past. No upstream decision addresses pruning it.</li>
 </ul>
@@ -256,6 +256,31 @@ strong { font-weight: 600; }
 <td>2026-07-30</td>
 <td>Data-sourcing bullet added; closed-state refresh promoted from an open <em>technical</em> question to a named ownerless job</td>
 <td>Standing rule, founder-direct 2026-07-30. "Refreshed from Apple Maps" was stated as a property of the column, with nothing scheduled to do the refreshing — req 4's fourth bullet silently depended on it</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>Acceptance REJECT</strong> — req 6 bullet 1 fails; back to <code>build</code></td>
+<td>Shipped empty state reads "Nothing here yet" + "Explore the map" and names nothing that would fill the list. One string. Full findings in <code>agent-os/PROGRESS.md</code>, this date</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D4 CONFIRMED</strong> — name-ascending sort, recency rejected</td>
+<td>The PRD specifies no order at all, so this is the architect filling a gap, not deviating. Recency would force a versioned-payload migration on already-shipped accepted state to store a timestamp nothing else needs. Name-ascending is stable, scannable, and the only order the current record shape can produce without a migration. If Aviran wants recency, it is a schema change, not a sort change</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D5 CONFIRMED</strong> — no offline banner ships, and req 6 bullet 2 corrected to match</td>
+<td>Not a silent gap: a banner in V1 would announce a sync the app never performs. The PRD's own Technical design already said "Writes nothing server-side in V1" — the requirement contradicted it</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D7 CONFIRMED</strong> — Places is bucket-2 chrome, not a nav-row button; T-032's D1 was wrong</td>
+<td><code>ux-flows.md</code> line 46 is explicit: "Saved-places icon (4th icon) — persistent icon, <strong>separate from the 3 nav buttons</strong>." Checked against the doc, not against D7's citation of it. Accepted cost: the icon fades and stops hit-testing while any surface is presented, so it cannot dismiss its own list and cannot be reached from an open heat/search/Passport surface. Acceptable — the list carries three dismissal paths (scrim tap, drag-down, ✕) and req 8 bullet 2 asks only for mutual exclusivity. The "can't reach Places without first closing another surface" wrinkle goes to the post-ship designer pass</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>§9 row 5's framing CONFIRMED as honest</strong> — with one PRD correction owed</td>
+<td>Req 5's Been/Visited bullets are checked in Build Phase 1 as the absence of any location code path in the feature (verified independently: zero <code>LocationStore</code> references and no <code>CoreLocation</code> use in <code>Places/</code> beyond <code>CLLocationCoordinate2D</code> types). This is genuinely what the requirement protects — no location-derived row can appear when permission is denied, because no row is location-derived at all. It is <strong>not</strong> the runtime behaviour the bullet describes: the bundled fixture populates Been/Visited regardless of permission. That is Build Phase 1's declared fake-data scope, not a gap, and it is re-verified as runtime behaviour when the real detector lands (<code>T-046</code>/<code>PAS-33</code>)</td>
 </tr>
 </tbody>
 </table>

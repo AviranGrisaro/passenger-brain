@@ -113,7 +113,7 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>tourist-trap-flag/tourist-trap-flag.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="tourist-trap-flag-local-qa-prd">Tourist-Trap Flag &amp; Local QA — PRD</h1>
-<p><strong>Status:</strong> Draft v1
+<p><strong>Status:</strong> Accepted (Build Phase 1) 2026-08-03 — reqs 1–4, 6, 7, 9 verified; req 5 built-but-unobservable and req 8's notification/geofence half not built in this phase, both named in the Decisions log.
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Owner:</strong> Aviran Grisaro
 <strong>Last updated:</strong> 2026-07-30
@@ -147,7 +147,7 @@ strong { font-weight: 600; }
 <p><strong>The flag never shares a visual channel with heat.</strong>
    - ☐ Heat is always the area fill; the flag is always the Hood's outline stroke (§2).
    - ☐ Flagged state reads without colour — weight and/or dash, not hue alone (<code>design-principles.md</code> §3).
-   - ☐ Moving the time slider repaints heat and changes no stroke: the flag is not time-variant.</p>
+   - ☐ Moving the time slider never changes <strong>which</strong> Hoods carry a stroke — the flagged set is time-invariant, and no unflagged Hood ever gains one. An already-flagged Hood's stroke <em>style</em> does switch between plain and busy+flagged as its density crosses the threshold for the selected hour (req 5). <em>(Corrected at acceptance 2026-08-03: the original "changes no stroke" contradicted req 5, which is per-hour by definition. TRD D3 built this reconciled reading; <code>map-rendering-spec.md</code> §3 is the locked design it matches.)</em></p>
 </li>
 <li>
 <p><strong>Progressive disclosure by zoom matches <code>map-rendering-spec.md</code> §2's table, row for row.</strong>
@@ -157,7 +157,7 @@ strong { font-weight: 600; }
 <li>
 <p><strong>Not-flagged and not-yet-rated both render blank.</strong>
    - ☐ A not-flagged Hood renders no stroke and no label, at every zoom.
-   - ☐ A not-yet-rated Hood renders identically to not-flagged, resolved on tap by the Hood sheet.
+   - ☐ A not-yet-rated Hood renders identically to not-flagged, resolved on tap by the Hood sheet: the sheet always carries one line stating exactly one of three states — "Tourist-heavy spot" / "Not a tourist-heavy spot" / "No local rating yet". <em>(Pass condition added at acceptance 2026-08-03: "resolved on tap" named no surface and no strings, and the Hood sheet had no flag element at all. TRD D5 built this line; confirmed. L-009.)</em>
    - ☐ Storage still distinguishes the two, because req 7 depends on it.</p>
 </li>
 <li>
@@ -259,6 +259,31 @@ strong { font-weight: 600; }
 <td>2026-07-30</td>
 <td>Data-sourcing bullet added; the "nothing produces the first flag value" gap promoted from implicit to a named risk</td>
 <td>Standing rule, founder-direct 2026-07-30. The PRD scoped the proposing algorithm out — correctly — but never said the feature ships blank if it never lands</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D3 CONFIRMED</strong> — req 2 bullet 3 was the wrong requirement, not the build</td>
+<td>The TRD's reconciled reading (flagged <em>set</em> is time-invariant; an already-flagged Hood's stroke <em>style</em> varies with the hour) is what <code>map-rendering-spec.md</code> §3 locks, and the only reading under which req 5 can exist at all. Req 2 bullet 3 rewritten above</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D5 CONFIRMED</strong> — the three-state Hood-sheet line is accepted as new UI, and req 4 bullet 2 now carries its pass condition</td>
+<td>"Resolved on tap by the Hood sheet" named no surface and no strings, and <code>HoodSheet.swift</code> had no flag element — a requirement no gate could fail. The three-state line is the only construction that distinguishes not-flagged from not-yet-rated, which req 4 bullet 3 and req 7 both depend on</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>Req 5 (busy+flagged) accepted as built-but-unobservable, not as passed</strong></td>
+<td><code>DensityStore</code> has no seed path in Build Phase 1, so <code>band</code> is <code>nil</code> for every Hood at every hour and <code>.busyWarning</code> can never render. The pure <code>FlagStroke.treatment(for:band:)</code>/<code>HoodSpeech.label</code> paths are built and unit-covered. Verified against source, not taken from the TRD's claim. Re-verify when T-032's C10 density seed lands</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>Req 8's notification + geofence half is out of Build Phase 1</strong>, confirming TRD §1's boundary</td>
+<td>No dwell detector and no <code>UserNotifications</code> link exists anywhere in the app, by design — the PRD assigns the detector to <code>data-engineer</code> as "one detector, three consumers." It now has a board row and an owner (<code>T-046</code>/<code>PAS-33</code>), which it did not when this PRD was written. Bullets 1 and 6 and the "syncs later" half of bullet 5 are re-verified there and at B1 (Build Phase 2), not here. Everything else in req 8 — binary toast, auto-dismiss, ask-once ledger, rolling-24h cap, denied-suppression, device-local queue — is real and verified</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td>Fixture completeness gap named, non-blocking</td>
+<td>No place in <code>places-tel-aviv.json</code> is both permanently closed <strong>and</strong> flagged, so req 6 bullet 3's independence claim is true by construction (separate views, separate fields) but not demonstrable in the demo. One fixture row fixes it — T-051</td>
 </tr>
 </tbody>
 </table>

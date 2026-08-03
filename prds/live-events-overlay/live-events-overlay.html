@@ -113,7 +113,7 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>live-events-overlay/live-events-overlay.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="live-events-overlay-prd">Live Events Overlay — PRD</h1>
-<p><strong>Status:</strong> Draft v2
+<p><strong>Status:</strong> Accepted (Build Phase 1) 2026-08-03 — reqs 1–5 only. <strong>Req 6 (layer toggle) is unbuilt and explicitly not accepted</strong>, deferred to T-050; see the Decisions log.
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Build phase:</strong> 1 — client ships with fake/empty data, no backend (<code>agent-os/BOARD.md</code> § V1 Build Phases)
 <strong>Owner:</strong> Aviran Grisaro
@@ -138,7 +138,7 @@ strong { font-weight: 600; }
 <ol>
 <li>
 <p><strong>Events render on the map, in the current hour.</strong>
-   - ☐ An event with a start time inside the selected hour renders as a marker at its location.
+   - ☐ An event renders as a marker at its location <strong>at every hour its interval overlaps</strong>, not only at its start hour — an event running 18:00–23:00 renders at 18:00, 19:00, 20:00, 21:00 and 22:00 (corrected at acceptance 2026-08-03, TRD D1; the original wording stated a sufficient condition and was read by an implementer as an exclusive one).
    - ☐ Changing the selected hour changes which events render, inside the 400ms budget (<code>design/design-principles.md</code> §2).
    - ☐ An event outside the now → +12h window never renders.
    - ☐ Event markers are distinguishable from place pins by shape or glyph, not colour alone (<code>design/design-principles.md</code> §3).</p>
@@ -146,7 +146,7 @@ strong { font-weight: 600; }
 <li>
 <p><strong>The layer never competes with heat.</strong>
    - ☐ Event markers do not use the heat bands' fill treatment or occupy the area channel — heat owns fill, always (<code>design/map-rendering-spec.md</code> §2).
-   - ☐ Event markers cluster by the same screen-distance rule as place pins, and clusters stay neutral-coloured (<code>design/map-rendering-spec.md</code> §5).</p>
+   - ☐ <del>Event markers cluster by the same screen-distance rule as place pins, and clusters stay neutral-coloured (<code>design/map-rendering-spec.md</code> §5).</del> <strong>Moved to <code>T-041</code>/<code>PAS-30</code> at acceptance, 2026-08-03</strong> (TRD D4). The shared screen-distance rule is unimplemented anywhere in the app and owned by no PRD; the on-screen marker cap (req 3 bullet 3) is Phase 1's density bound. Event markers join the shared rule when T-041 builds it — this requirement is not waived, it has a different owner.</p>
 </li>
 <li>
 <p><strong>The set is selected, not exhaustive.</strong>
@@ -159,7 +159,8 @@ strong { font-weight: 600; }
 <p><strong>Event detail.</strong>
    - ☐ Tapping a marker opens a sheet with name, time, and location, one tap, map still visible behind it.
    - ☐ The sheet offers the same route hand-off contract as a place — native Maps/Waze, walking, no in-app navigation.
-   - ☐ Any field the pipeline did not supply is omitted, not shown as a blank row or placeholder.</p>
+   - ☐ Any field the pipeline did not supply is omitted, not shown as a blank row or placeholder.
+   - ☐ Every field the sheet renders reads as human text, never an internal identifier — a Hood renders its display name ("Florentin"), never its slug (<code>kerem-hateimanim</code>); a category renders its display word, never its raw enum value. <em>(Added at acceptance 2026-08-03: the shipped sheet renders both raw. No earlier gate had a criterion to fail it on — the requirement existed only as an implicit reading of "location". L-009.)</em></p>
 </li>
 <li>
 <p><strong>The layer degrades to absent, never to broken.</strong>
@@ -185,7 +186,7 @@ strong { font-weight: 600; }
 <li><strong>Data sourcing (added 2026-07-30, standing rule).</strong> The pipeline that fills this table now has a PRD: <a href="../live-events-pipeline/live-events-pipeline.html"><code>prds/live-events-pipeline/</code></a>. It carries the ingest-side fields this sketch omits (<code>source_event_id</code> for dedup, <code>ingested_at</code> for freshness), the required-field drop rule, event→Hood attribution, expiry, and the non-personalized rank contract. <strong><code>PAS-5</code> delivered a feasibility read, not a spec</strong> — that gap is what the pipeline PRD closes. Which feed(s) ship is still Aviran's (<code>PAS-6</code> item 10); the pipeline PRD is written source-agnostically so it does not pre-decide it.</li>
 <li><strong>APIs / client-server contract:</strong> one fetch for the whole now → +12h window alongside the map's density load, re-filtered locally per hour rather than re-fetched per slider step. Realtime is not required — periodic refresh is enough for events known in advance.</li>
 <li><strong>Architecture notes:</strong> <code>SALVAGE.md</code> marks <code>Models/LiveEvent.swift</code>, <code>EventMarker.swift</code>, <code>EventDetailCard.swift</code>, <code>Services/EventsService.swift</code> REUSE. <strong>Check before reusing:</strong> <code>prds/INDEX.md</code> warns the Locali overlay shipped as an unflagged raw feed; the ranked-subset requirement is new and the salvaged service has no notion of it.</li>
-<li><strong>Dependencies:</strong> the map and time-slider PRDs land first. Hard upstream dependency on <a href="../live-events-pipeline/live-events-pipeline.html"><code>live-events-pipeline</code></a> for any <strong>real</strong> data, which in turn needs <a href="../hood-dataset/hood-dataset.html"><code>hood-dataset</code></a> — event→Hood attribution is impossible against placeholder rectangles. <strong>Build Phase 1 needs no backend at all:</strong> a bundled fake event set, carrying the same fields as the <code>events</code> table above, drives reqs 1–4 and 6; the empty case (req 5) is a state to verify, not the only Phase-1 state. Authoring that fixture is a named Phase-1 data need — small enough to live here rather than in its own PRD, but it does not exist yet and nobody owns it.</li>
+<li><strong>Dependencies:</strong> the map and time-slider PRDs land first. Hard upstream dependency on <a href="../live-events-pipeline/live-events-pipeline.html"><code>live-events-pipeline</code></a> for any <strong>real</strong> data, which in turn needs <a href="../hood-dataset/hood-dataset.html"><code>hood-dataset</code></a> — event→Hood attribution is impossible against placeholder rectangles. <strong>Build Phase 1 needs no backend at all:</strong> a bundled fake event set, carrying the same fields as the <code>events</code> table above, drives reqs 1–4 and 6; the empty case (req 5) is a state to verify, not the only Phase-1 state. Authoring that fixture is a named Phase-1 data need — small enough to live here rather than in its own PRD. <strong>Claimed by T-034 and shipped</strong> (<code>events-tel-aviv-seed.json</code>, TRD §3.4/D10, confirmed at acceptance 2026-08-03). <strong>The fixture must also be plausible, not merely structurally valid</strong> — added at acceptance: within any one hour bucket, no two events may share a coordinate, and no event may carry a templated name ("Fixture event 1"). The shipped bucket at offset +5 violates both — 14 events named "Fixture event 1…14" at one identical point — which passes the structural authoring rule and still renders as 12 stacked identical markers to anyone opening the demo at that hour. Tracked at T-051.</li>
 <li><strong>Open technical questions:</strong> refresh cadence; whether rank is absolute or per-hour; the on-screen marker cap, once real Tel Aviv event volume is known.</li>
 </ul>
 <h2 id="assumptions">Assumptions</h2>
@@ -232,6 +233,36 @@ strong { font-weight: 600; }
 <td>2026-07-31</td>
 <td>Phase-1 fake event fixture named as a real, unowned data need</td>
 <td>Consequence of the above, surfaced by this fix: with an empty feed only, reqs 1–4 and 6 have nothing to test against, so "unblocked for Phase 1" is only true if the fixture exists</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D1 CONCUR</strong> — req 1 bullet 1 rewritten from start-hour to overlap</td>
+<td>The literal reading makes a four-hour event visible for one of its four hours, which answers a different question than strategy's "what's happening" at the selected hour. The bullet stated a sufficient condition, not an exclusive one. Carries TRD §4.2's drop of <code>start_at=gte</code> — <code>data-engineer</code> still owes that confirmation</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D4 RULED</strong> — req 2 bullet 2 (clustering) moves to <code>T-041</code>/<code>PAS-30</code>, not waived</td>
+<td>The screen-distance rule is unimplemented app-wide and owned by no PRD; blocking a Phase-1 task on an unowned Phase-2 one buys nothing at ≤12 markers. The cap is Phase 1's bound. T-041's board row now carries this requirement</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D2 CONFIRMED</strong> — event markers render at every zoom, diverging from <code>map-rendering-spec.md</code> §2's "Pins: none at city-wide"</td>
+<td>That row solves place-pin density (dozens per Hood); a capped 12-marker city-wide set is a different problem. The spec's own §1 argues <em>for</em> it: a non-heat signal invisible at cold-open zoom leaves "heat alone at cold open, the half anyone already gets from Google Maps." <strong>The cap and the zoom rule are one decision</strong> — overturning the cap reopens this. <code>map-rendering-spec.md</code> has no events row at all; filed for <code>designer</code> at T-052</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>D10 CONFIRMED</strong> — the fixture is T-034's, with a plausibility clause added</td>
+<td>Phase-1 acceptance covers reqs 1–5 against the fixture only; Phase-3 acceptance re-runs them against the live feed with the constant flipped</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>Req 6 (toggle) not accepted — deferred to T-050</strong></td>
+<td>Build step C12 is blocked on T-032's <code>HeatModalCard</code>, which does not exist. No toggle UI ships; <code>isLayerVisible</code> exists as state and the layer and hit-tester both honour it, but nothing user-reachable sets it. Not a build defect — nobody can fix it until T-032 lands</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>Req 1 bullet 2's 400ms hour-change budget is unverified, not passed</strong></td>
+<td><code>qa</code>'s TEST-PLAN row 1b cites <code>ColdOpenPerformanceTests</code>, which measures cold-open-to-interactive, a different milestone. No <code>HourRepaint</code> signpost exists in the committed tree and no hour control ships (both T-032's). Re-verify at T-050</td>
 </tr>
 </tbody>
 </table>
