@@ -31,6 +31,17 @@ Entry format:
 
 ---
 
+### 2026-08-03 — chief-of-staff — PAS-36: recorded ios-code-reviewer APPROVE, dispatched qa
+
+- **Did:** `ios-code-reviewer`'s verdict on `passenger-code 4cd55f8` (the PAS-36 fix) relayed back as text only — no `passenger-brain` commit accompanied it (checked `git log`/`git status` in both repos before writing this: no new commits since this session's own `1ed88e5`, and the working tree carries only unrelated concurrent noise — modified agent-mirror files in both repos, plus T-032's still-uncommitted `SettingsHint.swift`/`HeatRepaintSignpost.swift` in `passenger-code`, none of it touched). Recording the verdict here rather than leaving it as an un-landed relay message, since the dispatch brief didn't explicitly require the reviewer to write its own worklog entry and review is read-only work with nothing else to commit.
+- **Verdict: APPROVE, no blocking findings.** (1) Fix completeness confirmed — reviewer traced every `openPlace` caller (`PlacesListOverlay.onSelect`, now fixed; map pin tap/`handleTap`, structurally unreachable while `.places` is presented per the overlay's full-screen scrim, matching the existing code comment at `MapScreen.swift:375`; `HoodSheet.swift:137`, a different presentation context) — no other call site needs the fix. (2) No ordering/flicker regression — `router.place`/`chrome.presented` mutate synchronously in one call stack, both `@MainActor @Observable`; one non-blocking note that the list's 0.25s exit transition and the sheet's ~0.35s presentation animation aren't length-matched, an inherent property of any dismiss+present-together, not the reported bug. (3) Regression test independently re-derived as real by replaying the pre-fix `onSelect` logic against its assertions. (4) `/vibe-security` clean. (5) The missing manual/live UI re-confirmation (flagged by `ios-developer`) is not blocking per the reviewer, but shouldn't be dropped silently — recommended an explicit `qa` task for it rather than closing on unit-level verification alone.
+- **Linear:** commented `PAS-36` with the full verdict. Reclaimed `owner:ios-code-reviewer` → `owner:qa`, status stays `In Progress`.
+- **Dispatched via relay to `main`:** `qa` — re-run the full `PassengerTests` suite independently, then the actual manual repro on simulator/device (open Places list → tap a row → confirm the list visually disappears as the sheet animates in, only one modal surface ever on screen), plus quick spot-checks of the two adjacent paths the reviewer reasoned were structurally unreachable rather than tested. Report PASS/FAIL and whether `PAS-36` is ready to close.
+- **Left behind:** `qa` dispatch in flight — `PAS-36` doesn't move to `Done` until that report lands and I've verified it against source/evidence, same standard as every step in this chain so far.
+- **Git:** `passenger-brain` — `agent-os/PROGRESS.md` (this entry) only; explicit path, did not stage the unrelated modified agent-mirror files or anything in `passenger-code` sitting in the shared trees (T-032's and others', not mine to touch). Committed, not pushed — Aviran-gated, rule 9.
+
+---
+
 ### 2026-08-03 — chief-of-staff — PAS-36: verified designer + ios-developer reports, moved to ios-code-reviewer
 
 - **Did:** two relay reports landed for `PAS-36` (`designer`'s design-principles.md §6 follow-up, `ios-developer`'s actual fix). Verified both independently against `git show` rather than trusting the reports' text, per this workspace's standing practice — reports describe intent, not necessarily fact.
