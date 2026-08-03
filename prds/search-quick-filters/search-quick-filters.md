@@ -1,9 +1,9 @@
 # Search & Quick Filters — PRD
 
-**Status:** Draft v1
+**Status:** Draft v2 — build REJECTed at acceptance 2026-08-03 (req 4 bullet 2), back at `build`
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-30
+**Last updated:** 2026-08-03
 **Placement settled:** decision #41 — quick filters stay sheet-internal, #25 unreversed. **Layout is not settled** (`ux-flows.md` §9 Q15, Aviran's); every requirement below holds either way.
 
 ## Description
@@ -46,6 +46,7 @@
 
 4. **Search filters the map at the selected hour; it never builds a second view of the data.**
    - [ ] While results show, the map dims everything except matching pins and Hoods, and keeps heat and the flag on what remains (§6).
+   - [ ] **Whenever results show, at least one map element renders undimmed — at every zoom the map can be at, including the cold-open zoom.** A place-only match at a zoom where place pins are not drawn must still emphasise something (the matched places' Hoods are the obvious candidate); a uniformly dimmed map with nothing bright is a fail. *(Added at acceptance 2026-08-03, L-009: the original bullet's only pass condition was the emphasis set and the `isDimmed` flag handed to each layer — both correct in the failing case, so nothing could fail it. The criterion is the rendered result, not the passed value.)*
    - [ ] Dimming clears the instant a result is selected or the sheet is dismissed.
    - [ ] Search reads the same cached place and Hood data the map reads — no search-only dataset, no search-only ranking.
    - [ ] Opening a result shows heat and the flag exactly as tapping that pin or Hood would, at the current hour.
@@ -75,6 +76,7 @@
    - [ ] Search icon, every chip, and every row has a ≥44pt touch target (`design-principles.md` §2).
    - [ ] Every row announces type and name in VoiceOver — "Florentin, Hood" / "Port Said, place, Eat & Drink".
    - [ ] The sheet stays usable at the largest Dynamic Type size; rows grow rather than truncate.
+   - [ ] **At the largest accessibility text size, neither chip's label truncates or clips** — the two chips wrap, scroll, or stack rather than being compressed into one screen width. *(Added at acceptance 2026-08-03, L-009: "rows grow rather than truncate" was read as covering result rows only, and the shipped guard test greps for `.lineLimit` — which is not what causes truncation inside an overflowing `HStack`.)*
    - [ ] Search-result pins differ from Places-list pins by shape or icon, never colour alone (§2.1).
 
 ### Nice-to-have (P1)
@@ -112,4 +114,9 @@
 | 2026-07-30 | Sheet layout left open rather than assumed | §9 Q15 — Aviran's literal-split ask vs. design's detent recommendation is unresolved |
 | 2026-07-30 | Rows carry no tourist-trap line, labelled **[ASSUMPTION]** | `tourist-trap-flag` req 6 gives the flag one home; a per-row line would reopen that PRD |
 | 2026-07-30 | Keyword field given an owning PRD (`places-dataset` req 4); the residual open item narrowed to authoring load | Standing rule, founder-direct 2026-07-30. The gap was correctly flagged but had no deliverable behind it — a flagged gap with no owner is how it reaches `build` unbuilt |
+| 2026-08-03 | **TRD D8 upheld** — a chip narrows *places* only; a Hood match survives an active chip | Req 3 bullet 3 says "narrows," not "replaces." A Hood carries no `PlaceCategory` and cannot be classified into one, so dropping Hoods would make a chip delete an entire result kind |
+| 2026-08-03 | **TRD D9 upheld** — two row words, "Hood" and "Place"; a keyword hit is a Place row | Req 2 bullet 2's own justification clause is a two-way distinction ("a Hood is never mistakable for a place"), and req 8's VoiceOver examples give only two forms. The third "kind" is a match *route*, not a row type |
+| 2026-08-03 | **TRD §4.10's undimmed MapKit base tiles accepted as a limitation, not a defect** | The requirement is about the prominence of Passenger-authored content (Hood fills, labels, pins). SwiftUI's `Map` exposes no layer between tiles and annotations, and a full-screen scrim would darken the matches too |
+| 2026-08-03 | **TRD D2 (0.45 / 0.92 two-height overlay) accepted for Build Phase 1, carried to Aviran** | The layout call is Aviran's and still open (§9 Q15). D2 is behaviourally design review's detent recommendation and is reversible for two constants and one gesture; it is not `product`'s to lock |
+| 2026-08-03 | Req 4 and req 8 each gained a pass/fail bullet at acceptance | L-009. Both requirements failed with every existing check green, because each check asserted a stored value rather than the rendered result |
 
