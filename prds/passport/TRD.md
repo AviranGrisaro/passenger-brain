@@ -163,13 +163,13 @@ Two guarantees, one on each hop, together satisfying PRD req 3's last two bullet
 
 ### 3.4 The registry is bundled and never fetched (D4)
 
-T-042 §4.5 offers `GET /rest/v1/place_types?select=id,sticker_shape`. **This client does not call it, in Phase 1 or Phase 2.**
+There is no `place_types` fetch to call. **This client reads the registry from the app bundle, in Phase 1 and in Phase 2.** An earlier version of T-042 §4.5 offered `GET /rest/v1/place_types?select=id,sticker_shape`; that contract was withdrawn at T-042 TRD v2 (2026-08-03) and this design is now what both documents say.
 
 The reason is not Build Phase 1 scope — it holds permanently for V1. A `sticker_shape` key is only useful if the app binary contains something to draw for it. A new key arriving over the wire that the shipped binary has never heard of renders `.generic` no matter how it arrived, so fetching the mapping buys a key the app cannot draw. Bundling it means the shape vocabulary and the shape assets ship in the same artifact, always in sync, and the totality test becomes a real build gate instead of a runtime hope. `places.place_type` still arrives per place over the wire at Phase 2 — that part must be live, because it is per-row data. Only the mapping is frozen into the build.
 
-**This is a deviation from T-042 §4.2/§4.5's implied client fetch and is flagged for T-042's reviewers.** It removes a request, a cache field and a skew class from that task's contract and adds nothing to it. If it is overruled, the change is one loader conformance and one `PlacesAPI` method; nothing else in this TRD moves.
+**Resolved, not open: `product` ruled for this design on 2026-08-03 (T-049 / Linear `PAS-37`), and T-042's TRD v2 was amended to match** ([`places-dataset/TRD.md`](../places-dataset/TRD.md) §4.5 **D7**, decisions log). The deviation was ever only from **§4.5** — §4.2 already described a shipped, bundled *export*, not a fetch — and that section no longer specifies the GET. It removed a request, a cache field and a skew class from T-042's contract and added nothing to it. If it were ever overruled, the change is one loader conformance and one `PlacesAPI` method; nothing else in this TRD moves.
 
-`Resources/place-types-tel-aviv.json` — **A1's content, `data-engineer`'s to author, provisional until Aviran ratifies T-042 B1**:
+`Resources/place-types-tel-aviv.json` — **A1's content, `data-engineer`'s to author, provisional until Aviran ratifies T-042 B1**. The `_note`'s *"Regenerate/replace, do not extend by hand"* had no generator behind it when A1 shipped; T-042 TRD v2 **D6** names one — `export_places.py` (T-042 B3) emits this file from an authored source at Build Phase 2 and supersedes this hand-authored placeholder from that point, which is when L-024's hand-edit ban starts applying to it. Nothing in A1 changes:
 
 ```json
 {
@@ -423,7 +423,7 @@ Non-optional on all three decode paths for T-036 D1's reason (a missing field mu
 T-042 §4.2 asks for exactly this and says why the enum alone is not the guarantee: the key arrives as a `String`. The test is the falsifiable half.
 
 ### D4 — The shape registry is bundled and never fetched, permanently in V1
-A shape key the binary cannot draw is useless however it arrives, so fetching the mapping buys nothing while adding a request, a cache field and a skew class. Bundling keeps vocabulary and assets in the same artifact. **Deviation from T-042 §4.5's implied client fetch — flagged for its reviewers**, reversible in one loader conformance.
+A shape key the binary cannot draw is useless however it arrives, so fetching the mapping buys nothing while adding a request, a cache field and a skew class. Bundling keeps vocabulary and assets in the same artifact. **Was a deviation from T-042 §4.5's client fetch; `product` ruled for this design on 2026-08-03 (T-049 / `PAS-37`) and T-042 TRD v2 struck that GET, so the two documents now agree.** Reversible in one loader conformance if it is ever revisited.
 
 ### D5 — Hood attribution reads `place.hoodID`; the client never ray-casts
 T-042's C-HOOD-1 already enforces exactly-one-Hood containment at dataset validation. A fourth implementation of that predicate on the client could disagree with the three that exist. Also answers the PRD's polygon-change question: re-attribution happens at export.
@@ -518,6 +518,6 @@ Ordered. A1 must land before C2's totality test is meaningful; A2 before C12's b
 
 - **T-032's TRD** — diff §4.6's reproduced `NavSurface`/`MapChromeState` block against its live §4.1 character by character (that exact mismatch sent T-036's v1 back), and confirm `MapNavRow`'s container contract before C7 adds a button to it.
 - **T-036's TRD** — confirm `VisitKind`/`VisitedPlacesStore.visits` still have the shape §4.1 reads, and that its C1 amendment to the four `Places/` files is additive with C1's (§2.2).
-- **T-042's TRD and its reviewers** — **D4** (the registry is bundled, never fetched — this removes `GET /place_types` from the client contract), **D12** (`StickerShape.spokenName` lives on the client, so §3.1's no-display-string-on-the-server rule stays intact), and confirmation that A1's provisional mapping is understood as provisional against its own B1.
+- **T-042's TRD and its reviewers** — **D4** (the registry is bundled, never fetched — **settled 2026-08-03 by the T-049/`PAS-37` ruling; T-042 TRD v2 struck `GET /place_types` from its §4.5, and its new D6 makes B3's `export_places.py` the emitter of this registry from Build Phase 2, superseding A1's placeholder file**), **D12** (`StickerShape.spokenName` lives on the client, so §3.1's no-display-string-on-the-server rule stays intact), and confirmation that A1's provisional mapping is understood as provisional against its own B1.
 - **`product` and Aviran** — the three PRD findings carried forward untouched (`place_type` user-facing or not; nothing rewards answering local-QA; device-local loss on reinstall), plus **D6's threshold value**, **D7's designated set**, **D8** (no in-the-moment surfacing, `ux-flows.md` Q13 left open), **D12** (req 7's literal wording), and §4.4's name-ascending album order.
 - **`chief-of-staff`, for `BOARD.md` rows this TRD cannot create** — the shared dwell/geofence detector is still ownerless (named by T-035 and T-036 and now T-037, no row); `hoods.designated_for_progression` has no owner for its real values; the Local threshold has no owner. Per `CLAUDE.md` rule 5, each needs a row with an owner rather than another worklog line saying "flagged for whoever owns it."

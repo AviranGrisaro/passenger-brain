@@ -113,11 +113,11 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>places-dataset/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="places-dataset-tel-aviv-curated-places-trd">Places Dataset — Tel Aviv Curated Places — TRD</h1>
-<p><strong>Task:</strong> T-042
+<p><strong>Task:</strong> T-042 · <strong>Linear:</strong> <code>PAS-19</code>
 <strong>PRD:</strong> <a href="./places-dataset.html"><code>places-dataset.md</code></a> (Draft v1)
 <strong>Design spec:</strong> none — pure data/schema deliverable, no UX surface. Routed <code>spec → trd</code>, skipping <code>design</code>.
-<strong>Author:</strong> <code>architect</code>, 2026-07-31
-<strong>Status:</strong> ready for <code>trd-review</code></p>
+<strong>Author:</strong> <code>architect</code>, 2026-07-31 · <strong>Amended:</strong> 2026-08-03 — <strong>v2</strong>, the T-049/<code>PAS-37</code> ruling (§2.2 <strong>D6</strong>, §3.3, §4.2, §4.5 <strong>D7</strong>, §5, §9 B3, §11)
+<strong>Status:</strong> <strong>v2.</strong> <code>trd-review</code> cleared 3/3, approved as-is (<code>developer</code>, <code>data-engineer</code>, <code>code-reviewer</code>, 2026-07-31) plus a <code>security-auditor</code> PASS. <code>build</code>-ready but <strong>HELD to Build Phase 2</strong>, undispatched. v2 is a documentation amendment ordered by <code>product</code>; no contract in it is re-opened and no re-review is owed — see <a href="#11-decisions-log">§11</a>.</p>
 <hr />
 <h2 id="1-context">1. Context</h2>
 <p>This is the schema spec for a table that six V1 PRDs already read and no migration has ever created. <code>database/migrations/</code> holds <code>001</code> (<code>hoods</code>, <code>hood_density</code>) and <code>002</code> (synthetic density generator). There is no <code>places</code> table.</p>
@@ -162,9 +162,14 @@ strong { font-weight: 600; }
 <td>new</td>
 </tr>
 <tr>
-<td>Authored source</td>
+<td>Authored source — places</td>
 <td><code>database/data/places-tel-aviv.source.json</code></td>
 <td>new</td>
+</tr>
+<tr>
+<td>Authored source — the shape registry</td>
+<td><code>database/data/place-types-tel-aviv.source.json</code></td>
+<td>new at v2, <a href="#22-not-built-here">§2.2</a> D6</td>
 </tr>
 </tbody>
 </table>
@@ -229,7 +234,11 @@ strong { font-weight: 600; }
 <td>T-035 / T-036 / T-037 / T-038, see D5 below</td>
 </tr>
 <tr>
-<td>Sticker-shape totality test — every <code>sticker_shape</code> in the shipped export resolves to a real asset</td>
+<td><code>place-types-tel-aviv.json</code> — the <strong>bundled</strong> <code>place_type</code> → <code>sticker_shape</code> registry the client reads. Hand-authored as a Phase-1 placeholder by T-037 A1; <strong>emitted by this task's <code>export_places.py</code> (<a href="#9-build-breakdown">§9</a> B3) from Build Phase 2 onward</strong>, see D6 below</td>
+<td><strong>T-042 (this task), B3</strong> — placeholder authored by T-037 A1</td>
+</tr>
+<tr>
+<td>Sticker-shape totality test — every <code>sticker_shape</code> in the shipped <code>place-types-tel-aviv.json</code> registry resolves to a real asset</td>
 <td>T-037 (Passport)</td>
 </tr>
 <tr>
@@ -244,6 +253,14 @@ strong { font-weight: 600; }
 </table>
 <p><strong>Decision D4 — <code>export_places.py</code> (<a href="#9-build-breakdown">§9</a> B3) is the sole emitter of <code>places-tel-aviv.json</code>. T-033 never produces it.</strong> An earlier draft of this table left the export with T-033's step B2 while <a href="#5-flow">§5</a> step 3 and <a href="#9-build-breakdown">§9</a> B3 both had <code>export_places.py</code> writing the same file — two claimed emitters of one artifact inside one document, which is either a conflicting second exporter or, worse, each task assuming the other ships one and neither doing it. B3 owns it because B3 already holds the validated source, which is the entire reason it exists. T-033's step is reduced to a <strong>drift check</strong> — assert its bundled copy round-trips against B3's output — the same relationship <code>export_hoods_geojson.py</code> has to the Hood bundle it does not author (<code>hood-dataset/TRD.md</code> §2.1). A second emitter is a second chance to drift.</p>
 <p><strong>Decision D5 — the fixture carries all four new fields; the Swift model gains them one task at a time.</strong> These are separable and were previously bundled onto T-033 as one amendment. The <strong>fixture</strong> must carry all four regardless: <code>place_type</code> and <code>keywords</code> are <code>not null</code> at the source and B3 round-trips the validated row, so there is no version of the export that omits them. The <strong><code>Place</code> Swift model</strong> is different — none of the four has a reader inside T-033's own scope, and building all four in now is exactly what T-033's own D2 rule ("don't build for a feature that isn't specced yet," the rule that keeps <code>created_at</code> out of its model) forbids. <code>Decodable</code> ignores unknown JSON keys, so a fixture wider than the model is an already-supported, costless state, and each field lands in the task that first reads it. Adopted from T-033's own recommendation, confirmed independently by <code>developer</code> and <code>code-reviewer</code> at <code>trd-review</code>.</p>
+<p><strong>Decision D6 — <code>export_places.py</code> (<a href="#9-build-breakdown">§9</a> B3) also emits the bundled registry <code>place-types-tel-aviv.json</code>, from the same validated source that produces the <code>place_types</code> seed rows. Added at v2 (T-049/<code>PAS-37</code>).</strong> D7 makes the registry a bundled artifact rather than a fetch, and a bundled artifact with no named emitter is exactly the gap that produces a hand-edited "generated" file (L-024). Today the shipped <code>passenger-code/Passenger/Resources/place-types-tel-aviv.json</code> (T-037 step A1, <code>passenger-code cc2b008</code>) carries the header <em>"Regenerate/replace, do not extend by hand"</em> and <strong>nothing in this workspace could regenerate it</strong> — <code>database/scripts/</code> has no <code>export_places.py</code> yet, and <code>database/data/places-tel-aviv.source.json</code> does not exist. This decision closes that:</p>
+<ul>
+<li><strong>One source, two artifacts, twice over.</strong> B3 already writes the DB seed and <code>places-tel-aviv.json</code> from one validated source (<a href="#5-flow">§5</a> step 3, D4). The registry is the same rule applied to the second table: the authored <code>place_type</code> → <code>sticker_shape</code> vocabulary (B1, Aviran-ratified) yields <strong>both</strong> the <code>place_types</code> insert statements <strong>and</strong> <code>place-types-tel-aviv.json</code>, in one run. The bundle and the table cannot disagree, because neither is hand-written. Same relationship <code>build_hoods.py</code> has to its two artifacts (<code>hood-dataset/TRD.md</code> §3.3/§3.5, §11 B2).</li>
+<li><strong>The registry's authored home is <code>database/data/place-types-tel-aviv.source.json</code></strong> — a <code>{ "&lt;place_type&gt;": "&lt;sticker_shape&gt;" }</code> map, sibling to the places source, the only hand-edited file on this path. B2's validator already fails a <code>place_type</code> with an empty <code>sticker_shape</code> (<a href="#5-flow">§5</a> step 2); it also fails a <code>place_type</code> used by any place but absent from this map, which is the source-side half of T-037's C12 invariant.</li>
+<li><strong>The emitted file must keep the shape T-037 already ships and decodes</strong> — <code>schemaVersion</code>, <code>_note</code>, <code>types</code> — with the <code>_note</code> rewritten by the generator from <code>PROVISIONAL …</code> to a generated-artifact banner naming <code>export_places.py</code>. Changing the shape would be a client change, and this task has no <code>[iOS]</code> step.</li>
+<li><strong>T-037's A1 file is a hand-authored Build-Phase-1 placeholder, and it is legitimate.</strong> It shipped before any generator existed, covering exactly the six <code>place_type</code> values in the shipped places bundle, explicitly labelled <code>PROVISIONAL</code> against B1. <strong>L-024's hand-edit ban attaches to this file from the moment B3 ships, not before</strong> — until then a hand-edit is the only supported path and the <code>_note</code>'s own instruction is unfollowable. From B3 forward, the file is generator output: edit <code>place-types-tel-aviv.source.json</code> and re-run, never the bundle. This is the same bounded exception, and the same retirement, that <code>hood-dataset/TRD.md</code> §3.5 grants its C2a hand-edit and retires at C3.</li>
+<li><strong>The retirement is a build step, not a note.</strong> B3's Build-Phase-2 run overwrites T-037's A1 file; <a href="#9-build-breakdown">§9</a> B3 states it, so the placeholder has a named end rather than an assumed one.</li>
+</ul>
 <hr />
 <h2 id="3-data-model">3. Data model</h2>
 <h3 id="31-publicplace_types-the-sticker-shape-registry">3.1 <code>public.place_types</code> — the sticker-shape registry</h3>
@@ -305,6 +322,7 @@ create policy place_types_public_read
 </code></pre>
 <p>Identical in shape to <code>001</code>'s <code>hoods_public_read</code> / <code>hood_density_public_read</code>. <strong>No insert/update/delete policy is written at all</strong> — absence of a policy is the denial, and there is no client write path to authorize. Whoever authors or updates the dataset writes with the service role, out of band, which bypasses RLS by construction.</p>
 <p>This satisfies req 8 and is not a new pattern: <code>002</code>'s generator writes the same way. Nothing here needs an identity, an auth surface, or a write rule to reason about.</p>
+<p><strong><code>place_types_public_read</code> stays exactly as written, and the V1 client is not its reader</strong> (added at v2, <a href="#45-fetch-contract">§4.5</a> D7). The registry reaches the app bundled, not fetched, so nothing in V1 selects from <code>place_types</code> over the wire. The policy is kept anyway: it is one line in an unapplied migration, it keeps both tables under the same public-read shape a reader can check at a glance, and dropping it would mean editing a migration — or writing a second one — to remove a policy that grants read access to a six-row mapping of slugs to shape names, carrying no user data and no display string (<a href="#31-publicplace_types">§3.1</a>). Removing it churns a migration for no gain. Its readers are out-of-band: the seed's own verification, <code>psql</code>, and anything later that legitimately needs the registry server-side.</p>
 <h3 id="34-location-privacy">3.4 Location &amp; privacy</h3>
 <p>Places are <strong>public reference data about businesses, not about people</strong>. Nothing in this table is derived from, or identifies, any individual (req 8):</p>
 <ul>
@@ -331,7 +349,7 @@ create policy place_types_public_read
 <p>Two halves, one on each side of the wire, together satisfying req 3's "every place yields a sticker, no place earns a shapeless sticker":</p>
 <ul>
 <li><strong>Server half (built here):</strong> <code>place_types.sticker_shape</code> is <code>not null</code>, and <code>places.place_type</code> FKs into it. A type without a shape cannot exist; a place with an unregistered type cannot exist.</li>
-<li><strong>Client half (built by T-037, named in <a href="#22-not-built-here">§2.2</a>):</strong> a <code>StickerShape</code> Swift enum over the known shape keys, plus a test asserting <strong>every</strong> <code>sticker_shape</code> present in the shipped <code>place-types.json</code> export resolves to a real asset. The test is the falsifiable pass condition; the enum alone is not, because the key arrives from the server as a <code>String</code>.</li>
+<li><strong>Client half (built by T-037, named in <a href="#22-not-built-here">§2.2</a>):</strong> a <code>StickerShape</code> Swift enum over the known shape keys, plus a test asserting <strong>every</strong> <code>sticker_shape</code> present in the shipped <strong><code>place-types-tel-aviv.json</code></strong> registry resolves to a real asset. The test is the falsifiable pass condition; the enum alone is not, because the key arrives as a <code>String</code>. The filename is the one that actually shipped (<code>passenger-code cc2b008</code>) and matches the <code>&lt;thing&gt;-tel-aviv.json</code> convention <code>hoods-tel-aviv.json</code> / <code>places-tel-aviv.json</code> already set — v2 corrected it from an earlier <code>place-types.json</code>, which never existed. The registry is a <strong>bundled build-time artifact</strong>, so this test is a build gate rather than a runtime hope (<a href="#45-fetch-contract">§4.5</a> D7); it is emitted by B3 from Build Phase 2 onward (<a href="#22-not-built-here">§2.2</a> D6).</li>
 <li><strong>Runtime fallback, defence-in-depth not contract:</strong> an unknown shape key renders a generic shape rather than nothing. This exists so a data/app version skew degrades instead of blanking a sticker; the export validator failing the build is what makes it unreachable in a shipped pair.</li>
 </ul>
 <h3 id="43-keyword-matching-is-client-side">4.3 Keyword matching is client-side</h3>
@@ -359,9 +377,16 @@ create policy place_types_public_read
 <h3 id="45-fetch-contract">4.5 Fetch contract</h3>
 <p>Unchanged from T-033's TRD §4 — this task adds columns to an existing embedded select, not a new endpoint:</p>
 <pre><code>GET /rest/v1/hoods?select=id,blurb,places(id,name,category,place_type,latitude,longitude,keywords,permanently_closed,is_tourist_trap)
-GET /rest/v1/place_types?select=id,sticker_shape
 </code></pre>
-<p>One extra small GET for <code>place_types</code> (dozens of rows), fetched once per session alongside the places load. No pagination. No query parameter carries anything user-specific.</p>
+<p><strong>One request, unchanged in shape.</strong> No pagination. No query parameter carries anything user-specific. <code>place_type</code> stays inside the embedded <code>places(…)</code> select above: it is <strong>per-row data</strong> and must arrive live at Build Phase 2, exactly like <code>category</code> or <code>keywords</code>. Only the <em>registry</em> — the <code>id</code> → <code>sticker_shape</code> mapping — is bundled.</p>
+<p><strong>Decision D7 — the <code>place_type</code> → <code>sticker_shape</code> registry is bundled in the app, never fetched. Permanent for V1. Added at v2 (T-049/<code>PAS-37</code>).</strong> An earlier version of this section specified a second call, <code>GET /rest/v1/place_types?select=id,sticker_shape</code>, "fetched once per session alongside the places load." <strong>That contract is withdrawn.</strong> The registry reaches the client as <code>place-types-tel-aviv.json</code> in the app bundle; the design, its reasoning and the client-side loader all live in <a href="../passport/TRD.md"><code>passport/TRD.md</code></a> <strong>§3.4 / D4</strong>, which this document defers to rather than restating. Three reasons this document is the one that moves:</p>
+<ol>
+<li><strong>Scope.</strong> <a href="#9-build-breakdown">§9</a> states <em>"No <code>[iOS]</code> step exists in this task"</em> and <a href="#22-not-built-here">§2.2</a> assigns the client half of C-STICKER-1 to T-037 by name. "Fetched once per session" was a client-runtime claim in a document that specs no client behaviour.</li>
+<li><strong>Self-consistency.</strong> <a href="#42-c-sticker-1--place_type--sticker-shape">§4.2</a> already defines this task's own falsifiable pass condition against <em>the shipped export</em> — a build-time artifact. A runtime GET three sections later contradicted it, and §4.2's check is only checkable against a bundled file.</li>
+<li><strong>Nothing read it.</strong> A <code>sticker_shape</code> key is undrawable unless the binary ships a matching asset, and an unknown key renders <code>.generic</code> however it arrived — so the request bought an undrawable key plus a cache field and a skew class. This task's own pipeline runs authored source → validator → export → DB seed (<a href="#5-flow">§5</a>), so the database is <strong>downstream</strong> of the mapping, never upstream of it. No consumer of that endpoint exists anywhere in the workspace.</li>
+</ol>
+<p>The <code>place_types</code> <strong>table</strong> and its <code>place_types_public_read</code> policy are unaffected — the FK from <code>places.place_type</code> is what makes req 3's closed enumeration structural (<a href="#31-publicplace_types">§3.1</a>), and that is a database-side guarantee, not a transport. <a href="#33-rls--the-established-public-read-shape-not-a-new-one">§3.3</a> records that V1 has no client reader for it. The bundled artifact's emitter is <a href="#22-not-built-here">§2.2</a> D6.</p>
+<p><strong>Ruling, not preference:</strong> <code>product</code>, 2026-08-03, Linear <code>PAS-37</code> / T-049, after both TRDs' full text was read against each other. If it is ever reversed, the change here is one line in the block above; on the client it is <em>"one loader conformance and one <code>PlacesAPI</code> method"</em> (<code>passport/TRD.md</code> §3.4).</p>
 <p><strong>Payload ceiling — answering the PRD's open "at what row count does the whole-payload cache stop fitting."</strong> <strong>[ASSUMPTION]</strong> at ~400–450 bytes of uncompressed JSON per row (measured against the column set above with ~6 keywords), the design is comfortable to <strong>~2,000 places</strong> (≈850KB raw, ≈200KB gzipped) and should be re-examined past <strong>~5,000</strong> (≈2MB raw). V1 Tel Aviv curation is expected in the low hundreds, so this is headroom, not a live constraint. The number is falsifiable the moment a real row count exists — measure the export, do not re-estimate. Past the ceiling, the escape is Hood-scoped fetching, which changes <code>PlaceCatalog</code>'s loading strategy but no contract in this section.</p>
 <hr />
 <h2 id="5-flow">5. Flow</h2>
@@ -369,9 +394,12 @@ GET /rest/v1/place_types?select=id,sticker_shape
 <ol>
 <li>A person authors/edits <code>database/data/places-tel-aviv.source.json</code> — one object per place, all columns of <a href="#32-publicplaces">§3.2</a> plus nothing else.</li>
 <li><code>validate_dataset.py</code> runs against that file <strong>and</strong> T-040's authored Hood source. It fails, loudly and per-row, on: a place in zero Hoods or two Hoods (C-HOOD-1 clause 2); a <code>hood_id</code> that disagrees with the ray-cast; a <code>place_type</code> not in <code>place_types</code>; a <code>place_type</code> whose <code>sticker_shape</code> is empty; zero keywords; a keyword set entirely derivable from the name; a <code>category</code> outside the two; <code>is_tourist_trap = false</code> where the author meant unknown (see <a href="#9-build-breakdown">§9</a> B2's explicit-<code>null</code> rule); <code>permanently_closed = true</code> with no <code>closed_checked_at</code>; a slug failing the <code>id</code> regex; a Hood with zero places not on the accepted exception list (req 7); a <code>designated_for_progression</code> Hood below the Local threshold (req 7, <strong>skips loudly</strong> while the threshold is unknown — see <a href="#8-risks--alternatives">§8</a>).</li>
-<li><code>export_places.py</code> writes two artifacts from the same validated source in one run: the DB seed statements and <code>passenger-code/Passenger/Resources/places-tel-aviv.json</code> (T-033's bundled seed floor, extended per <a href="#22-not-built-here">§2.2</a>). Same one-source-two-artifacts rule <code>hood-dataset</code> req 6 sets for Hoods; the two can never disagree because neither is hand-edited.</li>
-<li>The seed is applied by whoever holds credentials — <strong>Aviran-gated</strong>, like every migration in this repo.</li>
+<li><code>export_places.py</code> writes <strong>four</strong> artifacts from the same validated sources in one run — two per table, one DB-side and one bundle-side:
+   - from <code>places-tel-aviv.source.json</code>: the <code>places</code> seed statements, and <code>passenger-code/Passenger/Resources/places-tel-aviv.json</code> (T-033's bundled seed floor, extended per <a href="#22-not-built-here">§2.2</a>);
+   - from <code>place-types-tel-aviv.source.json</code>: the <code>place_types</code> seed statements, and <code>passenger-code/Passenger/Resources/place-types-tel-aviv.json</code> (the bundled registry T-037 reads — <a href="#22-not-built-here">§2.2</a> D6, <a href="#45-fetch-contract">§4.5</a> D7).</li>
 </ol>
+<p>Same one-source-two-artifacts rule <code>hood-dataset</code> req 6 sets for Hoods; within each pair the two can never disagree, because neither is hand-edited.
+4. The seed is applied by whoever holds credentials — <strong>Aviran-gated</strong>, like every migration in this repo.</p>
 <p><strong>Runtime flow is entirely T-033's</strong> and unchanged by this task: one session-scoped fetch → <code>PlaceCatalog</code> → <code>places(in:)</code> / <code>place(id:)</code> dictionary reads, live → cache → bundled seed → empty. This task adds fields to that payload and changes no step of it.</p>
 <p><strong>Edge/error paths, all pre-existing and deliberately untouched:</strong> a <code>hood_id</code> absent from the bundled Hood catalog keeps the place (T-033's §3.1 call — it renders as a pin and appears in no Hood sheet); a Hood with no places renders <code>hood-place-detail</code> req 2's specified empty state, which is a state, not a failure; <code>is_tourist_trap = null</code> renders exactly as <code>false</code> and announces differently in VoiceOver (<code>tourist-trap-flag</code> req 4/7).</p>
 <hr />
@@ -489,7 +517,7 @@ GET /rest/v1/place_types?select=id,sticker_shape
 <tbody>
 <tr>
 <td>B1</td>
-<td>Propose the initial <code>place_type</code> enumeration and its <code>sticker_shape</code> mapping, for Aviran's ratification. Not invented by whoever writes A1</td>
+<td>Propose the initial <code>place_type</code> enumeration and its <code>sticker_shape</code> mapping, for Aviran's ratification. Not invented by whoever writes A1. <strong>The ratified result is checked in as <code>database/data/place-types-tel-aviv.source.json</code></strong> (<a href="#22-not-built-here">§2.2</a> D6) — the authored home of the vocabulary, and the input B3 emits both the <code>place_types</code> seed rows and the bundled registry from. It supersedes T-037 A1's provisional six-value file, which named this step as its ratifying owner</td>
 <td><strong>[Algo/Data]</strong></td>
 </tr>
 <tr>
@@ -504,7 +532,7 @@ GET /rest/v1/place_types?select=id,sticker_shape
 </tr>
 <tr>
 <td>B3</td>
-<td><code>export_places.py</code> — one validated source → DB seed + <code>places-tel-aviv.json</code>, in one run. Fails the export on any validator failure</td>
+<td><code>export_places.py</code> — validated sources → <strong>four artifacts in one run</strong> per <a href="#5-flow">§5</a> step 3: the <code>places</code> seed + <code>Resources/places-tel-aviv.json</code>, and the <code>place_types</code> seed + <code>Resources/place-types-tel-aviv.json</code> (<a href="#22-not-built-here">§2.2</a> D6). Fails the export on any validator failure, so no artifact is written at all. <strong>This run overwrites T-037 A1's hand-authored placeholder registry and retires it</strong> — from this step forward that file is generator output and L-024's hand-edit ban applies to it; edit <code>place-types-tel-aviv.source.json</code> and re-run instead. Preserve the file's shipped shape (<code>schemaVersion</code> / <code>_note</code> / <code>types</code>), rewriting <code>_note</code> from <code>PROVISIONAL …</code> to a generated-artifact banner naming this script, since changing the shape would be a client change and this task has no <code>[iOS]</code> step. Deterministic output (keys sorted, no wall-clock stamp — <code>build_hoods.py</code>'s <code>generatedAt</code> is the counter-example, it makes every regeneration diff dirty; <code>hood-dataset/TRD.md</code> §3.5)</td>
 <td><strong>[Algo/Data]</strong></td>
 </tr>
 <tr>
@@ -529,7 +557,53 @@ GET /rest/v1/place_types?select=id,sticker_shape
 <li><strong>Closed-state refresh remains unowned, and it is an unmet P0 — not out of scope.</strong> <code>places-dataset</code> req 5's refresh-path bullet lives in the PRD's Open questions &amp; risks, not its <code>Not in scope</code> list, so nothing has released this requirement; this TRD simply does not build it, and <code>places-been-saved</code> req 4 depends on it. Flagged by <code>product</code>, by T-036's PRD, and by this TRD before it acquired an owner — now tracked as <strong>T-044 / Linear <code>PAS-22</code></strong>. <code>product</code> still owes the disposition: move the bullet to Not-in-scope, or open the follow-on PRD.</li>
 <li><strong>B5 is blocked on Aviran</strong> (<code>PAS-6</code> item 11), and it is the step that produces the actual dataset. Everything above it is scaffolding for rows nobody has been asked to write.</li>
 <li><strong>The Local threshold</strong> gates req 7's validation, not just Passport's UI. B2 ships the check disabled-and-loud until the number exists.</li>
+<li><strong>The bundled registry has an emitter on paper only until B3 ships</strong> (added at v2). D6 names <code>export_places.py</code> as the emitter of <code>place-types-tel-aviv.json</code>, but B3 is Build-Phase-2 and this task is HELD, so the file living in <code>passenger-code</code> today is T-037 A1's hand-authored placeholder with a <em>"do not extend by hand"</em> header nobody can currently obey. Until B3 lands, editing that file by hand is the <strong>only</strong> supported path and is not an L-024 violation; from B3 forward it is. Anyone adding a <code>place_type</code> in that window edits the bundle <em>and</em> must carry the same value into B1's source when it lands — which is the drift D6 exists to end, surfaced rather than assumed away.</li>
 </ol>
+<hr />
+<h2 id="11-decisions-log">11. Decisions log</h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Version</th>
+<th>Decision</th>
+<th>Why / source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-07-31</td>
+<td>v1</td>
+<td>D1–D5 as written above; <code>trd-review</code> cleared 3/3 approved-as-is (<code>developer</code>, <code>data-engineer</code>, <code>code-reviewer</code>) plus <code>security-auditor</code> PASS</td>
+<td>Original document</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>v2</strong></td>
+<td><strong>The <code>place_type</code> → <code>sticker_shape</code> registry is bundled, never fetched, permanently in V1. <code>GET /rest/v1/place_types?select=id,sticker_shape</code> and its "fetched once per session" sentence are struck from <a href="#45-fetch-contract">§4.5</a> (new </strong>D7<strong>). <code>place_type</code> itself stays in the embedded <code>places(…)</code> select — per-row data, live at Phase 2.</strong></td>
+<td><code>product</code>'s ruling on <strong>T-049 / Linear <code>PAS-37</code></strong>, 2026-08-03 (<code>passenger-brain 3a0824a</code>), reconciling this document with <a href="../passport/TRD.md"><code>passport/TRD.md</code></a> <strong>§3.4 / D4</strong>. Raised independently by <code>data-engineer</code> and <code>code-reviewer</code> at T-037's <code>trd-review</code>. Grounds in <a href="#45-fetch-contract">§4.5</a>: this document's own <a href="#9-build-breakdown">§9</a> says it specs no client behaviour; its own <a href="#42-c-sticker-1--place_type--sticker-shape">§4.2</a> already assumed a bundled export; no consumer of the endpoint exists</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>v2</strong></td>
+<td><strong><code>place_types_public_read</code> is kept exactly as written, with a stated note that the V1 client is not its reader</strong> (<a href="#33-rls--the-established-public-read-shape-not-a-new-one">§3.3</a>)</td>
+<td>Removing a policy from an unapplied migration churns a migration for no gain; the table's FK guarantee is unaffected by the transport decision</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>v2</strong></td>
+<td><strong><code>place-types.json</code> → <code>place-types-tel-aviv.json</code></strong> throughout (<a href="#42-c-sticker-1--place_type--sticker-shape">§4.2</a>)</td>
+<td>Corrected against what actually shipped — <code>passenger-code cc2b008</code>, <code>Passenger/Resources/place-types-tel-aviv.json</code> — and the <code>&lt;thing&gt;-tel-aviv.json</code> convention T-040/T-042 already use. <code>place-types.json</code> never existed</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>v2</strong></td>
+<td><strong><code>export_places.py</code> (B3) is named the emitter of the bundled registry, from a new authored source <code>database/data/place-types-tel-aviv.source.json</code>; T-037 A1's file is a Phase-1 placeholder the generator supersedes, with L-024's hand-edit ban attaching from B3 forward</strong> (new <strong>D6</strong>, <a href="#2-architecture">§2</a>, <a href="#5-flow">§5</a> step 3, <a href="#9-build-breakdown">§9</a> B1/B3, <a href="#10-left-for-the-board">§10</a> item 5)</td>
+<td>Second finding in the same <code>product</code> ruling: the shipped file says <em>"Regenerate/replace, do not extend by hand"</em> and <strong>no generator existed</strong> — verified, <code>database/scripts/</code> holds no <code>export_places.py</code> and no places source file. A bundled artifact with no named emitter is L-024's failure mode one build phase away. Mechanism is <code>architect</code>'s call; the shape follows D4's existing one-source-two-artifacts rule</td>
+</tr>
+</tbody>
+</table>
+<p><strong>No re-review is owed for v2.</strong> Every change is a documentation reconciliation ordered by <code>product</code> after both TRDs were read in full: no requirement is added, cut or rescoped; no schema, migration, constraint or RLS policy changes a character; D1–D5 are untouched. The one contract that moves — §4.5's withdrawn second GET — is withdrawn <em>toward</em> the design the client is already being built against (<code>passenger-code cc2b008</code>), so nothing shipped or in flight moves either. D6 adds a named emitter and an authored source file to an existing <code>[Algo/Data]</code> step that is HELD at Build Phase 2, so it is the first reader of B3 that will act on it, not a re-plan of work in progress. <code>data-engineer</code> and <code>code-reviewer</code> see both at their Build-Phase-2 dispatch.</p>
 </div>
 </body>
 </html>
