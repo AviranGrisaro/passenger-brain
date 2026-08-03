@@ -13,6 +13,15 @@ Entry format:
 
 ---
 
+### 2026-08-03 — chief-of-staff — T-032 REJECT triage: Linear for T-054, filed T-055/T-056, redispatching build
+
+- **Did:** processed `product`'s T-032/PAS-15 acceptance REJECT (`passenger-brain 73210bc`, verified against the commit directly). Created Linear `PAS-44` for T-054 (backlog, `owner:ios-developer`, unclaimed — the investigation ticket product's board row named but had no Linear issue for, since only `chief-of-staff` writes Linear). Filed two new `BOARD.md` rows product's report named but didn't itself create: **T-055** (`architect` owes a §9 verification row for the z5 nav-row-anchoring rule — same L-009 failure shape as T-046/T-053, third occurrence this session) and **T-056** (the 31pt drawn `Slider` frame vs. the claimed 44pt touch-target band — product explicitly called this "a scope call for you"; read it as a normal architect/product technical tradeoff, not Aviran-level, and said so on the row rather than silently deciding or silently escalating).
+- **Evidence:** `passenger-brain 73210bc` confirmed via `git log`/`git show --stat`. `PAS-44` created via Linear MCP, `list_issue_statuses` checked first for valid state names.
+- **Left behind:** dispatching `ios-developer` for T-032's rebuild (F1 nav-row anchor, F2 AX5 cap) and `architect` for T-055 in parallel this round — both relayed via `main`, replies pending. T-054/T-056 stay `backlog`, unclaimed, not this round's priority ("finish before starting" — T-032's own rejection loop takes precedence over the sibling-surface investigation and the touch-target scope question it spawned).
+- **Git:** `passenger-brain` — `agent-os/BOARD.md` (T-054 row Linear-ID note, new T-055/T-056 rows), `agent-os/PROGRESS.md` (this entry). Explicit paths, not pushed (Aviran-gated).
+
+---
+
 ### 2026-08-03 — product — T-032/PAS-15 acceptance pass: **REJECT → `build`**, and the 11 environment-blocked QA rows re-run live
 
 - **Did:** the `acceptance` step on T-032/PAS-15, arriving from `qa`'s PASS WITH MINORS. Read `passenger-brain/CLAUDE.md`, `BOARD.md`'s T-032 row in full (both tables), this file's recent worklog (`qa`'s T-032 entry, `ios-code-reviewer`'s T-032 code-review, my own T-034/T-035/T-036 pass for method), the PRD (v8) and `TRD.md` v3, and `TEST-PLAN.md`'s 27 cases. Then re-derived every P0 from `passenger-code` source rather than from `qa`'s verdict — the same discipline as the T-033/T-034/T-035 passes — and, because disk headroom had returned, **ran the blocked cases live instead of accepting them on a source read**.
