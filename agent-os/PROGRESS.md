@@ -13,6 +13,18 @@ Entry format:
 
 ---
 
+### 2026-08-03 — chief-of-staff — PAS-36: verified designer + ios-developer reports, moved to ios-code-reviewer
+
+- **Did:** two relay reports landed for `PAS-36` (`designer`'s design-principles.md §6 follow-up, `ios-developer`'s actual fix). Verified both independently against `git show` rather than trusting the reports' text, per this workspace's standing practice — reports describe intent, not necessarily fact.
+- **Designer verification:** `git show passenger-brain d9d3c01` — diff matches the report exactly. `design/design-principles.md` gained §6 "Presentation exclusivity — never stack two modal surfaces" (rule, PAS-36 as evidencing example, `DetailRouter`/`MapChromeState.NavSurface`/T-036 D8 named as the reusable mechanism), old §6 correctly renumbered to §7 with its checklist reference and escalation note updated. `agent-os/PROGRESS.md` worklog entry inserted exactly where reported. Only those two files touched. No further action needed — this was a documentation follow-up outside `PAS-36`'s own ticket lifecycle.
+- **ios-developer verification:** `git show passenger-code 4cd55f8` — diff matches the report exactly. `MapScreen.swift`: new `static func selectPlaceFromList(router:chrome:place:)` (same pattern as `openPlacesList`/`handlePresentedSurfaceChange`), calls `router.openPlace(place)` then `chrome.dismiss()`; `PlacesListOverlay.onSelect` rewired to call it instead of `detailRouter.openPlace` directly. `MapScreenTests.swift`: new `MapScreenD8WiringTests.selectingPlaceFromListDismissesList`, asserts `chrome.presented != .places` and the correct place opened after the call — reasoned through the pre-fix code path and confirmed this assertion would have failed against it (old `onSelect` never touched `chrome`). `git show passenger-brain fef4a4a` — worklog entry matches too. Build/test evidence (BUILD SUCCEEDED, 14/14 including the new test) taken at face value, not independently re-run this pass.
+- **Linear:** commented `PAS-36` with the fix summary, commit hashes, and the outstanding item (`ios-developer` flagged that live/manual UI re-confirmation of the original screenshot repro wasn't done — unit-level verification only). Reclaimed the ticket: `owner:ios-developer` → `owner:ios-code-reviewer`, status stays `In Progress` (this Linear workspace has no distinct "In Review"/"in QA" states — tracked via comments + owner label instead).
+- **Dispatched via relay to `main`:** `ios-code-reviewer` — review `passenger-code 4cd55f8` for correctness/completeness (does the fix cover every place-selection path, not just this one call site), SwiftUI state-ordering risk (`chrome.dismiss()` vs. `router.openPlace()` sequencing), independent re-derivation that the new test actually catches the bug, a `/vibe-security` pass, and a call on whether the missing manual UI re-confirmation should block or can pass to `qa` as-is.
+- **Left behind:** review dispatch in flight — `PAS-36` doesn't move again until that verdict lands. If APPROVE (with or without minors), next stop is `qa` re-confirming the live repro `ios-developer` didn't get to.
+- **Git:** `passenger-brain` — `agent-os/PROGRESS.md` (this entry). Committed, not pushed — Aviran-gated, rule 9.
+
+---
+
 ### 2026-08-03 — ios-developer — PAS-36 fix: Places list stays co-presented with place-detail sheet
 
 - **Did:** fixed the bug dispatched by `chief-of-staff`'s hilos intake (entry immediately below). Read this file's Current Snapshot/recent worklog and `passenger-code/CLAUDE.md` first, per protocol.
