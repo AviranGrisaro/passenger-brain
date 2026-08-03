@@ -2,11 +2,11 @@
 
 **Task:** T-038 · Linear `PAS-29`
 **Status:** **v2**, 2026-08-03 (v1 2026-08-03) — verification amendment only. No contract, decision or build step is re-opened; **no `trd-review` re-run is owed.**
-**Author:** `architect` · **Amended:** 2026-08-03 — T-053/`PAS-41`: [§9](#9-verification--one-row-per-p0-requirement) rows 2, 3, 4, 8 and the §9 preamble; [§4.10](#410-the-dim) brought in line with the system as built; **D14**
+**Author:** `architect` · **Amended:** 2026-08-03 — T-053/`PAS-43`: [§9](#9-verification--one-row-per-p0-requirement) rows 2, 3, 4, 8 and the §9 preamble; [§4.10](#410-the-dim) brought in line with the system as built; **D14** (`PAS-43` corrects an original mislabel of `PAS-41`, which is an unrelated `ios-developer` CI-workflow task — `chief-of-staff`, 2026-08-03)
 **Build phase:** 1 (client-only, bundled seed data)
 **Routes to `trd-review`:** **`ios-developer` + `ios-code-reviewer` only.** Every step in [§10](#10-build-breakdown) is **[iOS]**. There is no `[Backend]` and no `[Algo/Data]` step — verified three ways in [§10](#10-build-breakdown), not inferred from the PRD.
 
-**What changed at v2 (2026-08-03) — T-053/`PAS-41`.** `product`'s acceptance REJECT (round 8) failed PRD req 4 with **every §9 check green**, because row 4(a)'s pass condition asserted the emphasis *set* and the `isDimmed` value handed to each layer — both correct in the failing case. That is L-009's own failure shape, second occurrence after T-046/LOC-104. This revision rewrites the pass conditions that share it and **sweeps the rest of the table for the same pattern** rather than fixing the one row that was reported. **The shipped code is not changed and does not need to change** — `passenger-code d537ca5` already satisfies every amended condition; see D14 for the trace.
+**What changed at v2 (2026-08-03) — T-053/`PAS-43`.** `product`'s acceptance REJECT (round 8) failed PRD req 4 with **every §9 check green**, because row 4(a)'s pass condition asserted the emphasis *set* and the `isDimmed` value handed to each layer — both correct in the failing case. That is L-009's own failure shape, second occurrence after T-046/LOC-104. This revision rewrites the pass conditions that share it and **sweeps the rest of the table for the same pattern** rather than fixing the one row that was reported. **The shipped code is not changed and does not need to change** — `passenger-code d537ca5` already satisfies every amended condition; see D14 for the trace.
 
 | # | Row | The pattern | Fix in v2 |
 |---|---|---|---|
@@ -476,7 +476,7 @@ enum SearchDim {
 
 Per L-018 and `architect.md`. `qa` builds `TEST-PLAN.md` from this table. Where a bullet has no runnable check in Phase 1 it says so explicitly and names the owner — it is never marked passing by construction.
 
-**Two standing rules for this table, added at v2 after row 4(a) passed while its requirement failed (L-009, T-053/`PAS-41`).** Both are about conditions that are *true for the wrong reason*:
+**Two standing rules for this table, added at v2 after row 4(a) passed while its requirement failed (L-009, T-053/`PAS-43`).** Both are about conditions that are *true for the wrong reason*:
 
 - **No pass condition may be satisfiable over an empty set.** A condition of the form "every X has property P" is worthless without a stated non-zero count of X, because the failure mode being guarded against is usually "no X was produced at all." Every ∀ in this table is paired with an exact count or an exact expected array.
 - **Every negative-existence check needs a positive control.** Eleven sub-checks below are `grep … → 0 hits`, which passes identically whether the forbidden symbol is absent or the grep covered nothing. Each one is run alongside a second grep over the same paths for a symbol that **must** be present (`SearchQuery`, `SearchResultRow`) returning **> 0 hits**; a zero there means the path list is wrong and the whole row is unrun, not passed.
