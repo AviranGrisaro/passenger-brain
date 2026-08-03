@@ -84,11 +84,28 @@ Affects 15–20% of users directly.
 
 ---
 
-## 6. Agent-specific usage
+## 6. Presentation exclusivity — never stack two modal surfaces
+
+**Rule:** A system `.sheet`, a custom overlay "card" (e.g. a `ZStack`-based list/detail overlay), an `.alert`, or any other surface that claims the user's full attention never co-exists on screen with another one. Opening one always **replaces or dismisses** whatever else is presented — never adds to it. Two modal-like surfaces stacked simultaneously reads as a broken transition, not a broken feature, so it can pass a casual look while still being wrong.
+
+**Evidencing example — PAS-36:** tapping a place row inside the open Places list left `PlacesListOverlay` (a custom `ZStack` overlay, `passenger-code/Passenger/PlacesList/PlacesListOverlay.swift`) visible on screen *behind* the place-detail system `.sheet` that opened on top of it (`passenger-code/Passenger/Map/MapScreen.swift:235-243`). Nothing dismissed the overlay when the sheet opened, so both surfaces were live at once — the list card and the detail sheet stacked, instead of one replacing the other.
+
+**The reusable mechanism — this codebase already has it, use it rather than re-deriving:**
+- `DetailRouter` — one system `.sheet` modifier whose content switches between Hood / place / event, never multiple independent `.sheet` calls competing to be on top.
+- `MapChromeState`'s `NavSurface` — a single `presented: NavSurface?`; `toggle()` swaps that one value rather than layering a second surface over the first.
+- T-036's TRD (`prds/places-been-saved/TRD.md`) already named the specific case as **D8**: "a `NavSurface` and a system sheet are never co-presented in either direction." This entry generalizes D8 from a one-off TRD decision into a standing rule for every future screen: the answer to "what's on screen right now" must live in exactly one place.
+
+**Checkable at spec/review time:** any screen with more than one presentable surface needs exactly one piece of state answering "what's currently presented" — an enum/optional with mutually-exclusive setters, not N independent booleans or overlays that can each be true at once. If a screen can't name that single source of truth, it can stack.
+
+**Cite:** PAS-36.
+
+---
+
+## 7. Agent-specific usage
 
 **Designer** — spec *to* these thresholds. When you write a spec's components/states/accessibility sections, the numeric targets above (targets, contrast, Doherty timings, Hick option counts, thumb-zone placement) are the defaults you design against. Cite this doc rather than re-deriving.
 
-**iOS code reviewer** — add a **UX/HIG conformance pass** using §2, §3, §5 as the checklist: color-only signalling on the map, missing state handling, placeholder-as-label, targets < 44pt, fixed non-scaling type, response paths that block the main thread past the Doherty budget, unlabeled annotations. File findings **by component** (§5). These are `APPROVE with minors` unless they cause an accessibility failure or a functional/reliability break (§1), which escalates per the Maslow precedence.
+**iOS code reviewer** — add a **UX/HIG conformance pass** using §2, §3, §5, §6 as the checklist: color-only signalling on the map, missing state handling, placeholder-as-label, targets < 44pt, fixed non-scaling type, response paths that block the main thread past the Doherty budget, unlabeled annotations, and (§6) any screen that can present two modal-like surfaces at once — check for a single "what's presented" state rather than independent flags/overlays. File findings **by component** (§5). These are `APPROVE with minors` unless they cause an accessibility failure or a functional/reliability break (§1), which escalates per the Maslow precedence — a §6 stacked-modal finding is a functional break, so it escalates past minor.
 
 ---
 
