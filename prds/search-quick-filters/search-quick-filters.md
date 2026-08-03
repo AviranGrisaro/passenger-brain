@@ -46,7 +46,9 @@
 
 4. **Search filters the map at the selected hour; it never builds a second view of the data.**
    - [ ] While results show, the map dims everything except matching pins and Hoods, and keeps heat and the flag on what remains (§6).
-   - [ ] **Whenever results show, at least one map element renders undimmed — at every zoom the map can be at, including the cold-open zoom.** A place-only match at a zoom where place pins are not drawn must still emphasise something (the matched places' Hoods are the obvious candidate); a uniformly dimmed map with nothing bright is a fail. *(Added at acceptance 2026-08-03, L-009: the original bullet's only pass condition was the emphasis set and the `isDimmed` flag handed to each layer — both correct in the failing case, so nothing could fail it. The criterion is the rendered result, not the passed value.)*
+   - [ ] **The dim is visible in the heat channel, not only on outlines and labels.** With results showing, a non-matching Hood's *heat fill* renders visibly weaker than that same Hood's fill with no search open. The fill is what carries this requirement; dimming only a Hood's 0.5pt stroke and its centroid label is a fail.
+   - [ ] **Whenever results show, something on the map is visibly emphasised — at every zoom the map can be at, including the cold-open zoom.** A place-only match at a zoom where place pins are not drawn must still emphasise something (the matched places' Hoods are the obvious candidate). A screen where opening search and typing a match changed nothing a user can see is a fail.
+   *(Both added at acceptance 2026-08-03, L-009: the original bullet's only pass condition was the emphasis set and the `isDimmed` flag handed to each layer — both correct in the failing case, so nothing could fail it. The criterion is the rendered result, not the passed value.)*
    - [ ] Dimming clears the instant a result is selected or the sheet is dismissed.
    - [ ] Search reads the same cached place and Hood data the map reads — no search-only dataset, no search-only ranking.
    - [ ] Opening a result shows heat and the flag exactly as tapping that pin or Hood would, at the current hour.
