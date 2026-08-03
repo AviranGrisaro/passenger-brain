@@ -1,6 +1,6 @@
 # Time Slider — now → +12h — PRD
 
-**Status:** Draft v8 — Q7/Q8/Q3 ratified, `design-review` closed; v8 adds the Heat button's icon-only treatment (Technical design, Decisions log), no P0/P1 change
+**Status:** Draft v9 — **acceptance REJECT 2026-08-03** (`product`); v9 adds req 5's rendered-legibility bullet (L-009), no scope change. v8 added the Heat button's icon-only treatment
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
 **Last updated:** 2026-08-02
@@ -52,6 +52,7 @@
    - [ ] A visible numeral or label states the selected hour at all times while the control is on screen.
    - [ ] An explicit "now" mark is drawn on the track as a fixed anchor, at the range end the control treats as "now".
    - [ ] Meaning is never carried by colour alone (`design/design-principles.md` §3).
+   - [ ] **The whole readout — offset numeral, clock time, and the "next day" flag — renders unoccluded and unwrapped.** No nav-row button or other chrome overlaps any part of it, and no label breaks across lines or clips mid-token, at the default text size **and** at the largest supported Dynamic Type size. *(Added at acceptance 2026-08-03, L-009. The TRD's §2.3 z-table already required the card to sit "anchored a fixed distance above the nav row… never `bottom: 0`", but no PRD requirement, no §9 verification row and no TEST-PLAN case stated the **rendered** consequence — so `code-review` and `qa` both passed a build whose nav row draws on top of the readout. `XCUIElement.exists` is `true` for an occluded label and a source read cannot see an overlap; only a rendered check fails this.)*
 
 6. **Accessibility.**
    - [ ] VoiceOver exposes a discrete, announceable step — each step announces the hour it lands on; the control is not continuous-drag-only.
@@ -127,6 +128,7 @@ Also open, smaller:
 
 | Date | Decision / change | Why |
 |---|---|---|
+| 2026-08-03 | **v9 — acceptance REJECT (`product`). Req 5 gains a rendered-legibility bullet; no other requirement text changed, no scope change.** Two blocking findings, both rendered-only: (F1) the nav row draws on top of the modal card's readout at the **default** text size, hiding most of the "next day" flag; (F2) at AX5 the readout wraps mid-token ("+12" / "h") and the "next day" pill breaks across two lines | F1 is a straight build deviation from the TRD's own §2.3 z5 row ("anchored a fixed distance above the nav row… never `bottom: 0`") — `HeatModalCard` ships bottom-anchored at 8pt while `MapNavRow` floats 96pt up, so the two share pixels. It is *also* a spec gap, which is why the new bullet exists: §2.3 stated the layout rule as architecture and it never became a §9 verification row or a TEST-PLAN case, so no gate had a rendered pass condition to fail. Every prior gate checked source or element existence, and neither can see an overlap. Verified live this pass on a rendered app at `passenger-code d537ca5` |
 | 2026-08-02 | **v8 — Heat button confirmed icon-only, no text caption.** Technical design gains a stated bullet; no P0/P1 requirement text changed (this feature's own requirements never claimed a caption existed). The nav row's other two buttons (Search, Profile) are out of this PRD's scope per its own "not in scope" line — that half of the request is recorded centrally in `design/ux-flows.md` instead | Founder-direct, live hilos `@chief` chat, verbatim "remove the name from the icons in the nav bar, show only icons" — durable record in `agent-os/PROGRESS.md`'s 2026-08-02 FOUNDER-DIRECT STUB, per L-002. No code exists for any of the three nav buttons yet (T-032 is at `trd-review`, building the Heat button only per its TRD's D1), so this is captured in the spec ahead of build rather than dispatched as a code change |
 | 2026-08-02 | **v7 — Q7/Q8/Q3 ratified.** Q7: 24pt edge capture zone approved as a stated departure from the 44pt floor. Q8: idle hint kept; Description line widened to state it as an explicit exception. Q3: one shared hour value across both edges and the heat button, confirmed (no longer **[ASSUMPTION]**). No requirement text changes beyond the Description line | Founder-direct, live chat with coordinating session, verbatim "approve edge zone Q7, keep hint Q8, one shared hour Q3" — durable record in `agent-os/PROGRESS.md`'s 2026-08-02 FOUNDER-DIRECT STUB, per L-002. All three questions were routed to Aviran at `design-review` (Q7/Q8 at v5/v6, Q3 still open since v2) and no other agent had standing to answer them |
 | 2026-07-30 | PRD created | First PRD pass over the 2026-07-30 V1 lock (PAS-10); slider is the one item strategy marks unchanged |

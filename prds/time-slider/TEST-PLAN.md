@@ -55,3 +55,31 @@ Source: `prds/time-slider/time-slider.md` (PRD, requirements 1-7), `prds/time-sl
 - **C26 (landscape rotation): NOT satisfied by this pass**, same reason. The policy-layer unit test (C18/`EdgeAvailabilityTests`) passes by direct read; the rendered-layer rotation check has never been performed by any session on record for this task.
 
 **Recommendation, not a rejection:** since nothing found is actually broken — every case that could be checked (source read or, for the 15 PASS rows, real existing automated tests read in full) checked out clean, and the 11 BLOCKED rows are a verification gap caused by the environment, not a product defect — this does not warrant sending T-032 back to `build`. It warrants a short, dedicated follow-up `qa` pass targeting exactly the 11 BLOCKED rows (most of all C21 and C26, the reviewer's named asks) once the shared machine has disk headroom, ideally before `aviran-review` rather than after ship. Per this codebase's standing discipline, no P0 fails were found, so this is **PASS WITH MINORS** — moving to `acceptance` per lifecycle — but the two reviewer asks should be treated as still open, not closed, until that follow-up pass lands.
+
+
+---
+
+## Acceptance addendum — `product`, 2026-08-03: the 11 BLOCKED rows, re-run live
+
+The disk exhaustion above cleared (45Gi free, zero concurrent `xcodebuild`, one booted simulator). `product` ran the blocked cases on a **clean detached worktree at `passenger-code d537ca5`** — deliberately not the shared working tree, which carried T-051/T-052 WIP in `MapScreen.swift` at the time — on a dedicated simulator. `qa`'s rows above are left as `qa` wrote them; this addendum supersedes their Result cells where noted.
+
+| # | Was | Now | Evidence |
+|---|---|---|---|
+| C5 | BLOCKED | **PASS** | `HeatRepaintPerformanceTests.testHourRepaintSignpost` executed: `HourRepaint` **average 0.004s**, values `[0.0043, 0.0056, 0.0039, 0.0036, 0.0025]`. Budget is 400ms; measured max is 5.6ms |
+| C6 | MINOR GAP | **PASS** | Closed by a throwaway acceptance probe: button-path `adjust(toNormalizedSliderPosition:)` sweep to 0.5 then 1.0, camera dump sampled before/mid/after — byte-identical (`32.08530000,34.78180000,0.25788673,0.14000000` throughout) while the hour reached `12`. The shipped suite still has no such test — **the gap is now a missing test, not a missing answer** |
+| C13 | BLOCKED | **PASS (structural)** | `HourSlider.tickOverlay` draws the now mark as `diamond.fill` against 1pt hairline `Rectangle` stops; `EdgeHourTrack.stop(for:)` draws it as `diamond.fill` against 3pt `Circle` stops. Shape-distinct in both paths by construction — greyscale cannot change it |
+| C14 | BLOCKED | **still open, non-blocking** | Native `Slider(step: 1)` + `.accessibilityValue(HourFormat.voiceOverValue(...))` confirmed; `HourFormatTests` green in the 400-test run. No live VoiceOver session performed — unchanged from `qa`'s position |
+| C16 | BLOCKED | **FAIL — blocking, see F2** | Rendered at `UICTContentSizeCategoryAccessibilityXXXL`: the readout wraps mid-token ("+12" / "h" on two lines) and the "next day" pill breaks across two lines inside a capsule that no longer fits it |
+| C20 | BLOCKED | **still open, non-blocking** | Confirmed the intended control case was never written: `EdgeHourZoneInteractionTests.mapCenterX` is declared with the comment "used for the 'pan starts outside the band' control case" and is referenced by no test in the file |
+| C21 | **BLOCKED — reviewer's ask** | **PASS, live** | `EdgeHourZoneInteractionTests` executed clean, 3/3, 64.2s, zero failures — including `testInBandVerticalDragMovesTheHourAndLeavesTheCameraUntouched`. The reviewer's ask is satisfied on a rendered app, in this environment, by this pass |
+| C22–C25 | BLOCKED | **resolved by construction + one live case** | `testEdgeZoneIsInertWhileAHoodSheetIsPresented` executed clean live. The four rows split on **detent**, and there is no detent-sensitive code path to split on: `EdgeAvailability.liveEdges` takes no detent argument, and `MapScreen.edgeLayer(for:)` removes `EdgeHourZone` from the hierarchy whenever `isAnySheetPresented`. `.medium` and `.large` cannot differ |
+| C26 | **BLOCKED — reviewer's ask** | **PASS, live** | Purpose-built rotation probe: rotate to `.landscapeLeft`, in-band vertical edge drag → hour unchanged at `0`; rotate back to portrait, **identical** drag → hour moves. The negative control is the point — without it "nothing happened" proves nothing. The hint's absence in landscape is structural (`edgeLayer` draws `EdgeHint` only inside `if liveEdges.contains(edge)`, and the ghost-mark branch requires `idiom == .pad`), not separately rendered-checked |
+
+**Two new cases this pass created, neither previously in this plan — both FAIL:**
+
+| # | PRD req | Case | Result |
+|---|---|---|---|
+| C28 | Req 5 (new bullet) / TRD §2.3 z5 | The modal card's readout row renders unoccluded by `MapNavRow`, at the default text size | **FAIL (blocking).** `MapNavRow` (`.overlay(alignment: .bottom).padding(.bottom, 96)`) draws over `HeatModalCard` (`ZStack(alignment: .bottom)`, `.padding(.bottom, 8)`). The Heat and Search buttons sit on the "next day" flag; it reads as "…t day" |
+| C29 | Req 6 (Dynamic Type bullet) | The readout is legible at the largest supported Dynamic Type size | **FAIL (blocking).** See C16. No `dynamicTypeSize` cap exists anywhere in the app, so AX5 *is* the largest supported size |
+
+**Throwaway probes, deliberately not committed to `passenger-code`:** the rotation, AX5 and touch-target probes were written in the scratch worktree and discarded. `qa`/`ios-developer` should add real versions of the C26 rotation check and the C6 button-path camera check to the shipped suite — both are cheap and both are checks the suite genuinely lacks.
