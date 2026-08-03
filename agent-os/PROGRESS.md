@@ -13,6 +13,26 @@ Entry format:
 
 ---
 
+### 2026-08-03 — chief-of-staff — round 8: verified all 4 round-7 in-flight dispatches, caught a stale acceptance verdict, dispatched 5 more
+
+- **Did:** resumed after round 7's dispatches were cut off mid-task by an API session limit. Verified each against live `git log`/`PROGRESS.md` rather than assuming completion:
+  1. **T-032/PAS-15 code-review — landed, APPROVE WITH MINORS** (`passenger-brain 1b7e256`). No blocking findings; two non-blocking minors. Reviewer recommends `qa` next. Linear `PAS-15` → `owner:qa`, comment posted. **Dispatched `qa` via relay this round**, briefed on the reviewer's two open asks (on-device camera-immobility confirmation, D9 landscape-rotation check) and on `LESSONS.md` L-029 (see below).
+  2. **T-036/PAS-27 code-review — still genuinely in flight**, no verdict landed yet. Not touched, not re-dispatched (L-007).
+  3. **T-037/PAS-28 one-line fix — landed and fully documented by the dispatched session itself** (`passenger-code 05482e6`, `passenger-brain 92b4b3d`) between my first check (code committed, docs not yet written, ~1 min old) and my second (docs landed). Back to `code-review`/`owner:ios-code-reviewer` for a narrow re-review of just the fix. Linear `PAS-28` synced (`owner:ios-code-reviewer`, comment posted).
+  4. **T-038/PAS-29 acceptance — landed REJECT, then self-corrected by the same session** (`passenger-brain 8545d2b` → `a1ab81d`, both read directly). **Caught this before it propagated:** I had already sent a dispatch brief to `ios-developer` describing only the original (incomplete) F1 mechanism — a place-only match at cold-open zoom renders no pin (F1b). The correction commit found a second, larger bug the first pass missed: `HoodLayer`'s `fillColor` never applies `dimOpacity` at all (F1a) — a non-matching Hood's heat fill stays full-strength through a search, which is the more visually dominant channel. **Sent an immediate correction message to `main`** with the full corrected F1a+F1b text before the agent could act on the stale version (or as a same-turn correction if it already had). Linear `PAS-29` comment updated to match, `owner:ios-developer`.
+- **Also landed, unprompted, during this window:** `passenger-brain 44995b5`/`passenger-code b08199d` — a user-started background session root-caused the spreading UI-test "Restarting after unexpected exit" crash as **L-029**: simulator-UDID contention between concurrent `xcodebuild test` runs sharing one booted device, not a per-test flake. Applied to `qa.md`/`ios-developer.md`. Not my dispatch, just noted and relied on (the `qa` dispatch above references it).
+- **New dispatches this round (5 relay messages to `main`, all queued, none verified yet):**
+  1. `ios-developer` — T-038/PAS-29 build fix (F1a+F1b, corrected brief; F2 chip truncation folded in).
+  2. `ios-developer` — T-051/PAS-39, two fixture-data gaps (events-seed coordinates, closed+flagged place). Claimed: Linear `PAS-39` → `In Progress`.
+  3. `designer` — T-052/PAS-40, map-rendering-spec.md event-marker row + `EventDetailModal` slug-rendering fix. First dispatch under the post-ship redesign model. Claimed: Linear `PAS-40` → `In Progress`.
+  4. `qa` — T-032/PAS-15 (see above).
+  - **Held, not dispatched:** T-050/PAS-38 (events layer toggle) is unblocked now that T-032 cleared code-review, but deliberately held one more round — dispatching `ios-developer` for it now would put a second concurrent `ios-developer` instance in `MapScreen.swift` at the same time as the just-dispatched T-038 fix, which also touches that file. Dispatch next round once T-038's fix lands.
+- **T-035/PAS-26 req 5:** finding from round 7 (busy+flagged concretely observable against T-032's shipped density seed) is now final since T-032 cleared code-review — noted on T-035's `BOARD.md` row for `aviran-review`, no further dispatch needed.
+- **Left behind:** next round should (1) verify the 5 dispatches above, (2) dispatch T-050 once T-038's fix is confirmed landed, (3) chase T-036's code-review if it's still outstanding, (4) watch for `product`'s owed TRD amendments (T-038 §9 rows 4(a)/8(c) — filed as T-053, unowned) and the T-047/T-048/T-053 backlog items generally.
+- **Git:** `passenger-brain` — `agent-os/BOARD.md` (T-032 both rows, T-035, T-050, T-051, T-052), `agent-os/PROGRESS.md` (this entry). Explicit paths, re-read `git diff` before staging — confirmed only my own hunks present (T-032/T-036/T-037/T-038 rows were already updated by their own dispatched sessions, not touched here beyond what's shown above). Not pushed — Aviran-gated, `CLAUDE.md` rule 9. Hash in the final response.
+
+---
+
 ### 2026-08-03 — ios-code-reviewer — T-032/PAS-15 code-review (first-ever): **APPROVE WITH MINORS**
 
 - **Did:** the first code-review of `passenger-code 198b082` (T-032/PAS-15, full TRD v3 C1-C14) against `prds/time-slider/TRD.md` v3 (`trd-review` cleared 2026-08-02, both signoffs APPROVE, `passenger-brain 57c3518`/`9fc41b0`). Read `BOARD.md`'s T-032 row and this file's `ios-developer` build entry in full first, per protocol. Read every new file in the commit (all 18) plus the diffed hunks of all 5 modified files, and the full TRD end to end rather than its changelog summary — not a diff-scoped read.
