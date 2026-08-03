@@ -113,7 +113,7 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>time-slider/time-slider.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="time-slider-now-12h-prd">Time Slider — now → +12h — PRD</h1>
-<p><strong>Status:</strong> Draft v8 — Q7/Q8/Q3 ratified, <code>design-review</code> closed; v8 adds the Heat button's icon-only treatment (Technical design, Decisions log), no P0/P1 change
+<p><strong>Status:</strong> Draft v9 — <strong>acceptance REJECT 2026-08-03</strong> (<code>product</code>); v9 adds req 5's rendered-legibility bullet (L-009), no scope change. v8 added the Heat button's icon-only treatment
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Owner:</strong> Aviran Grisaro
 <strong>Last updated:</strong> 2026-08-02
@@ -167,7 +167,8 @@ strong { font-weight: 600; }
 <p><strong>The selected hour is readable as a number, not only as a position.</strong>
    - ☐ A visible numeral or label states the selected hour at all times while the control is on screen.
    - ☐ An explicit "now" mark is drawn on the track as a fixed anchor, at the range end the control treats as "now".
-   - ☐ Meaning is never carried by colour alone (<code>design/design-principles.md</code> §3).</p>
+   - ☐ Meaning is never carried by colour alone (<code>design/design-principles.md</code> §3).
+   - ☐ <strong>The whole readout — offset numeral, clock time, and the "next day" flag — renders unoccluded and unwrapped.</strong> No nav-row button or other chrome overlaps any part of it, and no label breaks across lines or clips mid-token, at the default text size <strong>and</strong> at the largest supported Dynamic Type size. <em>(Added at acceptance 2026-08-03, L-009. The TRD's §2.3 z-table already required the card to sit "anchored a fixed distance above the nav row… never <code>bottom: 0</code>", but no PRD requirement, no §9 verification row and no TEST-PLAN case stated the </em><em>rendered</em><em> consequence — so <code>code-review</code> and <code>qa</code> both passed a build whose nav row draws on top of the readout. <code>XCUIElement.exists</code> is <code>true</code> for an occluded label and a source read cannot see an overlap; only a rendered check fails this.)</em></p>
 </li>
 <li>
 <p><strong>Accessibility.</strong>
@@ -250,6 +251,11 @@ strong { font-weight: 600; }
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>2026-08-03</td>
+<td><strong>v9 — acceptance REJECT (<code>product</code>). Req 5 gains a rendered-legibility bullet; no other requirement text changed, no scope change.</strong> Two blocking findings, both rendered-only: (F1) the nav row draws on top of the modal card's readout at the <strong>default</strong> text size, hiding most of the "next day" flag; (F2) at AX5 the readout wraps mid-token ("+12" / "h") and the "next day" pill breaks across two lines</td>
+<td>F1 is a straight build deviation from the TRD's own §2.3 z5 row ("anchored a fixed distance above the nav row… never <code>bottom: 0</code>") — <code>HeatModalCard</code> ships bottom-anchored at 8pt while <code>MapNavRow</code> floats 96pt up, so the two share pixels. It is <em>also</em> a spec gap, which is why the new bullet exists: §2.3 stated the layout rule as architecture and it never became a §9 verification row or a TEST-PLAN case, so no gate had a rendered pass condition to fail. Every prior gate checked source or element existence, and neither can see an overlap. Verified live this pass on a rendered app at <code>passenger-code d537ca5</code></td>
+</tr>
 <tr>
 <td>2026-08-02</td>
 <td><strong>v8 — Heat button confirmed icon-only, no text caption.</strong> Technical design gains a stated bullet; no P0/P1 requirement text changed (this feature's own requirements never claimed a caption existed). The nav row's other two buttons (Search, Profile) are out of this PRD's scope per its own "not in scope" line — that half of the request is recorded centrally in <code>design/ux-flows.md</code> instead</td>

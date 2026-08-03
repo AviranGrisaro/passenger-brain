@@ -113,10 +113,10 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>search-quick-filters/search-quick-filters.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="search-quick-filters-prd">Search &amp; Quick Filters — PRD</h1>
-<p><strong>Status:</strong> Draft v1
+<p><strong>Status:</strong> Draft v2 — build REJECTed at acceptance 2026-08-03 (req 4 bullet 2), back at <code>build</code>
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Owner:</strong> Aviran Grisaro
-<strong>Last updated:</strong> 2026-07-30
+<strong>Last updated:</strong> 2026-08-03
 <strong>Placement settled:</strong> decision #41 — quick filters stay sheet-internal, #25 unreversed. <strong>Layout is not settled</strong> (<code>ux-flows.md</code> §9 Q15, Aviran's); every requirement below holds either way.</p>
 <h2 id="description">Description</h2>
 <ul>
@@ -161,6 +161,9 @@ strong { font-weight: 600; }
 <li>
 <p><strong>Search filters the map at the selected hour; it never builds a second view of the data.</strong>
    - ☐ While results show, the map dims everything except matching pins and Hoods, and keeps heat and the flag on what remains (§6).
+   - ☐ <strong>The dim is visible in the heat channel, not only on outlines and labels.</strong> With results showing, a non-matching Hood's <em>heat fill</em> renders visibly weaker than that same Hood's fill with no search open. The fill is what carries this requirement; dimming only a Hood's 0.5pt stroke and its centroid label is a fail.
+   - ☐ <strong>Whenever results show, something on the map is visibly emphasised — at every zoom the map can be at, including the cold-open zoom.</strong> A place-only match at a zoom where place pins are not drawn must still emphasise something (the matched places' Hoods are the obvious candidate). A screen where opening search and typing a match changed nothing a user can see is a fail.
+   <em>(Both added at acceptance 2026-08-03, L-009: the original bullet's only pass condition was the emphasis set and the <code>isDimmed</code> flag handed to each layer — both correct in the failing case, so nothing could fail it. The criterion is the rendered result, not the passed value.)</em>
    - ☐ Dimming clears the instant a result is selected or the sheet is dismissed.
    - ☐ Search reads the same cached place and Hood data the map reads — no search-only dataset, no search-only ranking.
    - ☐ Opening a result shows heat and the flag exactly as tapping that pin or Hood would, at the current hour.
@@ -194,6 +197,7 @@ strong { font-weight: 600; }
    - ☐ Search icon, every chip, and every row has a ≥44pt touch target (<code>design-principles.md</code> §2).
    - ☐ Every row announces type and name in VoiceOver — "Florentin, Hood" / "Port Said, place, Eat &amp; Drink".
    - ☐ The sheet stays usable at the largest Dynamic Type size; rows grow rather than truncate.
+   - ☐ <strong>At the largest accessibility text size, neither chip's label truncates or clips</strong> — the two chips wrap, scroll, or stack rather than being compressed into one screen width. <em>(Added at acceptance 2026-08-03, L-009: "rows grow rather than truncate" was read as covering result rows only, and the shipped guard test greps for <code>.lineLimit</code> — which is not what causes truncation inside an overflowing <code>HStack</code>.)</em>
    - ☐ Search-result pins differ from Places-list pins by shape or icon, never colour alone (§2.1).</p>
 </li>
 </ol>
@@ -253,6 +257,31 @@ strong { font-weight: 600; }
 <td>2026-07-30</td>
 <td>Keyword field given an owning PRD (<code>places-dataset</code> req 4); the residual open item narrowed to authoring load</td>
 <td>Standing rule, founder-direct 2026-07-30. The gap was correctly flagged but had no deliverable behind it — a flagged gap with no owner is how it reaches <code>build</code> unbuilt</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>TRD D8 upheld</strong> — a chip narrows <em>places</em> only; a Hood match survives an active chip</td>
+<td>Req 3 bullet 3 says "narrows," not "replaces." A Hood carries no <code>PlaceCategory</code> and cannot be classified into one, so dropping Hoods would make a chip delete an entire result kind</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>TRD D9 upheld</strong> — two row words, "Hood" and "Place"; a keyword hit is a Place row</td>
+<td>Req 2 bullet 2's own justification clause is a two-way distinction ("a Hood is never mistakable for a place"), and req 8's VoiceOver examples give only two forms. The third "kind" is a match <em>route</em>, not a row type</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>TRD §4.10's undimmed MapKit base tiles accepted as a limitation, not a defect</strong></td>
+<td>The requirement is about the prominence of Passenger-authored content (Hood fills, labels, pins). SwiftUI's <code>Map</code> exposes no layer between tiles and annotations, and a full-screen scrim would darken the matches too</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td><strong>TRD D2 (0.45 / 0.92 two-height overlay) accepted for Build Phase 1, carried to Aviran</strong></td>
+<td>The layout call is Aviran's and still open (§9 Q15). D2 is behaviourally design review's detent recommendation and is reversible for two constants and one gesture; it is not <code>product</code>'s to lock</td>
+</tr>
+<tr>
+<td>2026-08-03</td>
+<td>Req 4 and req 8 each gained a pass/fail bullet at acceptance</td>
+<td>L-009. Both requirements failed with every existing check green, because each check asserted a stored value rather than the rendered result</td>
 </tr>
 </tbody>
 </table>
