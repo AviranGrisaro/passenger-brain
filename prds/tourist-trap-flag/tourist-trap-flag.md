@@ -1,6 +1,6 @@
 # Tourist-Trap Flag & Local QA — PRD
 
-**Status:** Draft v1
+**Status:** Accepted (Build Phase 1) 2026-08-03 — reqs 1–4, 6, 7, 9 verified; req 5 built-but-unobservable and req 8's notification/geofence half not built in this phase, both named in the Decisions log.
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
 **Last updated:** 2026-07-30
@@ -34,7 +34,7 @@
 2. **The flag never shares a visual channel with heat.**
    - [ ] Heat is always the area fill; the flag is always the Hood's outline stroke (§2).
    - [ ] Flagged state reads without colour — weight and/or dash, not hue alone (`design-principles.md` §3).
-   - [ ] Moving the time slider repaints heat and changes no stroke: the flag is not time-variant.
+   - [ ] Moving the time slider never changes **which** Hoods carry a stroke — the flagged set is time-invariant, and no unflagged Hood ever gains one. An already-flagged Hood's stroke *style* does switch between plain and busy+flagged as its density crosses the threshold for the selected hour (req 5). *(Corrected at acceptance 2026-08-03: the original "changes no stroke" contradicted req 5, which is per-hour by definition. TRD D3 built this reconciled reading; `map-rendering-spec.md` §3 is the locked design it matches.)*
 
 3. **Progressive disclosure by zoom matches `map-rendering-spec.md` §2's table, row for row.**
    - [ ] City-wide shows no stroke and no label on any Hood; neighborhood adds both on flagged Hoods only; close keeps the stroke and drops the label.
@@ -42,7 +42,7 @@
 
 4. **Not-flagged and not-yet-rated both render blank.**
    - [ ] A not-flagged Hood renders no stroke and no label, at every zoom.
-   - [ ] A not-yet-rated Hood renders identically to not-flagged, resolved on tap by the Hood sheet.
+   - [ ] A not-yet-rated Hood renders identically to not-flagged, resolved on tap by the Hood sheet: the sheet always carries one line stating exactly one of three states — "Tourist-heavy spot" / "Not a tourist-heavy spot" / "No local rating yet". *(Pass condition added at acceptance 2026-08-03: "resolved on tap" named no surface and no strings, and the Hood sheet had no flag element at all. TRD D5 built this line; confirmed. L-009.)*
    - [ ] Storage still distinguishes the two, because req 7 depends on it.
 
 5. **Busy + flagged replaces the plain treatment; it never stacks.**
@@ -113,4 +113,9 @@
 | 2026-07-30 | Rendering referenced, not restated | `map-rendering-spec.md` §§2–3 were already rewritten against #37 by `designer` (PAS-8) |
 | 2026-07-30 | Nullable boolean over a separate `is_rated` column | Accessibility (req 7) needs three states stored while the map renders two |
 | 2026-07-30 | Data-sourcing bullet added; the "nothing produces the first flag value" gap promoted from implicit to a named risk | Standing rule, founder-direct 2026-07-30. The PRD scoped the proposing algorithm out — correctly — but never said the feature ships blank if it never lands |
+| 2026-08-03 | **D3 CONFIRMED** — req 2 bullet 3 was the wrong requirement, not the build | The TRD's reconciled reading (flagged *set* is time-invariant; an already-flagged Hood's stroke *style* varies with the hour) is what `map-rendering-spec.md` §3 locks, and the only reading under which req 5 can exist at all. Req 2 bullet 3 rewritten above |
+| 2026-08-03 | **D5 CONFIRMED** — the three-state Hood-sheet line is accepted as new UI, and req 4 bullet 2 now carries its pass condition | "Resolved on tap by the Hood sheet" named no surface and no strings, and `HoodSheet.swift` had no flag element — a requirement no gate could fail. The three-state line is the only construction that distinguishes not-flagged from not-yet-rated, which req 4 bullet 3 and req 7 both depend on |
+| 2026-08-03 | **Req 5 (busy+flagged) accepted as built-but-unobservable, not as passed** | `DensityStore` has no seed path in Build Phase 1, so `band` is `nil` for every Hood at every hour and `.busyWarning` can never render. The pure `FlagStroke.treatment(for:band:)`/`HoodSpeech.label` paths are built and unit-covered. Verified against source, not taken from the TRD's claim. Re-verify when T-032's C10 density seed lands |
+| 2026-08-03 | **Req 8's notification + geofence half is out of Build Phase 1**, confirming TRD §1's boundary | No dwell detector and no `UserNotifications` link exists anywhere in the app, by design — the PRD assigns the detector to `data-engineer` as "one detector, three consumers." It now has a board row and an owner (`T-046`/`PAS-33`), which it did not when this PRD was written. Bullets 1 and 6 and the "syncs later" half of bullet 5 are re-verified there and at B1 (Build Phase 2), not here. Everything else in req 8 — binary toast, auto-dismiss, ask-once ledger, rolling-24h cap, denied-suppression, device-local queue — is real and verified |
+| 2026-08-03 | Fixture completeness gap named, non-blocking | No place in `places-tel-aviv.json` is both permanently closed **and** flagged, so req 6 bullet 3's independence claim is true by construction (separate views, separate fields) but not demonstrable in the demo. One fixture row fixes it — T-051 |
 

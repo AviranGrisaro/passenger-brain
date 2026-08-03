@@ -1,6 +1,6 @@
 # Live Events Overlay — PRD
 
-**Status:** Draft v2
+**Status:** Accepted (Build Phase 1) 2026-08-03 — reqs 1–5 only. **Req 6 (layer toggle) is unbuilt and explicitly not accepted**, deferred to T-050; see the Decisions log.
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Build phase:** 1 — client ships with fake/empty data, no backend (`agent-os/BOARD.md` § V1 Build Phases)
 **Owner:** Aviran Grisaro
@@ -26,14 +26,14 @@
 ### Must-have (P0)
 
 1. **Events render on the map, in the current hour.**
-   - [ ] An event with a start time inside the selected hour renders as a marker at its location.
+   - [ ] An event renders as a marker at its location **at every hour its interval overlaps**, not only at its start hour — an event running 18:00–23:00 renders at 18:00, 19:00, 20:00, 21:00 and 22:00 (corrected at acceptance 2026-08-03, TRD D1; the original wording stated a sufficient condition and was read by an implementer as an exclusive one).
    - [ ] Changing the selected hour changes which events render, inside the 400ms budget (`design/design-principles.md` §2).
    - [ ] An event outside the now → +12h window never renders.
    - [ ] Event markers are distinguishable from place pins by shape or glyph, not colour alone (`design/design-principles.md` §3).
 
 2. **The layer never competes with heat.**
    - [ ] Event markers do not use the heat bands' fill treatment or occupy the area channel — heat owns fill, always (`design/map-rendering-spec.md` §2).
-   - [ ] Event markers cluster by the same screen-distance rule as place pins, and clusters stay neutral-coloured (`design/map-rendering-spec.md` §5).
+   - [ ] ~~Event markers cluster by the same screen-distance rule as place pins, and clusters stay neutral-coloured (`design/map-rendering-spec.md` §5).~~ **Moved to `T-041`/`PAS-30` at acceptance, 2026-08-03** (TRD D4). The shared screen-distance rule is unimplemented anywhere in the app and owned by no PRD; the on-screen marker cap (req 3 bullet 3) is Phase 1's density bound. Event markers join the shared rule when T-041 builds it — this requirement is not waived, it has a different owner.
 
 3. **The set is selected, not exhaustive.**
    - [ ] The layer shows a ranked subset, not every event the pipeline ingested — strategy: "algorithmically selected as likely-interesting to the user (not just a raw feed of every event)."
@@ -45,6 +45,7 @@
    - [ ] Tapping a marker opens a sheet with name, time, and location, one tap, map still visible behind it.
    - [ ] The sheet offers the same route hand-off contract as a place — native Maps/Waze, walking, no in-app navigation.
    - [ ] Any field the pipeline did not supply is omitted, not shown as a blank row or placeholder.
+   - [ ] Every field the sheet renders reads as human text, never an internal identifier — a Hood renders its display name ("Florentin"), never its slug (`kerem-hateimanim`); a category renders its display word, never its raw enum value. *(Added at acceptance 2026-08-03: the shipped sheet renders both raw. No earlier gate had a criterion to fail it on — the requirement existed only as an implicit reading of "location". L-009.)*
 
 5. **The layer degrades to absent, never to broken.**
    - [ ] If the events feed is unreachable or empty, the map renders heat and places normally with no error banner over the map surface.
@@ -67,7 +68,7 @@
 - **Data sourcing (added 2026-07-30, standing rule).** The pipeline that fills this table now has a PRD: [`prds/live-events-pipeline/`](../live-events-pipeline/live-events-pipeline.md). It carries the ingest-side fields this sketch omits (`source_event_id` for dedup, `ingested_at` for freshness), the required-field drop rule, event→Hood attribution, expiry, and the non-personalized rank contract. **`PAS-5` delivered a feasibility read, not a spec** — that gap is what the pipeline PRD closes. Which feed(s) ship is still Aviran's (`PAS-6` item 10); the pipeline PRD is written source-agnostically so it does not pre-decide it.
 - **APIs / client-server contract:** one fetch for the whole now → +12h window alongside the map's density load, re-filtered locally per hour rather than re-fetched per slider step. Realtime is not required — periodic refresh is enough for events known in advance.
 - **Architecture notes:** `SALVAGE.md` marks `Models/LiveEvent.swift`, `EventMarker.swift`, `EventDetailCard.swift`, `Services/EventsService.swift` REUSE. **Check before reusing:** `prds/INDEX.md` warns the Locali overlay shipped as an unflagged raw feed; the ranked-subset requirement is new and the salvaged service has no notion of it.
-- **Dependencies:** the map and time-slider PRDs land first. Hard upstream dependency on [`live-events-pipeline`](../live-events-pipeline/live-events-pipeline.md) for any **real** data, which in turn needs [`hood-dataset`](../hood-dataset/hood-dataset.md) — event→Hood attribution is impossible against placeholder rectangles. **Build Phase 1 needs no backend at all:** a bundled fake event set, carrying the same fields as the `events` table above, drives reqs 1–4 and 6; the empty case (req 5) is a state to verify, not the only Phase-1 state. Authoring that fixture is a named Phase-1 data need — small enough to live here rather than in its own PRD, but it does not exist yet and nobody owns it.
+- **Dependencies:** the map and time-slider PRDs land first. Hard upstream dependency on [`live-events-pipeline`](../live-events-pipeline/live-events-pipeline.md) for any **real** data, which in turn needs [`hood-dataset`](../hood-dataset/hood-dataset.md) — event→Hood attribution is impossible against placeholder rectangles. **Build Phase 1 needs no backend at all:** a bundled fake event set, carrying the same fields as the `events` table above, drives reqs 1–4 and 6; the empty case (req 5) is a state to verify, not the only Phase-1 state. Authoring that fixture is a named Phase-1 data need — small enough to live here rather than in its own PRD. **Claimed by T-034 and shipped** (`events-tel-aviv-seed.json`, TRD §3.4/D10, confirmed at acceptance 2026-08-03). **The fixture must also be plausible, not merely structurally valid** — added at acceptance: within any one hour bucket, no two events may share a coordinate, and no event may carry a templated name ("Fixture event 1"). The shipped bucket at offset +5 violates both — 14 events named "Fixture event 1…14" at one identical point — which passes the structural authoring rule and still renders as 12 stacked identical markers to anyone opening the demo at that hour. Tracked at T-051.
 - **Open technical questions:** refresh cadence; whether rank is absolute or per-hour; the on-screen marker cap, once real Tel Aviv event volume is known.
 
 ## Assumptions
@@ -89,4 +90,10 @@
 | 2026-07-30 | Ingestion pipeline given its own PRD rather than staying fenced out with no spec behind the fence | Standing rule, founder-direct 2026-07-30. Fencing it out was right; leaving the launch-blocking half with only a feasibility note and no requirements was not |
 | 2026-07-31 | Launch-blocking header re-attributed to the pipeline (`T-043`, Build Phase 3); this client marked Build Phase 1, unblocked. Strategy's gate itself untouched | The header conflated two things and read as if the client were blocked. Per `BOARD.md` § V1 Build Phases (Aviran, 2026-07-31), the client renders fake/empty data and needs no backend to ship, demo, or QA. The strategy line is Aviran-gated and was not edited, softened, or dropped — only correctly attributed |
 | 2026-07-31 | Phase-1 fake event fixture named as a real, unowned data need | Consequence of the above, surfaced by this fix: with an empty feed only, reqs 1–4 and 6 have nothing to test against, so "unblocked for Phase 1" is only true if the fixture exists |
+| 2026-08-03 | **D1 CONCUR** — req 1 bullet 1 rewritten from start-hour to overlap | The literal reading makes a four-hour event visible for one of its four hours, which answers a different question than strategy's "what's happening" at the selected hour. The bullet stated a sufficient condition, not an exclusive one. Carries TRD §4.2's drop of `start_at=gte` — `data-engineer` still owes that confirmation |
+| 2026-08-03 | **D4 RULED** — req 2 bullet 2 (clustering) moves to `T-041`/`PAS-30`, not waived | The screen-distance rule is unimplemented app-wide and owned by no PRD; blocking a Phase-1 task on an unowned Phase-2 one buys nothing at ≤12 markers. The cap is Phase 1's bound. T-041's board row now carries this requirement |
+| 2026-08-03 | **D2 CONFIRMED** — event markers render at every zoom, diverging from `map-rendering-spec.md` §2's "Pins: none at city-wide" | That row solves place-pin density (dozens per Hood); a capped 12-marker city-wide set is a different problem. The spec's own §1 argues *for* it: a non-heat signal invisible at cold-open zoom leaves "heat alone at cold open, the half anyone already gets from Google Maps." **The cap and the zoom rule are one decision** — overturning the cap reopens this. `map-rendering-spec.md` has no events row at all; filed for `designer` at T-052 |
+| 2026-08-03 | **D10 CONFIRMED** — the fixture is T-034's, with a plausibility clause added | Phase-1 acceptance covers reqs 1–5 against the fixture only; Phase-3 acceptance re-runs them against the live feed with the constant flipped |
+| 2026-08-03 | **Req 6 (toggle) not accepted — deferred to T-050** | Build step C12 is blocked on T-032's `HeatModalCard`, which does not exist. No toggle UI ships; `isLayerVisible` exists as state and the layer and hit-tester both honour it, but nothing user-reachable sets it. Not a build defect — nobody can fix it until T-032 lands |
+| 2026-08-03 | **Req 1 bullet 2's 400ms hour-change budget is unverified, not passed** | `qa`'s TEST-PLAN row 1b cites `ColdOpenPerformanceTests`, which measures cold-open-to-interactive, a different milestone. No `HourRepaint` signpost exists in the committed tree and no hour control ships (both T-032's). Re-verify at T-050 |
 
