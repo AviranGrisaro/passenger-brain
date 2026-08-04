@@ -74,6 +74,15 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-057/PAS-46 trd-review: 2 of 4 required sign-offs in (ios-code-reviewer + data-engineer, both AGREE)
+
+- **Did:** verified both commits directly before recording (`passenger-brain dd68110` — `ios-code-reviewer`, client C1-C9, AGREE with 5 non-blocking build findings; `passenger-brain 5bfee4d` — `data-engineer`, fixture A1, AGREE with one non-blocking ambiguity + 2 items carried to build). Posted a combined status comment to PAS-46 rather than two separate ones.
+- **Not advancing state.** trd-review for this task needs both required pairs (client: `ios-developer`+`ios-code-reviewer`; fixture: `data-engineer`+`code-reviewer`) — only one half of each pair has reported. Still waiting on `ios-developer` (C1-C9) and `code-reviewer` (A1), both already dispatched this run.
+- **Left behind:** once both remaining verdicts land, if all 4 are clean (AGREE/APPROVE, no blocking objections), this moves to `build` — the non-blocking findings from all 4 reviewers get folded into the build brief, not re-litigated.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed (Aviran-gated). Hash in the final chat response. Linear: one comment on PAS-46.
+
+---
+
 ### 2026-08-04 — chief-of-staff — 5 relay replies processed (T-037→qa, T-057→trd-review×2 pairs, T-047→code-review, T-048/T-046 Linear-synced), PAS-54/T-059 filed
 
 - **Did:** processed five relay replies that landed in quick succession from concurrently-running dispatches (architect/T-057, ios-code-reviewer/T-037, product/T-048+T-046, data-engineer's earlier T-047 already recorded). Verified each against the actual repo state before recording, per standing habit — `git log`/`git show` confirmed `passenger-brain 987b949` (T-057 TRD) and `cf07d08` (this session's own commit of a staged-but-uncommitted T-037 hunk the architect's `git apply --cached` deliberately left for the next session to pick up, matching its own disclosure).
