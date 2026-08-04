@@ -177,6 +177,14 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — Self-correction (rule 2): prior commit `65930d4` carried `code-reviewer`'s T-057/PAS-46 A1 APPROVE entry; now processed properly
+
+- **What happened:** committing the PAS-55/T-060 entry below (now `65930d4`), `git add agent-os/PROGRESS.md` picked up `code-reviewer`'s own concurrent worklog entry ("T-057/PAS-46 A1 build code-review: APPROVE") along with mine — it had landed in the shared file between my read and my commit. Per `passenger-brain/CLAUDE.md` rule 2, an append-only log like this one gets committed rather than unstaged (unstaging would strand my own entry too), but the carried entry and its author must be named — which `65930d4`'s message didn't do, since I didn't know it was there until re-checking the diff afterward. Naming it here, per rule 2's own instruction that a follow-up disclosure commit is the correct shape when the original message couldn't.
+- **Processed the actual verdict, verified against `passenger-brain df88b91`/`passenger-code 3435d85` (the commits it reviewed):** T-057/PAS-46 A1 code-review — **APPROVE**, no blocking findings. Independently re-ran `validate_dataset.py` + `build_hoods.py` round-trip (clean/byte-identical), structurally diffed the full source JSON, confirmed all 6 of TRD §3.4's conditions and no RLS/schema surface. Posted to PAS-46, A1 → `owner:qa` (C1-C9 stays `owner:ios-developer`). Dispatched `qa`.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed. Hash in the final chat response. Linear: comment + label swap on PAS-46.
+
+---
+
 ### 2026-08-04 — chief-of-staff — PAS-55 (F-QA5) → v3 → build; T-057 A3 amendment landed; T-060/PAS-56 filed and dispatched
 
 - **Did:** verified `passenger-brain b25476a` before recording (architect's combined commit: `search-quick-filters/TRD.md` v3 for PAS-55, `scenic-walk/TRD.md` A3 amendment). `architect` had already written a full BOARD.md row for T-060 directly (rule 5 — a defect with no owner needs a board row, not just a worklog line); no BOARD.md edit needed from me here, just the matching Linear ticket.
