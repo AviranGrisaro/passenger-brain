@@ -13,6 +13,17 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — L-002 stub: founder-direct request, nav bar icons in one row
+
+- **Provenance:** founder-direct, live chief-of-staff chat via hilos/chief command, 2026-08-04.
+- **Verbatim request:** "i want the icons in the nav bar will be in the same row"
+- **As I read it:** Aviran wants all the nav-bar icon buttons laid out together in a single row. **[ASSUMPTION]** which icons/rows he means — see scoping note below; nothing beyond the quoted sentence is his own word.
+- **Scoping note (mine, not his):** `passenger-code/Passenger/Map/MapNavRow.swift` (Heat/Search/Profile) is already one `HStack`. A second, separate row — `NearMeButton` + `PlacesButton` (plus a conditional `HoodButton`/`SettingsHint`) — sits lower on screen as "bucket-2 chrome" (`MapScreen.swift` ~L360-393), on purpose per TRD decisions D1/D7 (fades while a `NavSurface` is open; nav row does not). **[ASSUMPTION]** the request means merging these two clusters into one row, since the nav row alone is already single-row. Full detail in the dispatch ticket, not restated here.
+- **Left behind:** this stub is the durable record; the ticket and its detailed dispatch write-up follow in this same run's later worklog entry.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` only, this entry. Explicit path, not pushed (Aviran-gated).
+
+---
+
 ### 2026-08-03 — retrospective — nightly run covering 2026-08-03 itself: 4 new lessons (L-030 to L-033), all applied; L-009 marked failed and re-fixed at the authoring stage; 6 past fixes verified
 
 - **Did:** the nightly retro. **Window:** `LESSONS.md`'s three prior `2026-08-03` headers all covered other windows (the nightly one covered 08-02's 19:20 tail; L-028 and L-029 were single-investigation targeted runs), so **no run had covered 2026-08-03's own work** — 73 `passenger-brain` commits, 22 `passenger-code` commits, `chief-of-staff` rounds 3–9, four features through review/QA/acceptance, the day's first two acceptance REJECTs. Read `LESSONS.md` in full, `BOARD.md`, this file's 2026-08-03 worklog, both repos' `git log --stat` since midnight, all 25 Linear issues with activity today, and tonight's PM audit digest on `PAS-32` (posted 20:20, available).
