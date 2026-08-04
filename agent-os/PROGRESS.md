@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — Tel Aviv municipal events finding relayed to PAS-6/PAS-20; no build dispatched
+
+- **Did:** followed up the L-002 stub below with the actual research + relay, no code/infra touched. Read `passenger-brain/SALVAGE.md` (events-related verdicts: `EventsService.swift`/`TelAvivPlacesService.swift` REUSE, migrations `006`/`007` REUSE) and cloned the frozen `github.com/AviranGrisaro/locali` repo (`main` for the client, `brain` for `06-database/functions/events-ingest/`) directly to confirm what "we already did it" actually refers to, rather than trusting the phrase. Finding: Locali's *shipped* approach is a direct JSON API pull (`TlvListUtils.svc/GetEvBenList`) discovered after an earlier HTML-scrape attempt against that same URL failed (Angular-templated, async-rendered) — implemented + self-reviewed, never deployed (Aviran-gated secrets/deploy never completed there either). Cross-checked against Passenger's own state: `passenger-brain/database/README.md` confirms zero migrations applied, no Supabase project; `prds/live-events-pipeline/` (PRD + TRD) already exists, Draft v1, explicitly source-agnostic, with source selection recorded as `PAS-6` item 4 (renumbered from the PRD's own "item 10" reference — old items 7-16 map to current items 1-10) — Aviran's call, not pre-decided. Linear: `PAS-20` (T-043, the active pipeline build task, In Progress since 2026-07-30) already lists the 3 Aviran-gated Supabase extensions + Edge Function deploy in its own DoD as outstanding infra.
+- **Did not do:** create any Supabase infra, pick a source, or dispatch `data-engineer`/`developer` to build anything — source selection is explicitly Aviran's per the TRD, and standing up Supabase is external-account/infra territory (Aviran-gated). Posted findings as comments on `PAS-6` (full write-up: what Locali actually built, why it changes `data-eng/live-events-feasibility.md`'s "municipal calendars = narrow, needs scraping" read, and that this is evidence for item 4, not a decision) and `PAS-20` (short version, so `data-engineer` has it queued the moment source selection unblocks).
+- **Evidence:** Linear comments on `PAS-6` (comment id `19a94b88...`) and `PAS-20` (comment id `e18b7852...`), both 2026-08-04. Locali finding sourced from `06-database/functions/events-ingest/README.md` and `TLV-EVENTS-API-SPEC.md` on the `brain` branch, `93cedac`/`d8401ce` respectively.
+- **Left behind:** two separate Aviran-gated blockers, not one — (1) which source(s) ship, `PAS-6` item 4, and (2) standing up an actual Supabase project at all (Build Phase 2 precondition, BOARD.md). Neither is resolved by this run. Next run: if Aviran answers either in hilos/Linear, pick it up; otherwise no change in dispatch-ability for `PAS-20`.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed (Aviran-gated, `CLAUDE.md` rule 9). Hash in the final response.
+
+---
+
 ### 2026-08-04 — chief-of-staff — L-002 stub: founder-direct request, Tel Aviv municipal events source
 
 - **Provenance:** founder-direct, live chief-of-staff chat via hilos/chief command, 2026-08-04.
