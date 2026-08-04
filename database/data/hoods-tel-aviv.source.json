@@ -2,6 +2,7 @@
   "sourceSchemaVersion": 1,
   "city": "tel-aviv",
   "_attribution": "Boundary geometry for hoods with provenance.source == 'osm' is derived from OpenStreetMap data, (c) OpenStreetMap contributors, available under the Open Database License (ODbL) 1.0 -- https://www.openstreetmap.org/copyright . This derived dataset (hood boundaries, names, ids) must carry the same attribution wherever it is published or redistributed, and any produced database that is itself made available must be under ODbL or a compatible license (share-alike). Not yet resolved: whether attribution must be displayed in-app (PAS-6 item 15, Aviran's call, see hood-dataset PRD sec Open questions & risks and TRD sec 8 D8) -- flagged, not decided here.",
+  "_scenicWalkDemoFixtureNote": "Build-Phase-1 fixture for Scenic Walk req 8 (T-057/PAS-46, hood-dataset/TRD.md sec 3.4, scenic-walk/TRD.md sec 3.4/10 step A1). Adds isTouristTrap: false to old-north, montefiore, shapira (each marked [PROVISIONAL] in provenance.sourceRef, not blurb, since none of the three carry a curated blurb to attach the marker to) alongside the pre-existing false-flagged ramat-aviv, giving 4 false Hoods / 6 pairs, all mutually non-adjacent (re-verified this session via validate_dataset.py's own area_centroid, not reimplemented ad hoc: pairwise minimum vertex separations old-north<->montefiore 1136m, old-north<->shapira 2865m, montefiore<->shapira 428m, and against ramat-aviv 1088m/2462m/5344m -- all >> the 50m floor; centroid separations old-north<->montefiore 2690m, old-north<->shapira 4351m, montefiore<->shapira 2065m, and against ramat-aviv 2829m/4569m/6598m -- all >> the 800m floor). Documented demo corridor: origin 32.0945,34.7981 (Bavli, set as a Simulator custom location) to destination Place.id florentin-anna-loulou-bar (32.058204,34.772021 per places-tel-aviv.json), straight-line distance 4730m. Both montefiore (774m off that line) and shapira (1138m off) fall inside the 250-1200m waypoint band scenic-walk/TRD.md sec 4.5 requires, so either can be the resolved viaHoodName; expect the Scenic control to resolve to .success on this corridor. A second documented A->B with no qualifying Hood in range is owed from ios-developer/C9 per TRD sec 9 row 8(d)'s required negative case. Caveat carried forward, not resolved here: this is straight-line geometry, not a real walking route. A live MKDirections.calculate() call was attempted from this session (same origin/destination, transportType .walking) and got no response after 45s wall-clock, sandboxed and unsandboxed alike -- consistent with MapKit's directions service requiring a signed, running app-bundle context to authorize a request, which a bare command-line process doesn't have. Flagged for ios-developer to re-measure the montefiore/shapira offsets against the real fast-route polyline on-device during C9's build (scenic-walk/TRD.md sec 9 row 8(d)) before this corridor is treated as demo-proven rather than geometrically-plausible.",
   "hoods": [
     {
       "id": "florentin",
@@ -4463,11 +4464,11 @@
         ]
       ],
       "blurb": null,
-      "isTouristTrap": null,
+      "isTouristTrap": false,
       "designatedForProgression": false,
       "provenance": {
         "source": "osm",
-        "sourceRef": "relation/17399097",
+        "sourceRef": "[PROVISIONAL - Build-Phase-1 req-8 demo fixture, T-057/PAS-46, hood-dataset/TRD.md sec 3.4; real local-QA value owed in Phase 2] relation/17399097",
         "retrievedAt": "2026-07-31"
       }
     },
@@ -5149,11 +5150,11 @@
         ]
       ],
       "blurb": null,
-      "isTouristTrap": null,
+      "isTouristTrap": false,
       "designatedForProgression": false,
       "provenance": {
         "source": "osm",
-        "sourceRef": "way/817274801",
+        "sourceRef": "[PROVISIONAL - Build-Phase-1 req-8 demo fixture, T-057/PAS-46, hood-dataset/TRD.md sec 3.4; real local-QA value owed in Phase 2] way/817274801",
         "retrievedAt": "2026-07-31"
       }
     },
@@ -14249,11 +14250,11 @@
         ]
       ],
       "blurb": null,
-      "isTouristTrap": null,
+      "isTouristTrap": false,
       "designatedForProgression": false,
       "provenance": {
         "source": "osm",
-        "sourceRef": "way/803404213",
+        "sourceRef": "[PROVISIONAL - Build-Phase-1 req-8 demo fixture, T-057/PAS-46, hood-dataset/TRD.md sec 3.4; real local-QA value owed in Phase 2] way/803404213",
         "retrievedAt": "2026-07-31"
       }
     },
