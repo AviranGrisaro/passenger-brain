@@ -88,6 +88,16 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-057/PAS-46 trd-review CLEARS (4/4 AGREE) → `build`; T-047/PAS-34 code-review APPROVE → `qa`
+
+- **Did:** verified `passenger-brain 0a457d4` (`code-reviewer`, two verdicts in one commit) before recording.
+- **T-057/PAS-46: all 4 required trd-review sign-offs in, all AGREE** (`ios-code-reviewer`, `data-engineer`, `ios-developer`, `code-reviewer`). Fixture half's migration-numbering call (regenerate `007` in place, don't add `008`) confirmed safe by direct precedent (006→007, migration 002). Moved `trd-review` → `build`, split at step granularity (L-027): `ios-developer` (C1-C9) and `data-engineer` (A1), both dispatched. Flagged for the C1-C9 build: hold C3 specifically until `architect`'s two pre-C3 doc amendments (dispatched last round) land — C1/C2 aren't blocked.
+- **T-047/PAS-34: code-review APPROVE, no findings.** Both commits doc-only, RLS/migration-safety reconfirmed. `owner:code-reviewer` → `owner:qa`, dispatched.
+- **Left behind:** waiting on `ios-developer`+`data-engineer` (T-057 build), `architect` (2 pre-C3 amendments), `qa` (T-047, T-037, T-038), `ios-developer` (T-051, T-048+T-047-followup), `designer` (T-052).
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed. Hash in the final chat response. Linear: comments + label swaps on PAS-46, PAS-34.
+
+---
+
 ### 2026-08-04 — chief-of-staff — T-057/PAS-46 trd-review: 3 of 4 sign-offs in (ios-developer AGREE); dispatched architect for 2 doc-only pre-C3 amendments
 
 - **Did:** verified `passenger-brain 8a006f7` (`ios-developer`, client C1-C9, AGREE) before recording. Posted status comment to PAS-46. Only `code-reviewer`'s A1 verdict remains before all 4 required trd-review sign-offs are in.
