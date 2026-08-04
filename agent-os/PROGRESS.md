@@ -129,6 +129,15 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-057/PAS-46 A1 (fixture) build landed, → code-review
+
+- **Did:** verified `passenger-brain df88b91` + `passenger-code 3435d85` before recording. `isTouristTrap: false` authored on `old-north`/`montefiore`/`shapira` (4 non-adjacent false Hoods with pre-existing `ramat-aviv`, matching TRD §9 row 8a). Provisional marker correctly in `provenance.sourceRef` not `blurb`. Migration `007` regenerated in place, byte-identical round-trip. Surgical — didn't touch the concurrent C1-C9 session's files.
+- **Two non-blocking carry-forwards:** centroid separation numbers shifted slightly on re-verification (doesn't change the pass/fail call, floor still cleared with margin); real `MKDirections` route re-measurement couldn't complete (no signed app-bundle context from a bare CLI process) — flagged for `ios-developer` to verify against the real polyline on-device during C9, which the TRD already requires.
+- **Claimed A1 for `code-review`** — added `owner:code-reviewer` (C1-C9 stays `owner:ios-developer`, still in flight, two labels coexist per this task's step-granularity split). Dispatched `code-reviewer`.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed. Hash in the final chat response. Linear: comment + label add on PAS-46.
+
+---
+
 ### 2026-08-04 — chief-of-staff — T-038/PAS-29 BLOCKED (retry dispatched, PAS-55 filed for F-QA5); T-057 BOARD.md drift fixed, small doc pass dispatched
 
 - **T-038/PAS-29 qa: BLOCKED, verified against `passenger-brain a562be4`.** Two P0-relevant cases unrun, both environmental (shared-desktop/disk contention). Does not move to `acceptance`. Checked current disk: **10Gi free** (was 1.4GB during the blocked pass), 3 concurrent `xcodebuild` processes still running — improved but not clear. Re-dispatched `qa` for a retry of just the two unrun cases.
