@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — FOUNDER-DIRECT STUB: T-032 marked `done` by Aviran over an open REJECT
+
+- **Verbatim, buzz `#general`, 2026-08-04T10:14:48Z, Aviran:** "@Chief mark T-032 done"
+- **Did:** flipped `BOARD.md`'s T-032 row (main task table + V1 build-phase table) from `build`/`ios-developer` to `done`, dated 2026-08-04, with the override and its carried gaps written into the row rather than replacing the history. Linear `PAS-15` synced to Done, `gate:awaiting-aviran-review` handling per the T-031 precedent.
+- **What this overrides — stated plainly, not softened:** T-032 was at `build` after `product` returned **REJECT at acceptance on 2026-08-03** (F1: `MapNavRow` drawing over `HeatModalCard`'s readout at *default* text size, "…t day"; F2: AX5 mid-token wrap of the readout and the next-day pill). It did **not** re-pass `code-review`, `qa`, or `acceptance`. Per `BOARD.md`'s own rule a task is `done` only after `product` ACCEPTs *and* Aviran signs off — this is the founder exercising the second half without the first. Recorded as an override, not as a gate that passed.
+- **Evidence of the state at the moment of the call:** `passenger-code` HEAD `5e1f72f`; working tree carried uncommitted `Passenger/HeatModal/HourReadout.swift` and untracked `PassengerUITests/HeatModalCardLayoutTests.swift` — the round-10 F1/F2 WIP. The `ios-developer` dispatch sent to verify/build/test/commit that WIP had **not** replied. No build or test run was made for this entry.
+- **Left behind:** (1) **F1/F2 are unverified on `main`.** The fix is working-tree-only; `c1b8bc3` ("Nav row position, modal sizing, hood border-only styling") may have moved F1 independently, but nobody has checked. If Aviran wants the ship state clean rather than just the board clean, this needs a rendered re-check — flagged back to him in the same buzz thread. (2) The in-flight `ios-developer` round-10 reply will land against a task that is now `done`; whoever picks it up should route it to a fix task, not reopen T-032. (3) Still-open non-blockers from the prior acceptance: C14 (live VoiceOver), C20 (`mapCenterX` declared, unused by tests). (4) Sibling bottom-anchor surfaces (`PassportSurface`, `PlacesListOverlay`, `SearchOverlay`) remain tracked at **T-054** — unaffected by this move.
+
+---
+
 ### 2026-08-04 — chief-of-staff — PAS-47/48/49/50: fixup `5e1f72f` landed, re-dispatched ios-code-reviewer scoped to it
 
 - **Did:** coordinator relayed that `ios-code-reviewer`'s pass on `c1b8bc3` (dispatched in the entry below) came back with two blockers and one non-blocking finding, and that the peer session had already fixed both blockers in a new commit, `passenger-code 5e1f72f`. **Verified the commit directly (`git show 5e1f72f`) before acting on the relay** — confirmed both fixes exactly as described: (1) `EventDetailModal.swift`/`MapScreen.swift` reverted to pre-`c1b8bc3` bodies, decoupling PAS-48's `.presentationDetents` change from T-052/PAS-40's still-uncommitted `EventDetailRows.displayCategory` dependency that broke a standalone build; (2) `HoodLayer.swift`'s `borderColor` no-band branch now multiplies by `hoverGlow`, matching the banded branch — fixes PAS-50 hover never actually brightening for unflagged/`.cityWide` Hoods.
