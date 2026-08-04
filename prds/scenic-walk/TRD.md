@@ -1,6 +1,6 @@
 # Scenic Walk (lighter version) — TRD
 
-**Task:** T-057 · **Linear:** `PAS-46` · **Status:** `trd-review` — all four sign-offs AGREE (`ios-developer` `8a006f7`, `ios-code-reviewer` `dd68110`, `data-engineer` `5bfee4d`, `code-reviewer`; all `passenger-brain`)
+**Task:** T-057 · **Linear:** `PAS-46` · **Status:** `build` — `trd-review` cleared 2026-08-04 with all four sign-offs AGREE (`ios-developer` `8a006f7`, `ios-code-reviewer` `dd68110`, `data-engineer` `5bfee4d`, `code-reviewer` `0a457d4`; all `passenger-brain`), moved to `build` at `3e19897`, split at step granularity: `ios-developer` C1–C9, `data-engineer` A1
 **Owner:** architect · **Date:** 2026-08-04 · **Amended:** 2026-08-04 (see Amendments below)
 **PRD:** [`scenic-walk.md`](./scenic-walk.md) (Draft v1, `product`, 2026-08-04) · **Feasibility:** [`feasibility.md`](./feasibility.md) (`PAS-7`)
 **Scope ruling:** decision #44 (lighter version). Decision #32's weighted per-segment routing is explicitly not what this builds.
