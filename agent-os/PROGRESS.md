@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-062/PAS-58: designer pass verified, moved to `acceptance(product)`
+
+- **Did:** received designer's completion report via relay (`main`) for T-062/PAS-58 (Live Events marker redesign). Read `passenger-brain/CLAUDE.md` and this file's recent worklog first. Before trusting the report, independently confirmed: (1) both commits (`passenger-code c2770541`, `passenger-brain 0be931f`) exist and are ancestors of `main` in their respective repos (`git merge-base --is-ancestor`) — not stranded in a worktree, per rule 10; (2) read `passenger-code/Passenger/Map/EventLayer.swift` directly — `accessibilityLabel`, `accessibilityIdentifier`, and the 44×44 `Button` frame are exactly as before, only the drawn content inside changed; the new `LiveEventMarkerGlyph` (18×18 core, 30×30 halo, `.easeOut(1.6s).repeatForever`, `@Environment(\.accessibilityReduceMotion)` gating) matches the report's description line for line.
+- **Linear:** posted the mandatory outcome comment on `PAS-58` with both commit hashes and the three open items designer flagged (no live pulse render captured, unmeasured timing, iconless-marker readability). Swapped `owner:designer` → `owner:product` (single-writer label swap, same pattern as bug-ticket phase tracking — this task's lifecycle has no distinct Linear state for "acceptance," so status stays `In Progress` and the label carries the phase).
+- **BOARD.md:** `T-062` row moved `in-progress` → `acceptance`, owner `designer` → `product`, open items summarized.
+- **Left behind:** relay-dispatching `product` next for the acceptance pass against PAS-58's 4 requirements + P1. Product should try to get a working interaction path (or real device) to actually see the halo pulse before signing off — designer's build never got past a pre-existing simulator tap-registration block (same one QA hit at T-038/PAS-29 rounds 10-11).
+- **Git:** `passenger-brain/agent-os/BOARD.md`, `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit paths, `git diff --staged` re-read before commit per rule 2. Not pushed — Aviran-gated, `CLAUDE.md` rule 9. Hash in the final chat response. **Linear:** comment posted directly on `PAS-58` (see above), not just recorded here.
+
+---
+
 ### 2026-08-04 — designer — T-062/PAS-58: Live Events marker redesign — smaller, solid, micro-pulse
 
 - **Did:** post-ship redesign pass against the founder-direct request recorded at this file's 2026-08-04 L-002 stub ("the icon of the live events is too big. we need something more solid and small with micro animation that will let the user know that there is a live event"). Read `passenger-brain/CLAUDE.md`, `passenger-code/CLAUDE.md`, this file's Current Snapshot/recent worklog, and `BOARD.md`'s T-062 row first, per protocol. Worked against the actual shipped code (`passenger-code/Passenger/Map/EventLayer.swift`), not a fresh mockup — no mockup produced or needed, per the retired pre-build gate not applying here.
