@@ -13,6 +13,18 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — L-002 stub: founder-direct request, nav bar icons
+
+- **Provenance:** founder-direct, live chief-of-staff chat, this session, 2026-08-04. Relayed to this session as a request attributed to Aviran; no independently-verified transcript of his own literal wording exists on my side beyond what this session received, so treating the text below as **the request as relayed to this session**, per L-013's caution against folding restatement into a quotation.
+- **Verbatim request:** "i want the nav bar icons will be bigger and with colors, unique."
+- **As I read it:** Aviran wants the `MapNavRow` icon buttons (`HeatButton`, `SearchButton`, `ProfileButton`, `NearMeButton`, `PlacesButton` — all five, per `passenger-code/Passenger/Map/MapNavRow.swift`) changed on three axes: larger, colored (not the current uniform monochrome `.primary`/`.secondary`-on-`.thinMaterial` treatment), and visually distinctive/non-generic rather than stock SF Symbols glyphs. **[ASSUMPTION]** "bigger" means the icons/frames should grow beyond the current 44×44 target — exact sizing left to designer/ios-developer judgment, not stated by Aviran. **[ASSUMPTION]** "with colors" means each icon (or the set) gets real color rather than the current default-foreground/`.thinMaterial` circle look — which color(s), per-icon vs. uniform, left unspecified. **[ASSUMPTION]** "unique" means visually distinctive/custom rather than a literal requirement to abandon SF Symbols outright — read as a style direction, not a hard constraint; flagging this reading explicitly since it's the vaguest of the three asks.
+- **Routing:** treated as a founder-direct visual-polish request, same non-PRD-gated shape as T-063 (App Icon) and T-062 (Live Events marker redesign) — a Linear issue in Passenger V1, marketing/research-task lifecycle (`backlog → in-progress(designer) → in-progress(ios-developer) → acceptance(product) → done`), not the fine-grained feature lifecycle. No PRD/TRD — this is a visual-treatment change to already-shipped chrome, not a new feature or new scope.
+- **Known blocker at dispatch time:** `BOARD.md`'s standing `> **HALT**` line (no `xcodebuild`/simulator work until a human confirms disk headroom) is still in effect as of this stub — design/code-writing work can proceed, but `ios-developer`'s build/simulator verification step will be blocked by the same disk crisis already affecting T-038/T-062/T-063, per this file's same-day entries. Flagging this up front rather than letting a build step silently stall.
+- **Left behind:** filing the Linear ticket and dispatching `designer` (color/style direction for the 5 nav-row buttons) next; `ios-developer` follows once the direction lands, subject to the HALT above.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, `git diff --staged` re-read before commit per rule 2. Not pushed — Aviran-gated, `CLAUDE.md` rule 9. Hash in the final chat response.
+
+---
+
 ### 2026-08-04 — ios-developer — T-063/PAS-59: build/render verification — **BLOCKED**, disk under L-031 floor with a live concurrent simulator session
 
 - **Did:** picked up designer's handoff to confirm the App Icon asset (`passenger-code 4834261`) actually builds and renders, not just sits correctly in the catalog. Read workspace-root `CLAUDE.md`, `passenger-code/CLAUDE.md`, this file's Current Snapshot area (not present as a distinct heading in the live file — read the full recent worklog instead) and recent entries, and `BOARD.md`'s T-063 row before starting, per standing protocol.
