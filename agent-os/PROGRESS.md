@@ -113,6 +113,20 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-038/PAS-29 BLOCKED (retry dispatched, PAS-55 filed for F-QA5); T-057 BOARD.md drift fixed, small doc pass dispatched
+
+- **T-038/PAS-29 qa: BLOCKED, verified against `passenger-brain a562be4`.** Two P0-relevant cases unrun, both environmental (shared-desktop/disk contention). Does not move to `acceptance`. Checked current disk: **10Gi free** (was 1.4GB during the blocked pass), 3 concurrent `xcodebuild` processes still running — improved but not clear. Re-dispatched `qa` for a retry of just the two unrun cases.
+- **F-QA5 filed as `PAS-55`**, `owner:architect`, Bug: PAS-49's `HoodLayer` rewrite made `HoodLayerFillDimTests` a dead assertion (tests `fillColor`, which `body` no longer reads); the real render channel (`borderColor`) has zero coverage. Third L-009 recurrence (after T-046, T-053). Dispatched `architect` for the TRD §9 v3 amendment; test retarget (`ios-developer`) to follow once that lands.
+- **Process note, not reverted:** `qa` posted its own Linear comment on PAS-29 (content accurate, no label/status change) — inconsistent with the sole-Linear-writer rule other agents have been correctly deferring to. Left the comment in place (accurate, low-stakes) rather than delete-and-repost; flagged in my own follow-up comment for the record.
+- **Disk/simulator contention flagged as a standing pattern, not a one-off** — 3rd occurrence this week per `qa`'s own count. This is a machine-capacity question, not something any agent can fix; surfaced to Aviran directly in this run's chat report.
+- **T-057/PAS-46: BOARD.md row was still showing `trd-review` after the gate cleared** — `architect`'s TRD-amendment commit (`3e19897`, mine) only touched `PROGRESS.md`; the row itself needed a separate fix. Corrected: state → `build`, owner → `ios-developer`(C1-C9)+`data-engineer`(A1), TRD-amendment context folded in.
+- **Two TRD amendments confirmed landed** (`passenger-brain 299622f` — D15 Sendable-safe `WalkingRouteProvider`, D16 `RouteMemoStore` lifetime; `87bed7e` — TRD header → `build`). C3 unblocked.
+- **One more small doc-only pass dispatched to `architect`:** `ios-code-reviewer`'s findings 2/3 from `dd68110` (hardcoded camera inset, missing §9 row for `RouteControls`) — same non-blocking treatment.
+- **Left behind:** `ios-developer`/`data-engineer`'s T-057 build dispatches were sent before the amendment landed but briefed to check for it before C3 — watching their replies to confirm this held. `passenger-brain main` now sits at 19+ unpushed commits — flagged to Aviran.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry), `agent-os/BOARD.md` (T-057 row fix). Explicit paths, not pushed. Hash in the final chat response. Linear: comments on PAS-29, PAS-46; PAS-55 created.
+
+---
+
 ### 2026-08-04 — chief-of-staff — T-057/PAS-46 trd-review CLEARS (4/4 AGREE) → `build`; T-047/PAS-34 code-review APPROVE → `qa`
 
 - **Did:** verified `passenger-brain 0a457d4` (`code-reviewer`, two verdicts in one commit) before recording.
