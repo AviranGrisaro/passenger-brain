@@ -32,6 +32,26 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — Duplicate-session collision with the entry above, reconciled (2 duplicate dispatches retracted, 4 new ones stand)
+
+- **What happened:** this session and the session that wrote the entry immediately above ("Run-the-company pass: Linear reconciliation + 5 fresh dispatches") ran **concurrently, each unaware of the other** — two independent `chief` invocations against the same live board. Both read a BOARD.md/Linear snapshot from before either had written anything, did essentially the same investigation, and landed overlapping actions within about 4 minutes of each other. This is exactly the collision class L-007/L-027 describe, just between two full chief passes rather than a chief pass and a stray sub-dispatch — disclosing in full rather than quietly folding it away, per this workspace's own standing convention (`passenger-brain/CLAUDE.md` rule 2/9).
+- **Confirmed duplicates, retracted:**
+  1. **T-036/PAS-27 acceptance** — both sessions independently found the round-8 qa PASS WITH MINORS unposted, posted near-identical verdict comments, swapped `owner:qa`→`owner:product`, and dispatched `product`. Idempotent (same label ends up in the same place), but **only one `product` acceptance pass should actually run** — flagged on the ticket so the coordinating session doesn't fire two.
+  2. **T-057/PAS-46 TRD** — same shape: both claimed `Todo`→`In Progress` and dispatched `architect`. Idempotent, flagged the same way — **only one `architect` TRD pass should run.**
+  3. **Duplicate ticket, real damage, fixed:** this session filed **PAS-52** for the orphaned T-032 F1/F2 WIP; the other session had already filed **PAS-51** for the identical thing four minutes earlier and dispatched `ios-developer` against it. Marked **PAS-52 → Duplicate of PAS-51** (Linear `duplicateOf`), commented on both explaining why. **PAS-51 is the surviving ticket — dispatch `ios-developer` against PAS-51, not PAS-52.**
+  4. **BOARD.md T-057 row** — both sessions added one. Removed this session's (shorter, less detailed) copy; the other session's row (line ~119, includes the full PRD scope-gate/build-phase/assumption detail) stands as-is.
+- **Not duplicates — this session's findings are the only record of these, still needed:** the other session read the prior "5 dispatches" round's four items (T-037/PAS-28, T-038/PAS-29, T-032-orphan-WIP, T-052/PAS-40) as still genuinely in flight and did not touch them. This session checked file mtimes across the ~3-hour gap since that round's 10:19 dispatch and found them frozen (no commit, no worklog entry, no mtime movement) — stalled, not live, per L-033's own two-check test. **These four re-dispatches stand, not retracted:**
+  1. `ios-code-reviewer` → T-037/PAS-28, narrow re-review of `05482e6` (stalled since 10:19)
+  2. `qa` → T-038/PAS-29, behavioral pass — continuing from the in-progress `TEST-PLAN.md` draft (touched 10:36, frozen since); also note this was itself a redundant second dispatch of an earlier 07:16 qa dispatch, disclosed on the ticket
+  3. `ios-developer` → PAS-51 (not 52 — see above), finish the T-032 F1/F2 fix
+  4. `ios-developer` → T-051/PAS-39, verify+commit the disk-blocked fixture fix now that disk is healthy (neither session had touched this one before)
+  5. `designer` → T-052/PAS-40, rescue the raw-slug-fix WIP + `map-rendering-spec.md` update (frozen since before either session's dispatch)
+- **Net corrected dispatch list — what the coordinating session (`main`) should actually fire, deduplicated:** `ios-code-reviewer`(T-037/PAS-28), `qa`(T-038/PAS-29), `ios-developer`(T-051/PAS-39), `designer`(T-052/PAS-40). The `product`(T-036), `architect`(T-057), and `ios-developer`(PAS-51) dispatches were already sent by the other session's relay — do not fire a second copy of any of those three.
+- **Left behind:** same as the entry above — nothing has reported back yet, don't advance state until real replies land. Additionally: verify next round that the coordinating session didn't already fire duplicate spawns for the three idempotent-but-doubled dispatches before this reconciliation landed; if it did, that's wasted agent-runs to note, not state corruption to fix (both would reach the same verdict).
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry), `passenger-brain/agent-os/BOARD.md` (removed the duplicate T-057 row). Explicit paths, not pushed (Aviran-gated, `CLAUDE.md` rule 9). Hash in the final chat response. Linear: PAS-52 → Duplicate of PAS-51; correction comments on PAS-27, PAS-46, PAS-52, PAS-51.
+
+---
+
 ### 2026-08-04 — chief-of-staff — FOUNDER-DIRECT STUB: T-032 marked `done` by Aviran over an open REJECT
 
 - **Verbatim, buzz `#general`, 2026-08-04T10:14:48Z, Aviran:** "@Chief mark T-032 done"
