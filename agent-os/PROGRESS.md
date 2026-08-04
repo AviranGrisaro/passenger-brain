@@ -212,6 +212,17 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-038/PAS-29 retry: still BLOCKED, 3rd consecutive retry failure — escalating past "wait and retry"
+
+- **Did:** verified `passenger-brain 0a2add5`. `qa` retried the two cases fully isolated (worktree/simulator/derivedData) to rule out contamination from T-057's broken tree — build succeeded cleanly, confirming this is a genuinely separate blocker from the compile break above.
+- **Case 1: new failure.** A stuck location-permission system dialog survived 5 independent remediation attempts. Real, separate bug, worth investigating once the infra situation clears — not ticketing or dispatching now, holding per the standing halt.
+- **Case 2: disk got worse mid-attempt** (492-682Mi, confirmed not this session's own footprint), recovered to ~4.8GB by end. Correctly never started a test build under the L-031 floor.
+- **Escalation, not routine:** 5th disk/simulator-contention occurrence this week. "Retry once the machine clears" has now failed 3 consecutive times (round 9, round 10, this retry). **Explicitly not recommending a 4th automatic retry** — posted to PAS-29 that this needs Aviran to actually intervene on the shared machine, not another agent-side wait.
+- **Left behind:** PAS-29 stays `owner:qa`, no further action until infra is resolved. The stuck-permission-dialog finding needs its own ticket once things clear.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed. Hash in the final chat response. Linear: comment on PAS-29.
+
+---
+
 ### 2026-08-04 — chief-of-staff — Shared tree confirmed non-compiling (T-057 WIP), independent of disk; C15 correctly held uncommitted
 
 - **Did:** `ios-developer` reported PAS-55/C15's diff complete and correct (verified against the description: `borderColor` made internal, `HoodLayerFillDimTests` rewritten to TRD v3 spec, coverage grep now non-zero) but held uncommitted per `passenger-code/CLAUDE.md`'s "green build required, not just claimed" rule — the shared tree doesn't compile. Confirmed independently: `Passenger/Routing/`, `Passenger/Detail/RouteControls.swift`, `Passenger/Map/RouteLayer.swift` sit uncommitted with real compile errors (`ScenicUnavailable` not `Error`-conforming, `RoutePreview` not `Equatable`) — T-057's own in-flight C1-C9 WIP, unrelated to C15.
