@@ -49,3 +49,101 @@ not re-derived here. Rows **4d** and **8** are this pass's own direct verificati
 ## Left behind
 - Rows 3, 5's Phase-1 caveats (no real dwell detector, fixture populates regardless of permission) are pre-existing, TRD-acknowledged gaps, not introduced or affected by `952cf2f` — not re-flagged as new findings.
 - Req 4's closed-state refresh (no owner/cadence) is a separate, already-tracked gap (`places-been-saved.md`'s own Open Questions, T-044) — untouched by this commit.
+
+---
+
+## 2026-08-04 QA pass — round-7 code-review (APPROVE) follow-up, `passenger-code bc8e41a` → `0e3b3dc` → `92561a7`
+
+Round-7 `ios-code-reviewer` (APPROVE, no blocking findings, `bc8e41a`) briefed `qa` to
+give live behavioral attention — not just a code read — to four things: the three
+dismissal paths, the D8 co-presentation guard, the F1 empty-state copy fix rendering
+correctly on-device, and the closed badge never disabling Directions. This pass's
+own scope is exactly those four; rows 1–3, 4a–c, 5, 7 are unchanged from prior
+rounds and not re-derived.
+
+**Commit context.** Current `main` at dispatch was `0e3b3dc` (PAS-42, a same-day
+founder-direct task merging all 5 nav-row icon buttons into one row — already
+independently reviewed/QA'd/`Done`, not this task's to re-litigate). `bc8e41a` is
+confirmed an ancestor; PAS-42 deliberately reverses T-036's own D7 (Places moves
+from fading bucket-2 chrome into the always-visible `MapNavRow`), replacing the old
+protection ("can't re-tap to dismiss its own list") with a guard in
+`MapScreen.openPlacesList` (`guard chrome.presented != .places else { return }`),
+unit-tested (`reopeningPlacesWhileAlreadyOpenIsANoOp`). Tested against this state,
+not the older `bc8e41a`, since that's what a real user runs today.
+
+### Row 6 (empty state) — this pass's read
+
+`PlacesListEmptyState.swift`'s line is `"Save a place from its detail card, or spend
+enough time at one, and it'll show up here."` — confirmed by direct source read,
+names both ways in (save one, or spend time at one), matching PRD req 6 bullet 1 and
+the F1 fix. **Not re-confirmed by on-device render this pass**: Build Phase 1's
+bundled visit fixture (`place-visits-tel-aviv.json`) always ships 4 entries, so the
+app's default/fresh state is never actually empty — there is no launch-argument hook
+(unlike `-uiTestZoomedIn`/`-uiTestResetLocalQA`) to force it, and adding one was
+judged out of QA's remit for this pass (a production code change, not a test). This
+is a structural fact about Build Phase 1's design (D2 — fixture populates
+unconditionally), not a new gap; the copy itself is a static `Text`, so the source
+read carries the same confidence round-7's own review already placed on it.
+
+### Row 4d / row 8 — this pass's own live verification
+
+Live UI test coverage added: `PassengerUITests/PlacesListInteractionTests.swift`
+(`passenger-code 92561a7`, 6 tests, all passing against `0e3b3dc`+this commit).
+Written after manual simulator interaction proved unreliable this session (see
+below) — XCUITest's synthesized touches worked throughout, so this closes the same
+"live, not code read" gap with permanent regression coverage instead of a one-off
+click-through.
+
+| Test | Confirms |
+|---|---|
+| `testClosedPlaceRowOpensDetailWithDirectionsEnabledNotBlocked` | Row 4b: `neve-nachum-gutman-museum`'s row (`permanently_closed: true`) opens the real detail modal; `Directions` exists and `isEnabled == true` — the badge never blocks the route action |
+| `testDismissViaCloseButtonReturnsToListlessMap` | Dismissal path 1 (✕) |
+| `testDismissViaScrimTapReturnsToListlessMap` | Dismissal path 2 (scrim tap) |
+| `testDismissViaDragReturnsToListlessMap` | Dismissal path 3 (drag past the 80pt threshold) |
+| `testOpeningPlacesWhileHeatOpenReplacesHeatWithPlaces` | D8, direction 1: opening Places over an open Heat modal replaces it, live |
+| `testDismissingStackedPlaceModalRevealsListThenLeavingPlacesOpensHeat` | D8, direction 2 (adjusted — see finding below): dismissing a stacked place modal reveals the list unchanged (TRD §5), then leaving `.places` for Heat closes the list, live |
+
+**Finding (Minor, non-blocking, pre-existing).** The first version of the D8-direction-2
+test tapped `Heat` directly while a place-detail modal was stacked over the list —
+it failed, and the xcresult accessibility snapshot showed why: the depth-1 `.sheet`
+at `.medium` occupies `{{8, 415}, {386, 451}}` (y 415–866); `MapNavRow`'s buttons
+(Heat/Search/Profile/NearMe/Places, post-PAS-42) sit at y 700–744, entirely inside
+that span. `.presentationBackgroundInteraction(.enabled(upThrough: .medium))` keeps
+the *state* reachable (no dimming), but a real tap at a point the sheet's own opaque
+content visually covers still hits the sheet, not what's structurally underneath —
+this is not what the TRD's D8 rationale describes ("makes bucket-2 chrome tappable
+while a sheet is up... both orderings are reachable states, not hypotheticals").
+**Pre-existing, not a T-036 or PAS-42 regression** — the same geometry held for the
+original bucket-2 `padding(.bottom, 32)` button position before PAS-42 moved it. A
+real user reaches the same end state via the reachable path (dismiss the stacked
+modal first via its own ✕, then switch surfaces) — that's what the adjusted test
+now exercises. Not blocking this verdict: D8's actual contract (mutual exclusivity,
+nothing ever stranded) holds; only the TRD's claim of *single-tap-through*
+reachability while a system sheet visually covers the nav row doesn't. Flagged for
+`architect`/`product` to correct the D8 rationale text or reconsider chrome
+placement relative to sheet coverage — not this task's to fix.
+
+### Environment note (not a product finding)
+
+Manual `mcp__Claude_Code_iOS_Simulator__control` tap/`touch_path` interaction was
+unreliable for over 30 minutes this session — `uptime` load averages of 200–800 on
+a 10-core shared machine (confirmed via concurrent `ps aux` showing other sessions'
+active `xcodebuild test` processes, one specifically named `T037-review`), one full
+`xcodebuild test` run's `PassengerUITests-Runner` hit "test runner timed out while
+preparing to run tests" on its first attempt (retry succeeded clean). Load later
+dropped to single digits with no change in manual-tap reliability, while XCUITest's
+own synthesized touches (going through the app's linked XCTest framework rather
+than external simulator touch injection) worked reliably throughout every attempt —
+this is why the live coverage above is a UI test rather than a manual click-through.
+Full non-scoped suite (`passenger-code 92561a7`, dedicated simulator, L-029):
+**PassengerTests 401/401, PassengerUITests 25/25 (19 pre-existing + 6 new), 0
+failures.**
+
+### Verdict
+
+**T-036/PAS-27, this pass: PASS.** All four items round-7 code-review briefed are
+confirmed live except the empty-state on-device render (source-confirmed only, per
+the structural Build-Phase-1 reason above — not a gap this pass introduces, and not
+one QA can close without a new production launch-argument hook, which is out of
+scope for a QA pass). One Minor, non-blocking finding filed above (D8 rationale
+text vs. actual sheet-coverage reachability) — pre-existing, not this task's to fix.
