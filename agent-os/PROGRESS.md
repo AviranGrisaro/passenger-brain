@@ -13,6 +13,16 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — L-002 stub: Aviran live-chat request, Live Events marker icon
+
+- **Provenance:** founder-direct, live chief-of-staff chat (this session — not via buzz; buzz is unconfigured/not wired per workspace-root `CLAUDE.md`, so despite how the request was framed to this session it did not arrive through the buzz channel). Recorded before dispatching anyone, per L-002.
+- **Verbatim request:** "the icon of the live events is too big. we need something more solid and small with micro animation that will let the user know that there is a live event"
+- **As I read it:** feedback on the shipped Live Events marker (`T-034`/`PAS-25`, `passenger-code Passenger/Map/EventLayer.swift`) — the on-map event pin should read as smaller/more solid and carry a subtle looping animation communicating "live," rather than the current static `sparkles` glyph. **[ASSUMPTION]** "solid" means a more filled/graphic treatment (vs. the current thin SF Symbol glyph), not a specific shape — Aviran didn't specify. **[ASSUMPTION]** "small" is a visual-size reduction only; the 44×44pt tap target (`EventLayer.swift:30`, Fitts's Law minimum per `design-principles.md` §2) is not named for removal and should be preserved for HIG/accessibility reasons unless Aviran says otherwise — flag rather than assume if that tension matters. **[ASSUMPTION]** "micro animation" scope (pulse/glow/scale-loop, reduced-motion handling) is undecided — Aviran gave the goal ("let the user know there is a live event"), not the mechanism.
+- **Context found before dispatch:** `EventLayer.swift`'s own comment already marks the icon as provisional — `"sparkles" is [ASSUMPTION] §8 D5 — category-agnostic, overturned in a line at the post-ship designer pass` — so this request lands exactly where the shipped code expected a redesign pass to land, not as new scope.
+- **Routing:** post-ship redesign pass (pre-code design gate retired 2026-08-02 — no gate to clear). Opening a companion Linear issue, `owner:designer`, `backlog → in-progress(designer) → acceptance(product) → done` per the redesign-pass lifecycle in `chief.md`/`BOARD.md`. Ticket ID and dispatch recorded in the next entry once relay-dispatch to `main` is sent.
+
+---
+
 ### 2026-08-04 — designer — T-060/PAS-56: PAS-49's border-only `HoodLayer` render — **intended, not a regression**; `map-rendering-spec.md` rewritten; T-061 filed for a real gap it surfaced
 
 - **Did:** resolved the question `architect` filed at T-060/PAS-56 while amending `prds/search-quick-filters/TRD.md` to v3 — was `PAS-49`'s rewrite of `HoodLayer.body` (dropping the interior fill, moving heat's color into the outline stroke) intended, or an undocumented regression that `TRD.md` v3's `borderColor` retarget (§9 row 4, step C15) was wrong to assume? Read `passenger-brain/CLAUDE.md`, this file's Current Snapshot/recent worklog, and `BOARD.md`'s T-060 row first, then went to source rather than the worklog's paraphrase: `passenger-code` commits `c1b8bc3`/`5e1f72f` (`git show`, full messages), `HoodLayer.swift` in full, and `design/map-rendering-spec.md` in full.
