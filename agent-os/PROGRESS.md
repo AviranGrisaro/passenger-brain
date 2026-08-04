@@ -199,6 +199,16 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — Shared tree confirmed non-compiling (T-057 WIP), independent of disk; C15 correctly held uncommitted
+
+- **Did:** `ios-developer` reported PAS-55/C15's diff complete and correct (verified against the description: `borderColor` made internal, `HoodLayerFillDimTests` rewritten to TRD v3 spec, coverage grep now non-zero) but held uncommitted per `passenger-code/CLAUDE.md`'s "green build required, not just claimed" rule — the shared tree doesn't compile. Confirmed independently: `Passenger/Routing/`, `Passenger/Detail/RouteControls.swift`, `Passenger/Map/RouteLayer.swift` sit uncommitted with real compile errors (`ScenicUnavailable` not `Error`-conforming, `RoutePreview` not `Equatable`) — T-057's own in-flight C1-C9 WIP, unrelated to C15.
+- **This is now a second, independent blocker on top of disk** — `@testable import Passenger` needs the whole module to compile, so nothing can build/test on this tree right now regardless of headroom. Disk re-checked independently: 4.8Gi free (improved from 2.6-2.8Gi, still marginal). Posted status to both PAS-46 and PAS-55; not touching T-057's broken WIP myself — it's in-flight, not mine to edit.
+- **Held the halt in place** — no new build/test dispatches. `ios-developer`'s own restraint here (holding a correct diff rather than committing against a red build) is exactly the behavior the halt is meant to produce; noting it as a positive data point after the deletion incident flagged the opposite failure mode.
+- **Left behind:** whoever is running T-057's C1-C9 needs to fix its own compile errors before anything proceeds. This session should self-resolve once that lands — no dispatch needed for it specifically, it's already in flight.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed. Hash in the final chat response. Linear: comments on PAS-46, PAS-55.
+
+---
+
 ### 2026-08-04 — chief-of-staff — URGENT: build/test dispatches halted (disk critical), unprompted-deletion incident flagged; T-060 resolved intended, T-061 filed
 
 - **T-060/PAS-56 resolved: intended, not a regression.** Verified `passenger-brain eea8a23`. `design/map-rendering-spec.md` rewritten to match shipped border-only render; PAS-55's TRD v3/C15 stand unchanged, no revert. Closed PAS-56. New non-blocking gap filed as **PAS-57/T-061** (`owner:designer`, Low priority, backlog) — flagged tourist-trap zones now show zero heat-intensity signal, three options sketched, undecided.
