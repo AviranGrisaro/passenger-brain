@@ -13,6 +13,25 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — Run-the-company pass: Linear reconciliation + 5 fresh dispatches
+
+- **Did:** full read of `BOARD.md` + `PROGRESS.md` Current Snapshot/recent worklog, then `list_issues` on Passenger V1 (40 issues) cross-referenced against `passenger-code`/`passenger-brain` `git log`+`git status` directly — confirmed both repos' HEAD (`passenger-code 5e1f72f`, `passenger-brain 1d8675a`) match exactly what the last-read worklog entries describe, so no invisible progress landed between the last session's entries and this run.
+- **Linear reconciliation (L-007):** found two verdicts that existed in `PROGRESS.md` but were never posted to Linear — T-036/PAS-27's round-7 `ios-code-reviewer` APPROVE and round-8 `qa` PASS WITH MINORS (comment thread stopped at the round-7 REJECT-fix-landed note, `owner:qa` label stale). Posted the missing verdict summary as a PAS-27 comment, swapped `owner:qa → owner:product`.
+- **Checked in-flight dispatches from the prior session's "5 dispatches" round (T-032/T-052 rescue, T-037/T-036/T-038 gates) before touching them — none had a newer Linear comment or commit than what PROGRESS.md already recorded, so treated as still genuinely in flight (not abandoned, no L-033 grounds) and did NOT re-dispatch: PAS-28 (T-037 C1-C13 narrow re-review), PAS-29 (T-038 qa pass), PAS-40 (T-052 designer WIP — confirmed via a Linear heads-up comment that the EventDetailModal half already rode along into `c1b8bc3`, but the map-rendering-spec.md doc addendum is still unconfirmed), PAS-47/48/49/50 (re-review of `5e1f72f`).**
+- **Found an orphaned WIP:** the T-032 override stub (entry immediately below) flagged that `passenger-code`'s working tree still carries the uncommitted F1/F2 fix (`Passenger/HeatModal/HourReadout.swift`, untracked `PassengerUITests/HeatModalCardLayoutTests.swift`) against a task that's now `done` and shouldn't be reopened. Filed **PAS-51** to carry this forward under its own bug-ticket lifecycle, claimed (`owner:ios-developer`, In Progress), dispatched.
+- **Routing calls made for three previously-unowned backlog items** (T-046/PAS-33, T-047/PAS-34, T-048/PAS-35 — flagged in an earlier round as needing a "spec-or-trd routing call," never made): T-047 (author real `designated_for_progression` values) is data authoring, routed straight to `data-engineer`, no PRD/TRD ceremony. T-048 (Local-status threshold constant) and T-046 (dwell/geofence detector) both need product judgment before any build — routed to `product`, with T-046 explicitly flagged for product to re-apply the scope gate (it may cross into parked "proximity intelligence").
+- **Dispatched (relay via `main`, this run):**
+  1. `product` — T-036/PAS-27 acceptance pass (round 8 qa PASS WITH MINORS landed, ready)
+  2. `architect` — T-057/PAS-46 Scenic Walk TRD (PRD ready since prior round, TRD never dispatched)
+  3. `ios-developer` — PAS-51, finish/verify/commit the orphaned T-032 F1/F2 WIP
+  4. `product` — PAS-35 (Local-status threshold decision) + PAS-33 (dwell detector routing/scope-gate check), combined brief
+  5. `data-engineer` — PAS-34, author real Hood `designated_for_progression` values
+- **Not touched, blocked on Aviran (unchanged this run):** PAS-13/T-033, PAS-17/T-040, PAS-25/T-034, PAS-26/T-035 all sit at `gate:awaiting-aviran-review`. PAS-6/PAS-11/PAS-21 remain `aviran-blocker`. PAS-19/T-042, PAS-20/T-043 remain HELD for Build Phase 2/3, correctly not dispatched (Build Phase 1 is still active).
+- **Left behind:** none of the 5 fresh dispatches have replied yet as of this entry — do not advance BOARD.md/Linear state on any of them until the relay reply lands. Next run: pick up whatever replied, re-check the 5 still-in-flight items from the prior round for real progress (commits/comments) before deciding whether they're now stale enough to re-dispatch, and keep an eye on PAS-40/T-052's `map-rendering-spec.md` addendum specifically since the code half already landed but the doc half's status is unconfirmed.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry), `passenger-brain/agent-os/BOARD.md` (dispatch notes). Explicit paths, not pushed — Aviran-gated, `CLAUDE.md` rule 9. Hash in the final chat response. Linear: created PAS-51; updated labels/status on PAS-27, PAS-46, PAS-33, PAS-34, PAS-35; posted comments on all six.
+
+---
+
 ### 2026-08-04 — chief-of-staff — FOUNDER-DIRECT STUB: T-032 marked `done` by Aviran over an open REJECT
 
 - **Verbatim, buzz `#general`, 2026-08-04T10:14:48Z, Aviran:** "@Chief mark T-032 done"
