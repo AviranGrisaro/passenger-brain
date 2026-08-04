@@ -30,6 +30,7 @@
    - [ ] Changing the selected hour changes which events render, inside the 400ms budget (`design/design-principles.md` §2).
    - [ ] An event outside the now → +12h window never renders.
    - [ ] Event markers are distinguishable from place pins by shape or glyph, not colour alone (`design/design-principles.md` §3).
+   - [ ] Where a Hood's centroid name label overlaps an event marker, at least half the marker's drawn area still shows on screen — compare marker pixels at that coordinate against the same marker rendered clear of any label. *(Added at acceptance 2026-08-04, T-062/PAS-58. The post-ship redesign shrank the drawn mark to 18pt and the centroid label pill then covers it entirely: **0** marker pixels at the seeded Florentin event, against **43pt** of visible marker for the pre-redesign build at the identical coordinate, camera and zoom. No earlier gate had anything to fail it on — "distinguishable from place pins" presumes the marker renders at all. L-009.)*
 
 2. **The layer never competes with heat.**
    - [ ] Event markers do not use the heat bands' fill treatment or occupy the area channel — heat owns fill, always (`design/map-rendering-spec.md` §2).
@@ -96,4 +97,5 @@
 | 2026-08-03 | **D10 CONFIRMED** — the fixture is T-034's, with a plausibility clause added | Phase-1 acceptance covers reqs 1–5 against the fixture only; Phase-3 acceptance re-runs them against the live feed with the constant flipped |
 | 2026-08-03 | **Req 6 (toggle) not accepted — deferred to T-050** | Build step C12 is blocked on T-032's `HeatModalCard`, which does not exist. No toggle UI ships; `isLayerVisible` exists as state and the layer and hit-tester both honour it, but nothing user-reachable sets it. Not a build defect — nobody can fix it until T-032 lands |
 | 2026-08-03 | **Req 1 bullet 2's 400ms hour-change budget is unverified, not passed** | `qa`'s TEST-PLAN row 1b cites `ColdOpenPerformanceTests`, which measures cold-open-to-interactive, a different milestone. No `HourRepaint` signpost exists in the committed tree and no hour control ships (both T-032's). Re-verify at T-050 |
+| 2026-08-04 | **Req 1 gains a marker-legibility bullet** (label occlusion), added at acceptance of T-062/PAS-58's marker redesign | The redesign met every stated requirement and still produced a marker a user cannot see, because no bullet required the marker to survive an overlapping Hood centroid label. Marker size was never floored. The bullet states the rendered consequence, so QA can fail it by pixel count rather than by taste. Does not re-open reqs 1–5's 2026-08-03 acceptance — the shipped marker at that date passed this bullet |
 

@@ -141,7 +141,8 @@ strong { font-weight: 600; }
    - ☐ An event renders as a marker at its location <strong>at every hour its interval overlaps</strong>, not only at its start hour — an event running 18:00–23:00 renders at 18:00, 19:00, 20:00, 21:00 and 22:00 (corrected at acceptance 2026-08-03, TRD D1; the original wording stated a sufficient condition and was read by an implementer as an exclusive one).
    - ☐ Changing the selected hour changes which events render, inside the 400ms budget (<code>design/design-principles.md</code> §2).
    - ☐ An event outside the now → +12h window never renders.
-   - ☐ Event markers are distinguishable from place pins by shape or glyph, not colour alone (<code>design/design-principles.md</code> §3).</p>
+   - ☐ Event markers are distinguishable from place pins by shape or glyph, not colour alone (<code>design/design-principles.md</code> §3).
+   - ☐ Where a Hood's centroid name label overlaps an event marker, at least half the marker's drawn area still shows on screen — compare marker pixels at that coordinate against the same marker rendered clear of any label. <em>(Added at acceptance 2026-08-04, T-062/PAS-58. The post-ship redesign shrank the drawn mark to 18pt and the centroid label pill then covers it entirely: </em><em>0</em><em> marker pixels at the seeded Florentin event, against </em><em>43pt</em><em> of visible marker for the pre-redesign build at the identical coordinate, camera and zoom. No earlier gate had anything to fail it on — "distinguishable from place pins" presumes the marker renders at all. L-009.)</em></p>
 </li>
 <li>
 <p><strong>The layer never competes with heat.</strong>
@@ -263,6 +264,11 @@ strong { font-weight: 600; }
 <td>2026-08-03</td>
 <td><strong>Req 1 bullet 2's 400ms hour-change budget is unverified, not passed</strong></td>
 <td><code>qa</code>'s TEST-PLAN row 1b cites <code>ColdOpenPerformanceTests</code>, which measures cold-open-to-interactive, a different milestone. No <code>HourRepaint</code> signpost exists in the committed tree and no hour control ships (both T-032's). Re-verify at T-050</td>
+</tr>
+<tr>
+<td>2026-08-04</td>
+<td><strong>Req 1 gains a marker-legibility bullet</strong> (label occlusion), added at acceptance of T-062/PAS-58's marker redesign</td>
+<td>The redesign met every stated requirement and still produced a marker a user cannot see, because no bullet required the marker to survive an overlapping Hood centroid label. Marker size was never floored. The bullet states the rendered consequence, so QA can fail it by pixel count rather than by taste. Does not re-open reqs 1–5's 2026-08-03 acceptance — the shipped marker at that date passed this bullet</td>
 </tr>
 </tbody>
 </table>
