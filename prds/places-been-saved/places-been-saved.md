@@ -1,9 +1,9 @@
 # Places — Been & Saved — PRD
 
-**Status:** Draft v1
+**Status:** **Accepted 2026-08-04** (Build Phase 1) — v2. Shipped in `passenger-code` through `5e1f72f`; awaiting Aviran's `aviran-review` sign-off.
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-30
+**Last updated:** 2026-08-04
 **Closed-place case resolved:** decision #38 — a permanently-closed place can still be saved and carries a distinct badge, unrelated to the tourist-trap flag. That was the item holding this PRD at PAS-10.
 
 ## Description
@@ -43,6 +43,7 @@
    - [ ] The threshold is 20 minutes; verified presence below it logs **Visited**.
    - [ ] A Been row appears without the user acting, and never asks for confirmation.
    - [ ] Revisiting a Been place adds no row and changes no label.
+   - **Build-phase scope of the first two bullets — added at acceptance 2026-08-04, and the reason it is written here rather than only in the TRD (L-009).** Both describe a **dwell detector that does not exist in Build Phase 1**: Been/Visited ship as a bundled read-only fixture (TRD D2, §3.3), so no gate can pass *or fail* the 20-minute threshold or the already-known-place guard against this build. They are **carried forward to the shared detector's own task (T-046/`PAS-33`)** and re-run there as runtime behaviour. Bullets 3 and 4 are checkable now and were checked (no confirmation UI anywhere in the feature; a duplicate `place_id` keeps the higher kind, so one place can never produce two rows). Without this line the requirement reads as verified when only half of it is.
 
 4. **Permanently-closed places save, and say so on the row.**
    - [ ] Saving a permanently-closed place succeeds — no block, no dialog that prevents it (#38).
@@ -55,6 +56,7 @@
    - [ ] With Location Always denied, manual Saved works fully; Been and Visited never populate, with no error copy.
    - [ ] With location denied entirely, the list still opens and shows saved rows.
    - [ ] No path here re-asks a permission already denied (`ux-flows.md` §3).
+   - **Build-phase scope of bullet 1 — applied at acceptance 2026-08-04. This is the "one PRD correction owed" the 2026-08-03 Decisions log row named and nobody ever wrote into the requirement itself**, which is exactly how a gate re-reads a bullet as verified. In Build Phase 1, *"Been and Visited never populate"* is checked as the **absence of any sensor path** — no `CoreLocation` import, no authorization read, no permission request anywhere in this feature's files (re-confirmed by grep at this acceptance, not taken from the doc comments that claim it) — **not as runtime behaviour**: the bundled fixture populates Been/Visited regardless of permission state. Re-run as runtime behaviour against the real detector at T-046/`PAS-33`. Bullets 2 and 3 are checkable now and were checked.
 
 6. **Empty and offline states are plain, not errors.**
    - [ ] An empty list shows a plain empty state naming what would fill it (`design-principles.md` §4) — its copy must state the three ways a place gets here (save one, or spend time at one), not only that the list is empty. *(Pass condition sharpened at acceptance 2026-08-03: the TRD's §9 row 6 dropped "naming what would fill it" and checked only icon + line + CTA, so no gate could fail the shipped "Nothing here yet." With no onboarding in V1, this empty state is the only place the feature can explain itself. L-009.)*
@@ -100,6 +102,8 @@
 - **Permission sequence is a proposal, not a decision** (§9 Q10) — three system permissions for a product whose #8 rules out a permission gate.
 - ~~**Row density risk:** a row can carry a provenance word, a closed badge, and a tourist-heavy line at once~~ — **resolved at acceptance 2026-08-03**: the row never carries a tourist-heavy line (req 4 bullet 3 above), so the worst case is a provenance word plus a closed badge — one special element, within `design-principles.md` §2.
 - **The closed-state refresh has no owner and no cadence.** Req 4 requires a place that closes after being saved to badge on next render; nothing schedules the check that would make that true. Spec'd as a field in `places-dataset` req 5, but the job that runs it is unassigned. `data-engineer`'s or `developer`'s — needs assigning before this feature's req 4 can be QA'd honestly.
+- **The TRD's D7/D8 rationale prose is stale against shipped code** — not a defect in this feature, and it did not block acceptance, because req 8's actual requirement (mutual exclusivity, nothing stranded) holds and is covered by unit *and* live UI tests. But D7 describes a Places button that fades under its own surface, which PAS-42 replaced with an always-visible nav-row button plus a no-op guard, and D8's rationale claims bucket-2 chrome is tappable while a system sheet is up, which `qa` measured to be geometrically false. `architect` owns the correction — tracked as **T-058** on `BOARD.md`.
+- **No shipped seed row is both `permanently_closed` and `is_tourist_trap`**, so req 4 bullet 3's "the two are independent" is verified structurally (two separate fields, two separate `if`s, no shared copy — `PlaceDetailModal.touristTrapSlot`) rather than by a rendered example. Low risk; noted so a later gate doesn't assume a rendered check happened.
 - **Visited is the weakest of the three** — a row the user never chose, for somewhere they walked past. No upstream decision addresses pruning it.
 
 ## Decisions log
@@ -115,5 +119,7 @@
 | 2026-08-03 | **D4 CONFIRMED** — name-ascending sort, recency rejected | The PRD specifies no order at all, so this is the architect filling a gap, not deviating. Recency would force a versioned-payload migration on already-shipped accepted state to store a timestamp nothing else needs. Name-ascending is stable, scannable, and the only order the current record shape can produce without a migration. If Aviran wants recency, it is a schema change, not a sort change |
 | 2026-08-03 | **D5 CONFIRMED** — no offline banner ships, and req 6 bullet 2 corrected to match | Not a silent gap: a banner in V1 would announce a sync the app never performs. The PRD's own Technical design already said "Writes nothing server-side in V1" — the requirement contradicted it |
 | 2026-08-03 | **D7 CONFIRMED** — Places is bucket-2 chrome, not a nav-row button; T-032's D1 was wrong | `ux-flows.md` line 46 is explicit: "Saved-places icon (4th icon) — persistent icon, **separate from the 3 nav buttons**." Checked against the doc, not against D7's citation of it. Accepted cost: the icon fades and stops hit-testing while any surface is presented, so it cannot dismiss its own list and cannot be reached from an open heat/search/Passport surface. Acceptable — the list carries three dismissal paths (scrim tap, drag-down, ✕) and req 8 bullet 2 asks only for mutual exclusivity. The "can't reach Places without first closing another surface" wrinkle goes to the post-ship designer pass |
+| 2026-08-04 | **Acceptance ACCEPT** — all 8 P0s met; task → `aviran-review`. `Status:` flipped to Accepted in the same commit (L-006) | Every P0 re-derived from `passenger-code` source at `5e1f72f` (not from qa's or the reviewer's verdicts), plus an independent re-run of both suites at that commit: `PassengerTests` 401/401, `PassengerUITests/PlacesListInteractionTests` 6/6, 0 failures. Two commits (`c1b8bc3`, `5e1f72f`) landed after qa's `92561a7` pass and one of them touched this feature (`PlacesListOverlay` `maxHeight` 420→480, PAS-48) — re-run rather than assumed. Full findings in `agent-os/PROGRESS.md`, this date |
+| 2026-08-04 | **Req 3 and req 5 gain explicit build-phase scope on the bullets a Phase-1 build cannot satisfy** (L-009) | Both requirements describe a dwell detector that does not exist in Build Phase 1, so no gate could pass or fail them here — req 5's version of this was already ruled "owed" on 2026-08-03 and never applied to the Requirements section, where a gate actually reads it. Written as the carried-forward condition and its destination task (T-046/`PAS-33`), not as a softening of the requirement |
 | 2026-08-03 | **§9 row 5's framing CONFIRMED as honest** — with one PRD correction owed | Req 5's Been/Visited bullets are checked in Build Phase 1 as the absence of any location code path in the feature (verified independently: zero `LocationStore` references and no `CoreLocation` use in `Places/` beyond `CLLocationCoordinate2D` types). This is genuinely what the requirement protects — no location-derived row can appear when permission is denied, because no row is location-derived at all. It is **not** the runtime behaviour the bullet describes: the bundled fixture populates Been/Visited regardless of permission. That is Build Phase 1's declared fake-data scope, not a gap, and it is re-verified as runtime behaviour when the real detector lands (`T-046`/`PAS-33`) |
 
