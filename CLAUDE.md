@@ -69,7 +69,7 @@ Scope changes come from Aviran editing the strategy doc. Not from a PRD, not fro
 
 ## The company
 
-Founders: **Aviran** (product), **Serge** (design), **Yeari** (algo & data), **Gilad** (dev). The agent fleet does the work. Linear holds task state — workspace `passenger`, team `PAS`, one project **Passenger V1**. `BOARD.md` and `PROGRESS.md` are shared memory. `chief-of-staff` is the only agent that writes to Linear and the only one with a hilos presence; its own file is the operating contract for both.
+Founders: **Aviran** (product), **Serge** (design), **Yeari** (algo & data), **Gilad** (dev). The agent fleet does the work. Linear holds task state — workspace `passenger`, team `PAS`, one project **Passenger V1**. `BOARD.md` and `PROGRESS.md` are shared memory. `chief-of-staff` is the only agent that writes to Linear and the only one with a founders'-channel presence (hilos retired 2026-08-04, replaced by buzz — wiring pending, see workspace-root `CLAUDE.md`); its own file is the operating contract for both.
 
 ## Keeping this file current
 

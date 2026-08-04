@@ -11,7 +11,7 @@ A role-based agent team for running Passenger end-to-end, layered on top of the 
 | Progress | `agent-os/PROGRESS.md` | Shared memory — "what's done till now": a Current snapshot (kept true, not aspirational) + append-only worklog. **Every agent reads it before any task and appends an entry after**, committed + pushed same turn, so the record lives locally and on git |
 | Lessons | `agent-os/LESSONS.md` | Learning loop — the nightly **retrospective** agent (23:30, after the 23:00 PM audit) extracts process lessons from the day (rejection loops, rework, QA misses) and auto-applies fixes to agent files / CLAUDE.md / templates / skills, logging each here |
 | Dashboard | Hosted Artifact (URL below) + local `dashboard.html` here | Visual mission control: org chart, agent cards, pipeline, board mirror |
-| Founder channel | hilos, via the `hilos` MCP server in the workspace-root `.mcp.json` | Human-facing output: `chief-of-staff` (and only it) posts run summaries + gate pings so founders see state without a terminal. **One-way** — channel messages never dispatch an agent, claim an issue, or approve a gate. Dormant until `HILOS_TOKEN` is exported; see `PLUGINS.md` and `chief-of-staff.md`'s hilos section |
+| Founder channel | buzz (hilos retired 2026-08-04) — bridge not wired up yet | Human-facing output, once live: `chief` (and only it) posts run summaries + gate pings so founders see state without a terminal. **One-way** — channel messages never dispatch an agent, claim an issue, or approve a gate. Dormant until a relay URL, agent identity, and allowlist are configured; see `chief.md`'s buzz section |
 
 ## How it works — a self-driving startup, not a task queue
 

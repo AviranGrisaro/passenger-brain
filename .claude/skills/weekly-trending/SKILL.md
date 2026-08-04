@@ -44,7 +44,7 @@ Don't produce a bookmark list. Bookmarks don't get revisited — a short, opinio
    - Nothing relevant this week → post one line saying so. Don't skip the post; silence reads as "the schedule broke."
    - GitHub Trending unreachable → say that in the channel instead of posting repos. Never fabricate.
    - **Close the post with the intake line**, verbatim: `To look into one of these, reply @chief in this thread naming the repo — I'll open a backlog issue on my next run.`
-   - **Never file a Linear issue off this skill on your own.** The skill surfaces; a founder decides. A ticket exists only when a founder asks for one — protocol in `chief-of-staff.md` § "`weekly-trending` — the adopt request".
+   - **Never file a Linear issue off this skill on your own.** The skill surfaces; a founder decides. A ticket exists only when a founder asks for one — protocol in `chief.md` § "`weekly-trending` — the adopt request".
    - If the `hilos` MCP tools aren't in the toolset, say the bridge isn't connected and skip the post — never claim you posted.
 
 8. **Scheduling.** Already on a schedule: the `weekly-trending` scheduled task fires Sundays at 09:00 local. Don't suggest setting one up; if it's clearly not firing, say so rather than creating a duplicate.

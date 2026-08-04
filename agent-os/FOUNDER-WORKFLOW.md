@@ -50,7 +50,7 @@ The pipeline runs itself end to end except at these stops:
 
 ## Single interface: talk to chief, not the team
 
-All four founders default to talking to `chief` (the `chief-of-staff` agent — hilos already nicknames it `@chief`, this doc does the same). It dispatches every other agent, enforces the PRD-then-Linear gate above, runs the rejection loops (code-review ↩ build, qa ↩ build, acceptance ↩ build/design), and reports status back.
+All four founders default to talking to `chief` (the `chief-of-staff` agent — nicknamed `@chief` since hilos, carried over to buzz once that's wired up, and this doc does the same). It dispatches every other agent, enforces the PRD-then-Linear gate above, runs the rejection loops (code-review ↩ build, qa ↩ build, acceptance ↩ build/design), and reports status back.
 
 Direct dispatch to a specific agent still stands, but only for read-only/verification asks that touch no code and no Linear state — "qa, verify X", "designer, what's the status of Y". **Never for anything that writes code** — that always needs a PRD + Linear task first (above), no exception carved out here. Anything that creates new work, touches code, writes to Linear, or crosses domains goes through `chief`. Favorite-agent affinity (above) is about whose output you personally review — it isn't a way to route real work around chief.
 
