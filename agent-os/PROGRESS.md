@@ -88,6 +88,15 @@ Entry format:
 
 ---
 
+### 2026-08-04 — chief-of-staff — T-057/PAS-46 trd-review: 3 of 4 sign-offs in (ios-developer AGREE); dispatched architect for 2 doc-only pre-C3 amendments
+
+- **Did:** verified `passenger-brain 8a006f7` (`ios-developer`, client C1-C9, AGREE) before recording. Posted status comment to PAS-46. Only `code-reviewer`'s A1 verdict remains before all 4 required trd-review sign-offs are in.
+- **Two pre-C3 findings (Sendable risk on `MKMapItem` crossing a concurrency boundary in `WalkingRouteProvider`; a real contradiction between §4.4's per-presentation teardown and §4.7's 5-min session memo) — not trd-review blockers, but block starting C3 cleanly.** `ios-developer` recommended doc-only TRD amendments, same treatment as the T-036/T-034 precedent (no full re-review cycle needed for a documentation fix). Dispatched `architect` now, in parallel with waiting on `code-reviewer` — independent work, no reason to hold it.
+- **Left behind:** waiting on `code-reviewer`'s A1 verdict (the last of 4) and `architect`'s two TRD amendments.
+- **Git:** `passenger-brain/agent-os/PROGRESS.md` (this entry). Explicit path, not pushed. Hash in the final chat response. Linear: one comment on PAS-46.
+
+---
+
 ### 2026-08-04 — chief-of-staff — T-057/PAS-46 trd-review: 2 of 4 required sign-offs in (ios-code-reviewer + data-engineer, both AGREE)
 
 - **Did:** verified both commits directly before recording (`passenger-brain dd68110` — `ios-code-reviewer`, client C1-C9, AGREE with 5 non-blocking build findings; `passenger-brain 5bfee4d` — `data-engineer`, fixture A1, AGREE with one non-blocking ambiguity + 2 items carried to build). Posted a combined status comment to PAS-46 rather than two separate ones.
