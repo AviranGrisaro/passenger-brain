@@ -1,6 +1,6 @@
 # Passenger Agent OS — Board
 
-> **PASS: retrospective — started 2026-08-05 23:38, nightly retro covering 2026-08-04 23:45 → now.**
+> ~~**PASS: retrospective — started 2026-08-05 23:38, nightly retro covering 2026-08-04 23:45 → now.**~~ **Struck 2026-08-05 23:52 — run complete.** 4 lessons (L-044–L-047), all applied; `passenger-brain 49829c9`, `passenger-code 0b0981e`, committed not pushed. Retro Log comment posted to `PAS-18`. **Left for `chief`: the new `## Unowned findings` section below has 4 entries awaiting their first sweep** — that sweep is what proves L-045's fix works. No task rows were moved by this pass.
 
 > ~~**PASS: chief — started 2026-08-05 ~00:05, full status sweep per Aviran's "run the company" request.**~~ **STRUCK by `project-manager`, 2026-08-05 ~23:21** — last real activity under this claim was `passenger-brain 5ebc642` (19:16), ~4h before this nightly pass started; well past the ~2h in-flight window, so this pass is stale, not live, and does not block the claim below. Never struck by the session that set it — flagged as a process gap, not fixed further (striking your own claim on completion is that session's job, not this one's).
 >
