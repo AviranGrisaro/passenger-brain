@@ -41,6 +41,14 @@ Entry format:
 
 ---
 
+### 2026-08-05 — chief-of-staff — T-057/PAS-46 C8/C9 verified done, merge blocker diagnosed as T-052/PAS-40 dependency, not touched
+
+- **Did:** verified `ios-developer`'s C8 UI-test harness + C9 device check report against ground truth in `passenger-code`: `bd28e40` real, on branch `t057-c8c9-ready`, confirmed rebased onto `main`'s actual tip (`fe1c8ef`, T-037's just-landed sticker rebuild) via `git show --stat`. Investigated the reported merge blocker myself rather than acting on the report's framing alone: `git status` shows `Passenger/Map/MapScreen.swift` uncommitted in the shared tree (among several other stray files); diffed it directly — a 4-line hunk adding `hoodName:` to an `EventDetailModal(event:)` call site, which matches **T-052/PAS-40** exactly (confirmed against `BOARD.md`'s own T-052 row: `owner:designer`, round 9, actively dispatched, reply pending — not abandoned). Per L-035/L-007, left it untouched — this is another task's live claim, not stray WIP safe to commit over. Updated `BOARD.md`'s T-057 row to record C8/C9 as done-and-green, and the merge as blocked on T-052/PAS-40 landing, an internal sequencing dependency rather than something needing my action or Aviran's.
+- **Evidence:** `git show --stat bd28e40`, `git log --oneline -1` (main HEAD), `git diff Passenger/Map/MapScreen.swift`, `BOARD.md`'s T-052 row text.
+- **Left behind:** T-057 stays at `build` until T-052/PAS-40's `designer` dispatch reports back and its WIP is committed, at which point `t057-c8c9-ready` should fast-forward cleanly (already verified via rebase, per the report). Linear `PAS-46` comment owed once the merge actually lands — not posted yet since nothing shipped to `main` this round.
+
+---
+
 ### 2026-08-05 — chief-of-staff — T-038/PAS-29 ACCEPT relayed to aviran-review, T-070 filed for ios-developer coverage debt
 
 - **Did:** verified `product`'s ACCEPT verdict on T-038/PAS-29 against ground truth (`passenger-brain 1674137` real, matches: 8 P0s re-derived from a clean `git archive 1903eb1` extract, row-4a evidence-format-gap ruling with the full dim chain traced link-by-link, F-QA5/TRD-C15 coverage gap named as real and not waived, req 4 bullet 2 de-staled against PAS-49, sheet-layout item correctly still open for Aviran). Moved `BOARD.md`'s T-038 row (summary + full tracking table) to `aviran-review`/`Aviran`. Filed **T-070** (backlog, `owner:ios-developer`) for the coverage debt product flagged: TRD C15 (retarget `HoodLayerFillDimTests` at `borderColor`) + the chip-truncation test fix — both no-production-behavior-change, owed before launch.
