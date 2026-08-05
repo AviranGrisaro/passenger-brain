@@ -39,6 +39,17 @@ backlog → spec(product) → trd(architect) → trd-review(ios-developer/develo
 
 Task rows: `| id | task | state | owner | updated | notes / findings / output |`
 
+## Unowned findings (added 2026-08-05, L-045)
+
+**Any agent may append one line here. No `T-`/`PAS-` id needed — that's the point.** A real defect, stale artifact, or abandoned file you found and don't own goes here the moment you decline to fix it, not into a worklog paragraph or a PM digest bullet. `chief` sweeps this list each pass and converts entries into real task rows + Linear issues; strike a line when it becomes a row, naming the row. Existed because the previous rule ("file a `BOARD.md` row with an owner") asked non-coordinator roles to allocate ids that aren't theirs to allocate, so four separate agents correctly wrote worklog lines instead and a finished fix stayed invisible for 32 hours.
+
+`- <finding> — suspected owner: <role> — found by <agent>, <date>`
+
+- `passenger-code` carries an uncommitted `HoodLayer.swift` + `HoodLayerFillDimTests.swift` pair from **2026-08-04 15:23** — the C15/`PAS-55` fix (`borderColor` made `internal`, tests retargeted at the drawn channel), substantive but never built or committed by anyone. Abandoned by L-033's two-check test, not live WIP. **`PAS-66`/T-070 was filed 2026-08-05 for this same scope and duplicates the already-open `PAS-55`** — dedupe when landing. — suspected owner: `ios-developer` — found by `retrospective`, 2026-08-05
+- Every TRD authored **before 2026-08-03 23:45** has a §9 table that predates L-032's authoring rules and has never been audited against them; they surface one acceptance REJECT at a time (T-037/`PAS-28` cost a full build → 2 code-reviews → qa → REJECT cycle on 2026-08-05). Needs a backfill sweep, not another per-task amendment. — suspected owner: `architect` — found by `retrospective`, 2026-08-05
+- `prds/hood-dataset/hood-dataset.html` sits modified-uncommitted in the shared tree with no tracking ticket (its sibling `places-been-saved.html` is tracked as T-067/`PAS-63`; this one isn't). Flagged by `chief` and by `project-manager`'s digest on 2026-08-05 — neither became a row, which is the exact failure this section exists to fix. — suspected owner: `product` — found by `project-manager`, 2026-08-05
+- `PROGRESS.md` has no `## Current snapshot` / `## Worklog` H2 headings at all (entries sit under bare `---` separators) — unclear whether that's an intentional simplification or drift from the documented structure. Needs a call, not an invented heading. — suspected owner: `project-manager` — found by `project-manager`, 2026-08-05
+
 ## Active phase
 
 **Phase 1 — ship one map to real strangers in Tel Aviv.** Per `strategy/passenger-strategy.md`: nothing downstream matters until a real person reopens the app within a week, unprompted. As of 2026-07-31, this roadmap phase is itself sequenced into three **build phases** — see the section immediately below. **Build Phase 1 is the current active work.**
