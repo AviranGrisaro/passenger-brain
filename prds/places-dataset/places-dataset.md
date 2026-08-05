@@ -3,7 +3,7 @@
 **Status:** Draft v1
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-30
+**Last updated:** 2026-08-05
 **Why this is a PRD and not a line item:** standing rule, founder-direct 2026-07-30 (`agent-os/PROGRESS.md`, FOUNDER-DIRECT STUB). Six V1 PRDs read the `places` table; three of them name a field on it that does not exist. Nobody owns authoring it.
 
 ## Description
@@ -41,6 +41,7 @@
    - [ ] It is **internal**: no user-facing surface renders it as a third category, and it never appears in the search chips or any filter (`search-quick-filters` req 3 caps the sheet at two chips).
    - [ ] Every enumerated value maps to exactly one sticker shape, and every place therefore yields a sticker (`passport` req 3; decision #29).
    - [ ] Adding a `place_type` value without a sticker shape fails validation — a place must never earn a shapeless sticker.
+   - [ ] **The shape depicts the type, it does not merely map to it (added 2026-08-05 at `passport`'s T-037 acceptance, L-009):** the ratified vocabulary (step B1) pairs each `place_type` with a glyph a person would name as that kind of place — cup for café, cutlery for restaurant. A set of abstract geometric shapes assigned one-per-type passes the two bullets above and still fails `passport` req 3. That is how it shipped once already, in T-037's Build-Phase-1 registry.
    - [ ] Every row carries a non-null `place_type`. Without this field V1 ships two sticker shapes and decision #29 is not met (`passport` Open questions).
 
 4. **Keyword search has a field behind it.**
@@ -100,5 +101,6 @@
 |---|---|---|
 | 2026-07-30 | PRD created | Standing rule, founder-direct 2026-07-30. Six PRDs read `places`; three name a missing field; no PRD authored the dataset |
 | 2026-07-30 | `place_type` spec'd here rather than inside `passport` | It is a dataset field with its own enumeration and validation, not a Passport rendering detail — `passport`'s own Open questions call it "a dependency on the dataset, not a rendering detail" |
+| 2026-08-05 | Req 3 gained a depiction criterion for the `place_type` → sticker-shape pairing, added at `passport`'s T-037 acceptance (L-009) | Req 3's existing bullets guarantee coverage (every type has a shape) but say nothing about what the shape shows, so the Build-Phase-1 registry shipped six abstract geometric shapes and passed every gate. B1's ratified vocabulary is where the pairing is fixed, so the criterion belongs here as well as in `passport` |
 | 2026-07-30 | Kept separate from `hood-dataset` | Different sourcing job and different failure modes; they share one FK contract, stated in both |
 | 2026-07-30 | Req 7's designated-Hood/threshold cross-check written even though the threshold number is unknown | The check is falsifiable the moment the number lands, and without it a Hood can ship where `passport` req 4 is unreachable by construction |

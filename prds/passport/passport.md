@@ -1,9 +1,9 @@
 # Passport — PRD
 
-**Status:** Draft v2
+**Status:** Draft v3
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
-**Last updated:** 2026-07-30
+**Last updated:** 2026-08-05
 **Two blockers resolved:** decision #39 ("Profile" is the literal tab name, a naming exception to the no-profiles gate, not a reversal) and #40 (per-Hood Local status replaces the seven-tier ladder outright). Both held this PRD at PAS-10.
 
 ## Description
@@ -43,6 +43,7 @@
    - [ ] A manually **Saved** place earns no sticker on the save alone.
    - [ ] One Been place yields exactly one sticker; revisiting adds none.
    - [ ] Sticker shape matches the place's type — a coffee cup for a café (#29). The field is `places.place_type`, now spec'd in [`places-dataset`](../places-dataset/places-dataset.md) req 3: a closed enumeration, internal-only, one sticker shape per value, non-null on every row. It does not exist in any migration yet.
+   - [ ] **Pass condition (added at acceptance 2026-08-05, L-009):** with the place name hidden, a person can name what kind of place a sticker is for — a café's reads as a cup, a restaurant's as cutlery, a museum's as a museum. A distinct-but-abstract shape per type (circle for café, triangle for restaurant) **fails** this bullet however consistently it is assigned: "matches the place type" is depiction, not one-to-one mapping. Every gate before this one checked only that each type had *a* shape.
    - [ ] Every `place_type` value has a sticker shape, so no Been place can earn a shapeless sticker (`places-dataset` req 3 fails validation on a value with no shape).
    - [ ] Stickers file under the city's page; Tel Aviv is the only page in V1.
 
@@ -66,6 +67,7 @@
 
 7. **Accessibility** (`design-principles.md` §5, §2).
    - [ ] Every sticker carries a VoiceOver label naming the place and its type — never image-only.
+   - [ ] **Pass condition (added at acceptance 2026-08-05, L-009):** the label's second clause names the kind of place. *"Dr. Shakshuka, cutlery sticker"* passes; *"Dr. Shakshuka, triangle sticker"* fails — a geometry word is not a type. Speaking the raw `place_type` string stays forbidden (`places-dataset` req 3), and naming what the sticker depicts is not the same thing: once the sticker depicts the type, one word satisfies both rules.
    - [ ] Per-Hood status is announced as text, including the count and whether Local is reached.
    - [ ] Every interactive target is ≥44pt.
 
@@ -114,4 +116,6 @@
 | 2026-07-30 | `place_type` and `designated_for_progression` given owning PRDs; the Local threshold's *dataset-sizing* consequence surfaced | Standing rule, founder-direct 2026-07-30. Both fields were flagged as missing and left as open questions with no deliverable behind them; the threshold's effect on how many places a designated Hood needs was not noticed at all |
 | 2026-08-04 | **Local threshold fixed at 2, no longer provisional** (decision #45, T-048/`PAS-35`, `product`). PRD → Draft v2 | TRD D6 picked 2 from fixture observability and explicitly disclaimed being a product judgement, which is not a basis a number can ship on. Re-argued from what "Local" should mean to a user — *came back*, not *completed the Hood* — inside a [2, 3] range that the data fixes independently of taste. Not escalated to Aviran: decision #40 locked the mechanic, the strategy states no number, and *"a set of hoods Passenger designates"* puts the parameterisation with the company |
 | 2026-08-04 | The detector this PRD depends on is recorded as **launch-blocking**, not Phase 2/3 | Decision #46 (`product` scope gate, T-046/`PAS-33`). The prior "not launch-blocking" framing was true only of *build sequencing* — the consumers compile against stand-ins. Without the detector this feature ships permanently empty on a real device |
+| 2026-08-05 | **REJECT at acceptance (T-037).** Req 3's shape bullet and req 7's label bullet each gained a falsifiable pass/fail criterion, added at acceptance per L-009. PRD → Draft v3 | The build ships six abstract geometric stickers assigned one per `place_type` (café→circle, restaurant→triangle, bar→diamond) and speaks the geometry (*"Dr. Shakshuka, triangle sticker"*). Neither bullet was falsifiable: TRD §9 row 3's pass condition checked totality and symbol resolution only, so no gate downstream had anything to fail it on — L-009 exactly |
+| 2026-08-05 | **TRD D12's premise rejected**: req 7 bullet 1 and `places-dataset` §4.4 were never in conflict | §4.4 forbids rendering the raw `place_type` string; it does not forbid naming what a place is in the app's own words. The contradiction D12 resolved existed only because the shape vocabulary was abstract. A depictive sticker's spoken noun satisfies both documents, so the deviation is rejected along with its cause rather than confirmed |
 

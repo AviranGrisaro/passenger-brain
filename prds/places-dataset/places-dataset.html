@@ -116,7 +116,7 @@ strong { font-weight: 600; }
 <p><strong>Status:</strong> Draft v1
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Owner:</strong> Aviran Grisaro
-<strong>Last updated:</strong> 2026-07-30
+<strong>Last updated:</strong> 2026-08-05
 <strong>Why this is a PRD and not a line item:</strong> standing rule, founder-direct 2026-07-30 (<code>agent-os/PROGRESS.md</code>, FOUNDER-DIRECT STUB). Six V1 PRDs read the <code>places</code> table; three of them name a field on it that does not exist. Nobody owns authoring it.</p>
 <h2 id="description">Description</h2>
 <ul>
@@ -155,6 +155,7 @@ strong { font-weight: 600; }
    - ☐ It is <strong>internal</strong>: no user-facing surface renders it as a third category, and it never appears in the search chips or any filter (<code>search-quick-filters</code> req 3 caps the sheet at two chips).
    - ☐ Every enumerated value maps to exactly one sticker shape, and every place therefore yields a sticker (<code>passport</code> req 3; decision #29).
    - ☐ Adding a <code>place_type</code> value without a sticker shape fails validation — a place must never earn a shapeless sticker.
+   - ☐ <strong>The shape depicts the type, it does not merely map to it (added 2026-08-05 at <code>passport</code>'s T-037 acceptance, L-009):</strong> the ratified vocabulary (step B1) pairs each <code>place_type</code> with a glyph a person would name as that kind of place — cup for café, cutlery for restaurant. A set of abstract geometric shapes assigned one-per-type passes the two bullets above and still fails <code>passport</code> req 3. That is how it shipped once already, in T-037's Build-Phase-1 registry.
    - ☐ Every row carries a non-null <code>place_type</code>. Without this field V1 ships two sticker shapes and decision #29 is not met (<code>passport</code> Open questions).</p>
 </li>
 <li>
@@ -238,6 +239,11 @@ strong { font-weight: 600; }
 <td>2026-07-30</td>
 <td>Kept separate from <code>hood-dataset</code></td>
 <td>Different sourcing job and different failure modes; they share one FK contract, stated in both</td>
+</tr>
+<tr>
+<td>2026-08-05</td>
+<td>Req 3 gained a depiction criterion for the <code>place_type</code> → sticker-shape pairing, added at <code>passport</code>'s T-037 acceptance (L-009)</td>
+<td>Req 3's existing bullets guarantee coverage (every type has a shape) but say nothing about what the shape shows, so the Build-Phase-1 registry shipped six abstract geometric shapes and passed every gate. B1's ratified vocabulary is where the pairing is fixed, so the criterion belongs here as well as in <code>passport</code></td>
 </tr>
 <tr>
 <td>2026-07-30</td>

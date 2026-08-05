@@ -113,10 +113,10 @@ strong { font-weight: 600; }
 <div class="doc">
 <div class="source-note">Rendered from <code>passport/passport.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="passport-prd">Passport — PRD</h1>
-<p><strong>Status:</strong> Draft v2
+<p><strong>Status:</strong> Draft v3
 <strong>Phase:</strong> <a href="../../strategy/passenger-strategy.md#rollout-sequence">Phase 1 — Build to launch</a>
 <strong>Owner:</strong> Aviran Grisaro
-<strong>Last updated:</strong> 2026-07-30
+<strong>Last updated:</strong> 2026-08-05
 <strong>Two blockers resolved:</strong> decision #39 ("Profile" is the literal tab name, a naming exception to the no-profiles gate, not a reversal) and #40 (per-Hood Local status replaces the seven-tier ladder outright). Both held this PRD at PAS-10.</p>
 <h2 id="description">Description</h2>
 <ul>
@@ -157,6 +157,7 @@ strong { font-weight: 600; }
    - ☐ A manually <strong>Saved</strong> place earns no sticker on the save alone.
    - ☐ One Been place yields exactly one sticker; revisiting adds none.
    - ☐ Sticker shape matches the place's type — a coffee cup for a café (#29). The field is <code>places.place_type</code>, now spec'd in <a href="../places-dataset/places-dataset.html"><code>places-dataset</code></a> req 3: a closed enumeration, internal-only, one sticker shape per value, non-null on every row. It does not exist in any migration yet.
+   - ☐ <strong>Pass condition (added at acceptance 2026-08-05, L-009):</strong> with the place name hidden, a person can name what kind of place a sticker is for — a café's reads as a cup, a restaurant's as cutlery, a museum's as a museum. A distinct-but-abstract shape per type (circle for café, triangle for restaurant) <strong>fails</strong> this bullet however consistently it is assigned: "matches the place type" is depiction, not one-to-one mapping. Every gate before this one checked only that each type had <em>a</em> shape.
    - ☐ Every <code>place_type</code> value has a sticker shape, so no Been place can earn a shapeless sticker (<code>places-dataset</code> req 3 fails validation on a value with no shape).
    - ☐ Stickers file under the city's page; Tel Aviv is the only page in V1.</p>
 </li>
@@ -184,6 +185,7 @@ strong { font-weight: 600; }
 <li>
 <p><strong>Accessibility</strong> (<code>design-principles.md</code> §5, §2).
    - ☐ Every sticker carries a VoiceOver label naming the place and its type — never image-only.
+   - ☐ <strong>Pass condition (added at acceptance 2026-08-05, L-009):</strong> the label's second clause names the kind of place. <em>"Dr. Shakshuka, cutlery sticker"</em> passes; <em>"Dr. Shakshuka, triangle sticker"</em> fails — a geometry word is not a type. Speaking the raw <code>place_type</code> string stays forbidden (<code>places-dataset</code> req 3), and naming what the sticker depicts is not the same thing: once the sticker depicts the type, one word satisfies both rules.
    - ☐ Per-Hood status is announced as text, including the count and whether Local is reached.
    - ☐ Every interactive target is ≥44pt.</p>
 </li>
@@ -267,6 +269,16 @@ strong { font-weight: 600; }
 <td>2026-08-04</td>
 <td>The detector this PRD depends on is recorded as <strong>launch-blocking</strong>, not Phase 2/3</td>
 <td>Decision #46 (<code>product</code> scope gate, T-046/<code>PAS-33</code>). The prior "not launch-blocking" framing was true only of <em>build sequencing</em> — the consumers compile against stand-ins. Without the detector this feature ships permanently empty on a real device</td>
+</tr>
+<tr>
+<td>2026-08-05</td>
+<td><strong>REJECT at acceptance (T-037).</strong> Req 3's shape bullet and req 7's label bullet each gained a falsifiable pass/fail criterion, added at acceptance per L-009. PRD → Draft v3</td>
+<td>The build ships six abstract geometric stickers assigned one per <code>place_type</code> (café→circle, restaurant→triangle, bar→diamond) and speaks the geometry (<em>"Dr. Shakshuka, triangle sticker"</em>). Neither bullet was falsifiable: TRD §9 row 3's pass condition checked totality and symbol resolution only, so no gate downstream had anything to fail it on — L-009 exactly</td>
+</tr>
+<tr>
+<td>2026-08-05</td>
+<td><strong>TRD D12's premise rejected</strong>: req 7 bullet 1 and <code>places-dataset</code> §4.4 were never in conflict</td>
+<td>§4.4 forbids rendering the raw <code>place_type</code> string; it does not forbid naming what a place is in the app's own words. The contradiction D12 resolved existed only because the shape vocabulary was abstract. A depictive sticker's spoken noun satisfies both documents, so the deviation is rejected along with its cause rather than confirmed</td>
 </tr>
 </tbody>
 </table>
