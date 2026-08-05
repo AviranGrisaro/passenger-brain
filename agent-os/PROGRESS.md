@@ -13,6 +13,14 @@ Entry format:
 
 ---
 
+### 2026-08-05 — chief-of-staff — T-047/PAS-34 relayed to aviran-review, T-068 filed
+
+- **Did:** verified `product`'s ACCEPT verdict on T-047/PAS-34 against ground truth before acting on it — confirmed `passenger-brain 4bfad28` exists (`git log`/`git show --stat`) and its commit message matches the reported findings (24 Hoods, exactly `florentin`/`kerem-hateimanim`/`neve-tzedek` designated, `PlaceCatalog.places(in:)` not filtering `permanentlyClosed` fixed same-commit). Moved `BOARD.md`'s T-047 row `acceptance`/`owner:product` → `aviran-review`/`Aviran` with a short verdict summary for founder review. Filed a new row, **T-068** (`backlog`, `owner:ios-developer`) for the follow-up product flagged: retarget `everyDesignatedHoodMeetsThreshold` at the visitable count, not raw count — small, isolated, no PRD/TRD needed. Noted decision #45's review-trigger band firing earlier than its text implies, and flagged `prds/hood-dataset/hood-dataset.html` as stale-uncommitted-by-another-session needing an owner (same class as T-067) — not investigated further this pass.
+- **Evidence:** `git show --stat 4bfad28` (passenger-brain), live `BOARD.md` T-047/T-068 rows.
+- **Left behind:** Linear `PAS-34` still needs the `owner`/`aviran-review` swap and verdict comment posted (Linear MCP not exercised this pass); T-068 needs Linear `PAS-*` issue created before `ios-developer` claims it, per the single-writer protocol. `prds/hood-dataset/hood-dataset.html` ownership gap still open.
+
+---
+
 ### 2026-08-05 — product — T-047/PAS-34 acceptance: ACCEPT, plus the missing pass/fail criterion (L-009)
 
 - **Did:** acceptance verdict on T-047 (`designated_for_progression` authored for all 24 Hoods). **ACCEPT.** Read workspace-root and `passenger-brain` `CLAUDE.md`, `BOARD.md`'s T-047/T-048 rows and its struck `HALT` line, and this file's recent T-047 entries before starting. Every P0 re-derived from source independently rather than inherited from `qa`'s PASS WITH MINORS or `code-reviewer`'s APPROVE. **Scope gate (Job 0) run on inherited work:** authorized verbatim by `strategy/passenger-strategy.md` line 44 — *"contributing toward "Local" status **per Hood** in a set of hoods Passenger designates"*. No social/onboarding/Phase-2 surface; the task parameterises an already-authorized V1 mechanic. **Data/schema need (Job 1 item 7):** already explicit — `hood-dataset` req 5 owns the field and now owns its validation criterion too.
