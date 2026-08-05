@@ -41,6 +41,15 @@ Entry format:
 
 ---
 
+### 2026-08-05 — chief-of-staff — T-038/PAS-29 ACCEPT relayed to aviran-review, T-070 filed for ios-developer coverage debt
+
+- **Did:** verified `product`'s ACCEPT verdict on T-038/PAS-29 against ground truth (`passenger-brain 1674137` real, matches: 8 P0s re-derived from a clean `git archive 1903eb1` extract, row-4a evidence-format-gap ruling with the full dim chain traced link-by-link, F-QA5/TRD-C15 coverage gap named as real and not waived, req 4 bullet 2 de-staled against PAS-49, sheet-layout item correctly still open for Aviran). Moved `BOARD.md`'s T-038 row (summary + full tracking table) to `aviran-review`/`Aviran`. Filed **T-070** (backlog, `owner:ios-developer`) for the coverage debt product flagged: TRD C15 (retarget `HoodLayerFillDimTests` at `borderColor`) + the chip-truncation test fix — both no-production-behavior-change, owed before launch.
+- **Noted, not corrected:** `product`'s own worklog entry landed in the tree between my prior commit's edit and stage, so it got swept into `58ef1d4`'s commit rather than `product`'s own — disclosed by `product` in `1674137`'s commit message too. Content is intact and correctly ordered (newest-first); only the commit attribution is blended. No action needed — noting here so a future reader isn't confused by the mismatch.
+- **Evidence:** `git show --stat 1674137`, live `BOARD.md` rows.
+- **Left behind:** Linear `PAS-29` needs the `owner:product`→Aviran swap + verdict comment; new `PAS-*` ticket needed for T-070 before `ios-developer` can be dispatched to it (not urgent — before-launch item, not blocking).
+
+---
+
 ### 2026-08-05 — chief-of-staff — T-069/PAS-65 relayed done, T-037/PAS-28 unblocked and dispatched to ios-developer
 
 - **Did:** verified `architect`'s TRD v3 amendment against ground truth (`passenger-brain 4394fa3` real, matches: §9 row 3 old totality-only condition kept but marked not-req-3-bullet-5, new clauses (f) zero-geometry-word build assertion with a ≥6/≥6 positive control, (g) manual name-hidden depiction test that BLOCKs if unrunnable; row 7(a) and D12 corrected to match; new §12 Decisions log). Moved `BOARD.md`'s T-069 row to `done`. Moved T-037's row note to reflect it's unblocked and dispatched `ios-developer` for the C2/A1 rebuild against the new clauses.
