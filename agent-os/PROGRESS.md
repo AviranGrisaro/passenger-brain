@@ -13,6 +13,26 @@ Entry format:
 
 ---
 
+## Worklog
+
+_(`## Worklog` heading added 2026-08-06 by `chief`, resolving the "PROGRESS.md has no H2 headings" item from `BOARD.md`'s Unowned findings — light structural fix so `chief.md`'s "insert after `## Worklog`" instruction has somewhere real to point. Nothing above this line moved; entries below are unchanged, still newest-first.)_
+
+### 2026-08-06 — chief — full status sweep, run the company: 4 dispatches to land in-flight/abandoned WIP, unowned-findings sweep
+
+- **Did:** claimed the board (`> **PASS: chief — started 2026-08-06 ~00:00**`). Read `BOARD.md` in full (task table + Unowned findings) and the last ~48h of `PROGRESS.md` worklog entries. Found the pipeline mostly parked at `aviran-review` (T-033, T-034, T-035, T-036, T-038, T-047, T-062, T-063, T-064 — 9 tasks awaiting Aviran, nothing for chief to move there) and no actionable `backlog`/`spec`/`trd`/`trd-review` work for the active Build Phase 1. Per "finish before starting," focused this pass on landing in-flight/abandoned work rather than pulling new backlog items:
+  1. **T-037/PAS-28 (Passport):** found `passenger-code fe1c8ef` ("Rebuild Passport sticker registry as genuine depictions") already landed on `main` — `ios-developer`'s fix for product's F1/F2 REJECT, built against TRD v3's new §9 row 3(f)/(g). Never routed to `code-review`. Dispatched `ios-code-reviewer`.
+  2. **T-051/PAS-39 + T-048/PAS-35:** both already committed (`eecccd5`, `1c84b29`) and sitting at `code-review` unreviewed. Dispatched `ios-code-reviewer` for both in one pass (same session originally, related files).
+  3. **Two abandoned WIP diffs** (L-033/L-044 test: hours-old mtimes — Aug 3-4, now Aug 6 — no commit, no worklog entry): PAS-51 (`HourReadout.swift` + 2 new test files, T-032's orphaned F1/F2 fix) and T-070/PAS-66 (`HoodLayer.swift`/`HoodLayerFillDimTests.swift`, dedupes PAS-55). Dispatched `ios-developer` to verify, build, test, and commit both.
+  4. **T-052/PAS-40 designer WIP** (`EventDetailModal.swift`/`EventDetailRows.swift`/partial `MapScreen.swift`/tests): round-9 dispatch went quiet, same abandonment test applies. Re-dispatched `designer` to resume, finish (map-rendering-spec.md event-marker section, display names not raw slugs), build, test, and commit.
+  All four dispatches relayed via `main`, results pending as this entry is written — see Left behind.
+- **Unowned findings sweep (L-045):** converted 3 of 4 entries. HoodLayer WIP entry — already a row (T-070/PAS-66), struck with a pointer to this pass's dispatch. TRD pre-L-032 backfill audit — new row **T-071**, owner `architect`. `hood-dataset.html` stale twin — new row **T-072**, owner `product`. PROGRESS.md missing `## Worklog`/`## Current snapshot` headings — added the `## Worklog` heading (this section), left the rest of the file's structure untouched; flagged as overridable by `project-manager`/Aviran. **Linear issues for T-071/T-072 not created this pass** — `plugin:product-management:linear` MCP is unauthenticated in this session (confirmed via the system's own capability listing, not assumed); noted on both rows for the next Linear-capable pass.
+- **Evidence:** `git log --oneline -15` + `git status --short` on `passenger-code` (confirmed `fe1c8ef`, `eecccd5`, `1c84b29` on `main`; confirmed the 9 uncommitted files and their mtimes via `stat -f '%Sm'`); direct read of `BOARD.md` task table and Unowned findings section.
+- **Board/Linear:** `BOARD.md` — claim line added, Unowned findings section updated (3 struck), T-071/T-072 rows added. Linear untouched this pass (auth unavailable).
+- **Left behind:** all 4 dispatches (ios-code-reviewer ×2, ios-developer, designer) were in flight as this entry was written — next pass (or this session's continuation) needs to verify each against ground truth before advancing BOARD.md/Linear state, per standing rule (don't trust a relay report at face value). T-050 (events-layer toggle, unblocked now that T-032 is done) not dispatched this pass — queued behind the in-flight work above. The 9 `aviran-review` tasks are all correctly parked on Aviran, not re-listed here — see BOARD.md for the full list.
+- **Git:** `passenger-brain/agent-os/BOARD.md`, `passenger-brain/agent-os/PROGRESS.md` — explicit paths. Not pushed — Aviran-gated, `CLAUDE.md` rule 9. Hash in the final chat response.
+
+---
+
 ### 2026-08-05 — chief — PAS-47/48/49/50 re-review closed all 4 Done, PAS-51 dispatched to finish/commit
 
 - **Did:** dispatched by a `project-manager` nightly-hygiene stall audit to resume 5 named tickets that had gone quiet 24-37+ hours with no aviran-blocker label. Verified everything against ground truth before acting, per standing rule — did not take any prior session's report at face value.
