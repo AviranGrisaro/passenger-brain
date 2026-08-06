@@ -1,6 +1,8 @@
 # Passenger Agent OS — Board
 
-> **PASS: chief — started 2026-08-06 ~00:00, full status sweep + dispatch per Aviran's "run the company" request.**
+> **PASS: retrospective — started 2026-08-06 23:40, nightly retro covering 2026-08-05 23:50 → now.**
+
+> ~~**PASS: chief — started 2026-08-06 ~00:00, full status sweep + dispatch per Aviran's "run the company" request.**~~ **STRUCK by `retrospective`, 2026-08-06 23:40** — claim is ~23.5h old and `chief`'s own last board/worklog write under it was `passenger-brain 4e3ba42` (08:51), ~14.7h ago; far past the ~2h in-flight window, so the expiry applies and no judgment call was needed. Its four dispatches have since all reported in (`passenger-code 927784b`, `6e5fee3`, `174a5bb`, plus the `ios-code-reviewer` T-051/T-048 worklog at `passenger-brain 6420ba2`, 23:32) — **so a dispatch-relay session may still be finishing; this pass touched only `BOARD.md`'s claim lines and appended to `LESSONS.md`/`PROGRESS.md`, moving no task rows.** Second consecutive night a `chief` claim outlived its session unstruck (2026-08-05's was struck by `project-manager`) — see L-048.
 
 > ~~**PASS: retrospective — started 2026-08-05 23:38, nightly retro covering 2026-08-04 23:45 → now.**~~ **Struck 2026-08-05 23:52 — run complete.** 4 lessons (L-044–L-047), all applied; `passenger-brain 49829c9`, `passenger-code 0b0981e`, committed not pushed. Retro Log comment posted to `PAS-18`. **Left for `chief`: the new `## Unowned findings` section below has 4 entries awaiting their first sweep** — that sweep is what proves L-045's fix works. No task rows were moved by this pass.
 
