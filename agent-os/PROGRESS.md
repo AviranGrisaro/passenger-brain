@@ -15,6 +15,22 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-07 ~23:5x — chief-of-staff — Linear `In Progress` sweep, first pass
+
+**Scope:** all 21 issues in `In Progress` at sweep start, per Aviran's direct instruction (relayed via `main`) to clear the list. Explicitly excluded `T-057`/`PAS-46` and the stranded `passenger-brain` branch issues — a separate, concurrent, unexpired `chief` claim (started 23:25) already owns that scope.
+
+**Findings, by category:**
+- **3 legitimately at `aviran-review`, this session's own arc** (`PAS-60`, `PAS-73`, `PAS-77`) — delivered, correctly waiting, left untouched.
+- **12 more at `gate:awaiting-aviran-review`** (`PAS-13`, `PAS-25`, `PAS-26`, `PAS-27`, `PAS-29`, `PAS-34`, `PAS-35`, `PAS-39`, `PAS-40`, `PAS-58`, `PAS-59`, `PAS-66`) — spot-checked for staleness, none showed signs of it; this is Linear's correct resting state for that gate (waiting on Aviran counts as "parked," not "no active work"). Not individually deep-audited this pass given volume — a candidate for a follow-up pass if any turn out stale.
+- **`PAS-72`** (fixture-count fix) — already dispatched by this session before the claim gap; confirmed still genuinely in flight via a live `git diff` on the shared tree (not stalled), left running.
+- **`PAS-51`** (`T-077`) — confirmed NOT stale: continuous chief-driven build↔review↔product-verdict cycling today through 18:57, real ongoing work, not something to re-dispatch on top of.
+- **`PAS-17`** (Hood alias-folding client work) — already thoroughly triaged by the concurrent 23:25 `chief` claim tonight with a clear diagnosis (abandoned uncommitted WIP, frozen mtimes) and action item; not duplicated here.
+- **`PAS-28`/T-037 (Passport) — found genuinely stalled and resumed.** Rejected by `product` on 2026-08-05 (abstract-geometry stickers, not depictions — a stated P0 miss), and nothing had picked it back up in ~2 days despite its blocker (`PAS-65`, the TRD amendment) closing `Done` the same day. Dispatched `ios-developer` to rebuild against the now-amended depiction criteria.
+
+**Left for a follow-up pass, not silently dropped:** a deeper individual audit of the 12 `gate:awaiting-aviran-review` items (spot-checked only, not each fully re-derived), and re-checking `PAS-17`/`PAS-51`/`T-057` once the other concurrent `chief` claim's scope resolves.
+
+**Left behind (per L-050):** `PAS-72` and `PAS-28`'s dispatches were both still in flight when this entry was written — their own reports will land routing separately, not held open for here.
+
 ### 2026-08-07 — chief — T-057/PAS-46 resumed (stranded branch, blocker cleared 2 days ago); two stranded brain branches routed to PAS-70/PAS-69
 
 **Scope.** Dispatched by the `project-manager` nightly hygiene audit (its claim line, 23:10–01:10, left untouched — not mine). Unattended run, no founder available. Deliberately narrow: resume the stalled-but-unblocked T-057, and connect the two stranded `passenger-brain` `claude/*` branches to the tickets that already exist for the same files. **Not** a full "run the company" sweep — no backlog pulled, no other task rows moved.
