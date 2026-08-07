@@ -43,6 +43,22 @@ Passenger has **two structurally different modal shapes today**, and the split d
 - **Nav row hit-testability — the constraint these overlays exist to protect — needs a different mechanism now that the card is flush to the bottom edge**, since `MapNavRow` (52pt-tall buttons, z7, drawn last) would otherwise render *underneath* an edge-to-edge Group-B card sitting at the same z-position. **[ASSUMPTION, this spec's call]**: the fix is **not** "make the card shorter" — it's ordering. `MapNavRow` is already drawn last in `MapScreen.swift`'s overlay chain (line 514, "drawn last among this file's overlays so it renders above all of them") and z5's Group-B overlays are declared *before* it (line 472, comment: "Above the remaining fading chrome... below the system sheet at Site A"). That ordering already makes `MapNavRow` render on top of a full-height Group-B card today — the row survives edge-to-edge cards the same way it survives the current inset ones, because it's a later sibling in the same `ZStack`, not because the card stops short of the row. Removing the bottom-padding gap doesn't change this ordering, so nav-row hit-testability is preserved with no further change. **This should be confirmed on-device once buildable** — it's read correctly from the modifier-order comments, not observed rendered.
 - **Drag-to-dismiss and scrim:** both unchanged (`DragGesture`, `Color.black.opacity(0.3)` scrim, dismiss threshold) — this fix is shape/anchoring only, not interaction.
 
+## Correction — added at acceptance, 2026-08-07 (`product`, T-079 REJECT)
+
+Two claims above were derived from source only and are **wrong on the actual runtime** (iOS 26.5, iPhone 17), measured first-hand at acceptance:
+
+1. **Group A does not already satisfy the ask.** "A SwiftUI `.sheet()` is, by default, full device width, anchored flush to the bottom and sides, with rounded corners only on the top two corners" was true through iOS 18. On iOS 26 a `.sheet()` at a non-`.large` detent renders as an **inset, floating card, rounded on all four corners, with map visible on the left, right and bottom** — exactly the shape Aviran reported as the bug. Rendered proof: `EventDetailModal` opened from `eventMarker-seed-0001`, live `simctl io screenshot`. Group A therefore needs its own fix (`presentationBackground`/detent choice, or a non-`.sheet` construction), not a "don't touch."
+2. **`.ignoresSafeArea(edges: .bottom)` as applied does not reach the bottom edge.** In all three Group-B files it is applied *inside* the `GeometryReader`, before an outer `.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)`, so the card is positioned within the safe area and stops short of the screen edge.
+
+## Pass/fail criteria — measurable, added at acceptance (L-009)
+
+The spec asserted "full-width" and "flush to the bottom edge" with no falsifiable check, so every gate before acceptance had nothing objective to fail. These are the checks; each is a pixel measurement on a screenshot of the surface open, not a source read:
+
+1. **Full width:** the card's surface colour is present at x = 0 and x = width−1 on any row inside the card. *Measured result at `passenger-code ddbc7de`: PASS for all 3 Group-B surfaces.*
+2. **Flush bottom:** the card's surface colour is present on the screen's **last** pixel row. *Measured result: **FAIL** — `SearchOverlay` and `PlacesListOverlay` both stop 102px = **34pt** above the bottom edge (exactly the iPhone 17 home-indicator inset), with live map rendering underneath.*
+3. **Top-corners-only:** the two bottom corners are square — surface colour reaches x = 0 and x = width−1 on the card's last row. *Measured result: PASS for Group B; **FAIL** for Group A (all four corners rounded, see Correction 1).*
+4. **One shape app-wide:** criteria 1–3 give the same answer for a Group-A surface and a Group-B surface, captured in the same session. *Measured result: **FAIL** — the two groups render as visibly different shapes.*
+
 ## Add to `design-principles.md` — so future modals default to this, not rediscover it
 
 See `passenger-brain/design/design-principles.md` §8 (added by this pass) — the standard now lives there as the shared reference `ios-code-reviewer`/`designer` check future surfaces against, rather than re-derived per feature.
