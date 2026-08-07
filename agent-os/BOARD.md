@@ -79,7 +79,7 @@ Task rows: `| id | task | state | owner | updated | notes / findings / output |`
   - ~~`qa` → T-048/`PAS-35`~~ **Reported back and routed, 2026-08-07 — PASS (`passenger-brain 7899a47`), see T-048 row (now `acceptance`/`product`). `product` re-dispatched for acceptance.**
   - `qa` → T-051/`PAS-39` (Phase-1 fixture gaps) — verdict lands on Linear PAS-39 + `BOARD.md` T-051 row.
   - `ios-code-reviewer` → T-070/`PAS-66` (HoodLayer dim-test retarget, `passenger-code 6e5fee3`) — verdict lands on Linear PAS-66 + `BOARD.md` T-070 row.
-  - `ios-code-reviewer` → `PAS-51` (T-032 orphaned F1/F2 fix, `passenger-code 927784b`, no dedicated `T-` row) — verdict lands on Linear PAS-51.
+  - ~~`ios-code-reviewer` → `PAS-51`~~ **Reported back and routed, 2026-08-07 — APPROVE WITH MINORS (`passenger-code 927784b`, worklog `passenger-brain 36be7c7`). F1 genuinely fixed. F2 sound but under-verified — 5 non-blocking findings, none regressions, routed to `owner:qa` as an explicit check-list (no `T-` row exists for PAS-51; verdict + findings live on the Linear comment). `qa` re-dispatched.**
   - ~~`product` → T-052/`PAS-40` acceptance~~ **Reported back and routed, 2026-08-07 — ACCEPT (`passenger-brain 3126c2c`), see T-052 row (now `aviran-review`).**
 
 ## Active phase
