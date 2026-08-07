@@ -114,7 +114,7 @@ strong { font-weight: 600; }
 <div class="source-note">Rendered from <code>hood-dataset/TRD.md</code> — source of truth is the markdown file; this HTML copy is generated for easy reading.</div>
 <h1 id="hood-dataset-tel-aviv-geometry-attributes-trd">Hood Dataset — Tel Aviv Geometry &amp; Attributes — TRD</h1>
 <p><strong>Task:</strong> T-040 · <strong>Linear:</strong> <code>PAS-17</code> · <strong>State:</strong> <code>trd-review</code> complete (6/6) → <code>build</code>-ready, <strong>held to Build Phase 2 except for the C1/C2/C2a carve-out</strong> (§8 D10)
-<strong>Owner:</strong> architect · <strong>Date:</strong> 2026-07-31 · <strong>Amended:</strong> 2026-07-31 — <strong>Build-phase split: C1, C2 and a new C2a build in Build Phase 1; B1/B2/B3/B4/B5/B6, A1 and C3/C4/C5 stay Build Phase 2</strong> (§3.5, §8 D10, §11)
+<strong>Owner:</strong> architect · <strong>Date:</strong> 2026-07-31 · <strong>Amended:</strong> 2026-08-07 — <code>developer</code>, in response to an unowned finding from <code>data-engineer</code>'s Tel Aviv coverage-gap follow-up (<code>hood-dataset.md</code> Decisions log, 2026-08-07 "Groups 4/5" entry): new <code>hoods.aliases text[]</code> column (§3.1, §3.2, §3.3, §3.5, §8 D11), migration <code>009_hoods_aliases.sql</code>, bundle <code>schemaVersion</code> 3 · <strong>Amended:</strong> 2026-07-31 — <strong>Build-phase split: C1, C2 and a new C2a build in Build Phase 1; B1/B2/B3/B4/B5/B6, A1 and C3/C4/C5 stay Build Phase 2</strong> (§3.5, §8 D10, §11)
 <strong>PRD:</strong> <a href="./hood-dataset.html"><code>hood-dataset.md</code></a> (Draft v1) · <strong>Design spec:</strong> none — pure-build/data task, no UX surface, skips <code>design</code> per <code>BOARD.md</code>'s lifecycle rule.
 <strong>Upstream TRD this extends:</strong> <a href="../map-hoods-heat/TRD.html"><code>map-hoods-heat/TRD.md</code></a> §3.1, §3.2, §8 D3, §11 B3 — T-031 built the schema, the bundle format, and the export script this task replaces the data inside. Nothing here re-derives those; where this TRD changes one of them, it says so by name.
 <strong>Sibling TRD, written in parallel:</strong> <a href="../places-dataset/TRD.html"><code>places-dataset/TRD.md</code></a> (T-042). Its §4.1 <code>C-HOOD-1</code> is the two tasks' shared contract and is quoted here verbatim in §4.4; its §6 stdlib-only dependency call is adopted in §2.3; its §2.1 resolves the other half of the migration <code>003</code> collision recorded in §8 D7. Where the two documents touch, this one defers.</p>
@@ -245,6 +245,10 @@ tel_aviv_data.sql        hoods-tel-aviv.json
 alter table public.hoods add column if not exists is_tourist_trap            boolean;
 alter table public.hoods add column if not exists designated_for_progression boolean not null default false;
 </code></pre>
+<p><strong>Amended 2026-08-07, migration <code>009_hoods_aliases.sql</code></strong> (§8 D11):</p>
+<pre><code class="language-sql">alter table public.hoods add column if not exists aliases text[] not null default '{}';
+</code></pre>
+<p>A fourth additive column, landed separately because it answers a different question found later: <code>data-engineer</code>'s Tel Aviv coverage-gap follow-up confirmed several real neighbourhood names (<code>Kfar Shalem</code>, <code>Ramat Aviv Aleph</code>, <code>Shabazi</code>, <code>Givat Aliyah</code>, <code>Neve Tzahal</code>, <code>Yisgav</code>) are legitimately not separate polygons — they're OSM-identical duplicates of, or fully contained inside, an already-shipped Hood's geometry — so a user searching one of those names got no match anywhere. <code>aliases</code> is a plain <code>text[]</code>, not a join table: every case found so far is a same-script alternate name with no per-alias provenance need, and a join table is the correct escalation the day that changes, not a default to reach for now. <code>not null default '{}'</code> needs no backfill — every existing row is already correct. No index, no RLS change (inherits <code>001</code> A2, column-agnostic).</p>
 <p>Three columns, no index, no RLS change. <code>hoods</code> already has <code>enable row level security</code> and one public <code>select</code> policy from <code>001</code> A2; new columns inherit it, and there is still no write policy anywhere — PRD req 5's last bullet is satisfied by <em>not</em> changing anything, which is the correct amount of work.</p>
 <p>Four decisions inside those three lines:</p>
 <ul>
@@ -267,7 +271,8 @@ alter table public.hoods add column if not exists designated_for_progression boo
       &quot;blurb&quot;: &quot;…&quot;,
       &quot;isTouristTrap&quot;: null,
       &quot;designatedForProgression&quot;: false,
-      &quot;provenance&quot;: { &quot;source&quot;: &quot;osm&quot;, &quot;sourceRef&quot;: &quot;relation/1234567&quot;, &quot;retrievedAt&quot;: &quot;2026-08-02&quot; }
+      &quot;provenance&quot;: { &quot;source&quot;: &quot;osm&quot;, &quot;sourceRef&quot;: &quot;relation/1234567&quot;, &quot;retrievedAt&quot;: &quot;2026-08-02&quot; },
+      &quot;aliases&quot;: [&quot;Kfar Shalem&quot;]
     }
   ]
 }
@@ -324,6 +329,12 @@ alter table public.hoods add column if not exists designated_for_progression boo
 <td>yes</td>
 <td><code>source</code> ∈ <code>{osm, municipal, manual}</code>, plus <code>sourceRef</code> and <code>retrievedAt</code>. <strong>Promoted from PRD P1 to required</strong> — see §8 D8; this is a licence-obligation artifact, not a nice-to-have.</td>
 </tr>
+<tr>
+<td><code>aliases</code></td>
+<td><code>string[]</code></td>
+<td>no — <strong>added 2026-08-07, §8 D11</strong></td>
+<td>Defaults to <code>[]</code> if absent. Real alternate names a user might search for this Hood (e.g. a name that is an OSM-identical duplicate of, or fully contained inside, this Hood's own polygon) — never a keyword or a generic descriptor. Non-empty strings, no duplicates within the Hood (case-insensitive), and no collision with any Hood's own <code>id</code>/<code>name</code> or another Hood's <code>aliases</code> anywhere in the dataset — all enforced by <code>validate_dataset.py</code>'s V10 (§5.2).</td>
+</tr>
 </tbody>
 </table>
 <p><code>lng</code> before <code>lat</code> is the format <code>001</code> and the existing script already committed to, and the single most common way a geospatial dataset ships silently broken. V4 (§5.2) catches a swapped pair by range, which works because Tel Aviv's latitude (~32) is inside longitude's valid range but its longitude (~34.8) is also inside latitude's — so range alone is <em>not</em> sufficient. V5 adds a bounding-box check against Tel Aviv specifically, which is.</p>
@@ -333,8 +344,9 @@ alter table public.hoods add column if not exists designated_for_progression boo
 -- Do not hand-edit. Re-run the generator instead.
 -- Source digest: sha256:&lt;hex of the source file&gt;
 
-insert into public.hoods (id, name, city, polygon, blurb, is_tourist_trap, designated_for_progression) values
-  ('florentin', 'Florentin', 'tel-aviv', '[[34.7661,32.0553], …]'::jsonb, '…', null, false),
+insert into public.hoods (id, name, city, polygon, blurb, is_tourist_trap, designated_for_progression, aliases) values
+  ('florentin', 'Florentin', 'tel-aviv', '[[34.7661,32.0553], …]'::jsonb, '…', null, false, '{}'::text[]),
+  ('neve-eliezer', 'Neve Eliezer', 'tel-aviv', '[[…]]'::jsonb, '…', null, false, array['Kfar Shalem']::text[]),
   …
 on conflict (id) do update set
   name                       = excluded.name,
@@ -342,6 +354,7 @@ on conflict (id) do update set
   blurb                      = excluded.blurb,
   is_tourist_trap            = excluded.is_tourist_trap,
   designated_for_progression = excluded.designated_for_progression,
+  aliases                    = excluded.aliases,
   updated_at                 = now();
 
 delete from public.hoods
@@ -363,14 +376,15 @@ delete from public.hoods
 </ol>
 <p>Both are data decisions with a human in the loop, which is right for a dataset with dozens of rows.</p>
 <p><strong>The escalation trigger is named, so nobody quietly picks option 3.</strong> If <code>data-engineer</code> finds a Tel Aviv Hood that neither rule can honestly represent — a real donut, or an exclave that residents call one place — that comes back to <code>architect</code> as a scope change, not a workaround. The validator makes this unavoidable: V2 rejects a nested array, so the only way past it is to change the spec.</p>
-<h3 id="35-client-bundle-schemaversion-2">3.5 Client — bundle <code>schemaVersion</code> 2</h3>
-<pre><code class="language-json">{ &quot;schemaVersion&quot;: 2, &quot;generatedAt&quot;: &quot;…&quot;, &quot;city&quot;: &quot;tel-aviv&quot;,
+<h3 id="35-client-bundle-schemaversion-2-bumped-to-3-2026-08-07-8-d11">3.5 Client — bundle <code>schemaVersion</code> 2, bumped to 3 (2026-08-07, §8 D11)</h3>
+<pre><code class="language-json">{ &quot;schemaVersion&quot;: 3, &quot;generatedAt&quot;: &quot;…&quot;, &quot;city&quot;: &quot;tel-aviv&quot;,
   &quot;hoods&quot;: [ { &quot;id&quot;: &quot;florentin&quot;, &quot;name&quot;: &quot;Florentin&quot;,
                &quot;polygon&quot;: [[34.7661, 32.0553], …, [34.7661, 32.0553]],
                &quot;centroid&quot;: [34.7672, 32.0559],
-               &quot;blurb&quot;: &quot;…&quot;, &quot;isTouristTrap&quot;: null, &quot;designatedForProgression&quot;: false } ] }
+               &quot;blurb&quot;: &quot;…&quot;, &quot;isTouristTrap&quot;: null, &quot;designatedForProgression&quot;: false,
+               &quot;aliases&quot;: [] } ] }
 </code></pre>
-<p>Changes from v1: rings are closed (§4.2), <code>centroid</code> is precomputed (§8 D5), and the three attributes ride along. <code>city</code>, <code>generatedAt</code> and the top-level shape are unchanged.</p>
+<p>Changes from v1: rings are closed (§4.2), <code>centroid</code> is precomputed (§8 D5), and the three attributes ride along. <code>city</code>, <code>generatedAt</code> and the top-level shape are unchanged. <strong>v3 (2026-08-07) adds <code>aliases: string[]</code></strong> (<code>[]</code> when a Hood has none) — decode-compatible in both directions per §4.3's rule (an unknown higher version is never rejected; a decoder that predates this field simply ignores the key). <code>search-quick-filters</code>'s <code>SearchIndex</code> is the field's intended consumer once <code>ios-developer</code> wires it in — folding <code>aliases</code> alongside <code>name</code> the same way it already folds place keywords (§4.2 of that TRD) — not built here; this TRD only guarantees the field is present and correctly populated.</p>
 <p><strong>Why the attributes ship in the bundle at all,</strong> given that T-033 fetches <code>blurb</code> live: the same reason T-031 bundled geometry and T-033 added a bundled place seed — no backend has ever been reachable in this pipeline, so a build agent, a reviewer and <code>qa</code> all see a Hood sheet with a real blurb, a Passport with real designated Hoods, and a tourist-trap stroke on a device with no credentials. The bundle is the seed floor; live data supersedes it where a feature fetches.</p>
 <p><strong>One field, one owner.</strong> <code>hoods-tel-aviv.json</code> carries the Hood record — geometry and Hood-level attributes. T-033's <code>places-tel-aviv.json</code> carries places. <code>hood-place-detail/TRD.md</code> §3.4's bundled seed floor currently plans to carry Hood blurbs too; it should not, and that is the second amendment §8 D7 asks of T-033. A field with two bundled homes drifts.</p>
 <p><strong>Build Phase 1 gets this bundle by hand, once, and that is a stated exception</strong> (added 2026-07-31, §8 D10). D2 and §5.3 say the bundle is generator-output and a hand-edited bundle is the unsupported path <code>HoodCatalogTests</code> exists to catch. That still holds for geometry. The one authorized exception: at Build Phase 1, step <strong>C2a</strong> hand-edits the <em>existing shipped</em> <code>passenger-code/Passenger/Resources/hoods-tel-aviv.json</code> to bump <code>schemaVersion</code> to 2 and add a <code>blurb</code> to the four placeholder Hoods — <strong>geometry untouched, no other field added</strong>. <code>centroid</code>, <code>isTouristTrap</code> and <code>designatedForProgression</code> stay absent, which §4.3's decode rules already handle (averaged-centroid fallback, <code>nil</code>, <code>false</code>); a Phase-1 build must not invent values for them. B6 then overwrites the whole file at Build Phase 2 and the generator is sole emitter again from that moment. The reason the exception exists at all is in T-033: <a href="../hood-place-detail/TRD.html"><code>hood-place-detail/TRD.md</code></a> §3.4.1 — with the seed pinned authoritative, its Hood sheet reads <code>blurb</code> from this bundle, so without it a Phase-1 demo can only ever render the no-blurb branch of its own authorizing strategy line.</p>
@@ -596,6 +610,11 @@ area_centroid(ring)                 -&gt; (lng, lat)        # §8 D5
 <td><code>isTouristTrap</code> ∈ {<code>true</code>,<code>false</code>,<code>null</code>}; <code>designatedForProgression</code> ∈ {<code>true</code>,<code>false</code>}, never <code>null</code>; <code>provenance.source</code> ∈ the enum</td>
 <td>error</td>
 </tr>
+<tr>
+<td>V10</td>
+<td><strong>Added 2026-08-07, §8 D11.</strong> <code>aliases</code> (if present) is a list of non-empty strings; no duplicate alias within a Hood (case-insensitive); no alias collides case-insensitively with any Hood's own <code>id</code>/<code>name</code> or with another Hood's alias anywhere in the dataset</td>
+<td>error</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Slug-preservation check (PRD req 3's third bullet), a warning not an error:</strong> the generator compares the source's ids against <code>001</code>'s five seeded slugs and warns for each one that disappears. It is a warning because dropping <code>old-north</code> may be a legitimate authoring decision, and an error would make a correct dataset unshippable. It prints, so nobody drops one by accident.</p>
@@ -669,6 +688,12 @@ area_centroid(ring)                 -&gt; (lng, lat)        # §8 D5
 <p><strong>Why three steps move.</strong> T-033 ships at Build Phase 1 with its bundled seed pinned authoritative (<a href="../hood-place-detail/TRD.html"><code>hood-place-detail/TRD.md</code></a> §3.4.1, §8 D10). With <code>source == .seed</code>, its Hood sheet reads <code>blurb</code> from <strong>this</strong> task's bundle — and today's shipped bundle is <code>schemaVersion</code> 1 with keys <code>id</code>/<code>name</code>/<code>polygon</code> only, verified by reading the file, no <code>blurb</code> anywhere. Uncaught, a Phase-1 demo could only render T-033 req 2's <em>no-blurb</em> branch, while the blurb is half of that feature's authorizing strategy line (<code>strategy/passenger-strategy.md:37</code>) and all of decision #10's "local read".</p>
 <p><strong>Why exactly these three, and not more.</strong> C1 and C2 are pure client-side decode — a struct gaining optional fields and a decoder gaining boundary rules — with zero backend surface, which is what makes them Phase-1-shaped under the phase split's own no-backend constraint. C2a is one hand-edited fixture under an explicitly stated exception (§3.5). <strong>B1/B2/B4/B6 stay Phase 2 deliberately:</strong> pulling the generated bundle forward would drag B4, the real municipal-geometry sourcing, into Phase 1 — genuinely Phase-2-shaped effort and precisely the long pole the phase split exists to defer. A1 stays Phase 2 because it is a migration, and nothing in Phase 1 reads a column over the wire.</p>
 <p><strong>What this changes and what it does not.</strong> No requirement is added, cut, or rescoped; no contract in §4 moves; the schema, the validator design, the source-file pipeline and D1–D9 are all untouched. The <code>trd-review</code> approvals stand — this is a build-order split of already-approved steps, not new design. Two consequences worth naming: the Phase-1 bundle is briefly hand-edited, which §3.5 states as a bounded exception with C3 as its retirement; and C4's blurb/ring decode assertions ride forward with C2 (<strong>architect's own bounded call</strong> — a decode rule shipped without the test that proves it is a rule nobody checked), while C4's non-overlap tripwire stays with the real geometry it exists to check.</p>
+<h3 id="d11-hoodsaliases-text-a-column-not-a-table-added-2026-08-07-developer">D11 — <code>hoods.aliases text[]</code>, a column not a table (added 2026-08-07, <code>developer</code>)</h3>
+<p><strong>The finding.</strong> <code>data-engineer</code>'s 2026-08-07 Tel Aviv coverage-gap follow-up confirmed six real neighbourhood names — <code>Kfar Shalem</code>, <code>Ramat Aviv Aleph</code>, <code>Shabazi</code>, <code>Givat Aliyah</code>, <code>Neve Tzahal</code>, <code>Yisgav</code> — are not separate Hood geometries: the first two are OSM-identical duplicates of <code>neve-eliezer</code>'s and <code>ramat-aviv</code>'s shipped polygons respectively, the other four resolve fully inside <code>neve-tzedek</code>, <code>ajami</code>, <code>hatikva</code>, and <code>ramat-hachayal</code>'s polygons respectively. Confirmed by grep that no alias/alt-name mechanism existed anywhere in the schema, source contract, or either generated artifact — a user searching any of those six names got no match at all. Flagged on <code>BOARD.md</code>'s Unowned findings as a schema call for <code>developer</code>, not <code>data-engineer</code>, to make.</p>
+<p><strong>A seventh name, <code>Ohel Moshe</code>, is explicitly excluded from this list.</strong> A later re-investigation pass (same Decisions log, second 2026-08-07 entry) found <code>Ohel Moshe</code> has <strong>no resolvable OSM entity in Tel Aviv at all</strong> — GovMap corroborates it resolves only to a Jerusalem street. It is an unresolved name, not a confirmed alias, and must not be populated as one without a real source.</p>
+<p><strong>Column, not a join table.</strong> Every case above is a plain alternate name in the same script as the target Hood's <code>name</code>, with no per-alias provenance, locale, or script need. <code>hood_aliases</code> (a separate table with its own <code>is_tourist_trap</code>-style provenance columns, as <code>data-engineer</code>'s own writeup floated) is the correct move the day an alias needs metadata of its own — e.g. a Hebrew-script alias distinct from the Latin one, or a per-alias source citation. Introducing that table later is not blocked by this decision; <code>aliases text[]</code> does not need to be migrated away from, only supplemented.</p>
+<p><strong>Why not <code>resolve_hood()</code>.</strong> That function (§4.4, <code>C-HOOD-1</code>) is point → containing-Hood-id, geometric containment, shared with <code>places-dataset</code> and mirrored by T-043's SQL <code>hood_for_point()</code>. It has never taken a name as input and has no reason to read <code>aliases</code> — a name-to-Hood lookup is a different operation than a point-to-Hood lookup, and conflating them would make <code>resolve_hood</code>'s one existing contract (used by two other tasks) harder to reason about for a feature that doesn't need it there. The actual name-search consumer is <code>search-quick-filters/TRD.md</code> §3.3/§4.2's client-side <code>SearchIndex</code>, which already folds <code>Hood.name</code> — extending it to fold <code>aliases</code> too is a small, well-scoped <code>ios-developer</code> follow-up once this column ships real data, not built as part of this amendment.</p>
+<p><strong>What this amendment ships and what it doesn't.</strong> Migration <code>009_hoods_aliases.sql</code> (mechanism, additive, <code>default '{}'</code>, no backfill needed), <code>build_hoods.py</code>/<code>validate_dataset.py</code> updated to read/emit/validate an optional <code>aliases</code> field (V10, §5.2), bundle <code>schemaVersion</code> bumped to 3 (§3.5). <strong>Not shipped:</strong> any actual alias data. <code>hoods-tel-aviv.source.json</code> is unchanged this pass — no hood has an <code>aliases</code> key yet. <code>data-engineer</code> populates the six confirmed mappings above (and any others found later, subject to the same real-source rule) in a follow-up source-file edit + <code>build_hoods.py</code> regeneration.</p>
 <hr />
 <h2 id="9-risks-alternatives">9. Risks &amp; alternatives</h2>
 <table>

@@ -74,6 +74,7 @@ class HoodRecord:
     is_tourist_trap: Optional[bool]
     designated_for_progression: bool
     provenance: dict
+    aliases: list = field(default_factory=list)  # alternate names, see V10
     raw: dict = field(default_factory=dict, repr=False)
 
 
@@ -104,6 +105,7 @@ def load_hood_source(path) -> HoodDataset:
                 is_tourist_trap=entry.get("isTouristTrap"),
                 designated_for_progression=entry.get("designatedForProgression"),
                 provenance=entry.get("provenance") or {},
+                aliases=entry.get("aliases") or [],
                 raw=entry,
             )
         )
@@ -361,11 +363,49 @@ def validate_hoods(dataset: HoodDataset) -> list:
         if not prov.get("retrievedAt"):
             violations.append(Violation("V9", f"hood {hood.id!r}: provenance.retrievedAt missing"))
 
+        # V10 -- aliases: list of non-empty strings, no duplicate within a hood
+        if not isinstance(hood.aliases, list):
+            violations.append(Violation("V10", f"hood {hood.id!r}: aliases must be a list"))
+        else:
+            seen_local = set()
+            for alias in hood.aliases:
+                if not isinstance(alias, str) or not alias.strip():
+                    violations.append(Violation("V10", f"hood {hood.id!r}: alias {alias!r} is empty/not a string -- omit it, don't ship \"\""))
+                    continue
+                key = alias.strip().casefold()
+                if key in seen_local:
+                    violations.append(Violation("V10", f"hood {hood.id!r}: duplicate alias {alias!r}"))
+                seen_local.add(key)
+
     # V6 -- non-overlap, bbox-prefiltered. The check the whole task exists for.
     violations.extend(non_overlap_report(dataset, as_violations=True))
 
     # V7 -- sampled interior coverage gaps.
     violations.extend(coverage_gaps(dataset, as_violations=True))
+
+    # V10 (cont'd) -- global collision check: an alias must not read as another
+    # Hood's own id/name, nor collide with any other alias anywhere in the
+    # dataset (case-insensitive) -- either would make "search X" ambiguous
+    # about which Hood it resolves to, exactly the failure mode this column
+    # exists to prevent, not reintroduce.
+    owner_of = {}  # casefolded string -> hood.id that "owns" it as id/name
+    for hood in dataset.hoods:
+        if hood.id:
+            owner_of.setdefault(hood.id.strip().casefold(), hood.id)
+        if hood.name:
+            owner_of.setdefault(hood.name.strip().casefold(), hood.id)
+    alias_owner = {}  # casefolded alias -> first hood.id claiming it
+    for hood in dataset.hoods:
+        for alias in hood.aliases or []:
+            if not isinstance(alias, str) or not alias.strip():
+                continue  # already flagged above
+            key = alias.strip().casefold()
+            if key in owner_of and owner_of[key] != hood.id:
+                violations.append(Violation("V10", f"hood {hood.id!r}: alias {alias!r} collides with Hood {owner_of[key]!r}'s own id/name"))
+            elif key in alias_owner and alias_owner[key] != hood.id:
+                violations.append(Violation("V10", f"hoods {alias_owner[key]!r} and {hood.id!r} both claim alias {alias!r}"))
+            else:
+                alias_owner.setdefault(key, hood.id)
 
     return violations
 

@@ -48,7 +48,7 @@ from validate_dataset import (  # noqa: E402
     area_centroid,
 )
 
-BUNDLE_SCHEMA_VERSION = 2
+BUNDLE_SCHEMA_VERSION = 3  # bumped 2 -> 3: adds `aliases` (database/migrations/009_hoods_aliases.sql)
 DEFAULT_SOURCE = Path(__file__).resolve().parent.parent / "data" / "hoods-tel-aviv.source.json"
 DEFAULT_JSON_OUT = (
     Path(__file__).resolve().parents[3]
@@ -89,6 +89,7 @@ def build_bundle(dataset, source_digest: str) -> dict:
                 "blurb": hood.blurb,
                 "isTouristTrap": hood.is_tourist_trap,
                 "designatedForProgression": hood.designated_for_progression,
+                "aliases": list(hood.aliases or []),
             }
         )
     return {
@@ -113,6 +114,13 @@ def _sql_literal_bool(value) -> str:
     return "true" if value else "false"
 
 
+def _sql_literal_text_array(values) -> str:
+    if not values:
+        return "'{}'::text[]"
+    items = ",".join(_sql_literal_text(v) for v in values)
+    return f"array[{items}]::text[]"
+
+
 def _sql_literal_polygon(ring) -> str:
     pts = ",".join(f"[{_fmt_float(lng)},{_fmt_float(lat)}]" for lng, lat in ring)
     return f"'[{pts}]'::jsonb"
@@ -126,8 +134,10 @@ def build_migration_sql(dataset, migration_number: str, source_digest: str) -> s
     lines.append("-- Do not hand-edit. Re-run the generator instead (hood-dataset/TRD.md sec 3.3).")
     lines.append(f"-- Source digest: sha256:{source_digest}")
     lines.append("--")
-    lines.append("-- Task: T-040 (hood-dataset). Requires 003_hood_attributes.sql to have run first")
-    lines.append("-- (adds blurb / is_tourist_trap / designated_for_progression to public.hoods).")
+    lines.append("-- Task: T-040 (hood-dataset). Requires 003_hood_attributes.sql (adds blurb /")
+    lines.append("-- is_tourist_trap / designated_for_progression) AND 009_hoods_aliases.sql (adds")
+    lines.append("-- aliases text[]) to have both run first -- this generator always emits an")
+    lines.append("-- `aliases` value per row, even when every row's list is empty.")
     lines.append("--")
     lines.append("-- Attribution (hood-dataset/TRD.md sec 8 D8; see database/data/hoods-tel-aviv.source.json")
     lines.append("-- for the full notice and per-row provenance):")
@@ -146,7 +156,7 @@ def build_migration_sql(dataset, migration_number: str, source_digest: str) -> s
         "-- scoped to city = 'tel-aviv' and prunes any placeholder id the real dataset drops."
     )
     lines.append("")
-    lines.append("insert into public.hoods (id, name, city, polygon, blurb, is_tourist_trap, designated_for_progression) values")
+    lines.append("insert into public.hoods (id, name, city, polygon, blurb, is_tourist_trap, designated_for_progression, aliases) values")
     value_lines = []
     for hood in sorted_hoods:
         value_lines.append(
@@ -160,6 +170,7 @@ def build_migration_sql(dataset, migration_number: str, source_digest: str) -> s
                     _sql_literal_text(hood.blurb),
                     _sql_literal_bool(hood.is_tourist_trap),
                     _sql_literal_bool(hood.designated_for_progression),
+                    _sql_literal_text_array(hood.aliases),
                 ]
             )
             + ")"
@@ -171,6 +182,7 @@ def build_migration_sql(dataset, migration_number: str, source_digest: str) -> s
     lines.append("  blurb                      = excluded.blurb,")
     lines.append("  is_tourist_trap            = excluded.is_tourist_trap,")
     lines.append("  designated_for_progression = excluded.designated_for_progression,")
+    lines.append("  aliases                    = excluded.aliases,")
     lines.append("  updated_at                 = now();")
     lines.append("")
     id_array = ", ".join(_sql_literal_text(h.id) for h in sorted_hoods)
