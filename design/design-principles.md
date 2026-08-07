@@ -101,11 +101,21 @@ Affects 15–20% of users directly.
 
 ---
 
-## 7. Agent-specific usage
+## 8. Modal shape — full-width, bottom-anchored, one shared treatment
+
+**Rule (Aviran-direct, 2026-08-07, T-079/`PAS-73`):** every modal-like surface in the app — system `.sheet()` and custom `ZStack` overlay alike — renders full device width (no horizontal inset) and flush to the bottom edge (no gap, no floating), with rounded corners on the **top two corners only**. Never centered, never inset on all sides, never floating above the screen edge with all-four-corner rounding.
+
+**Why this is one rule and not per-surface taste:** a system `.sheet()` already does this by default (full width, bottom-anchored, top-corners-only) — that's the platform convention, not a custom design. Any custom `ZStack`-based overlay built instead of a system sheet (typically because a sheet would cover chrome that needs to stay hit-testable, e.g. Passenger's nav row) must still match that same shape by construction: no `.padding(.horizontal, ...)` on the card, no bottom padding pulling it off the true edge, `UnevenRoundedRectangle`/a top-corners-only clip rather than a uniform `RoundedRectangle`. See `design/phase-1/modal-shape-standard.md` for the full derivation and the specific fix applied to Passenger's 4 custom-overlay surfaces (`PlacesListOverlay`, `PassportSurface`, `SearchOverlay`, `HeatModalCard`) versus its 3 already-correct system sheets (`EventDetailModal`, `PlaceDetailModal`, `HoodSheet`).
+
+**Checkable at spec/review time:** any new modal-like surface's background modifier gets checked for (a) no horizontal padding/inset on the card itself, (b) no bottom padding pulling it off the safe-area edge, (c) corner radius applied only to the top two corners. A surface that fails any of the three needs a stated reason (e.g. a deliberate non-modal floating chip, which isn't a "modal" under this rule at all) or it's a finding.
+
+---
+
+## 9. Agent-specific usage
 
 **Designer** — spec *to* these thresholds. When you write a spec's components/states/accessibility sections, the numeric targets above (targets, contrast, Doherty timings, Hick option counts, thumb-zone placement) are the defaults you design against. Cite this doc rather than re-deriving.
 
-**iOS code reviewer** — add a **UX/HIG conformance pass** using §2, §3, §5, §6 as the checklist: color-only signalling on the map, missing state handling, placeholder-as-label, targets < 44pt, fixed non-scaling type, response paths that block the main thread past the Doherty budget, unlabeled annotations, and (§6) any screen that can present two modal-like surfaces at once — check for a single "what's presented" state rather than independent flags/overlays. File findings **by component** (§5). These are `APPROVE with minors` unless they cause an accessibility failure or a functional/reliability break (§1), which escalates per the Maslow precedence — a §6 stacked-modal finding is a functional break, so it escalates past minor.
+**iOS code reviewer** — add a **UX/HIG conformance pass** using §2, §3, §5, §6, §8 as the checklist: color-only signalling on the map, missing state handling, placeholder-as-label, targets < 44pt, fixed non-scaling type, response paths that block the main thread past the Doherty budget, unlabeled annotations, (§6) any screen that can present two modal-like surfaces at once — check for a single "what's presented" state rather than independent flags/overlays — and (§8) any modal-like surface inset from the screen edges or rounded on all four corners instead of matching the full-width/bottom-anchored/top-corners-only standard. File findings **by component** (§5). These are `APPROVE with minors` unless they cause an accessibility failure or a functional/reliability break (§1), which escalates per the Maslow precedence — a §6 stacked-modal finding or a §8 shape finding that breaks nav-row hit-testability is a functional break, so it escalates past minor.
 
 ---
 
