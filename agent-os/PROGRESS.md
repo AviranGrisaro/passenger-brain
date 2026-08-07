@@ -15,6 +15,18 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-07 — chief — FOUNDER-DIRECT STUB: remove redundant 12h slider from search modal
+
+**Provenance:** founder-direct, relayed via the coordinating session (not live buzz chat — buzz has no live wiring yet per `chief.md`), 2026-08-07, timestamped at receipt.
+
+**Verbatim request:** "no need 12h slider on the modal if we have this on the sides, remove the 12h sliders from the search modal."
+
+**As I read it:** [ASSUMPTION] Aviran wants the hour/time-selection slider control removed from inside the search modal (`SearchOverlay`) because a duplicate/equivalent time-selection control already exists elsewhere on the map screen ("on the sides") — every word past the quote is my inference, not his. "On the sides" is not self-explanatory from the quote alone; scoping this required investigating the actual shipped UI to determine what control it refers to, rather than guessing. Filed as a new ticket, sequenced after the in-flight T-051/PAS-39 acceptance and T-077/PAS-51 C16 work per the coordinator's explicit instruction not to collide with in-flight work on the same files.
+
+This stub is inserted before any dispatch, per L-002 — a live founder-direct request exists only in this conversation until written down.
+
+---
+
 ### 2026-08-07 — ios-developer — T-079/`PAS-73` re-fix: modal shape, all 7 files, pixel-verified
 
 - **Scope:** re-fix round after `product` REJECT on `passenger-code ddbc7de` (two pixel-measured findings: Group-B cards 34pt short of the true bottom edge; Group A never actually correct on iOS 26). Read `BOARD.md`'s T-079 row, the updated `design/phase-1/modal-shape-standard.md` (Correction + Pass/fail criteria sections), and this file's Current Snapshot before starting, per the standing rule.
