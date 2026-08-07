@@ -83,3 +83,25 @@ The disk exhaustion above cleared (45Gi free, zero concurrent `xcodebuild`, one 
 | C29 | Req 6 (Dynamic Type bullet) | The readout is legible at the largest supported Dynamic Type size | **FAIL (blocking).** See C16. No `dynamicTypeSize` cap exists anywhere in the app, so AX5 *is* the largest supported size |
 
 **Throwaway probes, deliberately not committed to `passenger-code`:** the rotation, AX5 and touch-target probes were written in the scratch worktree and discarded. `qa`/`ios-developer` should add real versions of the C26 rotation check and the C6 button-path camera check to the shipped suite — both are cheap and both are checks the suite genuinely lacks.
+
+---
+
+## T-077/`PAS-51` re-run — `qa`, 2026-08-07: row 5b/6(c) re-targeted at `SearchOverlay` (TRD v6, C16)
+
+C16 re-targeted row 5b/6(c) at `SearchOverlay`'s Hour segment after `HeatModalCard` (C16/C28/C29 above) was deleted by a concurrent merge (T-078/T-079). `ios-code-reviewer` gave APPROVE WITH MINORS on `passenger-code 1021428`; this is the independent behavioral QA re-run of that build, not a re-trust of the review.
+
+**Method:** isolated `git worktree` pinned to `passenger-code 1021428` (clean checkout, excludes an unrelated concurrent session's uncommitted `Hood.swift`/`HoodCatalog.swift`/`SearchIndex.swift`/`SearchQuery.swift` WIP sitting in the shared tree) + a dedicated simulator (`t077-qa-sim`) + dedicated `-derivedDataPath`, both deleted after. Two runs: `SearchHourSegmentInteractionTests` alone, then the full `PassengerTests`+`PassengerUITests` suite.
+
+| # | Row 5b/6(c) sub-check | Result | Evidence |
+|---|---|---|---|
+| C16a | Occlusion (i): `hourReadout`/`hourSlider` never intersect `mapNavRow`, default text size | **PASS** | `testReadoutNeverIntersectsTheNavRowAtDefaultTextSize` passed (14.4s) |
+| C16b | AX5-ceiling binds (C15 `[ASSUMPTION]` retired): AX5 capture's `hourReadout`/`hourSlider` frames equal AX3's | **PASS** | `testHourSegmentDynamicTypeCeilingBindsAtAX5` passed (32.5s) — confirms `.environment(\.dynamicTypeSize, …)` does propagate into `SearchOverlay`, not a BLOCKED disclosure |
+| C16c | Containment (ii) + P0 ≥44pt (iii) + wrap check + positive control, both default and AX3 captures | **FAIL — expected, pre-disclosed** | `testHourSegmentContentStaysUnoccludedAndContainedAcrossTextSizes` failed: `XCTAssertGreaterThanOrEqual failed: ("31.0") is less than ("44.0") — [default] hourSlider height 31.0pt is below the 44pt P0 minimum`. Exact match to the `ios-developer`/`ios-code-reviewer`-disclosed `HourSlider` 31pt finding (`T-081`/`PAS-76`/`task_8d9fa06a`), reproduced independently on a third build. Containment, wrap check and the "+12 hours"/"next day" positive control all passed inside this same test — only the P0 height assertion failed |
+| C16d | Search↔Hour entry path, dismiss | **PASS** | `testTappingSearchThenHourSegmentOpensTheSlider` (9.6s), `testTappingSearchAgainDismissesTheOverlayFromTheHourSegment` (12.0s) both passed |
+| C16e | Slider drag repaints silently | **PASS** | `testDraggingTheSliderMovesTheSelectedHourAndRepaintsSilently` passed (22.3s) |
+
+**Full suite (own isolated run, not inherited):** 522 tests total (`xcresulttool` summary: 520 passed, 2 failed). Both failures triaged, neither new:
+- `ScenicWalkBundleInvariantTests.falseFlagCountAndTotal()` (`hoods.count → 44 == 24`) — pre-existing, tracked at **T-076/`PAS-72`**, unrelated to this ticket's touch-set (Hood dataset regeneration `036d7d1`/`11cb097`, both ancestors of `1021428`). Reproduces in a clean pinned worktree with zero uncommitted changes, confirming it is a real landed-on-`main` drift, not shared-tree contamination.
+- `SearchHourSegmentInteractionTests.testHourSegmentContentStaysUnoccludedAndContainedAcrossTextSizes` — the same disclosed `HourSlider` 31pt finding as C16c above, not a second defect.
+
+**Verdict: PASS WITH MINORS.** All row 5b/6(c) P0 checks that TRD v6 requires actually ran (none BLOCKED, none unrun) and none failed except the one pre-disclosed, already-tracked `HourSlider` 31pt gap, which is explicitly out of C16's touch-set (`T-081`/`PAS-76`, held pending this ticket's close) and does not gate this ticket. No regressions found anywhere else in the full suite. Moving to `acceptance`.
