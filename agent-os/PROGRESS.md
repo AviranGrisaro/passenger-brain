@@ -15,6 +15,37 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-07 — chief-of-staff — L-002 stub: push authorized + Linear In-Progress sweep directive, relayed via `main`, provenance confirmed direct
+
+**Provenance:** relayed via `main`, stated as "both direct from him in chat." Not independently corroborated by this session (no separate confirmation exchange occurred, same shape as the standing-instruction stub earlier today) — recorded per L-002 discipline regardless, before acting on it.
+
+**Verbatim, as relayed:** "push everything to git" and "continue to clear the linear In progress list."
+
+**As I read it — two separate, concrete changes:**
+1. `main` reports it pushed both repos itself already (`passenger-brain main → d3e91ed`, `passenger-code main → 7975dc4`) and that the standing Aviran-gated push hold (`CLAUDE.md` rule 9) is lifted — I can push directly from now on rather than committing-and-holding. **[ASSUMPTION]** this applies going forward for this session/arc, not retroactively re-litigated — noting the change, not re-verifying the two pushes already made (`main`'s own action, not mine).
+2. A new standing objective: audit every Linear issue currently `In Progress` and drive each to a real resolution — finish, close if already done, or reclassify/park if genuinely not being worked. Starting now.
+
+**Note carried forward, not re-derived:** the other session's uncommitted `T-077`/`PAS-51` WIP was NOT included in the push (a push only sends commits) — it remains local, and the earlier `DO NOT COMMIT SearchOverlay.swift` warning (stale copy would revert `PAS-78`) still stands.
+
+### 2026-08-07 — project-manager — nightly hygiene audit (23:10 run)
+
+- **Did:** full nightly pass (no short-circuit — 63 commits across both repos since midnight). Checked 80 Linear issues, 14 PRDs, 3 mirrors, both repos' branch/worktree state.
+  - **Linear fixes (2):** `PAS-28` `owner:product` → `owner:ios-developer` (the label was wrong — T-037's last verdict is `product` REJECT at `passenger-brain 1d1167f`, then `58ef1d4` returned it to `build`; the 10:56 PM pass had set `owner:product` off the stale Build-Phases table row rather than the Tasks row, and those two tables disagree about T-037). `PAS-46` gained its missing TRD link.
+  - **Description fixes (4):** `PAS-26`/`PAS-27`/`PAS-28`/`PAS-29` each carried an unticked "Design pass complete (currently queued behind design capacity)" DoD item for the pre-code design gate retired 2026-08-02. Struck and annotated per the pattern `PAS-25` already used.
+  - **Dispatched (1, in flight at end of pass):** a `chief`-contract agent for **T-057/`PAS-46`** — stalled since 08-05, `owner:ios-developer`, no blocker label, and its claimed-complete C8/C9 work (`passenger-code bd28e40`, branch `t057-c8c9-ready`) is **not an ancestor of `main`**. Relayed two further findings to the same agent mid-run: the stranded `passenger-brain` HTML branches, and the still-live `PAS-78` regression risk.
+  - **Filed 7 findings on `BOARD.md`'s Unowned findings inbox** (`passenger-brain d3e91ed`) rather than digest-only — three of them had been raised in prior digests and never became findable items (the exact L-041/L-045 failure).
+- **Evidence:** mirror check `diff -qr` silent on all three pairs (`.claude/agents/` ↔ `agents-mirror/` ↔ `passenger-code/.claude/agents/`, `.claude/skills/` ↔ `skills-mirror/`). `gate:prd-approved` absence confirmed by a live `list_issue_labels` probe returning the full 20-label set, not by a listing guess (L-048). Stranded-branch claims confirmed by `git merge-base --is-ancestor` plus per-file `shasum` comparison against `main`. `PAS-78` revert confirmed by reading `git diff HEAD` on the live tree, not from the board warning's text.
+- **Calls made unattended (no founder available):**
+  1. Struck `chief`'s `PASS` claim (started 16:30, expired 18:30) — dead by its own stamped clock per L-049, no archaeology. Third consecutive night a `chief` claim outlived its session unstruck.
+  2. **`PROGRESS.md` does not need a `## Current snapshot` section.** This list has carried that as an open question since 2026-08-05 and named `project-manager` as its owner; making the call rather than passing it on again. `BOARD.md` is already the current-state document by its own first line, so a second one would only add a staleness surface. Recommend deleting the clause from `project-manager.md` check J and both mirrors. Aviran can override.
+  3. Did **not** auto-attach the 15 project-orphaned issues, did **not** trim `BOARD.md`'s bloated rows, did **not** archive `PROGRESS.md`'s worklog down from ~179 entries — the first because check E calls it judgment, the latter two because a `chief` dispatch was writing to both files concurrently and clobbering its work to save tokens would be a bad trade. All three are on the inbox with owners.
+- **Left behind:**
+  - **`BOARD.md` row bloat is now a real fleet-wide token cost** — `## Tasks` alone is ~240KB, `T-079`'s notes cell is 27,296 chars, 13 rows are over 5× check J's threshold. Needs a dedicated sweep, not opportunistic nightly trims. Third consecutive flag.
+  - **The uncommitted `passenger-code` work is two clusters, not the one the board warning describes.** The 11:01–11:03 cluster (9 files) is `PAS-17`'s alias-folding work and has been untouched for 12+ hours with no commit and no worklog entry — by L-044/L-033 that reads as abandoned, while `PAS-17`'s own status text still says it is actively running. The 18:48–18:50 cluster (2 files) is the T-077 WIP carrying the `PAS-78` revert.
+  - Push backlog for Aviran: `passenger-brain` 115 commits ahead of `origin/main`, `passenger-code` 25.
+  - My `PASS` claim line and the strike of `chief`'s were written early in the pass but landed inside `chief`'s commit `21f5609` (shared-file carry, `CLAUDE.md` rule 2) — content is mine and correct, noting it so the attribution isn't confusing later.
+- **Git:** `passenger-brain` — `agent-os/BOARD.md` (`d3e91ed`), `agent-os/PROGRESS.md` (this entry). Explicit paths; `git diff --staged --stat` read over the whole index before each commit (L-037), only my own hunks present. Not pushed — Aviran-gated, `CLAUDE.md` rule 9. Digest posted to `PAS-32`.
+
 ### 2026-08-07 — qa — T-084/`PAS-79` full-suite confirmation — clean except tracked pre-existing failure
 
 - **Did:** ran the full `PassengerTests` + `PassengerUITests` suite on `passenger-code 7975dc4` (the same commit the prior `PAS-79` QA pass PASSed on with a genuine live before/after repro but no suite run, disclosed rather than hidden) — closing the one gap that pass left open before `PAS-79` can be considered fully closed `Done`.
