@@ -124,6 +124,45 @@ ViewThatFits(in: .vertical) {
 
 This degrades to exactly today's behavior above 480pt and shrinks to fit below it. **`architect` picks between the two (or a third) and writes the call into the fix's scope** — `product` is not making a SwiftUI layout-mechanism decision, and neither candidate should be implemented on this document's say-so.
 
+### Round-4 mechanism decision (`architect`, 2026-08-07) — neither candidate; use a non-greedy clamp
+
+**Decision: replace `.frame(maxHeight: 480)` with `.frame(maxHeight: 480).fixedSize(horizontal: false, vertical: true)` on the existing `ScrollView`, in all three files. No `GeometryReader`, no `PreferenceKey`, no `@State`, no `ViewThatFits`.** One modifier added per file; the `ScrollView` and the 480 constant stay exactly as they are.
+
+**Both candidates on the table were rejected on measured evidence, not preference.** Measured with a SwiftUI layout harness (`NSHostingController.sizeThatFits`, same layout engine, proposal 393×850 — the bottom-aligned `ZStack` case), sweeping content heights of 150 / 300 / 600 / 900pt:
+
+| construction | 150 | 300 | 600 | 900 |
+|---|---|---|---|---|
+| `ScrollView{c}.frame(maxHeight: 480)` — today | 480 | 480 | 480 | 480 |
+| `ViewThatFits{c; ScrollView{c}}.frame(maxHeight: 480)` — the sketch above | **480** | **480** | **480** | 480 |
+| `ViewThatFits{c; ScrollView{c}.frame(maxHeight: 480)}` — clamp moved inside | 150 | 300 | **600** | 480 |
+| `ScrollView{c}.frame(maxHeight: 480).fixedSize(horizontal: false, vertical: true)` | **150** | **300** | **480** | **480** |
+
+1. **The `ViewThatFits` sketch as written in this document does not fix anything** — it measures 480pt at every content height, identical to today. The reason is that **`.frame(maxHeight:)` is itself greedy**, which this document's round-3 diagnosis missed by attributing the defect to `ScrollView` alone: a bare 150pt block under `.frame(maxHeight: 480)` measures 480. So the outer clamp re-inflates whatever `ViewThatFits` returns, and the branch choice is irrelevant. Had this been built verbatim, the dead band would have been unchanged and only a render would have caught it.
+2. **`ViewThatFits` with the clamp moved inside the fallback branch still leaves a hole in the 481–850pt range** (row 3: 600pt content renders at 600pt). `ViewThatFits` runs its fit test against the *proposed* height — the full screen, ~850pt — not against 480, so content taller than the ceiling but shorter than the screen is judged to "fit" and renders un-scrolled at full height. That is the `PAS-73` defect (card eats the map) reintroduced through the fix for `PAS-77`. No shipped Hood hits this today, but nothing in the mechanism prevents it, and a fuller dataset (`T-075`) is exactly what would.
+3. **`GeometryReader` + `PreferenceKey` is rejected as unnecessary, not as unworkable.** Its costs are real (a layout result written into `@State` during layout, re-measurement pressure from the outer `DragGesture` and `.transition`), and there is no reason to pay them for an effect one stateless modifier produces.
+
+**Why the clamp works:** both `ScrollView` and `.frame(maxHeight:)` are greedy *under a concrete proposal* — each takes everything offered. `.fixedSize(horizontal: false, vertical: true)` removes the concrete vertical proposal, so the frame clamps an *ideal* height instead of inflating a proposed one. `horizontal: false` leaves the width proposal intact, so text wrapping and full-width layout are unaffected.
+
+**Verified, and the limit of what was verified.** The table above is a real SwiftUI layout measurement, not reasoning. A view-hierarchy dump at 900pt content confirms the clamped `ScrollView` is structurally identical to today's — `HostingScrollView` 480pt with a real 480pt clip view, *not* a 900pt view clipped by a frame — so `.fixedSize` does not collapse it into a static block. **Disclosed: this is macOS AppKit hosting, and it measures sizing, not gesture behavior.** That the clamped `ScrollView` still *scrolls* on iOS at long content is the one claim not proven here and is a required build-time check (below).
+
+**Interaction with the drag gesture and the transition — better than today, not worse.** Both live outside the card's content (`.offset(y:)` and `.move(edge: .bottom)` translate the card, they don't re-propose its size), so neither re-triggers measurement; there is no measurement to re-trigger. On short content the card is now shorter than the scroll threshold, so the `ScrollView` has nothing to scroll and the outer `DragGesture` gets the touch cleanly — which addresses the drag-vs-scroll spot-check `ios-code-reviewer` left for `qa` at round 3, on the 41-of-44 path.
+
+**`Spacer(minLength: 0)`** (`EventDetailModal.swift:82`, `PlaceDetailModal.swift:93`) is **inert** under this mechanism — measured: a card with and without it both report 190pt at 150pt content, because a nil proposal reduces a `Spacer` to its `minLength`. Removing it is optional cleanup, not part of the fix. It is worth removing anyway, as it is the one thing that would silently re-inflate these cards if anyone later drops the `.fixedSize`.
+
+#### Build scope for `ios-developer` [iOS]
+
+All three files get the **same one-line change**, and nothing else. `HoodSheet` does **not** need different treatment — its "existing fix" is the same greedy `.frame(maxHeight: 480)` as the other two (`HoodSheet.swift:102`), so it has a cap but no shrink, exactly like them. Three identical edits, one commit.
+
+1. `Detail/EventDetailModal.swift:92` — `.frame(maxHeight: 480)` → `.frame(maxHeight: 480)` + `.fixedSize(horizontal: false, vertical: true)`
+2. `Detail/PlaceDetailModal.swift:104` — same
+3. `Detail/HoodSheet.swift:102` — same
+
+Extract the constant if you prefer (`private static let maxCardHeight: CGFloat = 480`), but do not change its value — the 480 ceiling is settled in `PAS-73`. Update each site's existing comment to say the cap is now a ceiling rather than a fixed height. Optional, same commit: delete the two dead `Spacer(minLength: 0)` lines. Nothing else in these files changes — not the `ScrollView`, not the `ZStack`/scrim, not the `DragGesture`, not the `.transition`, not the background shape.
+
+**Required verification (the sizing claim is proven; these two are not).** Both are renders on the *sparsest* case each surface can produce, per `product`'s round-4 note — a "typical" case passing is not evidence:
+- **Shrink:** card height at short content is measurably less than 480pt, and the dead band is under criterion 5's ~25% bar, measured by the procedure above. Sparsest cases: a Hood with no places and no blurb (41 of 44 qualify; 21 have no blurb); a place with location permission declined; the shortest `EventDetailRows` set.
+- **Scroll, at long content — this is the one that can actually fail.** Force content past 480pt and confirm the card caps at 480pt **and still scrolls to its last row**. Pass condition: the final row/button is reachable by scrolling and not merely clipped. A build that shrinks correctly but clips instead of scrolling is a regression worse than the defect being fixed, and no existing test covers it.
+
 **Out of scope, explicitly:** the 480pt ceiling itself and the round-2 decision to drop the `.medium` detent both stay as settled in `PAS-73`. This changes only whether the card is *allowed to be shorter* than the ceiling.
 
 **Not filed as a defect but noted for `T-075`'s thread:** the 9-places-across-44-hoods count above is itself a content-coverage gap, and it is the same scarcity `T-075`/`PAS-71` already has open with Aviran (curated places per Hood). No new task filed — flagging that the modal-shape symptom and the curation-coverage question share a root cause, and that a fuller dataset would shrink but not remove this defect (`HoodSheet` would still be short for any Hood under ~7 places).
