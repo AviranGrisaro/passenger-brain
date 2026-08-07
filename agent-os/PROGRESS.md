@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-07 — data-engineer — Hood alias population: migration `010`, Tel Aviv hood coverage complete
+
+- **Did:** follow-up to `developer`'s alias mechanism (`009_hoods_aliases.sql`, not yet applied). Populated the `aliases` field for the 6 confirmed mappings left in the previous entry, in `database/data/hoods-tel-aviv.source.json`: `neve-eliezer` → `["Kfar Shalem"]`, `ramat-aviv` → `["Ramat Aviv Aleph"]`, `neve-tzedek` → `["Shabazi"]`, `ajami` → `["Givat Aliyah"]`, `hatikva` → `["Neve Tzahal"]`, `ramat-hachayal` → `["Yisgav"]`. `Ohel Moshe` deliberately NOT added anywhere — confirmed in the 2026-08-07 re-investigation to have no resolvable OSM entity (Jerusalem street match only), excluded per that finding.
+- **Built:** ran `python3 database/scripts/build_hoods.py --migration-number 010`, which regenerated both derived artifacts: `database/migrations/010_hoods_tel_aviv_data.sql` (new, full 44-row data-seed upsert, 6 rows now carry `array['<alias>']::text[]`, the other 38 carry `'{}'::text[]`) and `passenger-code/Passenger/Resources/hoods-tel-aviv.json` (iOS bundle, schema v3, same 6 rows gain a non-empty `aliases` array).
+- **Verified:** `python3 database/scripts/validate_dataset.py database/data/hoods-tel-aviv.source.json` → `0 error(s), 0 warning(s), 44 hoods` — clean, including the new V10 alias-collision/duplicate check from `009`'s build. `git diff` on the source file shows exactly 6 inserted lines (one `"aliases": [...]` line per hood) and nothing else — confirmed the other 38 rows and every other field on the 6 edited rows are byte-identical to before.
+- **Left behind:** all 6 confirmed aliases are now shipped in the source + generated artifacts. This completes the Tel Aviv hood coverage arc: 44 geometric hoods, 6 of which now carry an aliased duplicate/contained name, plus 5 genuinely unsourceable names and 3 genuine polygon-overlap conflicts documented in prior entries as intentionally not added. Final state is pending Aviran applying migrations `003`, `006`–`010` in Supabase — none of them have been applied yet. `ios-developer`'s still-open follow-up (fold `aliases` into `SearchIndex`/`SearchQuery`, per `009`'s entry) now has real, non-empty data to fold once picked up.
+- **Git:** `passenger-brain` — `database/data/hoods-tel-aviv.source.json`, `database/migrations/010_hoods_tel_aviv_data.sql` (new), `agent-os/PROGRESS.md` (this entry), `agent-os/BOARD.md`. `passenger-code` — `Passenger/Resources/hoods-tel-aviv.json`.
+
+---
+
 ### 2026-08-07 — developer — Hood alias mechanism (unowned finding, `data-engineer` 2026-08-07): schema built, migration `009`
 
 - **Did:** picked up the unowned finding on `BOARD.md` (`data-engineer`'s Tel Aviv coverage-gap follow-up, `hood-dataset` PRD Decisions log 2026-08-07 "Groups 4/5" entry): 6 real Tel Aviv neighbourhood names have no separate Hood geometry (2 are OSM-identical duplicates, 4 resolve fully inside an already-shipped Hood's polygon) and were unfindable by search because `hoods` had no alias/alt-name mechanism at all. This was flagged explicitly as a schema decision for `developer`, not `data-engineer`, to make.

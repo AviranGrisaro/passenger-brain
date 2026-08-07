@@ -1478,6 +1478,7 @@
       "blurb": null,
       "isTouristTrap": null,
       "designatedForProgression": true,
+      "aliases": ["Shabazi"],
       "provenance": {
         "source": "osm",
         "sourceRef": "way/803468682",
@@ -5898,6 +5899,7 @@
       "blurb": null,
       "isTouristTrap": null,
       "designatedForProgression": false,
+      "aliases": ["Neve Tzahal"],
       "provenance": {
         "source": "osm",
         "sourceRef": "way/819219044",
@@ -6368,6 +6370,7 @@
       "blurb": null,
       "isTouristTrap": false,
       "designatedForProgression": false,
+      "aliases": ["Ramat Aviv Aleph"],
       "provenance": {
         "source": "osm",
         "sourceRef": "way/819845420",
@@ -8388,6 +8391,7 @@
       "blurb": null,
       "isTouristTrap": null,
       "designatedForProgression": false,
+      "aliases": ["Yisgav"],
       "provenance": {
         "source": "osm",
         "sourceRef": "way/819866913",
@@ -15468,6 +15472,7 @@
       "blurb": null,
       "isTouristTrap": null,
       "designatedForProgression": false,
+      "aliases": ["Givat Aliyah"],
       "provenance": {
         "source": "osm",
         "sourceRef": "way/816911092",
@@ -16278,6 +16283,7 @@
       "blurb": null,
       "isTouristTrap": null,
       "designatedForProgression": false,
+      "aliases": ["Kfar Shalem"],
       "provenance": {
         "source": "osm",
         "sourceRef": "way/819219046",
