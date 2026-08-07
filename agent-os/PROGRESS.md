@@ -15,6 +15,23 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-07 — chief-of-staff — L-002 stub: founder-direct request, map-screen button row + modal shape
+
+**Provenance:** founder-direct, live chief-of-staff chat, this session, 2026-08-07 ~16:30.
+
+**Verbatim request** (from Aviran's message, describing a screenshot of the current bottom button row on the map screen — 5 circular buttons: heat/flame orange, search blue, profile purple, "location off" gray, list red — sitting above the map, "colors clash and look bad"):
+
+1. "Modal design bug — modals should be full-width, anchored to bottom (side-to-side and bottom), NOT floating/centered. All modals across app must share this same size/shape treatment."
+2. "Merge 'map hour' and 'search' into a single button (the search button) — remove the separate hour button, fold that function into search."
+3. "Move the 'center map on my location' button to the top-right of the screen. Look at reference apps (e.g. Apple Maps, Google Maps) for correct placement/style."
+4. "'Save places' button should use a proper save/bookmark icon (look at reference apps for the standard icon), not whatever it currently uses."
+5. "Overall button color scheme needs redesign — colors currently clash (orange/blue/purple/gray/red circles). Search Mobbin for inspiration and propose a cohesive palette."
+
+**As I read it:** this is Aviran's aviran-review verdict on the already-shipped `PAS-60` ("Nav bar icons — bigger, colored, unique") — the color scheme he's rejecting (orange/blue/purple/gray/pink) is exactly what `PAS-60` shipped — plus 4 new asks that widen scope beyond `PAS-60`: merging the heat/hour button into search, relocating the locate-me button, fixing the save/places icon, and a separate app-wide modal-shape requirement. **[ASSUMPTION]** "map hour" refers to the `HeatButton` (opens the time/heat slider modal, `HeatModalCard`) — Aviran didn't name the Swift file. **[ASSUMPTION]** "save places" refers to `PlacesButton` (currently a list glyph, opens `PlacesListOverlay`) — treating this as the icon that should become a bookmark/save glyph, since there's no other save-labeled button in the nav row.
+
+**Routing:** treated as REJECT-with-findings on `PAS-60` (back to `owner:designer`, not `aviran-review`) plus a new companion issue for the app-wide modal-shape requirement (distinct from `PAS-48`'s already-`Done` detent/maxHeight unification, which didn't touch shape/anchoring). Full detail in this pass's own worklog entry below once dispatch completes.
+
+
 ### 2026-08-07 — qa — T-070/`PAS-66` QA pass: **PASS**
 
 - **Scope:** verify `ios-code-reviewer`'s round-2 APPROVE (`passenger-code main 0515521`) — both requirements (`HoodLayerFillDimTests` retargeted at `HoodLayer.borderColor` per TRD §9 row 4(a/b/f), C15; `categoryChipRowGrowsRatherThanTruncates()` a genuine `.fixedSize` presence assertion) — that this is a coverage-only change with no production behavior change, and that the full suite is green modulo the already-tracked T-076/`PAS-72` failure.
