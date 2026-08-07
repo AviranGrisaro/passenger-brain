@@ -15,6 +15,26 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-07 — product — T-070/`PAS-66` acceptance: **ACCEPT**
+
+**Verdict: ACCEPT** at `passenger-code 0515521` (T-070's tip; `6e5fee3` + `0515521` are both ancestors of current `main`). Re-derived from source rather than trusting `qa`'s report, per the dispatch.
+
+**Preflight (L-040):** re-read `BOARD.md` — the only `HALT` line is the 2026-08-04 disk halt, struck/LIFTED, no live halt on build work. `df -h /` 44Gi avail/21%. `uptime` load 16–74 through the session (abnormal at times — flagged below where it mattered). Ran in a detached worktree with a dedicated `-derivedDataPath` and a simulator I created (`t070-accept`), never touching the concurrently-booted `pas51-fix-verify` or the other session's uncommitted `SearchIndex`/`SearchQuery` alias WIP. Simulator, worktree and derived data all deleted at the end (`simctl list devices booted` back to `pas51-fix-verify` only).
+
+**DoD item 1 — `HoodLayerFillDimTests` retargeted at `borderColor`, passes.** Verified. `git show 6e5fee3 -- Passenger/Map/HoodLayer.swift` is the whole production diff: a doc-comment rewrite plus `private var borderColor` → `var borderColor`. The expression body is byte-identical — `guard let band else { return .secondary.opacity(min(0.35 * hoverGlow, 1) * dimOpacity) }` unchanged, `min(bandStrength * hoverGlow, 1) * dimOpacity` unchanged. Coverage-only confirmed independently, not taken from the commit message. All 6 tests in the suite pass.
+
+**DoD item 2 — chip-truncation test asserts `.fixedSize`, passes.** Verified. `categoryChipRowGrowsRatherThanTruncates()` reads `CategoryChipRow.swift` and asserts `fixedSizeCount == textRunCount` — a presence check, not the old absence-of-`.lineLimit` grep. Source has exactly 1 `Text(` run and exactly 1 `.fixedSize(horizontal: false, vertical: true)`. All 3 tests in `SearchRowGrowthGuardTests` pass.
+
+**Negative control (the part that makes this more than a re-run).** Both new assertions were deliberately broken in the worktree and re-run: removing `.fixedSize` from `CategoryChipRow.swift` failed `categoryChipRowGrowsRatherThanTruncates()` with `(fixedSizeCount → 0) == (textRunCount → 1)`; changing `dimOpacity` to `isDimmed ? 0.5 : 1` failed `dimmedBorderIsExactlyQuarterOfUndimmed()` with `abs(ratio - 0.25) → 0.25`. Both are genuinely falsifiable against the behavior they claim to guard — which is the entire point of T-070, since L-009's failure shape is a real fix guarded by an assertion that can't fail. Mutations reverted before the final runs.
+
+**Test evidence.** `PassengerTests` at current `main` (`60b4c07`): 473 tests, 1 failure — `ScenicWalkBundleInvariantTests.falseFlagCountAndTotal()`, the known pre-existing 24-vs-44-hood drift already filed as **T-076/`PAS-72`**, unrelated to T-070. `PassengerUITests` at T-070's tip (`0515521`): **26/26, TEST SUCCEEDED, 0 failures.** T-070's own deliverable is fully green.
+
+**Finding raised, not part of this verdict — UI regression on `main` after T-070.** The same `PassengerUITests` target at current `main` (`60b4c07`) fails **8 of 27**, all one root cause: `HeatModalCard never opened` / `hourSlider never rendered`. Reproduced twice, the second time on an erased simulator with `location-always` granted before first install (per the documented Simulator fact) and at load average 7.19 — so it is not the permission-dialog artifact and not a load artifact. It is absent at `0515521` and present at `60b4c07`; the only commit between them touching that surface is `passenger-code 8fe34d3` ("PAS-51 findings 2/3/5"), which modified `HeatModalCard.swift` and added the 27th test. Filed on `BOARD.md`'s `## Unowned findings` inbox for `chief` to route — **[ASSUMPTION]** `8fe34d3` is the culprit; that's a bisect of one candidate commit by inspection, not a run at `8fe34d3^`, which I did not do.
+
+**Docs closed in this pass (L-006).** `prds/search-quick-filters/search-quick-filters.md`'s Status line still carried "the unbuilt TRD step C15 (dim test coverage)" as an open item carried to Aviran. C15 *is* T-070, now accepted — line corrected in this same commit so the spec stops contradicting reality.
+
+**Not touched, per the dispatch:** Linear `PAS-66` and the `BOARD.md` T-070 row — `chief-of-staff` owns both. My only `BOARD.md` write is the one-line finding on the `## Unowned findings` inbox, which that section explicitly takes from any agent.
+
 ### 2026-08-07 — chief-of-staff — L-002 stub: founder-direct request, map-screen button row + modal shape
 
 **Provenance:** founder-direct, live chief-of-staff chat, this session, 2026-08-07 ~16:30.

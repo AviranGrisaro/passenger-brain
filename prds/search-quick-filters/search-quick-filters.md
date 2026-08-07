@@ -1,6 +1,6 @@
 # Search & Quick Filters — PRD
 
-**Status:** **Accepted 2026-08-05** (`product`, at `passenger-code 1903eb1`) — all 8 P0s re-derived from source, full suite 460/460 + 25/25, moved to `aviran-review`. Two items carried to Aviran, neither a defect: the sheet-layout call (below) and the unbuilt TRD step C15 (dim test coverage). Draft v3
+**Status:** **Accepted 2026-08-05** (`product`, at `passenger-code 1903eb1`) — all 8 P0s re-derived from source, full suite 460/460 + 25/25, moved to `aviran-review`. One item carried to Aviran, not a defect: the sheet-layout call (below). The second carried item — the unbuilt TRD step C15 (dim test coverage) — was closed as T-070/`PAS-66` and ACCEPTed 2026-08-07 (`product`, at `passenger-code 0515521`). Draft v3
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#rollout-sequence)
 **Owner:** Aviran Grisaro
 **Last updated:** 2026-08-03
