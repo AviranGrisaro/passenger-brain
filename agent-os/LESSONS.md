@@ -28,6 +28,17 @@ Running log of process lessons extracted by the nightly **retrospective** agent 
 
 <!-- Entries begin below. Newest first. -->
 
+## 2026-08-07 (founder-direct, live chief-of-staff chat via the coordinator)
+
+### L-051 — "Delete it when you're done" only fires on the happy path; simulators from crashed/timed-out runs pile up in Aviran's picker
+- **Date:** 2026-08-07
+- **Category:** tooling
+- **Scope:** general
+- **Evidence:** Aviran reported his simulator picker showing 6+ leftover named devices from isolated role-agent test runs (`t050-events-toggle`, `t070-fix`, `t051t048-review`, `ios-dev-alias-work`, `t037-fresh-review`, `t037-review`) — all runs whose reports said "deleted after." Live check confirmed 5 of the 6 still existed (`xcrun simctl list devices`); one-time sweep deleted them, leaving only the simulator a concurrently-running dispatch was actively using.
+- **Lesson:** L-029/L-031's existing cleanup instruction ("delete your own scratch derivedDataPath and any simulator you created when you're done") is a last-line-of-the-happy-path instruction — it only runs if the session reaches its own end cleanly. A crash, timeout, or early exit (all real failure modes on a shared machine already documented in L-029/L-031/L-042) skips it, and the simulator survives with no trace that anyone was supposed to clean it up. "Clean up when you're done" needs to mean "clean up whether or not you finish," not just "remember to, at the end."
+- **Action:** applied → `qa.md`, `ios-developer.md` gain a clause at the existing cleanup instruction: wrap the run so `xcrun simctl delete <udid>` still executes on failure/crash/early-exit, not only after a clean pass. `ios-code-reviewer.md` gains the same instruction fresh (it builds/tests diffs in isolated simulators too but never had L-029/L-031 guidance at all). All three mirrored across the live `.claude/agents/`, `passenger-code/.claude/agents/`, and `passenger-brain/agent-os/agents-mirror/` copies (verified identical by `md5` before and after). One-time cleanup: 5 orphaned simulators deleted this pass.
+- **Status:** applied
+
 ## 2026-08-06 (nightly — covering 2026-08-05 23:50 → 2026-08-06 23:40)
 
 > **Window note.** Previous header was 2026-08-05's run, which closed at 23:38 and committed at 23:50 — one night, none missed. The window holds **5 `passenger-brain` and 3 `passenger-code` commits**: a `chief` full sweep with an `## Unowned findings` conversion, then its four dispatches landing T-032/`PAS-51` and T-070/`PAS-66` (`passenger-code 927784b`, `6e5fee3`), T-052/`PAS-40` (`174a5bb`), and `APPROVE`×2 on T-051/`PAS-39` + T-048/`PAS-35`. **PM digest not available** — no `project-manager` audit ran tonight; newest `PAS-32` comment is 2026-08-05 20:27 UTC, and every earlier comment since the window opened was read (there are none). Fell back to the PM's absent commits and to `PROGRESS.md` per step 1. Tonight's three lessons share a spine the last two nights have been circling: **the fleet's coordination all funnels through one role that has no clock — no scheduled trigger, no self-expiring claim, and no substitute writer** — so a day of genuinely good, well-verified work moved nothing anyone else can see.
