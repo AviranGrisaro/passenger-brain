@@ -15,6 +15,14 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief-of-staff — L-002 stub: "continue with the audit" + audit brief
+
+**Provenance:** Aviran, live chat, direct — "continue with the audit," relayed via `main` as first-hand.
+
+**Verbatim:** "continue with the audit"
+
+**As I read it:** proceed with the deeper 12-item `gate:awaiting-aviran-review` line-by-line audit flagged as owed from the earlier In-Progress sweep. `main` supplied the audit's actual scope in its own words (not Aviran's, not quoted as his): for each of the 12 — is it genuinely finished and correctly waiting, or parked while incomplete; does it have real verification (build/QA/acceptance) or an unfalsifiable/assumed pass; how stale is it; what exactly does Aviran need to decide. Consolidated summary owed, grouped shortest-path-to-clear first. Starting now.
+
 ### 2026-08-08 — chief — FOUNDER-DIRECT STUB: "fix the PRD reversal"
 
 **Provenance:** Aviran, relayed via the coordinating session, live this session, timestamped at receipt.
