@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief-of-staff — L-002 stub: founder-direct, museum sticker glyph, round 2 — rendered-image pick
+
+**Provenance:** Aviran, live chat, direct to `main`, first-hand.
+
+**Verbatim:** "use photo.artframe"
+
+**Context, `main`'s own account, not Aviran's words — labelled separately per L-013:** `main` rendered all remaining candidate SF Symbols itself (a Swift/AppKit script, each symbol at both large size and actual 44pt sticker size in the shipped teal) and sent Aviran the image before he answered. This is the fix for the pattern that produced two ambiguous glyphs in a row (`building.columns.fill`→"bank", `theatermasks.fill`→"theater") — both were picked from a text list, not a rendered comparison.
+
+**As I read it:** replaces `StickerShape`'s museum case glyph, `theatermasks.fill` → `photo.artframe`. **`PAS-28` is already closed `Done`** — this needs its own fresh ticket, not a reopen. Filing and dispatching now.
+
 ### 2026-08-08 — product — T-088/PAS-86 stale `dynamicTypeSize` comment fix: **ACCEPT WITH NOTES**
 
 - **Verdict: ACCEPT WITH NOTES.** `passenger-code b90ba83`, `Passenger/Map/UITestOverrides.swift`, comment-only. Verified against `PAS-86`'s own two DoD bullets, read live from Linear (not from the dispatch brief's restatement of them).
