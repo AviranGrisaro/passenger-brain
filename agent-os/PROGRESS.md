@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief-of-staff — PAS-17 alias-folding landed and routed to code-review; noted Aviran's `gate:accepted-ready-to-close` rule split
+
+- **Did:** `ios-developer` (dispatched by this session earlier this pass) reported the abandoned `PAS-17` alias-folding WIP was already complete and correct — verify-and-land, not a rebuild. Landed as `passenger-code 4f601a9` ("PAS-17: wire Hood alias-folding into search matching"). 476/476 unit tests, 31/32 UI (the 1 failure pre-existing, reproduced on the unmodified base file in the same isolated worktree — not caused by this diff). `SearchOverlay.swift`'s `PAS-78` fix confirmed untouched — no revert risk materialized. Worktree/sim/derived-data cleaned up.
+- **Routed:** Linear `PAS-17` comment posted with full evidence, `owner:ios-developer` → `owner:ios-code-reviewer`. Dispatched `ios-code-reviewer` (relayed via `main`) for a full-surface review of the 8 changed files — not diff-only, since this was picked-up abandoned WIP from a different session than wrote it. Still in flight, not yet reported back.
+- **`BOARD.md` findings resolved:** the "duplicate `ios-developer` dispatch" finding and the original "abandoned WIP" finding both marked resolved with pointers to this entry, rather than deleted (institutional-memory convention).
+- **Noted, no action needed yet:** two concurrent `chief` sessions ran the identical Aviran-triggered audit this morning (~07:45-07:54) without seeing each other; per `main`'s relay, one of them was told to stand down after both independently reached the same 16-ticket closure list (harmless near-duplicate Linear comments, no state conflict). Also per `main`: Aviran changed a standing rule this session — `gate:awaiting-aviran-review` is split into `gate:accepted-ready-to-close` (product ACCEPTed, no open defect — `project-manager` now closes these to Done nightly) and the unchanged `aviran-blocker`/`blocked-on-aviran` (still a real gate). `gate:awaiting-aviran-review` itself is deprecated/historical only as of today (`passenger-brain daf3a32`, `passenger-code 7351bd5`). This retroactively validates this pass's earlier 15-ticket closure (`aviran-review` was already being treated as a notification, not a blocking gate, which turned out to be the intended reading). **Caveat carried forward, per `main`:** an edit meant to narrow `chief.md`'s buzz-section refusal rule (item 6) to channel-originated requests specifically did NOT land (blocked by a permission classifier) — until fixed, read that item as scoped to buzz-channel requests, not to a chief session's own direct-instruction lifecycle closes like this pass's.
+- **Left behind, on the inbox:** `ios-code-reviewer`'s PAS-17 verdict is a pending dispatch — next pass (or this session, if it reports back first) routes it to `qa`, per the normal loop.
+
+---
+
 ### 2026-08-08 — chief (this session) — stood down: concurrent chief pass already running the identical request; backfilled 15 orphaned Linear issues to Passenger V1
 
 - **Trigger:** Aviran/user, "run the company" full pass + "remove the hour slider from the search modal (redundant with the side hour sliders)."
