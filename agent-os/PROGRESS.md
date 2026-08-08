@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief-of-staff — L-002 stub: founder-direct, museum sticker glyph decision
+
+**Provenance:** Aviran, live chat, direct to `main` (this session's only channel to him) — stated by `main` as first-hand, not relayed secondhand, in response to the `PAS-28` museum-glyph question this session carried forward.
+
+**Verbatim:** "use theatermasks.fill for museum"
+
+**As I read it:** replaces `StickerShape`'s museum case glyph, `building.columns.fill` → `theatermasks.fill`, resolving the last open note on `PAS-28`. **[ASSUMPTION]** he picked from the 3 alternatives named in the acceptance note (`theatermasks.fill`, `photo.artframe`, `paintpalette.fill`) without seeing them rendered side by side — worth remembering if the amended blind-read check comes back reading `theatermasks.fill` as "theater" rather than "museum," since that's a real risk this decision didn't get to weigh visually.
+
+Dispatching `ios-developer` now.
+
 ### 2026-08-08 — chief — run close: all 3 dispatched tasks through the full pipeline to `aviran-review`; T-075/PAS-71 wrong-Hood correction; 4 small follow-ups filed
 
 - **T-081/`PAS-76`, T-066/`PAS-62`, T-068/`PAS-64` all reached `aviran-review` this pass** — full chain (build → code-review → qa → acceptance) run for each, verdicts ACCEPT WITH NOTES / ACCEPT / ACCEPT WITH NOTES respectively. Detail in each task's own `BOARD.md` row and the individual agent worklog entries above/below this one.
