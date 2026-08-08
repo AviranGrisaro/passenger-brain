@@ -15,6 +15,19 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — run summary: un-held T-081/PAS-76 (hour-slider removal), superseded T-077/PAS-51, T-068/PAS-64 landed, T-081 blocked-on-aviran on a landing conflict
+
+- **Trigger:** Aviran, this session, "continue with the backlog + remove the hour slider from the search modal (we already have hour sliders at the sides)." Found `T-081`/`PAS-76` already filed 2026-08-07 for exactly this, held pending `T-077`/`PAS-51`'s close.
+- **Un-held T-081, superseded T-077:** `T-077` had hit REQUEST CHANGES 3x on the exact `hourContent`/`HourSlider` surface `T-081` deletes (loop-guard threshold) — un-holding `T-081` and marking `T-077` superseded (closes once `T-081` lands, not re-dispatched) resolves both, plus makes the dormant `T-056` (HourSlider 31pt touch-target gap, no Linear ticket) moot.
+- **Dispatched 3 parallel `ios-developer` tasks** (relay via `main`): `T-081` (remove Hour segment/`HourSlider`/`HourReadout` from `SearchOverlay`), `T-066`/`PAS-62` (flaky sleep-based test sync), `T-068`/`PAS-64` (visitable-count test fix) — all isolated worktrees, no file overlap.
+- **T-068/PAS-64 complete this run:** `ios-developer` (`passenger-code 01bdcd0`) → `ios-code-reviewer` APPROVE WITH MINORS (source-only, justified) → routed to `qa` for full-suite confirmation, dispatched.
+- **T-081/PAS-76 code complete and green** (branch `t081-remove-hourslider`, `passenger-code b2dc981`, 468/468 + 23/23 tests) **but cannot land — moved to `blocked-on-aviran`.** The shared tree's `main` checkout carries stale uncommitted `PAS-51` WIP on the exact 2 files this touches, predating the `PAS-78` fix; `git merge --ff-only` refuses to clobber it, and `ios-developer` correctly declined a forced ref-move when the permission classifier denied it. Disposal of that stale WIP is a data-loss-adjacent call — escalated to Aviran directly via the coordinating session rather than decided unilaterally. `main` verified untouched. Filed `T-085`/`PAS-82` for a non-blocking coverage gap the deletion left behind (`HourRepaintPerformanceTests` needs rewriting against `EdgeHourZone`).
+- **T-066 still in flight**, not yet reported back — left on the board for the next pass to route.
+- **Row-budget trim (L-057):** `T-081`/`T-077`/`T-068` rows were 5-7KB each (mostly historical "Prior:" chains); trimmed to current-status-only with history archived to `archive/2026-08-08-board-row-trim/` and a pointer left in each row.
+- **Also swept:** confirmed the `t037-review-wt2` orphaned-worktree inbox finding is already resolved (worktree gone); flagged a broader stale-`git worktree`-registration cleanup for next pass (found `t057-rebase-probe`, `t077-fix2-worktree`, `t078-t079-qa-worktree` still registered) rather than blind-removing any of them.
+- **Git:** `passenger-brain` — `agent-os/BOARD.md`, `agent-os/PROGRESS.md`, `archive/2026-08-08-board-row-trim/` (explicit paths, this entry). Not pushed — Aviran-gated.
+- **Left behind:** `T-066` and `T-081`'s landing-conflict resolution both pending, on the board with owners, not held open here.
+
 ### 2026-08-08 — ios-code-reviewer — T-068/PAS-64 code review: APPROVE WITH MINORS
 
 - **Did:** Source-only review (no rebuild/rerun — diff is a single test file, 59 insertions/3 deletions, no production surface touched; `ios-developer`'s own dispatch already produced a clean isolated-worktree 501/502 run with the 1 failure independently triaged as the pre-existing `SearchHourSegmentInteractionTests` wall-clock flake, cross-checked against the 2026-08-07 finding-4 entry — reviewed source-only per the task's own house-convention allowance for small isolated fixes).
