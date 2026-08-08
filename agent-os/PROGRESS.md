@@ -15,6 +15,13 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — ios-code-reviewer — T-088/PAS-86 stale `dynamicTypeSize` comment fix, code review
+
+- **Did:** Reviewed `passenger-code b90ba83` (`Passenger/Map/UITestOverrides.swift`, 11 insertions/9 deletions, doc comment only). Confirmed: (1) genuinely comment-only — the `enum UITestOverrides` body (`dynamicTypeSize`, `now()`, `launchArgumentValue`) is byte-identical before/after, no production or test logic touched; (2) new comment text is accurate against current reality — repo-wide grep confirms `SearchHourSegmentInteractionTests` no longer exists anywhere, zero test files pass `-uiTestDynamicTypeSize`, and the Hour segment's T-081/PAS-76 deletion is independently corroborated by comments in `SearchButton.swift`, `MapScreen.swift`, and `PlacesListInteractionTests.swift`; (3) `MapScreen.swift:699` usage spot-checked — `.environment(\.dynamicTypeSize, UITestOverrides.dynamicTypeSize ?? systemDynamicTypeSize)` — line number and no-op behavior as described match exactly, unchanged by this diff.
+- **Verdict: APPROVE.** Source-only review, no build needed — as low-risk as a diff gets, per the dispatch brief.
+- **Minor, non-blocking, not filed as a task:** `MapScreen.swift` ~line 693 carries its own stale comment from the same T-081 deletion ("...including `SearchOverlay`'s Hour segment and `MapNavRow`") — pre-existing, not touched by `b90ba83`, out of scope for this comment-only ticket. Worth a follow-up sweep if not already covered elsewhere.
+- **Left behind:** Routing to `qa` is chief-of-staff's/BOARD.md's call, not mine — did not touch `BOARD.md` or Linear per role contract.
+
 ### 2026-08-08 — chief-of-staff — L-002 stub: "continue with the audit" + audit brief
 
 **Provenance:** Aviran, live chat, direct — "continue with the audit," relayed via `main` as first-hand.
