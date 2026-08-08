@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — L-002 stub: founder-direct request, live chief-of-staff chat (support-the-project paywall)
+
+**Provenance:** Aviran, founder-direct, live chief-of-staff chat, this session, 2026-08-08.
+
+**Verbatim request:** "do we have paywall? for now i want paywall for support our project, it will pop on start with 5$ payment, there are not ads or premium feature (for p1). so the paywall is a request of supporting this project. create ticket for paywall (pay with apple)"
+
+**As I read it:** Two asks. (1) A factual question — does Passenger have a paywall today — to be answered before any ticket work, from a live check of `passenger-code` and Linear, not memory. (2) A request to open a Linear ticket for a new P1 feature: a screen shown on app start asking the user to voluntarily pay to support the project, **[ASSUMPTION]** one-time $5 via Apple/StoreKit (he said "$5 payment," not a recurring amount or "subscription"), **[ASSUMPTION]** dismissible/skippable since he was explicit that nothing is gated behind it — no ads, no premium feature, "for p1." This is a pure voluntary-support prompt, not a feature gate. It runs directly against the currently locked `strategy/decisions.md` decision #9 ("Free V1... no paywall/unlock/trial gate anywhere in Phase 1, monetization deferred") — flagged in the ticket and in this run's report, not silently overridden or auto-reconciled in the strategy doc by this pass.
+
+---
+
 ### 2026-08-08 — architect — T-090/`PAS-88`, TRD half (second session): D4/D5 amended, §2.3 + §10's co-presentation claim restated, rows 7(d)/6(d) re-audited
 
 - **Deliverable:** [`prds/time-slider/TRD.md`](../prds/time-slider/TRD.md) v7. Documentation only — no build, no simulator, no `passenger-code` file touched. `time-slider.md`, `strategy/decisions.md`, `BOARD.md` and Linear untouched per dispatch (`product` committed its PRD half at `passenger-brain b5cd19a`).
