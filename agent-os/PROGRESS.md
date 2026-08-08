@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief-of-staff — PAS-17 alias-folding: code-review APPROVE, advanced to qa
+
+- **Did:** `ios-code-reviewer` (dispatched this pass) returned **APPROVE** on `passenger-code 4f601a9` (PAS-17 alias-folding) — full-surface read of all 8 files against `prds/hood-dataset/TRD.md` §3.1 D11/§3.5/§4.4, independent build+test in its own isolated worktree/sim/derived-data. Confirmed `Hood.aliases` is correctly `var` not `let` (L-028), `HoodCatalog`'s schemaVersion-3 decode-compatibility, `SearchIndex.foldedAliases`/`SearchQuery`'s alias-or-name match wired to the real shipped bundle (not a stub), 476/476 unit tests with all 7 new alias tests confirmed actually run, and — critically — **did not trust the UI-failure triage, reproduced it independently** (reverted the 4 touched files to base `040ea1e` in the same worktree, same failure persisted, confirmed pre-existing/unrelated). No security/HIG findings.
+- **Routed:** posted the full verdict to Linear `PAS-17`, swapped `owner:ios-code-reviewer` → `owner:qa`. Dispatched `qa` (relayed via `main`) with the reviewer's one flagged gap: all automated tests use synthetic fixtures, never the real shipped bundle end-to-end — asked for a manual sanity check (search "Kfar Shalem" on a simulator, confirm "Neve Eliezer" surfaces). Still in flight, not yet reported back.
+- **`BOARD.md` housekeeping:** closed the "duplicate `ios-developer` dispatch" inbox finding for good — reviewer's own independent check (`git show --stat` on `4f601a9`) confirms only one commit landed, no duplicate ever materialized.
+- **Concurrent-session note:** while making this edit, found `BOARD.md` carrying a second, unrelated, uncommitted hunk from a concurrent `chief` session (T-081/PAS-76 hour-slider removal, now `blocked-on-aviran` on a landing conflict — see the entry below this one). Per `passenger-brain/CLAUDE.md` rule 2, staged only my own hunk via `git add -p` rather than committing both under my name; the concurrent session's own commit (`passenger-brain 92e475f`) ended up carrying my staged hunk too (same working tree, its `git add`/`commit` picked up what was already staged) — confirmed after the fact that my note landed intact, nothing lost, nothing misattributed in *my* commit message since I made none for that hunk.
+- **Left behind, on the inbox:** `qa`'s PAS-17 sanity-check result is a pending dispatch — next pass routes it (PASS → `product` acceptance / this being a bug-shortened-lifecycle-style ticket with no PRD, or straight toward whatever `PAS-17`'s own closing criteria are; FAIL/BLOCKED → back to `build`).
+
+---
+
 ### 2026-08-08 — chief — run summary: un-held T-081/PAS-76 (hour-slider removal), superseded T-077/PAS-51, T-068/PAS-64 landed, T-081 blocked-on-aviran on a landing conflict
 
 - **Trigger:** Aviran, this session, "continue with the backlog + remove the hour slider from the search modal (we already have hour sliders at the sides)." Found `T-081`/`PAS-76` already filed 2026-08-07 for exactly this, held pending `T-077`/`PAS-51`'s close.
