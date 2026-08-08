@@ -15,6 +15,14 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — L-002 stub: founder-direct request, live chief-of-staff chat (open-kritt for security agent)
+
+**Provenance:** Aviran, founder-direct, live chief-of-staff chat, this session, 2026-08-08.
+
+**Verbatim request:** "i think we need to add this https://github.com/Kritt-ai/open-kritt as part of out security agent"
+
+**As I read it:** Aviran wants the `open-kritt` GitHub repo **[ASSUMPTION]** evaluated for fit, and **[ASSUMPTION]** if it fits, folded into how Passenger's `security-auditor` role/workflow operates ("out security agent" read as "our security agent" — plain typo, not a separate term). This is a suggestion to verify, not a pre-authorized adoption — independent repo verification (README, license, maturity, activity, what it actually does) and a fit check against the standing `security-auditor` workflow follow in this run before any integration work item is proposed, per L-002/L-013. This stub is inserted before any research or dispatch.
+
 ### 2026-08-08 — product — T-090/`PAS-88`: `time-slider.md`'s unmarked PRD reversal fixed; `decisions.md` #47/#48 backfilled
 
 - **Verdict: done on the PRD half.** Aviran, founder-direct, verbatim *"fix the PRD reversal"* (this file's 2026-08-08 FOUNDER-DIRECT STUB). Everything past that quote is the coordinating session's scoping, relayed and labelled as such by the stub itself — I worked to it as a brief, not as his words, and say so here rather than let the specificity harden (L-013).
