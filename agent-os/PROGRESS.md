@@ -15,6 +15,17 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — qa — T-068/PAS-64 full-suite confirmation: PASS
+
+- **Did:** Full build + full test suite for `passenger-code main` (`d8103b8`, carrying `01bdcd0`) in an isolated worktree (`/private/tmp/…/t068-qa-worktree`, detached at `main`), dedicated cloned simulator (`t068-qa-verify`, iPhone 16/iOS 26.5, cloned from a shutdown base device so as not to touch the two already-booted sims in use by concurrent sessions — `pas17-qa-verify`, `t066-pas62-test`), dedicated `-derivedDataPath` (`t068-dd`). Preflighted per L-029/L-034/L-042 first: no standing `BOARD.md` HALT, `df -h /` 26Gi avail (well over the 5GB floor), but `uptime` load 108/118/153 — high, from the two other legitimately in-flight QA sims, not a fresh crisis; proceeded with full isolation rather than adding contention to a shared sim.
+- **Evidence — `PassengerTests`:** 477/477 tests passed, 81 suites, `** TEST SUCCEEDED **`. Confirmed via `xcresulttool` JSON (not just console text) that both named tests ran and passed: `PassportBundleInvariantTests/everyDesignatedHoodMeetsThreshold()` → Passed, `PassportBundleInvariantTests/regressionCountsVisitableNotRawPlaces()` → Passed. Hand-verified the new check's logic against `prds/hood-dataset/hood-dataset.md` req 5's pass/fail bullet — matches.
+- **Evidence — `PassengerUITests`:** 32 tests executed, 1 failure — `SearchHourSegmentInteractionTests.testReadoutNeverIntersectsTheNavRowAtDefaultTextSize()`, exactly the disclosed pre-existing wall-clock flake (run started ~08:44, before local noon; file is slated for deletion under `PAS-76`/hour-slider removal). No other failures. Not chased further, per this ticket's own dispatch brief.
+- **Verdict: PASS.** No P0 case left unrun — both target tests plus the full two-target suite all executed to completion. No regressions outside the disclosed flake.
+- **Cleanup:** cloned simulator deleted, `t068-dd` derived-data removed, worktree removed + pruned — confirmed via `git worktree list` and `simctl list devices` post-cleanup.
+- **Left behind:** none. Route: `qa` → `product` acceptance, per `chief-of-staff`'s dispatch brief (does not touch `BOARD.md`/Linear itself, L-038).
+
+---
+
 ### 2026-08-08 — chief-of-staff — PAS-17 alias-folding: code-review APPROVE, advanced to qa
 
 - **Did:** `ios-code-reviewer` (dispatched this pass) returned **APPROVE** on `passenger-code 4f601a9` (PAS-17 alias-folding) — full-surface read of all 8 files against `prds/hood-dataset/TRD.md` §3.1 D11/§3.5/§4.4, independent build+test in its own isolated worktree/sim/derived-data. Confirmed `Hood.aliases` is correctly `var` not `let` (L-028), `HoodCatalog`'s schemaVersion-3 decode-compatibility, `SearchIndex.foldedAliases`/`SearchQuery`'s alias-or-name match wired to the real shipped bundle (not a stub), 476/476 unit tests with all 7 new alias tests confirmed actually run, and — critically — **did not trust the UI-failure triage, reproduced it independently** (reverted the 4 touched files to base `040ea1e` in the same worktree, same failure persisted, confirmed pre-existing/unrelated). No security/HIG findings.
