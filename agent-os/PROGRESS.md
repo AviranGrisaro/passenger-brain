@@ -15,6 +15,14 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief-of-staff — FOUNDER-DIRECT STUB: "open a Sign in with Apple ticket"
+
+**Provenance:** Aviran, live chief-of-staff chat, mid-run, 2026-08-08.
+
+**Verbatim request:** "if no Sign in with Apple ticket exists, open one. Authorization granted — create it in Linear yourself (correct team, project/phase, labels, owner) rather than just proposing. Report the ticket ID/URL in your run summary."
+
+**As I read it:** checked Linear (`PAS` team, full-workspace query + keyword searches) and grepped `passenger-brain/prds/`, `BOARD.md` for any existing Sign in with Apple / Apple ID / `ASAuthorization` ticket or PRD — none existed. Only related hits were Passport's TRD/test-plan explicitly asserting *zero* `ASAuthorization`/`SignInWith` usage (Passport is deliberately account-free). Filed `PAS-89` (Backlog, team PAS, project Passenger V1, labels `Feature`+`aviran-blocker`) — no owner label since it's not actionable in the current Build Phase 1 (100% client-side, no backend) and depends on the Apple Developer Program account, which doesn't exist yet and is itself Aviran-gated per `ACCOUNTS-AND-COSTS.md`. Full description written per the locked ticket template, no PRD/TRD invented.
+
 ### 2026-08-08 — ios-code-reviewer — T-088/PAS-86 stale `dynamicTypeSize` comment fix, code review
 
 - **Did:** Reviewed `passenger-code b90ba83` (`Passenger/Map/UITestOverrides.swift`, 11 insertions/9 deletions, doc comment only). Confirmed: (1) genuinely comment-only — the `enum UITestOverrides` body (`dynamicTypeSize`, `now()`, `launchArgumentValue`) is byte-identical before/after, no production or test logic touched; (2) new comment text is accurate against current reality — repo-wide grep confirms `SearchHourSegmentInteractionTests` no longer exists anywhere, zero test files pass `-uiTestDynamicTypeSize`, and the Hour segment's T-081/PAS-76 deletion is independently corroborated by comments in `SearchButton.swift`, `MapScreen.swift`, and `PlacesListInteractionTests.swift`; (3) `MapScreen.swift:699` usage spot-checked — `.environment(\.dynamicTypeSize, UITestOverrides.dynamicTypeSize ?? systemDynamicTypeSize)` — line number and no-op behavior as described match exactly, unchanged by this diff.
