@@ -15,6 +15,18 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — corrective note: `passenger-code 8ed7fbc`'s commit message misattributes content that actually lives in `82fe538`
+
+**For future archaeology on `prds/time-slider/TRD.md`'s v7 history, read this before trusting either commit message alone.**
+
+A second, uncoordinated `architect` session ran `T-090`'s TRD half concurrently with the one this session dispatched (neither `main`, the coordinating session, nor this `chief` session spawned it — most likely the duplicate `chief` collision already on record earlier today, 2026-08-08 07:45-07:54, see the two entries at the top of this Worklog). No work was lost: both commits landed cleanly on `main`, `82fe538` on top of `8ed7fbc`, working tree verified clean.
+
+**The defect:** `8ed7fbc`'s own commit message states "§2–§8 and §10 untouched" — true when *that* commit was authored. But `8ed7fbc` also swept architect #2's concurrently in-flight `Status:`-line edit into itself (same shared-working-tree hazard `passenger-brain/CLAUDE.md` rule 2 documents), so `8ed7fbc` as it now sits on `main` carries a `Status:` line describing D4/D5 amendments and a §2.3/§10 restatement that its own message says didn't happen. **That work is real, but it lives in `82fe538`, not `8ed7fbc`** — D5 amended (the button-half-moot/edge-half-unconditional call, plus the PRD req 6 3:1-exemption retirement), §2.3/§10 restated on the live `EdgeAvailability.liveEdges(...)` mechanism, the citation defect fixed at all 3 sites, and two more stale TRD rows found (7d, 6d) via re-audit. `82fe538`'s own commit message discloses all of this correctly.
+
+**Read `82fe538`'s message for what actually changed, not `8ed7fbc`'s** — is the corrective this entry exists to record. Full detail on the collision itself and its routing: `BOARD.md`'s Unowned findings inbox, 2026-08-08.
+
+**Git:** `passenger-brain` — `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths, this entry + inbox findings). Not pushed — Aviran-gated.
+
 ### 2026-08-08 — chief — L-002 stub: founder-direct request, live chief-of-staff chat (support-the-project paywall)
 
 **Provenance:** Aviran, founder-direct, live chief-of-staff chat, this session, 2026-08-08.
