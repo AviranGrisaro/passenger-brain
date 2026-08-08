@@ -1,0 +1,3 @@
+# T-090 row history, trimmed 2026-08-08 (L-057 board-row budget)
+
+Prior: **DISPATCHED 2026-08-08 (`chief`).** Aviran, direct: "fix the PRD reversal." L-002 stub in `PROGRESS.md`. `product` owns the PRD rewrite (Q1 marked superseded not deleted, reqs 1/6/Q5/D4, `strategy/decisions.md` gains both the original "Supplement" call and its reversal — the more important half, per Aviran's own scoping relayed this run); `architect` loops in for `TRD.md` §9 rows 5b/6(c) + build step C16. `Status:` line NOT to be flipped as a reflex — refers to T-032's acceptance, `product` flagged this explicitly. Routes through `aviran-review` at the end, not straight to `done` — this corrects the record of one of his own decisions. |
