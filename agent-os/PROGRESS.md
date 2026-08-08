@@ -15,6 +15,15 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — T-081/PAS-76, T-068/PAS-64, T-066/PAS-62 closed `Done` — Aviran: "approve all three"
+
+- **Provenance:** Aviran, relayed via the coordinating session, verbatim "approve all three" — approval of these three `aviran-review` items only. Explicitly not a decision on the `time-slider.md` PRD-reversal finding (still his, still open) or `T-075`/`PAS-71` (still `blocked-on-aviran`) — both left exactly where they were, untouched this pass.
+- **Closed all three in Linear:** status → `Done`, DoD checkboxes ticked where genuinely true. `T-081`/`PAS-76`'s TRD/PRD-amendment DoD item left **deliberately unchecked** with a note explaining why — it's real, load-bearing PRD-rewrite work explicitly excluded from this ticket's build/acceptance, and ticking it would misrepresent that the PRD reversal is resolved when it isn't. `owner:product`/In Progress labels cleared on all three — `PAS-62` in particular had been sitting mislabeled after its acceptance landed.
+- **`BOARD.md` rows moved to `done`** for T-081/T-066/T-068, each citing the approval and what's explicitly carried forward unresolved (T-081 → the PRD finding; T-068 → `T-089`/`PAS-87`'s test-hardening gap; T-066 → `T-086`/`PAS-84`'s two more flaky instances).
+- **Standing note for `retrospective` and for every future dispatch brief, not just `LESSONS.md`:** every dispatch this pass that launched a build/test run in the background and ended its turn waiting for a completion notification stalled — that notification does not fire in this environment. Cost five agent restarts. The working pattern is a **foreground Bash call that blocks until the command finishes**, explicit timeout up to 600000ms, split across multiple sequential calls if one run can't fit in that window. Applying this in every dispatch brief sent from this point forward in this pass; flagging on the inbox below so it becomes a permanent line in the standing dispatch template, not something each session has to remember.
+- **Git:** `passenger-brain` — `agent-os/BOARD.md`, `agent-os/PROGRESS.md` (explicit paths, this entry). Not pushed — Aviran-gated.
+- **Left behind:** continuing the backlog in the same pass — see the next entry.
+
 ### 2026-08-08 — chief-of-staff — L-002 stub: founder-direct, museum sticker glyph decision
 
 **Provenance:** Aviran, live chat, direct to `main` (this session's only channel to him) — stated by `main` as first-hand, not relayed secondhand, in response to the `PAS-28` museum-glyph question this session carried forward.
