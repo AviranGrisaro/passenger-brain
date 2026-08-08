@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — T-091/`PAS-92` filed: small magnify animation on the right-edge hour scroller
+
+- **Did:** focused pass, not a full "run the company" sweep, per this run's brief (open one ticket for a UI polish request, don't dispatch). Read `BOARD.md`/`PROGRESS.md` fresh (concurrent sessions actively writing both, per L-007). Found and struck a dead claim line (`PASS: chief — 08:10–10:10`, 9.5h past its own stamped expiry, L-049) before claiming my own pass. Checked the actual component before writing requirements — `passenger-code/Passenger/EdgeHour/EdgeHourTrack.swift` (renders 13 hour stops + a floating readout chip along a rail, currently no scale variation) and `EdgeHour/EdgeHourZone.swift` (the `DragGesture` driving `EdgeDragState`/`activeDrag.y`) — so the ticket's requirements cite the real drag-state plumbing instead of guessing at it. Searched Linear (`list_issues` on team `PAS`, query "magnify"/"EdgeHour") for a duplicate first, per L-045's "search before you file" rule — none found; `PAS-76` (HourSlider removal from the search modal) and `PAS-82` (EdgeHourZone test rewrite) are both related components but neither covers this ask.
+- **Filed `PAS-92`**, Backlog, Passenger V1, no labels (deliberately unclaimed — this run doesn't dispatch). Full requirements/DoD/links in the ticket body; scale numbers (1.15–1.25x focused, 1.05–1.1x neighbors), explicit non-goals (no haptics beyond existing, no bounce, scroller-only, no backend), and a DoD note that `simctl io screenshot` can't capture motion (per `passenger-code/CLAUDE.md`'s simulator facts) so QA needs `recordVideo`+`ffmpeg`, not a static screenshot.
+- **No PRD/TRD** — single-surface client-side animation confined to two existing files, no schema/data/architecture change. Same class as this board's existing no-PRD precedent (`PAS-84`, `PAS-85`, `PAS-87`). Said so explicitly in the ticket's Links section rather than silently omitting the lines, per this run's brief.
+- **`BOARD.md` row `T-091`** added, state `backlog`, owner noted as "`ios-developer` (intended, not yet claimed/dispatched)" — no `owner:*` Linear label and no status move past Backlog, since claiming happens at actual dispatch time (single-writer protocol), and this run was scoped to not dispatch.
+- **L-002 stub** written and committed (`passenger-brain c8dadf9`) before ticket creation, verbatim quote separated from the confirmed restatement per L-013 — see this file's own 2026-08-08 "edge-hour magnify animation" stub entry below.
+- **Evidence:** `PAS-92` — https://linear.app/passenger-app/issue/PAS-92/small-magnify-animation-on-the-right-edge-hour-scroller-edgehourtrack. `passenger-brain c8dadf9` (stub), this commit (board row + full entry).
+- **Left behind:** next run claims `T-091`/`PAS-92` (`owner:ios-developer` label, Backlog→In Progress) and dispatches `ios-developer` to `build` — no gate to hold on given no PRD/TRD. Nothing else touched this pass; no full board sweep performed, per scope.
+
 ### 2026-08-08 — chief — L-002 stub: founder-direct request, live chief-of-staff chat (open-kritt for security agent)
 
 **Provenance:** Aviran, founder-direct, live chief-of-staff chat, this session, 2026-08-08.
