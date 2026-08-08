@@ -15,6 +15,14 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — L-002 stub: founder-direct request, live chief-of-staff chat (edge-hour magnify animation)
+
+**Verbatim request:** "I want small magnify animation for the edge scroll hour slide."
+
+**As I read it (Aviran confirmed this restatement with "great"):** attached a screenshot of the main map screen with red arrows pointing at the right-edge vertical hour scroller (the thin strip used to scrub hours of the day — today renders flat, every hour marker the same size). Wants a small magnify/lens effect while scrolling: the hour nearest the focus point scales up slightly, immediate neighbors scale a bit less, everything else stays normal — dock/picker-style, not a big fisheye distortion, follows the finger live during drag, settles on the selected hour when it stops. Scroller only, not the map/buttons/pill. Scale-only (optionally opacity), no added bounce, no added haptics. Peak scale roughly 1.15–1.25x focused, 1.05–1.1x neighbors. Client-side SwiftUI only, no backend/schema/data change.
+
+**Provenance:** founder-direct, live chief-of-staff chat, this session, 2026-08-08. Ticket to follow this same run — no PRD/TRD, per the established small-fix precedent (single animation modifier, no schema/data change).
+
 ### 2026-08-08 — chief-of-staff — L-002 stub: founder-direct, museum sticker glyph, round 2 — rendered-image pick
 
 **Provenance:** Aviran, live chat, direct to `main`, first-hand.
