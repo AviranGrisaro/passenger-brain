@@ -4,8 +4,8 @@
 **Phase:** [Phase 1 — Build to launch](../../strategy/passenger-strategy.md#strategic-phasing)
 **Build phase:** 1 — client-side only (StoreKit 2 IAP is a client + App Store Connect config change; no backend table needed for a single non-consumable/consumable product).
 **Owner:** Aviran Grisaro
-**Linear:** [PAS-94](https://linear.app/passenger-app/issue/PAS-94/support-the-project-paywall-dollar5-one-time-apple-iap-on-app-start-no) · **Board:** T-092
-**Note:** a near-simultaneous duplicate ticket, `PAS-95`, was filed by a concurrent session ~1 minute after this one and is now marked Duplicate of `PAS-94`. `PAS-94` is canonical.
+**Linear:** [PAS-95](https://linear.app/passenger-app/issue/PAS-95/support-the-project-prompt-app-start-voluntary-dollar5-apple-iap) · **Board:** T-092
+**Note:** two concurrent `chief` sessions filed this request ~1 minute apart (`PAS-94` 17:03:08 UTC, `PAS-95` 17:04:03 UTC) and each then reconciled the collision in the opposite direction. Live-verified final Linear state: `PAS-94` is `Duplicate`, `duplicateOf` → `PAS-95`; `PAS-95` is `Backlog`, `duplicateOf` null. **`PAS-95` is canonical.** This header previously named `PAS-94` — corrected 2026-08-08 against `get_issue` output, not assumed.
 **Last updated:** 2026-08-08
 **Scope ruling:** this PRD exists on a direct, live founder instruction (see Decisions log) that runs against locked decision #9 below — flagged, not silently reconciled.
 
