@@ -15,6 +15,16 @@ Entry format:
 
 ## Worklog
 
+### 2026-08-08 — chief — FOUNDER-DIRECT STUB: "fix the PRD reversal"
+
+**Provenance:** Aviran, relayed via the coordinating session, live this session, timestamped at receipt.
+
+**Verbatim request:** "fix the PRD reversal."
+
+**As I read it:** [ASSUMPTION] this refers to the `prds/time-slider/time-slider.md` finding raised to him this run — Q1's recorded "Supplement (recommended), keep both paths" decision, reversed by his own 2026-08-07 instruction to remove the modal hour slider (`T-081`/`PAS-76`, shipped), with the reversal never marked in the PRD. Every scoping detail past the quote (which sections need rewriting, that `strategy/decisions.md` should gain both rows, that the `Status:` line must not be flipped, that `architect` should be looped in for the TRD rows) is the coordinating session's own scoping relayed to me, not Aviran's literal words — recorded as relayed, not verified independently before dispatch, per this workspace's own standing caution about restatements accreting specificity a founder never said.
+
+This stub is inserted before any dispatch, per L-002 — a live founder-direct request exists only in this conversation until written down.
+
 ### 2026-08-08 — ios-developer — T-088/PAS-86 stale `dynamicTypeSize` propagation comment: fixed
 
 - **Did:** `passenger-code b90ba83` (on `main`, clean fast-forward from a tip already at `b63b291` — no rebase/merge needed). One file, `Passenger/Map/UITestOverrides.swift`, comment-only. The doc comment (lines 18-26) claimed as confirmed fact that the `dynamicTypeSize` override seam propagates into `SearchOverlay`'s Hour segment, cited `SearchHourSegmentInteractionTests` as live proof, and instructed a future test to file BLOCKED against `time-slider/TRD.md` §9 row 5b. T-081/`PAS-76` deleted both the Hour segment and that test suite, so both the "confirmed" claim and the BLOCKED-routing instruction were stale (product's T-081 acceptance NOTE 1 flagged exactly this, in this file's 2026-08-08 T-081 acceptance entry). Rewrote the comment to state plainly: the seam has zero live test consumers today (no test passes `-uiTestDynamicTypeSize`), it's still applied at `MapScreen.swift:699` and still a no-op on a normal launch, and a future UI test needing it should verify propagation fresh rather than trust this comment's history. Removed the dead BLOCKED/TRD-row instruction entirely rather than repointing it at a still-live row — there isn't one.
